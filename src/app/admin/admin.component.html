@@ -1,0 +1,183 @@
+<div class="parent3">
+    <section id="sidebar">
+        <a href="#" class="brand">
+            <i class='bx bxs-watch'></i>
+            <span class="text">Watchly</span>
+        </a>
+        <ul class="side-menu top">
+            <!-- Users menu with dropdown -->
+            <li routerLinkActive="active">
+                <a href="javascript:void(0)">
+                    <i class='bx bxs-group'></i>
+                    <span class="text">Users</span>
+                    <i class='bx bx-chevron-down dropdown-icon'></i>
+                </a>
+               
+            </li>
+            <!-- Orders menu -->
+            <li routerLinkActive="active">
+                <a routerLink="/dashboard/orders" style="cursor: pointer">
+                    <i class='bx bxs-package'></i>
+                    <span class="text">Orders</span>
+                </a>
+            </li>
+            <!-- Categories menu -->
+            <li routerLinkActive="active">
+                <a routerLink="/dashboard/categories" style="cursor: pointer">
+                    <i class='bx bxs-category'></i>
+                    <span class="text">Catagories</span>
+                </a>
+            </li>
+
+            <li routerLinkActive="active">
+                <a routerLink="/dashboard/brands" style="cursor: pointer">
+                    <i class='bx bx-store'></i>
+                    <span class="text">Brands</span>
+                </a>
+            </li>
+            <!-- Products menu -->
+            <li routerLinkActive="active">
+                <a href="javascript:void(0)">
+                    <i class='bx bxs-shopping-bag-alt'></i>
+                    <span class="text">Products</span>
+                    <i class='bx bx-chevron-down dropdown-icon'></i>
+                </a>
+            
+            </li>
+            <!-- Branches menu -->
+            <li routerLinkActive="active">
+                <a routerLink="/dashboard/branches" style="cursor: pointer">
+                    <i class='bx bx-git-branch'></i>
+                    <span class="text">Branches</span>
+                </a>
+            </li>
+            <!-- Analytics menu -->
+            <li routerLinkActive="active">
+                <a routerLink="/dashboard/analytics" style="cursor: pointer">
+                    <i class='bx bxs-doughnut-chart'></i>
+                    <span class="text">Analytics</span>
+                </a>
+            </li>
+            <!-- Feedbacks menu -->
+            <li routerLinkActive="active">
+                <a routerLink="/dashboard/feedbacks" style="cursor: pointer">
+                    <i class='bx bxs-message-dots'></i>
+                    <span class="text">Feedbacks</span>
+                </a>
+            </li>
+        </ul>
+        <ul class="side-menu">
+            <li>
+                <a class="logout" style="cursor: pointer">
+                    <i class='bx bx-log-out-circle'></i>
+                    <span class="text">Logout</span>
+                </a>
+            </li>
+        </ul>
+    </section>
+    <!-- SIDEBAR -->
+
+
+
+    <!-- CONTENT -->
+    <section id="content">
+        <!-- NAVBAR -->
+        <nav>
+            <i class='bx bx-menu' style="transform: scale(1.5);"></i>
+            <form action="#">
+                <div class="form-input">
+                    <button type="submit" class="search-btn" disabled style="visibility: hidden;"><i
+                            class='bx bx-tool'></i></button>
+                </div>
+            </form>
+            <input type="checkbox" id="switch-mode" hidden>
+            <label for="switch-mode" class="switch-mode"></label>
+            <div class="notification-container" (click)="$event.stopPropagation()">
+                <a href="javascript:void(0)" class="notification">
+                    <i class='bx bxs-bell' style="transform: scale(1.5);"></i>
+                    <span class="num"></span>
+                </a>
+                <div class="notification-dropdown" *ngIf="isNotificationsOpen">
+                    <div class="notification-header">
+                        <h3>Notifications</h3>
+                    </div>
+                    <div class="notification-body" *ngIf="notifications.length > 0; else noNotifications">
+                        <div *ngFor="let notification of notifications" class="notification-item">
+                            <div class="notification-content">
+                                <div class="notification-message">
+                                    <strong>{{ notification.product.name }}</strong> ({{ notification.product.code }})
+                                    <strong style="color: var(--red);">is out of stock</strong> at <strong>{{
+                                        notification.branch.location }}</strong> branch.
+                                </div>
+                                <div class="notification-time">
+
+                                </div>
+                            </div>
+                            <div class="notification-actions">
+                                <button class="view-btn">
+                                    <i style="color: var(--dark);" class='bx bx-show'></i>
+                                </button>
+                                <button class="delete-btn">
+                                    <i class='bx bx-x'></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <ng-template #noNotifications>
+                        <div class="no-notifications">
+                            No new notifications
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+
+            <a href="#" class="profile">
+
+            </a>
+        </nav>
+        <!-- NAVBAR -->
+
+        <!-- MAIN -->
+        <router-outlet></router-outlet>
+        <!-- MAIN -->
+    </section>
+
+    <!-- Notification Details Modal -->
+    <div class="notification-modal-overlay" *ngIf="selectedNotification" 
+        >
+        <div class="notification-modal">
+            <div class="notification-modal-header">
+                <h3>Out of Stock Notification Details</h3>
+            </div>
+            <div class="notification-modal-body">
+                <div class="detail-row">
+                    <span class="detail-label">Product Name:</span>
+                    <span class="detail-value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Product Code:</span>
+                    <span class="detail-value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Branch Location:</span>
+                    <span class="detail-value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Governorate:</span>
+                    <span class="detail-value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Created At:</span>
+                    <span class="detail-value"></span>
+                </div>
+            </div>
+            <div class="notification-modal-footer">
+                <button style="background-color: var(--dark) !important;" class="btn-primary">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
