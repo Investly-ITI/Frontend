@@ -1,1 +1,86 @@
-/* You can add global styles to this file, and also import other style files */
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.parent {
+	width: 100vw;
+	min-height: 500px;
+	height: 100vh;
+	display: grid;
+	place-content: center;
+	background: #ccc;
+}
+
+
+html {
+	scroll-behavior: smooth;
+  }
+
+.cdk-overlay-container {
+  z-index: 5000 !important;
+}
+
+.cdk-overlay-container .cdk-overlay-connected-position-bounding-box .mat-mdc-menu-panel {
+  min-width: 120px !important; 
+  border-radius: 15px;
+  background-color: #F9F9F9 !important; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.mat-mdc-menu-content {
+  padding: 8px !important;
+}
+
+.mat-button-toggle-group.matbuttongroupfilter {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border: none !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+}
+
+.mat-button-toggle:not(:last-child) {
+  border-bottom: 3px solid #eee !important;
+}
+
+.dark .mat-button-toggle:not(:last-child) {
+  border-bottom: 1px solid #333 !important;
+}
+
+.mat-button-toggle {
+  position: relative !important;
+  overflow: hidden !important;
+  transition: background-color 0.3s !important;
+}
+
+.mat-button-toggle:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.dark .mat-button-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.mat-button-toggle::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 5px !important;
+  height: 5px !important;
+  background: rgba(0, 0, 0, 0.1) !important;
+  opacity: 0 !important;
+  border-radius: 100% !important;
+  transform: scale(1) translate(-50%, -50%) !important;
+  transform-origin: 50% 50% !important;
+}
+
+.dark .mat-button-toggle::after {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.mat-button-toggle:active::after {
+  opacity: 1 !important;
+  transform: scale(40) translate(-50%, -50%) !important;
+  transition: transform 0.6s, opacity 0.6s !important;
+}

@@ -1,10 +1,17 @@
+<!-- ========================================
+     MAIN CONTAINER & THEME
+======================================== -->
 <div class="parent3" [ngClass]="{'dark': isDarkMode}">
     <section id="content">
         <main>
+            <!-- ========================================
+                 PAGE HEADER & NAVIGATION
+            ======================================== -->
             <div class="head-title">
                 <div class="left">
+                    <!-- Page Title & Dark Mode Toggle -->
                     <div class="head-flex">
-                        <h1>Hi,sara</h1>
+                        <h1>Hi, Admin!</h1>
                         <div class="switch-container">
                             <label class="switch-mode">
                                 <input type="checkbox" id="switch-mode" (change)="toggleDarkMode()">
@@ -12,252 +19,344 @@
                             </label>
                         </div>
                     </div>
+                    
+                    <!-- Breadcrumb Navigation -->
                     <ul class="breadcrumb">
-                        <li><a >Dashboard</a></li>
+                        <li><a>Dashboard</a></li>
                         <li><i class='bx bx-chevron-right'></i></li>
-                        <li><a class="active" >Brands</a></li>
+                        <li><a class="active">Investors</a></li>
                     </ul>
                 </div>
             </div>
 
+            <!-- ========================================
+                 STATISTICS BOXES
+            ======================================== -->
             <ul class="box-info">
-
+                <!-- Active Entities Count -->
                 <li>    
-                    <ngx-skeleton-loader *ngIf="activeCustomersCount === null || activeCustomersCount === undefined" appearance="custom-content">
-                        <div class="skeleton-container">
-                          <div class="skeleton-box">
-                            <div class="skeleton-circle"></div>
-                          </div>
-                          <div class="skeleton-text">
-                            <div class="skeleton-line short"></div>
-                            <div class="skeleton-line"></div>
-                          </div>
-                        </div>
-                      </ngx-skeleton-loader>                      
-                      
-                    <i *ngIf="activeCustomersCount !== null && activeCustomersCount !== undefined" class='bx bxs-category'></i>
-                    <span *ngIf="activeCustomersCount !== null && activeCustomersCount !== undefined" class="text">
-                        <h3>{{activeCustomersCount}}</h3>
-                        <p>Active Brands</p>
+                    <i class='bx bxs-user-check' style="font-size: 2.5em;"></i>
+                    <span class="text">
+                        <h3 class="animated-number">
+                            <span class="digit-container" *ngFor="let digit of getDigitsArray(displayActiveCount); let i = index">
+                                <span class="digit" 
+                                      [style.animation-delay]="(i * 0.1) + 's'"
+                                      [ngClass]="{'animate': animationComplete}">
+                                    {{ digit }}
+                                </span>
+                            </span>
+                        </h3>
+                        <p>Active {{ entityNamePlural }}</p>
                     </span>
                 </li>
+                
+                <!-- Inactive Entities Count -->
                 <li>
-                    <ngx-skeleton-loader *ngIf="inactiveCustomersCount === null || inactiveCustomersCount === undefined" appearance="custom-content">
-                        <div class="skeleton-container">
-                          <div class="skeleton-box">
-                            <div class="skeleton-circle"></div>
-                          </div>
-                          <div class="skeleton-text">
-                            <div class="skeleton-line short"></div>
-                            <div class="skeleton-line"></div>
-                          </div>
-                        </div>
-                      </ngx-skeleton-loader>
-
-                    <i  *ngIf="inactiveCustomersCount !== null && inactiveCustomersCount !== undefined" class='bx bxs-category-alt' id="lol"></i>
-                    <span *ngIf="inactiveCustomersCount !== null && inactiveCustomersCount !== undefined" class="text">
-                        <h3>{{inactiveCustomersCount}}</h3>
-                        <p>Inactive Brands</p>
+                    <i class='bx bxs-user-x' style="font-size: 2.5em;"></i>
+                    <span class="text">
+                        <h3 class="animated-number">
+                            <span class="digit-container" *ngFor="let digit of getDigitsArray(displayInactiveCount); let i = index">
+                                <span class="digit" 
+                                      [style.animation-delay]="(i * 0.1) + 's'"
+                                      [ngClass]="{'animate': animationComplete}">
+                                    {{ digit }}
+                                </span>
+                            </span>
+                        </h3>
+                        <p>Inactive {{ entityNamePlural }}</p>
                     </span>
                 </li>
             </ul>
 
+            <!-- ========================================
+                 MAIN DATA TABLE SECTION
+            ======================================== -->
             <div class="table-data">
                 <div class="order">
-                    <div class="head">
-                        <div class="headhead">
-                        <h3>Brands</h3>
-                        <button type="button" class="btn btn-sm btn-outline-dark" data-toggle="modal" data-target="#addCategoryModal" (click)="openAddModal()" style="margin-left: 5px; margin-bottom: 5px; color: var(--dark); background-color: var(--grey);">
-                            <i class='bx bx-plus' style="padding: 3px;"></i>
-                        </button>
-                        <div class="items-per-page">
-                            <label> 
-                                <select [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()" name="itemsPerPage">
-                                    <option value="5">5</option>
-                                    <option value="10">10</option>
-                                    <option value="25">25</option>
-                                </select>
-                            </label>
+                    <!-- ========================================
+                         TABLE HEADER & CONTROLS
+                    ======================================== -->
+                    <div class="table-header">
+                        <!-- Left Side: Title & Add Button -->
+                        <div class="table-header-left">
+                            <h2>{{ entityNamePlural }}</h2>
+                            <button type="button" class="add-entity-btn" (click)="openAddModal()">
+                                <i class='bx bx-plus'></i>
+                                Add
+                            </button>
                         </div>
+                        
+                        <!-- Right Side: Controls & Search -->
+                        <div class="table-header-right">
+                            <!-- Items Per Page Selector -->
+                            <div class="items-per-page">
+                                <label> 
+                                    <b>Items:</b>
+                                    <select [(ngModel)]="itemsPerPage" name="itemsPerPage">
+                                        <!-- //+ You need to use (change)="onItemsPerPageChange($event)" in select tag when you implement the pagination logic -->
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                    </select>
+                                </label>
+                            </div>
+                            
+                            <!-- Search Form & Filters -->
+                            <form>
+                                <div class="form-input">
+                                    <!-- Search Input -->
+                                    <input type="search" 
+                                           name="searchQuery"
+                                           placeholder="Search {{ entityNamePlural.toLowerCase() }}..."
+                                    >
+                                    <!-- //+ Place Holder should be dynamic based on the choices you have in filter menu, typescript -->
+
+                                    <!-- Search & Filter Buttons -->
+                                    <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
+                                    <div id="search-btns">
+                                        <!-- Filter Menu Button -->
+                                        <button mat-icon-button type="button" [matMenuTriggerFor]="menu" style="border: none; background-color: var(--light);">
+                                            <i class='bx bx-filter' style="color: var(--dark); margin-left: 0.7em; font-size: 1.3em;"></i>
+                                        </button>
+
+                                        <!-- Reset Search Button -->
+                                        <button mat-icon-button type="button" style="border: none; background-color: var(--light);" title="Reset Search">
+                                            <i class='bx bx-reset' style="color: var(--dark); margin-left: 0.7em; font-size: 1.3em;"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Filter Menu Dropdown -->
+                                    <mat-menu #menu="matMenu" class="matMenu">
+                                        <button mat-menu-item class="mat-menu-item">
+                                            <mat-button-toggle-group vertical name="favoriteColor" aria-label="Favorite Color"
+                                                [hideSingleSelectionIndicator]="hideSingleSelectionIndicator()" 
+                                                class="matbuttongroupfilter">
+                                                <!-- //+ You need to use (change)="onFilterChange($event)" in <mat-button-toggle-group> tag when you implement the filter logic -->
+
+                                                <mat-button-toggle value="name">Name</mat-button-toggle>
+                                                <mat-button-toggle value="ID">ID</mat-button-toggle>
+                                            </mat-button-toggle-group>
+                                        </button>
+                                    </mat-menu>
+                                </div>
+                            </form>
                         </div>
-                        <form (ngSubmit)="onSearch($event)">
-                          <div class="form-input">
-                              
-                              <input type="search" 
-                                     [(ngModel)]="searchQuery" 
-                                     name="searchQuery" 
-                                     [placeholder]="searchPlaceholder"
-                                     (keypress)="validateSearchInput($event)"
-                                     (paste)="handlePaste($event)">
-                              <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
-                              <div id="search-btns">
-                              <button mat-icon-button type="button" (click)="resetSearch()" style="border: none; background-color: var(--light);" title="Reset Search">
-                                  <i class='bx bx-reset' style="color: var(--dark); margin-left: 0.7em; font-size: 1.3em;"></i>
-                              </button>
-                              </div>
-                          </div>
-                      </form>
                     </div>
 
+                    <!-- ========================================
+                         DATA TABLE
+                    ======================================== -->
                     <table style="border-spacing: 15px; border-collapse: separate;">
+                        <!-- Table Header -->
                         <thead>
                             <tr>
-                                <th (click)="toggleSort('name')">
-                                    Brand Name
-                                    <i class='bx' [ngClass]="{
-                                        'bx-up-arrow': sortField === 'name' && sortDirection === 'asc',
-                                        'bx-down-arrow': sortField === 'name' && sortDirection === 'desc'
-                                    }"></i>
+                                <th>Name</th>
+                                <th style="cursor: pointer">
+                                    <!-- //+ You need to use (click)="toggleSort('createdAt')" for example in th tag when you implement the sorting logic -->
+                                    Created At
+                                    <i class="bx bx-sort"></i>
                                 </th>
-                                <th (click)="toggleSort('createdAt')" style="cursor: pointer">
-                                  Created At
-                                  <i class="bx" [ngClass]="{
-                                      'bx-up-arrow-alt': sortField === 'createdAt' && sortDirection === 'asc',
-                                      'bx-down-arrow-alt': sortField === 'createdAt' && sortDirection === 'desc',
-                                      'bx-sort': sortField !== 'createdAt'
-                                  }"></i>
-                              </th>
                                 <th>
                                     Status
-                                    <span id="dots-container">
+                                    <!-- Status Filter Dots -->
+                                    <span id="dots-container" >
                                         <span class="dot green-dot" [class.selected]="currentFilter === 'active'" (click)="setFilter('active')" title="Show Active"></span>
-                                        <span class="dot red-dot"  [class.selected]="currentFilter === 'inactive'" (click)="setFilter('inactive')" title="Show Inactive"></span>
+                                        <span class="dot red-dot" [class.selected]="currentFilter === 'inactive'" (click)="setFilter('inactive')" title="Show Inactive"></span>
                                     </span>
                                 </th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
+                        
+                        <!-- Table Body -->
                         <tbody>
-                            <tr *ngIf="!isLoading && showNoResults" class="no-results-row">
-                                <td colspan="3" style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
-                                    No brand found with this name
+                            <!-- ========================================
+                                 EMPTY STATES & LOADING
+                            ======================================== -->
+                            <!-- No Results Found -->
+                            <tr *ngIf="showNoResults" class="no-results-row">
+                                <td colspan="7" style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
+                                    No {{ entityNamePlural }} Found
                                 </td>
                             </tr>
-                            <tr *ngIf="!isLoading && !showNoResults && categories.length === 0" class="no-results-row">
-                                <td colspan="3" style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
-                                    No {{ currentFilter === 'active' ? 'Active' : currentFilter === 'inactive' ? 'Inactive' : '' }} Brand Yet
+
+                            <!-- No Active/Inactive Entities -->
+                            <tr *ngIf="!isLoading2" class="no-results-row">
+                                <td colspan="7" style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
+                                    No {{ currentFilter === 'active' ? 'Active' : 'Inactive' }} {{ entityNamePlural }} Yet
                                 </td>
                             </tr>
+
+                            <!-- Loading Spinner -->
                             <tr *ngIf="isLoading" class="no-results-row">
-                                <td colspan="3" style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
+                                <td colspan="7" style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
                                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;" id="spinner">
                                         <mat-spinner style="color: white;" class="mat-spinner"></mat-spinner>
                                     </div>
                                 </td>
                             </tr>
-                            <tr *ngFor="let category of categories; let i = index">
+
+                            <!-- ========================================
+                                 DATA ROWS - SAMPLE DATA
+                            ======================================== -->
+                            <!-- Active Entity Row Example -->
+                            <tr>
                                 <td>
-                                    <p>{{ category.Bname }}</p>
+                                    <img src="https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg" alt="User Image">
+                                    <p>Ahmed</p>
                                 </td>
-                                <td>{{ category.createdAt | date:'dd/MM/yyyy' }}</td>
+                                <td>01/01/2022</td>
                                 <td>
-                                    <span class="status process" [class.active]="category.isActive" [class.deactivated]="!category.isActive" [style]="{'min-width': '100px', 'display': 'inline-block', 'text-align': 'center', 'color': category.isActive ? '#2ed134' : '#e6382f'}">
-                                        {{category.isActive ? 'Active' : 'Inactive'}}
+                                    <span class="status process active" style="min-width: 100px; display: inline-block; text-align: center; color: #2ed134; padding: 10px 0px;">
+                                        Active
                                     </span>
                                 </td>
                                 <td>
-                                    <div class="dropdown" [ngClass]="{'show': dropdownStates[i]}" (click)="toggleDropdown(i)">
-                                        <a class="btn btn-secondary dropdown-toggle btn-lg" role="button" id="dropdownMenuLink" aria-haspopup="true" aria-expanded="false" style="padding: 0px 5px; padding-left: 8px; display: flex; align-items: center;">
-                                            ...
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-lg" [ngClass]="{'show': dropdownStates[i]}" aria-labelledby="dropdownMenuLink" style="cursor: pointer;">
-                                            <a class="dropdown-item p-3" (click)="showCategoryInfo(category)" data-toggle="modal" data-target="#sellerInfoModal"><i class='bx bx-show'></i> Show</a>
+                                    <!-- Actions Dropdown -->
+                                    <div class="dropdown" [ngClass]="{'show': dropdownStates[0]}">
+                                        <button 
+                                            class="dropdown-toggle" 
+                                            type="button"
+                                            (click)="toggleDropdown(0, $event)"
+                                            [attr.aria-expanded]="dropdownStates[0]">
+                                            <i class='bx bx-dots-vertical-rounded'></i>
+                                        </button>
+                                        <div class="dropdown-menu" [ngClass]="{'show': dropdownStates[0]}">
+                                            <button class="dropdown-item show-action" type="button" (click)="openModal()">
+                                                <i class='bx bx-show'></i> 
+                                                View Details
+                                            </button>
                                             <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item p-3" (click)="category.isActive ? openConfirmDialog(category._id) : openConfirmDialog2(category._id)" style="cursor:pointer;">
-                                                <i class='bx' [ngClass]="{'bx-check-circle': !category.isActive, 'bx-x-circle': category.isActive}"></i>
-                                                {{category.isActive ? 'Deactivate' : 'Activate'}}
-                                            </a>
+                                            <button class="dropdown-item deactivate-action" type="button" (click)="openActivateDeactivateModal('Ahmed', 'deactivate')">
+                                                <i class='bx bx-x-circle'></i>
+                                                Deactivate
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Inactive Entity Row Example -->
+                            <tr>
+                                <td>
+                                    <img src="https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg" alt="User Image">
+                                    <p>Ahmed</p>
+                                </td>
+                                <td>01/01/2022</td>
+                                <td>
+                                    <span class="status process deactivated" style="min-width: 100px; display: inline-block; text-align: center; color: #e6382f; padding: 10px 0px;">
+                                        Inactive
+                                    </span>
+                                </td>
+                                <td>
+                                    <!-- Actions Dropdown -->
+                                    <div class="dropdown" [ngClass]="{'show': dropdownStates[1]}">
+                                        <button 
+                                            class="dropdown-toggle" 
+                                            type="button"
+                                            (click)="toggleDropdown(1, $event)"
+                                            [attr.aria-expanded]="dropdownStates[1]">
+                                            <i class='bx bx-dots-vertical-rounded'></i>
+                                        </button>
+                                        <div class="dropdown-menu" [ngClass]="{'show': dropdownStates[1]}">
+                                            <button class="dropdown-item show-action" type="button" (click)="openModal()">
+                                                <i class='bx bx-show'></i> 
+                                                View Details
+                                            </button>
+                                            <div class="dropdown-divider"></div>
+                                            <button class="dropdown-item activate-action" type="button" (click)="openActivateDeactivateModal('Ahmed', 'activate')">
+                                                <i class='bx bx-check-circle'></i>
+                                                Activate
+                                            </button>
                                         </div>
                                     </div>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                    
+                    <!-- ========================================
+                         PAGINATION CONTROLS
+                    ======================================== -->
                     <div class="pagination-controls">
-                        <button (click)="previousPage()" [disabled]="!hasPreviousPage"><i class='bx bx-chevron-left' style="font-size: 1.7em;"></i></button>
-                        <button (click)="nextPage()" [disabled]="!hasNextPage"><i class='bx bx-chevron-right' style="font-size: 1.7em;"></i></button>
+                        <button><i class='bx bx-chevron-left' style="font-size: 1.7em;"></i></button>
+                        <button><i class='bx bx-chevron-right' style="font-size: 1.7em;"></i></button>
                     </div>
+                    <!-- //+ Pagination Should Be Enabled Or Disabled based on the items count -->
                 </div>
             </div>
         </main>
     </section>
 
-    <div class="modal fade" id="sellerInfoModal" tabindex="-1" role="dialog" aria-labelledby="sellerInfoModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content custom-modal">
-          <div class="modal-header">
-            <h5 class="modal-title" id="sellerInfoModalLabel">Brand Details</h5>
-          </div>
-          <div class="modal-body">
-            <form #editForm="ngForm">
-              <div class="info-grid" *ngIf="selectedCategory">
-                <div class="info-item">
-                    <strong class="label">Name:</strong>
-                      <div class="input-wrapper" [ngClass]="{'valid': categoryNameInput.touched && categoryNameInput.valid, 'invalid': categoryNameInput.touched && categoryNameInput.invalid}">
-                      <input type="text" required minlength="3" maxlength="15" pattern="^[a-zA-Z]+(?: [a-zA-Z]+)*$" [(ngModel)]="selectedCategory.Bname" name="categoryName" #categoryNameInput="ngModel" [disabled]="!editing" class="value">
-                      </div>
-                  </div>
-                    <div class="info-item">
-                    <strong class="label">Created At:</strong>
-                      <div class="input-wrapper">
-                      <input type="text" 
-                         [(ngModel)]="selectedCategory.createdAt" 
-                         name="createdAt" 
-                         #createdAtInput="ngModel" 
-                         disabled 
-                         class="value">
-                      </div>
-                    </div>
-            
-                
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" (click)="toggleEdit($event)" id="updateBtn" [disabled]="editing && !editForm.valid" [style.opacity]="editing && !editForm.valid ? 0.5 : 1">
-              <i class='bx' [ngClass]="{'bx-pen': !editing, 'bx-check': editing}"></i>
-            </button>
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                <i class='bx bx-x'></i>
-            </button>
-          </div>
+    <!-- ========================================
+         ADD/UPDATE INVESTOR MODAL
+    ======================================== -->
+    <div class="modal-overlay" [ngClass]="{'show': isModalOpen}" (click)="closeModal()">
+        <div class="modal-container" (click)="$event.stopPropagation()">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h3>{{ modalMode === 'add' ? 'Add New ' + entityName : entityName + ' Details' }}</h3>
+                <button type="button" class="close-btn" (click)="closeModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <app-add-update 
+                    [selectedEntity]="selectedEntity"
+                    [isEditMode]="isEditMode || modalMode === 'add'"
+                    [entityName]="entityName"
+                    [modalMode]="modalMode"
+                    (saveEntity)="onSaveEntity($event)">
+                </app-add-update>
+            </div>
         </div>
-      </div>
     </div>
 
-    <div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content custom-modal">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addCategoryModalLabel">Add New Brand</h5>
+    <!-- ========================================
+         ACTIVATE/DEACTIVATE CONFIRMATION MODAL
+    ======================================== -->
+    <div class="modal-overlay" [ngClass]="{'show': isActivateDeactivateModalOpen}" (click)="closeActivateDeactivateModal()">
+        <div class="modal-container activate-deactivate-modal" (click)="$event.stopPropagation()" *ngIf="entityToModify">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h3>{{ modifyAction === 'deactivate' ? 'Deactivate' : 'Activate' }} {{ entityName }}</h3>
+                <button type="button" class="close-btn" (click)="closeActivateDeactivateModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <div class="activate-deactivate-confirmation">
+                    <div class="action-icon">
+                        <i class='bx' [ngClass]="modifyAction === 'deactivate' ? 'bx-error-circle' : 'bx-check-circle'" 
+                           [style.color]="modifyAction === 'deactivate' ? 'var(--red)' : 'var(--green)'"></i>
+                    </div>
+                    <p class="confirmation-text">
+                        Are you sure you want to {{ modifyAction }} this {{ entityName.toLowerCase() }}?
+                        <span *ngIf="modifyAction === 'deactivate'" class="warning-text">
+                            This action will make the {{ entityName.toLowerCase() }} inactive.
+                        </span>
+                        <span *ngIf="modifyAction === 'activate'" class="success-text">
+                            This action will make the {{ entityName.toLowerCase() }} active.
+                        </span>
+                    </p>
                 </div>
-                <div class="modal-body">
-                    <form #addCategoryForm="ngForm">
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <strong class="label">Brand Name:</strong>
-                                <div class="input-wrapper" [ngClass]="{'valid': addCategoryName.touched && addCategoryName.valid, 'invalid': addCategoryName.touched && addCategoryName.invalid}">
-                                    <input type="text" 
-                                           required 
-                                           minlength="3" 
-                                           [(ngModel)]="newCategoryName" 
-                                           name="categoryName" 
-                                           #addCategoryName="ngModel" 
-                                           placeholder="Enter brand name"
-                                           pattern="^[a-zA-Z]+(?: [a-zA-Z]+)*$">
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" (click)="addCategory()" [disabled]="!addCategoryForm.valid" title="Add Category">
-                        <i class="bx bx-check"></i>
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class='bx bx-x'></i>
-                    </button>
-                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer activate-deactivate-modal-footer">
+                <button type="button" class="cancel-btn" (click)="closeActivateDeactivateModal()">
+                    Cancel
+                </button>
+                <button type="button" class="confirm-btn" 
+                        [ngClass]="modifyAction === 'deactivate' ? 'deactivate' : 'activate'" 
+                        (click)="confirmActivateDeactivate()">
+                    <i class='bx' [ngClass]="modifyAction === 'deactivate' ? 'bx-x-circle' : 'bx-check-circle'"></i>
+                    {{ modifyAction === 'deactivate' ? 'Deactivate' : 'Activate' }}
+                </button>
             </div>
         </div>
     </div>

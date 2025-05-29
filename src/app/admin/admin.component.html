@@ -1,183 +1,167 @@
+<!-- ========================================
+     MAIN CONTAINER & LAYOUT
+======================================== -->
 <div class="parent3">
-    <section id="sidebar">
-        <a href="#" class="brand">
-            <i class='bx bxs-watch'></i>
-            <span class="text">Watchly</span>
-        </a>
-        <ul class="side-menu top">
-            <!-- Users menu with dropdown -->
-            <li routerLinkActive="active">
-                <a href="javascript:void(0)">
-                    <i class='bx bxs-group'></i>
-                    <span class="text">Users</span>
-                    <i class='bx bx-chevron-down dropdown-icon'></i>
-                </a>
-               
-            </li>
-            <!-- Orders menu -->
-            <li routerLinkActive="active">
-                <a routerLink="/dashboard/orders" style="cursor: pointer">
-                    <i class='bx bxs-package'></i>
-                    <span class="text">Orders</span>
-                </a>
-            </li>
-            <!-- Categories menu -->
-            <li routerLinkActive="active">
-                <a routerLink="/dashboard/categories" style="cursor: pointer">
-                    <i class='bx bxs-category'></i>
-                    <span class="text">Catagories</span>
-                </a>
-            </li>
 
-            <li routerLinkActive="active">
-                <a routerLink="/dashboard/brands" style="cursor: pointer">
-                    <i class='bx bx-store'></i>
-                    <span class="text">Brands</span>
-                </a>
-            </li>
-            <!-- Products menu -->
-            <li routerLinkActive="active">
-                <a href="javascript:void(0)">
-                    <i class='bx bxs-shopping-bag-alt'></i>
-                    <span class="text">Products</span>
-                    <i class='bx bx-chevron-down dropdown-icon'></i>
-                </a>
-            
-            </li>
-            <!-- Branches menu -->
-            <li routerLinkActive="active">
-                <a routerLink="/dashboard/branches" style="cursor: pointer">
-                    <i class='bx bx-git-branch'></i>
-                    <span class="text">Branches</span>
-                </a>
-            </li>
-            <!-- Analytics menu -->
-            <li routerLinkActive="active">
-                <a routerLink="/dashboard/analytics" style="cursor: pointer">
-                    <i class='bx bxs-doughnut-chart'></i>
-                    <span class="text">Analytics</span>
-                </a>
-            </li>
-            <!-- Feedbacks menu -->
-            <li routerLinkActive="active">
-                <a routerLink="/dashboard/feedbacks" style="cursor: pointer">
-                    <i class='bx bxs-message-dots'></i>
-                    <span class="text">Feedbacks</span>
-                </a>
-            </li>
-        </ul>
-        <ul class="side-menu">
-            <li>
-                <a class="logout" style="cursor: pointer">
-                    <i class='bx bx-log-out-circle'></i>
-                    <span class="text">Logout</span>
-                </a>
-            </li>
-        </ul>
-    </section>
-    <!-- SIDEBAR -->
+<!-- ========================================
+     SIDEBAR NAVIGATION
+======================================== -->
+<section id="sidebar">
+    <!-- Brand Logo & Title -->
+    <a href="#" class="brand">
+        <img src="Logo-Investly-Cut.png" alt="Investly">
+        <span class="text">nvestly</span>
+    </a>
 
-
-
-    <!-- CONTENT -->
-    <section id="content">
-        <!-- NAVBAR -->
-        <nav>
-            <i class='bx bx-menu' style="transform: scale(1.5);"></i>
-            <form action="#">
-                <div class="form-input">
-                    <button type="submit" class="search-btn" disabled style="visibility: hidden;"><i
-                            class='bx bx-tool'></i></button>
-                </div>
-            </form>
-            <input type="checkbox" id="switch-mode" hidden>
-            <label for="switch-mode" class="switch-mode"></label>
-            <div class="notification-container" (click)="$event.stopPropagation()">
-                <a href="javascript:void(0)" class="notification">
-                    <i class='bx bxs-bell' style="transform: scale(1.5);"></i>
-                    <span class="num"></span>
-                </a>
-                <div class="notification-dropdown" *ngIf="isNotificationsOpen">
-                    <div class="notification-header">
-                        <h3>Notifications</h3>
-                    </div>
-                    <div class="notification-body" *ngIf="notifications.length > 0; else noNotifications">
-                        <div *ngFor="let notification of notifications" class="notification-item">
-                            <div class="notification-content">
-                                <div class="notification-message">
-                                    <strong>{{ notification.product.name }}</strong> ({{ notification.product.code }})
-                                    <strong style="color: var(--red);">is out of stock</strong> at <strong>{{
-                                        notification.branch.location }}</strong> branch.
-                                </div>
-                                <div class="notification-time">
-
-                                </div>
-                            </div>
-                            <div class="notification-actions">
-                                <button class="view-btn">
-                                    <i style="color: var(--dark);" class='bx bx-show'></i>
-                                </button>
-                                <button class="delete-btn">
-                                    <i class='bx bx-x'></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <ng-template #noNotifications>
-                        <div class="no-notifications">
-                            No new notifications
-                        </div>
-                    </ng-template>
-                </div>
-            </div>
-
-            <a href="#" class="profile">
-
+    <!-- Main Navigation Menu -->
+    <ul class="side-menu top">
+        <!-- Investors -->
+        <li routerLinkActive="active">
+            <a routerLink="/admin/investor">
+                <i class='bx bxs-user-account'></i>
+                <span class="text">Investors</span>
             </a>
-        </nav>
-        <!-- NAVBAR -->
+        </li>
+        
+        <!-- Founders -->
+        <li routerLinkActive="active">
+            <a routerLink="/dashboard/orders" style="cursor: pointer">
+                <i class='bx bxs-briefcase'></i>
+                <span class="text">Founders</span>
+            </a>
+        </li>
+        
+        <!-- Categories -->
+        <li routerLinkActive="active">
+            <a routerLink="/dashboard/categories" style="cursor: pointer">
+                <i class='bx bxs-category'></i>
+                <span class="text">Categories</span>
+            </a>
+        </li>
 
-        <!-- MAIN -->
-        <router-outlet></router-outlet>
-        <!-- MAIN -->
-    </section>
+        <!-- Business Ideas -->
+        <li routerLinkActive="active">
+            <a routerLink="/dashboard/brands" style="cursor: pointer">
+                <i class='bx bx-bulb'></i>
+                <span class="text">Business Ideas</span>
+            </a>
+        </li>
+        
+        <!-- Analytics -->
+        <li routerLinkActive="active">
+            <a routerLink="/dashboard/analytics" style="cursor: pointer">
+                <i class='bx bxs-bar-chart-alt-2'></i>
+                <span class="text">Analytics</span>
+            </a>
+        </li>
+        
+        <!-- Feedbacks -->
+        <li routerLinkActive="active">
+            <a routerLink="/dashboard/feedbacks" style="cursor: pointer">
+                <i class='bx bxs-comment-detail'></i>
+                <span class="text">Feedbacks</span>
+            </a>
+        </li>
+    </ul>
 
-    <!-- Notification Details Modal -->
-    <div class="notification-modal-overlay" *ngIf="selectedNotification" 
-        >
-        <div class="notification-modal">
-            <div class="notification-modal-header">
-                <h3>Out of Stock Notification Details</h3>
-            </div>
-            <div class="notification-modal-body">
-                <div class="detail-row">
-                    <span class="detail-label">Product Name:</span>
-                    <span class="detail-value"></span>
+    <!-- Bottom Menu Items -->
+    <ul class="side-menu">
+        <!-- Logout -->
+        <li>
+            <a class="logout" style="cursor: pointer">
+                <!-- //+ use sweet alert / dialog / confirm -->
+                <i class='bx bx-log-out-circle'></i>
+                <span class="text">Logout</span>
+            </a>
+        </li>
+    </ul>
+</section>
+
+<!-- ========================================
+     MAIN CONTENT AREA
+======================================== -->
+<section id="content">
+    <!-- ========================================
+         TOP NAVIGATION BAR
+    ======================================== -->
+    <nav>
+        <!-- Mobile Menu Toggle -->
+        <i class='bx bx-menu' style="transform: scale(1.5);" ></i>
+        
+        <!-- Search Form (Empty for now) -->
+        <form action="#">
+        </form>
+        
+        <!-- Dark Mode Toggle -->
+        <input type="checkbox" id="switch-mode" hidden >
+        <label for="switch-mode" class="switch-mode"></label>
+
+        <!-- ========================================
+             NOTIFICATIONS DROPDOWN
+        ======================================== -->
+        <div class="notification-container" (click)="$event.stopPropagation()">
+            <!-- Notification Bell Icon -->
+            <a href="javascript:void(0)" class="notification" (click)="toggleNotifications()">
+                <i class='bx bxs-bell' style="transform: scale(1.5);"></i>
+                <span class="num" *ngIf="notificationsCount > 0">{{ notificationsCount }}</span>
+            </a>
+            
+            <!-- Notification Dropdown Panel -->
+            <div class="notification-dropdown" *ngIf="isNotificationsOpen" [class.closing]="isNotificationsClosing">
+                <!-- Dropdown Header -->
+                <div class="notification-header">
+                    <h3>Notifications</h3>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">Product Code:</span>
-                    <span class="detail-value"></span>
+                
+                <!-- Notifications List -->
+                <div class="notification-body" *ngIf="notifications.length > 0; else noNotifications">
+                    <div *ngFor="let notification of notifications" 
+                         class="notification-item">
+                        <!-- Notification Content -->
+                        <div class="notification-content">
+                            <div class="notification-message">
+                                <!-- //+ Message Content Here -->
+                            </div>
+                            <div class="notification-time">
+                                <!-- //+ Message Date Here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Notification Actions -->
+                        <div class="notification-actions">
+                            <button class="view-btn" >
+                                <!-- //+ click function for mark As Seen Here -->
+                                <i style="color: var(--dark);" class='bx bx-show'></i>
+                            </button>
+                            <button class="delete-btn" >
+                                <!-- //+ click function for delete Here -->
+                                <i class='bx bx-x'></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">Branch Location:</span>
-                    <span class="detail-value"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Governorate:</span>
-                    <span class="detail-value"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Status:</span>
-                    <span class="detail-value"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Created At:</span>
-                    <span class="detail-value"></span>
-                </div>
-            </div>
-            <div class="notification-modal-footer">
-                <button style="background-color: var(--dark) !important;" class="btn-primary">Close</button>
+                
+                <!-- No Notifications Template -->
+                <ng-template #noNotifications>
+                    <div class="no-notifications">
+                        No new notifications
+                    </div>
+                </ng-template>
             </div>
         </div>
-    </div>
+
+        <!-- User Profile -->
+        <a href="#" class="profile">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile Image">
+        </a>
+    </nav>
+
+    <!-- ========================================
+         DYNAMIC CONTENT AREA
+    ======================================== -->
+    <!-- Router Outlet for Child Components -->
+    <router-outlet></router-outlet>
+</section>
+
 </div>
+
