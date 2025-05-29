@@ -105,49 +105,11 @@
                 <i class='bx bxs-bell' style="transform: scale(1.5);"></i>
                 <span class="num" *ngIf="notificationsCount > 0">{{ notificationsCount }}</span>
             </a>
-            
-            <!-- Notification Dropdown Panel -->
-            <div class="notification-dropdown" *ngIf="isNotificationsOpen" [class.closing]="isNotificationsClosing">
-                <!-- Dropdown Header -->
-                <div class="notification-header">
-                    <h3>Notifications</h3>
-                </div>
-                
-                <!-- Notifications List -->
-                <div class="notification-body" *ngIf="notifications.length > 0; else noNotifications">
-                    <div *ngFor="let notification of notifications" 
-                         class="notification-item">
-                        <!-- Notification Content -->
-                        <div class="notification-content">
-                            <div class="notification-message">
-                                <!-- //+ Message Content Here -->
-                            </div>
-                            <div class="notification-time">
-                                <!-- //+ Message Date Here -->
-                            </div>
-                        </div>
-                        
-                        <!-- Notification Actions -->
-                        <div class="notification-actions">
-                            <button class="view-btn" >
-                                <!-- //+ click function for mark As Seen Here -->
-                                <i style="color: var(--dark);" class='bx bx-show'></i>
-                            </button>
-                            <button class="delete-btn" >
-                                <!-- //+ click function for delete Here -->
-                                <i class='bx bx-x'></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- No Notifications Template -->
-                <ng-template #noNotifications>
-                    <div class="no-notifications">
-                        No new notifications
-                    </div>
-                </ng-template>
-            </div>
+            <app-notification-drop-down 
+             [isNotificationsOpen]="isNotificationsOpen"
+             [isNotificationsClosing]="isNotificationsClosing"
+             [notifications]="notifications"
+             ></app-notification-drop-down>
         </div>
 
         <!-- User Profile -->

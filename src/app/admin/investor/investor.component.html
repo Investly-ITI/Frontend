@@ -10,7 +10,7 @@
             <div class="head-title">
                 <div class="left">
                     <!-- Page Title & Dark Mode Toggle -->
-                    <div class="head-flex">
+                    <!-- <div class="head-flex">
                         <h1>Hi, Admin!</h1>
                         <div class="switch-container">
                             <label class="switch-mode">
@@ -18,7 +18,7 @@
                                 <span class="slider"></span>
                             </label>
                         </div>
-                    </div>
+                    </div> -->
                     
                     <!-- Breadcrumb Navigation -->
                     <ul class="breadcrumb">
@@ -32,9 +32,9 @@
             <!-- ========================================
                  STATISTICS BOXES
             ======================================== -->
-            <ul class="box-info">
+            <div class="box-info" >
                 <!-- Active Entities Count -->
-                <li>    
+                <li >  
                     <i class='bx bxs-user-check' style="font-size: 2.5em;"></i>
                     <span class="text">
                         <h3 class="animated-number">
@@ -66,7 +66,7 @@
                         <p>Inactive {{ entityNamePlural }}</p>
                     </span>
                 </li>
-            </ul>
+            </div>
 
             <!-- ========================================
                  MAIN DATA TABLE SECTION
@@ -201,6 +201,77 @@
                             ======================================== -->
                             <!-- Active Entity Row Example -->
                             <tr>
+                                <td>
+                                    <img src="https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg" alt="User Image">
+                                    <p>Ahmed</p>
+                                </td>
+                                <td>01/01/2022</td>
+                                <td>
+                                    <span class="status process active" style="min-width: 100px; display: inline-block; text-align: center; color: #2ed134; padding: 10px 0px;">
+                                        Active
+                                    </span>
+                                </td>
+                                <td>
+                                    <!-- Actions Dropdown -->
+                                    <div class="dropdown" [ngClass]="{'show': dropdownStates[0]}">
+                                        <button 
+                                            class="dropdown-toggle" 
+                                            type="button"
+                                            (click)="toggleDropdown(0, $event)"
+                                            [attr.aria-expanded]="dropdownStates[0]">
+                                            <i class='bx bx-dots-vertical-rounded'></i>
+                                        </button>
+                                        <div class="dropdown-menu" [ngClass]="{'show': dropdownStates[0]}">
+                                            <button class="dropdown-item show-action" type="button" (click)="openModal()">
+                                                <i class='bx bx-show'></i> 
+                                                View Details
+                                            </button>
+                                            <div class="dropdown-divider"></div>
+                                            <button class="dropdown-item deactivate-action" type="button" (click)="openActivateDeactivateModal('Ahmed', 'deactivate')">
+                                                <i class='bx bx-x-circle'></i>
+                                                Deactivate
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                               <tr>
+                                <td>
+                                    <img src="https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg" alt="User Image">
+                                    <p>Ahmed</p>
+                                </td>
+                                <td>01/01/2022</td>
+                                <td>
+                                    <span class="status process active" style="min-width: 100px; display: inline-block; text-align: center; color: #2ed134; padding: 10px 0px;">
+                                        Active
+                                    </span>
+                                </td>
+                                <td>
+                                    <!-- Actions Dropdown -->
+                                    <div class="dropdown" [ngClass]="{'show': dropdownStates[0]}">
+                                        <button 
+                                            class="dropdown-toggle" 
+                                            type="button"
+                                            (click)="toggleDropdown(0, $event)"
+                                            [attr.aria-expanded]="dropdownStates[0]">
+                                            <i class='bx bx-dots-vertical-rounded'></i>
+                                        </button>
+                                        <div class="dropdown-menu" [ngClass]="{'show': dropdownStates[0]}">
+                                            <button class="dropdown-item show-action" type="button" (click)="openModal()">
+                                                <i class='bx bx-show'></i> 
+                                                View Details
+                                            </button>
+                                            <div class="dropdown-divider"></div>
+                                            <button class="dropdown-item deactivate-action" type="button" (click)="openActivateDeactivateModal('Ahmed', 'deactivate')">
+                                                <i class='bx bx-x-circle'></i>
+                                                Deactivate
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                               <tr>
                                 <td>
                                     <img src="https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg" alt="User Image">
                                     <p>Ahmed</p>

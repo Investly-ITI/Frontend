@@ -11,6 +11,7 @@ import { ToastrService } from 'ngx-toastr';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AddUpdateComponent } from './add-update/add-update.component';
+import { InvestorService } from '../_services/investor.service';
 
 @Component({
   selector: 'app-investor',
@@ -74,11 +75,25 @@ export class InvestorComponent implements OnInit {
 
 
   //* Constructor
-  constructor() {}
+  constructor(private InvestorService:InvestorService) {}
 
   ngOnInit(): void {
-
+    console.log("777777");
+   this.loadData();
   }
+
+
+  loadData(){
+   this.InvestorService.getAllInvestors().subscribe({
+    next:(response)=>{
+      console.log(response)
+    },
+    error:(err)=>{
+      console.log(err);
+    }
+   }) 
+  }
+
 
   //! METHODS:
 
