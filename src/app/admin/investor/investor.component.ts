@@ -15,6 +15,7 @@ import { InvestorService } from '../_services/investor.service';
 import { Investor, InvestorSearch } from '../../_models/investor';
 import { StatusLabelPipe } from '../../_shared/pipes/enum.pipe';
 import { Status } from '../../_shared/enums';
+import { ArrayDataSource } from '@angular/cdk/collections';
 @Component({
   selector: 'app-investor',
   imports: [
@@ -40,7 +41,7 @@ export class InvestorComponent implements OnInit {
   isLoading: boolean = false;
   isLoading2: boolean = true;
   showNoResults: boolean = false;
-  dropdownStates: boolean[] = [false, false]; //+ Current two dropdowns for the component , gonna use index when using ngFor
+  dropdownStates: boolean[] = [false]; 
   animationComplete: boolean = true;
 
   //* Modal state
@@ -107,6 +108,7 @@ export class InvestorComponent implements OnInit {
           this.currentPage=response.data.currentPage;
           this.totalPages=Math.ceil(this.totalCount / this.pageSize);
           this.showNoResults = response.data.list.length === 0 ? true : false;
+          this.dropdownStates=new Array(this.loadedListData.length).fill(false);
           console.log(this.showNoResults);
         }
       },

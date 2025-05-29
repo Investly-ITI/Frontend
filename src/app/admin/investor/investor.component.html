@@ -230,8 +230,8 @@
                                     <!-- Actions Dropdown -->
                                     <div class="dropdown" [ngClass]="{'show': dropdownStates[i]}">
                                         <button class="dropdown-toggle" type="button"
-                                            (click)="toggleDropdown(0, $event)"
-                                            [attr.aria-expanded]="dropdownStates[0]">
+                                            (click)="toggleDropdown(i, $event)"
+                                            [attr.aria-expanded]="dropdownStates[i]">
                                             <i class='bx bx-dots-vertical-rounded'></i>
                                         </button>
                                         <div class="dropdown-menu" [ngClass]="{'show': dropdownStates[i]}">
