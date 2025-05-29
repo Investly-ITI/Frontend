@@ -9,16 +9,6 @@
             ======================================== -->
             <div class="head-title">
                 <div class="left">
-                    <!-- Page Title & Dark Mode Toggle -->
-                    <!-- <div class="head-flex">
-                        <h1>Hi, Admin!</h1>
-                        <div class="switch-container">
-                            <label class="switch-mode">
-                                <input type="checkbox" id="switch-mode" (change)="toggleDarkMode()">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div> -->
                     
                     <!-- Breadcrumb Navigation -->
                     <ul class="breadcrumb">
@@ -107,37 +97,69 @@
                                     <!-- Search Input -->
                                     <input type="search" 
                                            name="searchQuery"
+                                           [(ngModel)]="searchQuery"
                                            placeholder="Search {{ entityNamePlural.toLowerCase() }}..."
                                     >
-                                    <!-- //+ Place Holder should be dynamic based on the choices you have in filter menu, typescript -->
 
-                                    <!-- Search & Filter Buttons -->
+                                    <!-- Search & Advanced Search Buttons -->
                                     <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
                                     <div id="search-btns">
-                                        <!-- Filter Menu Button -->
-                                        <button mat-icon-button type="button" [matMenuTriggerFor]="menu" style="border: none; background-color: var(--light);">
+                                        <!-- Advanced Search Button -->
+                                        <button mat-icon-button type="button" 
+                                                style="border: none; background-color: var(--light);" 
+                                                title="Advanced Search"
+                                                (click)="toggleAdvancedSearch($event)">
                                             <i class='bx bx-filter' style="color: var(--dark); margin-left: 0.7em; font-size: 1.3em;"></i>
                                         </button>
-
-                                        <!-- Reset Search Button -->
-                                        <button mat-icon-button type="button" style="border: none; background-color: var(--light);" title="Reset Search">
-                                            <i class='bx bx-reset' style="color: var(--dark); margin-left: 0.7em; font-size: 1.3em;"></i>
-                                        </button>
                                     </div>
-                                    
-                                    <!-- Filter Menu Dropdown -->
-                                    <mat-menu #menu="matMenu" class="matMenu">
-                                        <button mat-menu-item class="mat-menu-item">
-                                            <mat-button-toggle-group vertical name="favoriteColor" aria-label="Favorite Color"
-                                                [hideSingleSelectionIndicator]="hideSingleSelectionIndicator()" 
-                                                class="matbuttongroupfilter">
-                                                <!-- //+ You need to use (change)="onFilterChange($event)" in <mat-button-toggle-group> tag when you implement the filter logic -->
+                                </div>
 
-                                                <mat-button-toggle value="name">Name</mat-button-toggle>
-                                                <mat-button-toggle value="ID">ID</mat-button-toggle>
-                                            </mat-button-toggle-group>
-                                        </button>
-                                    </mat-menu>
+                                <!-- Advanced Search Dropdown -->
+                                <div class="advanced-search-dropdown">
+                                    <div class="advanced-search-menu" [ngClass]="{'show': isAdvancedSearchOpen}">
+                                        <div class="advanced-search-content">
+                                            <h4>Search Filters</h4>
+                                            
+                                            <!-- Search Type Filter -->
+                                            <div class="filter-group">
+                                                <label for="searchType">Search By:</label>
+                                                <select id="searchType" [(ngModel)]="selectedSearchType" name="searchType">
+                                                    <option value="name">Name/Email</option>
+                                                    <option value="ssn">SSN</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Governorate Filter -->
+                                            <div class="filter-group">
+                                                <label for="governorate">Governorate:</label>
+                                                <select id="governorate" [(ngModel)]="selectedGovernomate" name="governorate">
+                                                    <option value="">All Governorates</option>
+                                                    <option *ngFor="let gov of governorates" [value]="gov">{{ gov }}</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Gender Filter -->
+                                            <div class="filter-group">
+                                                <label for="gender">Gender:</label>
+                                                <select id="gender" [(ngModel)]="selectedGender" name="gender">
+                                                    <option value="">All Genders</option>
+                                                    <option *ngFor="let gender of genders" [value]="gender">{{ gender }}</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Action Buttons -->
+                                            <div class="advanced-search-actions">
+                                                <button type="button" class="clear-btn" (click)="clearAdvancedSearch()">
+                                                    <i class='bx bx-x'></i>
+                                                    Clear
+                                                </button>
+                                                <button type="button" class="apply-btn" (click)="applyAdvancedSearch()">
+                                                    <i class='bx bx-search'></i>
+                                                    Apply
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -212,22 +234,21 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <!-- Actions Dropdown -->
-                                    <div class="dropdown" [ngClass]="{'show': dropdownStates[0]}">
+                                    <!-- New Actions Dropdown -->
+                                    <div class="action-dropdown" [ngClass]="{'active': dropdownStates[0]}">
                                         <button 
-                                            class="dropdown-toggle" 
+                                            class="action-btn" 
                                             type="button"
-                                            (click)="toggleDropdown(0, $event)"
-                                            [attr.aria-expanded]="dropdownStates[0]">
+                                            (click)="toggleDropdown(0, $event)">
                                             <i class='bx bx-dots-vertical-rounded'></i>
                                         </button>
-                                        <div class="dropdown-menu" [ngClass]="{'show': dropdownStates[0]}">
-                                            <button class="dropdown-item show-action" type="button" (click)="openModal()">
+                                        <div class="action-menu">
+                                            <button class="action-item view" type="button" (click)="openModal()">
                                                 <i class='bx bx-show'></i> 
                                                 View Details
                                             </button>
-                                            <div class="dropdown-divider"></div>
-                                            <button class="dropdown-item deactivate-action" type="button" (click)="openActivateDeactivateModal('Ahmed', 'deactivate')">
+                                            <div class="action-divider"></div>
+                                            <button class="action-item deactivate" type="button" (click)="openActivateDeactivateModal('Ahmed', 'deactivate')">
                                                 <i class='bx bx-x-circle'></i>
                                                 Deactivate
                                             </button>
@@ -248,22 +269,21 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <!-- Actions Dropdown -->
-                                    <div class="dropdown" [ngClass]="{'show': dropdownStates[0]}">
+                                    <!-- New Actions Dropdown -->
+                                    <div class="action-dropdown" [ngClass]="{'active': dropdownStates[1]}">
                                         <button 
-                                            class="dropdown-toggle" 
+                                            class="action-btn" 
                                             type="button"
-                                            (click)="toggleDropdown(0, $event)"
-                                            [attr.aria-expanded]="dropdownStates[0]">
+                                            (click)="toggleDropdown(1, $event)">
                                             <i class='bx bx-dots-vertical-rounded'></i>
                                         </button>
-                                        <div class="dropdown-menu" [ngClass]="{'show': dropdownStates[0]}">
-                                            <button class="dropdown-item show-action" type="button" (click)="openModal()">
+                                        <div class="action-menu">
+                                            <button class="action-item view" type="button" (click)="openModal()">
                                                 <i class='bx bx-show'></i> 
                                                 View Details
                                             </button>
-                                            <div class="dropdown-divider"></div>
-                                            <button class="dropdown-item deactivate-action" type="button" (click)="openActivateDeactivateModal('Ahmed', 'deactivate')">
+                                            <div class="action-divider"></div>
+                                            <button class="action-item deactivate" type="button" (click)="openActivateDeactivateModal('Ahmed', 'deactivate')">
                                                 <i class='bx bx-x-circle'></i>
                                                 Deactivate
                                             </button>
@@ -283,22 +303,21 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <!-- Actions Dropdown -->
-                                    <div class="dropdown" [ngClass]="{'show': dropdownStates[0]}">
+                                    <!-- New Actions Dropdown -->
+                                    <div class="action-dropdown" [ngClass]="{'active': dropdownStates[2]}">
                                         <button 
-                                            class="dropdown-toggle" 
+                                            class="action-btn" 
                                             type="button"
-                                            (click)="toggleDropdown(0, $event)"
-                                            [attr.aria-expanded]="dropdownStates[0]">
+                                            (click)="toggleDropdown(2, $event)">
                                             <i class='bx bx-dots-vertical-rounded'></i>
                                         </button>
-                                        <div class="dropdown-menu" [ngClass]="{'show': dropdownStates[0]}">
-                                            <button class="dropdown-item show-action" type="button" (click)="openModal()">
+                                        <div class="action-menu">
+                                            <button class="action-item view" type="button" (click)="openModal()">
                                                 <i class='bx bx-show'></i> 
                                                 View Details
                                             </button>
-                                            <div class="dropdown-divider"></div>
-                                            <button class="dropdown-item deactivate-action" type="button" (click)="openActivateDeactivateModal('Ahmed', 'deactivate')">
+                                            <div class="action-divider"></div>
+                                            <button class="action-item deactivate" type="button" (click)="openActivateDeactivateModal('Ahmed', 'deactivate')">
                                                 <i class='bx bx-x-circle'></i>
                                                 Deactivate
                                             </button>
@@ -320,22 +339,21 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <!-- Actions Dropdown -->
-                                    <div class="dropdown" [ngClass]="{'show': dropdownStates[1]}">
+                                    <!-- New Actions Dropdown -->
+                                    <div class="action-dropdown" [ngClass]="{'active': dropdownStates[3]}">
                                         <button 
-                                            class="dropdown-toggle" 
+                                            class="action-btn" 
                                             type="button"
-                                            (click)="toggleDropdown(1, $event)"
-                                            [attr.aria-expanded]="dropdownStates[1]">
+                                            (click)="toggleDropdown(3, $event)">
                                             <i class='bx bx-dots-vertical-rounded'></i>
                                         </button>
-                                        <div class="dropdown-menu" [ngClass]="{'show': dropdownStates[1]}">
-                                            <button class="dropdown-item show-action" type="button" (click)="openModal()">
+                                        <div class="action-menu">
+                                            <button class="action-item view" type="button" (click)="openModal()">
                                                 <i class='bx bx-show'></i> 
                                                 View Details
                                             </button>
-                                            <div class="dropdown-divider"></div>
-                                            <button class="dropdown-item activate-action" type="button" (click)="openActivateDeactivateModal('Ahmed', 'activate')">
+                                            <div class="action-divider"></div>
+                                            <button class="action-item activate" type="button" (click)="openActivateDeactivateModal('Ahmed', 'activate')">
                                                 <i class='bx bx-check-circle'></i>
                                                 Activate
                                             </button>
@@ -343,6 +361,42 @@
                                     </div>
                                 </td>
                             </tr>
+
+                            <tr>
+                                <td>
+                                    <img src="https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg" alt="User Image">
+                                    <p>Ahmed</p>
+                                </td>
+                                <td>01/01/2022</td>
+                                <td>
+                                    <span class="status process deactivated" style="min-width: 100px; display: inline-block; text-align: center; color: #e6382f; padding: 10px 0px;">
+                                        Inactive
+                                    </span>
+                                </td>
+                                <td>
+                                    <!-- New Actions Dropdown -->
+                                    <div class="action-dropdown" [ngClass]="{'active': dropdownStates[4]}">
+                                        <button 
+                                            class="action-btn" 
+                                            type="button"
+                                            (click)="toggleDropdown(4, $event)">
+                                            <i class='bx bx-dots-vertical-rounded'></i>
+                                        </button>
+                                        <div class="action-menu">
+                                            <button class="action-item view" type="button" (click)="openModal()">
+                                                <i class='bx bx-show'></i> 
+                                                View Details
+                                            </button>
+                                            <div class="action-divider"></div>
+                                            <button class="action-item activate" type="button" (click)="openActivateDeactivateModal('Ahmed', 'activate')">
+                                                <i class='bx bx-check-circle'></i>
+                                                Activate
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
                         </tbody>
                     </table>
                     

@@ -12,6 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AddUpdateComponent } from './add-update/add-update.component';
 import { InvestorService } from '../_services/investor.service';
+import { DarkModeService } from '../_services/dark-mode.service';
 
 @Component({
   selector: 'app-investor',
@@ -25,20 +26,24 @@ import { InvestorService } from '../_services/investor.service';
     NgxSkeletonLoaderModule,
     MatSelectModule,
     MatCheckboxModule,
-    AddUpdateComponent, // Add this import
+    AddUpdateComponent,
   ],
   templateUrl: './investor.component.html',
   styleUrl: './investor.component.css'
 })
-export class InvestorComponent implements OnInit {
+export class InvestorComponent implements OnInit, OnDestroy {
 
   //* State management (Flags)
-  isDarkMode: boolean = false;
+  isDarkMode: boolean = true;
   isLoading: boolean = false;
   isLoading2: boolean = true;
   showNoResults: boolean = false;
-  dropdownStates: boolean[] = [false, false]; //+ Current two dropdowns for the component , gonna use index when using ngFor
+  dropdownStates: boolean[] = [false, false, false, false, false]; //+ Current five dropdowns for the component , gonna use index when using ngFor
   animationComplete: boolean = true;
+  isAdvancedSearchOpen: boolean = false; // Advanced search dropdown state
+
+  //* Subscription for dark mode
+  private darkModeSubscription: Subscription = new Subscription();
 
   //* Modal state
   isModalOpen: boolean = false;
@@ -65,6 +70,21 @@ export class InvestorComponent implements OnInit {
   itemsPerPage: number = 10;
   currentFilter: string = '';
 
+  //* Advanced search filters
+  selectedGovernomate: string = '';
+  selectedGender: string = '';
+  selectedSearchType: string = 'name'; // 'name' or 'ssn'
+  searchQuery: string = '';
+
+  //* Dropdown data
+  governorates: string[] = [
+    'Cairo',
+    'Alexandria',
+    'Giza'
+  ];
+
+  genders: string[] = ['Male', 'Female'];
+  
   //* Generic entity configuration
   entityName: string = 'Investor';
   entityNamePlural: string = 'Investors';
@@ -75,13 +95,27 @@ export class InvestorComponent implements OnInit {
 
 
   //* Constructor
-  constructor(private InvestorService:InvestorService) {}
+  constructor(
+    private InvestorService: InvestorService,
+    private darkModeService: DarkModeService
+  ) {}
 
   ngOnInit(): void {
     console.log("777777");
-   this.loadData();
+    this.loadData();
+    
+    // Subscribe to dark mode changes
+    this.darkModeSubscription = this.darkModeService.darkMode$.subscribe(
+      (isDarkMode) => {
+        this.isDarkMode = isDarkMode;
+      }
+    );
   }
 
+  ngOnDestroy(): void {
+    // Clean up subscription
+    this.darkModeSubscription.unsubscribe();
+  }
 
   loadData(){
    this.InvestorService.getAllInvestors().subscribe({
@@ -97,11 +131,6 @@ export class InvestorComponent implements OnInit {
 
   //! METHODS:
 
-  //* Toggle dark mode
-  toggleDarkMode(): void {
-    this.isDarkMode = !this.isDarkMode;
-  }
-
   //* Toggle dropdown
   toggleDropdown(index: number, event?: Event) {
     if (event) {
@@ -116,10 +145,15 @@ export class InvestorComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
     const target = event.target as HTMLElement;
-    const dropdown = target.closest('.dropdown');
+    const actionDropdown = target.closest('.action-dropdown');
+    const advancedSearch = target.closest('.advanced-search-dropdown');
     
-    if (!dropdown) {
+    if (!actionDropdown) {
       this.dropdownStates = this.dropdownStates.map(() => false);
+    }
+    
+    if (!advancedSearch) {
+      this.isAdvancedSearchOpen = false;
     }
   }
 
@@ -224,6 +258,35 @@ export class InvestorComponent implements OnInit {
   //* Get digits array for flip animation
   getDigitsArray(number: number): string[] {
     return number.toString().split('');
+  }
+
+  //* Toggle advanced search dropdown
+  toggleAdvancedSearch(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.isAdvancedSearchOpen = !this.isAdvancedSearchOpen;
+  }
+
+  //* Apply advanced search filters
+  applyAdvancedSearch(): void {
+    console.log('Applying search filters:', {
+      searchType: this.selectedSearchType,
+      searchQuery: this.searchQuery,
+      governorate: this.selectedGovernomate,
+      gender: this.selectedGender
+    });
+    // Implement your search logic here
+    this.isAdvancedSearchOpen = false;
+  }
+
+  //* Clear advanced search filters
+  clearAdvancedSearch(): void {
+    this.selectedGovernomate = '';
+    this.selectedGender = '';
+    this.selectedSearchType = 'name';
+    console.log('Search filters cleared');
+    // Implement your clear logic here
   }
 
 }
