@@ -341,6 +341,7 @@ loadActiveInactiveCount(){
       this.searchData.SearchInput = '';
       this.currentPage = 1; // Reset to first page
       this.searchData.pageNumber = 1;
+      //+ call your function to load data unfiltered here !!!
     }
   }
   
