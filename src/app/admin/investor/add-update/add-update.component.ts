@@ -32,10 +32,12 @@ export class AddUpdateComponent implements OnInit, OnChanges {
 
 
   ngOnInit(): void {
+    
     this.initializeForm();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    console.log(this.isEditMode);
     if (changes['selectedEntity'] || changes['isEditMode']) {
       this.initializeForm();
     }
@@ -46,7 +48,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
       investingType: [this.selectedEntity?.investingType || '', Validators.required],
       user: this.fb.group({
         firstName: [this.selectedEntity?.user?.firstName || '', Validators.required],
-        lastName: [this.selectedEntity?.user?.fastName || '', Validators.required],
+        lastName: [this.selectedEntity?.user?.lastName || '', Validators.required],
         email: [this.selectedEntity?.user?.email || '', [Validators.required, Validators.email]],
         phoneNumber: [this.selectedEntity?.user?.phoneNumber || ''],
         userType: [this.selectedEntity?.user?.userType || ''],
@@ -58,6 +60,9 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         cityId: [this.selectedEntity?.user?.cityId || '']
       })
     });
+    if(!this.isEditMode){
+      this.formData.disable()
+    }
   }
 
   resetForm(): void {
@@ -81,23 +86,20 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   }
 
   toggleEditMode(): void {
-    if (this.isEditMode) {
-      // Save mode - submit the form
-      this.onSubmit();
+    if (!this.isEditMode) {
+      this.formData.enable();
+      this.isEditMode=true;
     } else {
-      // Enable edit mode
-      this.isEditMode = true;
+     this.formData.disable();
     }
   }
 
   onSubmit(): void {
     if (!this.formData.valid) {
-      console.log("uuu");
       this.formData.markAllAsTouched();
     } else {
       //add
       if (this.selectedEntity?.id == null || this.selectedEntity?.id==0) {
-        
         const investorPayload = {
           ...this.formData.value,
           userId:0,
@@ -119,11 +121,13 @@ export class AddUpdateComponent implements OnInit, OnChanges {
             console.log(err);
           }
         })
+
+        //edit
+      }else{
+
+        
       }
-      //console.log(this.formData.value);
-      if (this.modalMode === 'view' && this.selectedEntity) {
-        this.isEditMode = false;
-      }
+      
     }
 
   }

@@ -4,7 +4,7 @@ export class User {
     constructor(
         public id:number,
         public firstName:string,
-        public fastName:string,
+        public lastName:string,
         public email:string,
         public HashedPassword:string,
         public phoneNumber:string,

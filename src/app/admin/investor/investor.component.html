@@ -98,7 +98,7 @@
                                     <input type="search" [(ngModel)]="searchData.SearchInput" name="searchQuery"
                                         placeholder="Search  by name or email...">
                                     <!-- Search & Filter Buttons -->
-                                     <!-- <button class='bx bx-x m-2'></button> -->
+                                     <button class='bx bx-x m-2'></button>
                                     <button type="submit" class="search-btn" (click)="loadData();"><i
                                             class='bx bx-search'></i></button>
                                     <div id="search-btns">
@@ -255,7 +255,7 @@
                                             <i class='bx bx-dots-vertical-rounded'></i>
                                         </button>
                                         <div class="action-menu">
-                                            <button class="action-item view" type="button" (click)="openModal()">
+                                            <button class="action-item view" type="button" (click)="openModal(item)">
                                                 <i class='bx bx-show'></i> 
                                                 View Details
                                             </button>

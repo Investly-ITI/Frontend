@@ -21,9 +21,19 @@ export class InvestorService {
     var result = this.httpClient.post<Response<Investor>>(`${this.baseUrl}`, data);
     return result;
   }
-  
+
   getTotalActiveInactive(): Observable<Response<any>> {
     var result = this.httpClient.get<Response<any>>(`${this.baseUrl}/total-active-inactive`);
+    return result;
+  }
+  
+  update(data:Investor):Observable<Response<Investor>>{
+    var result= this.httpClient.put<Response<Investor>>(`${this.baseUrl}`,data);
+    return result;
+  }
+
+  changeStatus(id:number, status:number):Observable<Response<any>>{
+    var result= this.httpClient.put<Response<any>>(`${this.baseUrl}/change-status/${id}?status=${status}`,null);
     return result;
   }
 

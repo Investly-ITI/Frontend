@@ -238,11 +238,11 @@ loadActiveInactiveCount(){
 
 
   //* Modal methods:
-  openModal(): void {
+  openModal(item:Investor): void {
     this.isModalOpen = true;
     this.isEditMode = false;
     this.modalMode = 'view';
-    this.selectedEntity = { name: 'Ahmed', age: '25', stage: 'intermediate', id: 1 }; 
+    this.selectedEntity = item;
     this.dropdownStates = this.dropdownStates.map(() => false);
   }
 

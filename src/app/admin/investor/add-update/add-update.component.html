@@ -102,6 +102,19 @@
              </div>   
         </div>
 
+          <div class="col-4">
+            <label for="investingType">Investing Type</label>
+            <div class="input-container">
+                <input type="number" id="investingType" class="form-input2" formControlName="investingType"
+                    [disabled]="!isEditMode" />
+            </div>
+
+             <div *ngIf="formData.get('user.investingType')?.invalid && formData.get('user.investingType')?.touched"
+                    class="text-danger">
+                    investingType is required.
+             </div>  
+        </div>
+
     
     </div>
 <!-- 
@@ -122,20 +135,7 @@
         </div>
     </div> -->
 
-    <div class="row">
-        <div class="col-4">
-            <label for="investingType">Investing Type</label>
-            <div class="input-container">
-                <input type="number" id="investingType" class="form-input2" formControlName="investingType"
-                    [disabled]="!isEditMode" />
-            </div>
-
-             <div *ngIf="formData.get('user.investingType')?.invalid && formData.get('user.investingType')?.touched"
-                    class="text-danger">
-                    investingType is required.
-             </div>  
-        </div>
-    </div>
+  
 </form>
 
 <!-- Modal Footer -->
