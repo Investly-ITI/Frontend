@@ -1,4 +1,4 @@
-import { Gender, InvestorInvestingType, Status, UserType } from "../enums";
+import { InvestorInvestingType, Status, UserType } from "../enums";
 
 export function getStatusLabel(value:number):string{
     console.log(Status[value]);
@@ -13,6 +13,3 @@ export function getUserTypeLabel(value:number):string{
     return UserType[value]??'unknown';
 }
 
-export function getGenderLabel(value:number):string{
-    return Gender[value]??'unknown';
-}

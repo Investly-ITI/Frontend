@@ -17,6 +17,7 @@ import { Investor, InvestorSearch } from '../../_models/investor';
 import { StatusLabelPipe } from '../../_shared/pipes/enum.pipe';
 import { Status } from '../../_shared/enums';
 import { ArrayDataSource } from '@angular/cdk/collections';
+import { Gender } from '../../_shared/general';
 
 @Component({
   selector: 'app-investor',
@@ -47,6 +48,7 @@ export class InvestorComponent implements OnInit, OnDestroy {
   dropdownStates: boolean[] = [false]; 
   animationComplete: boolean = true;
   isAdvancedSearchOpen: boolean = false; // Advanced search dropdown state
+  currentFilter:string='';
 
   //* Subscription for dark mode
   private darkModeSubscription: Subscription = new Subscription();
@@ -72,8 +74,10 @@ export class InvestorComponent implements OnInit, OnDestroy {
     PageSize: 5,
     SearchInput: '',
     governmentId: 0,
-    gender: null
+    gender: null,
+    status:0
   }
+  
   pageSize:number=5;
   currentPage: number = 1;
   totalCount: number = 0;
@@ -91,8 +95,6 @@ export class InvestorComponent implements OnInit, OnDestroy {
     'Alexandria',
     'Giza'
   ];
-
-  genders: string[] = ['Male', 'Female'];
   
   //* Generic entity configuration
   entityName: string = 'Investor';
@@ -105,6 +107,7 @@ export class InvestorComponent implements OnInit, OnDestroy {
   //*Data
   loadedListData: Investor[] = [];
   Status = Status
+  Gender=Gender
 
   //* Constructor
   constructor(
@@ -141,10 +144,6 @@ export class InvestorComponent implements OnInit, OnDestroy {
     }, 4000);
   }
 
-  ngOnDestroy(): void {
-    // Clean up subscription
-    this.darkModeSubscription.unsubscribe();
-  }
 
   loadData() {
     this.searchData.pageNumber=this.currentPage;
@@ -161,7 +160,7 @@ export class InvestorComponent implements OnInit, OnDestroy {
           this.totalPages=Math.ceil(this.totalCount / this.pageSize);
           this.showNoResults = response.data.list.length === 0 ? true : false;
           this.dropdownStates=new Array(this.loadedListData.length).fill(false);
-          console.log(this.showNoResults);
+          this.isAdvancedSearchOpen = false;
         }
       },
       error: (err) => {
@@ -195,17 +194,14 @@ loadActiveInactiveCount(){
 }
 
 
-  //! METHODS:
-
   //* Toggle dropdown
   toggleDropdown(index: number, event?: Event) {
     if (event) {
       event.stopPropagation();
     }
-
-    //? Close all other dropdowns first, then toggle the clicked one
     this.dropdownStates = this.dropdownStates.map((state, i) => i === index ? !state : false);
   }
+  
 
   //* Close dropdowns when clicking outside
   @HostListener('document:click', ['$event'])
@@ -213,25 +209,51 @@ loadActiveInactiveCount(){
     const target = event.target as HTMLElement;
     const actionDropdown = target.closest('.action-dropdown');
     const advancedSearch = target.closest('.advanced-search-dropdown');
-    
     if (!actionDropdown) {
       this.dropdownStates = this.dropdownStates.map(() => false);
     }
-    
     if (!advancedSearch) {
       this.isAdvancedSearchOpen = false;
     }
   }
 
-  //* Setting filter of search
-  // setFilter(filter: string): void {
-  //   this.currentFilter = this.currentFilter === filter ? '' : filter;
-  // }
+  //* Setting filter of search by status
+  setFilter(filter: string, status:number): void {
+    this.currentFilter = this.currentFilter === filter ? '' : filter;
+    this.searchData.status=status;
+    this.loadData();
+  }
 
-  //? MatMenu toggle (It's needed for the MatMenu dropdown but I don't remember what it does)
-  hideSingleSelectionIndicator = signal(true);
 
+  
+  //* Toggle advanced search dropdown
+  toggleAdvancedSearch(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.isAdvancedSearchOpen = !this.isAdvancedSearchOpen;
+  }
 
+  //* Apply advanced search filters
+  applyAdvancedSearch(): void {
+    if (this.searchData.gender === "1") {
+    this.searchData.gender = true;
+  } else if (this.searchData.gender === "0") {
+    this.searchData.gender = false;
+  } else {
+    this.searchData.gender = null; 
+  }
+  console.log(this.searchData.gender);
+    this.loadData();
+  }
+
+  //* Clear advanced search filters
+  clearAdvancedSearch(): void {
+  this.searchData.gender=null;
+  this.searchData.governmentId=0;
+  this.loadData();
+
+  }
 
 
   //* Modal methods:
@@ -239,8 +261,7 @@ loadActiveInactiveCount(){
     this.isModalOpen = true;
     this.isEditMode = false;
     this.modalMode = 'view';
-    this.selectedEntity = { name: 'Ahmed', age: '25', stage: 'intermediate', id: 1 }; // Sample data
-    // Close all dropdowns when modal opens
+    this.selectedEntity = { name: 'Ahmed', age: '25', stage: 'intermediate', id: 1 }; 
     this.dropdownStates = this.dropdownStates.map(() => false);
   }
 
@@ -249,7 +270,6 @@ loadActiveInactiveCount(){
     this.isEditMode = true;
     this.modalMode = 'add';
     this.selectedEntity = null;
-    // Ensure dropdowns are closed
     this.dropdownStates = this.dropdownStates.map(() => false);
   }
 
@@ -264,8 +284,8 @@ loadActiveInactiveCount(){
   }
 
   onSaveEntity(entityData: any): void {
-    console.log('Saving entity:', entityData);
     this.closeModal();
+    this.loadData();
 
   }
 
@@ -305,53 +325,28 @@ loadActiveInactiveCount(){
   }
 
 
-  //* Animate statistics numbers
-
   //* Get digits array for flip animation
   getDigitsArray(number: number): string[] {
     return number.toString().split('');
   }
 
-  //* Toggle advanced search dropdown
-  toggleAdvancedSearch(event?: Event) {
-    if (event) {
-      event.stopPropagation();
-    }
-    this.isAdvancedSearchOpen = !this.isAdvancedSearchOpen;
-  }
-
-  //* Apply advanced search filters
-  applyAdvancedSearch(): void {
-    console.log('Applying search filters:', {
-      searchType: this.selectedSearchType,
-      searchQuery: this.searchQuery,
-      governorate: this.selectedGovernomate,
-      gender: this.selectedGender
-    });
-    // Implement your search logic here
-    this.isAdvancedSearchOpen = false;
-  }
-
-  //* Clear advanced search filters
-  clearAdvancedSearch(): void {
-    this.selectedGovernomate = '';
-    this.selectedGender = '';
-    this.selectedSearchType = 'name';
-    console.log('Search filters cleared');
-    // Implement your clear logic here
-  }
 
   //* Handle search clear event (when X button is clicked)
   onSearchClear(event: Event): void {
     const target = event.target as HTMLInputElement;
     
-    // Check if the input was cleared (empty value)
+    // Check if the input (empty value)
     if (target.value === '') {
       console.log('test clear'); 
       this.searchData.SearchInput = '';
       this.currentPage = 1; // Reset to first page
       this.searchData.pageNumber = 1;
     }
+  }
+  
+  
+  ngOnDestroy(): void {
+    this.darkModeSubscription.unsubscribe();
   }
 
 }

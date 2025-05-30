@@ -16,7 +16,3 @@ export enum InvestorInvestingType {
      Founder = 3,
  }
 
- export enum Gender{
-    Male=0,
-    Female=1
- }

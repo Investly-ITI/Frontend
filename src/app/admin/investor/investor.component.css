@@ -528,12 +528,14 @@ input:checked + .slider:before {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   min-width: 280px;
+  width: 500px;
+  height: 300px;
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.3s ease;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .advanced-search-menu.show {
@@ -1067,7 +1069,7 @@ input:checked + .slider:before {
   background: var(--light);
   border-radius: 20px;
   width: 90%;
-  max-width: 500px;
+  max-width: 900px;
   min-width: 400px;
   max-height: 90vh;
   overflow-y: auto;

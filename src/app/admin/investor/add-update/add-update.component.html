@@ -92,10 +92,9 @@
             <label for="gender">Gender</label>
             <div class="input-container">
                 <select formControlName="gender" class="form-input2" [disabled]="!isEditMode" >
-                 <option value="1">male</option> 
-                 <option value="0"> female</option>
+                 <option [value]="Gender.Male" selected>Male</option> 
+                 <option [value]="Gender.Female"> Female</option>
                 </select>
-     
             </div>
              <div *ngIf="formData.get('user.gender')?.invalid && formData.get('user.gender')?.touched"
                     class="text-danger">
