@@ -96,8 +96,9 @@
                                 <div class="form-input">
                                     <!-- Search Input -->
                                     <input type="search" [(ngModel)]="searchData.SearchInput" name="searchQuery"
-                                        placeholder="Search {{ entityNamePlural.toLowerCase() }}...">
+                                        placeholder="Search  by name or email...">
                                     <!-- Search & Filter Buttons -->
+                                     <!-- <button class='bx bx-x m-2'></button> -->
                                     <button type="submit" class="search-btn" (click)="loadData();"><i
                                             class='bx bx-search'></i></button>
                                     <div id="search-btns">
@@ -118,13 +119,13 @@
                                             <h4>Search Filters</h4>
                                             
                                             <!-- Search Type Filter -->
-                                            <div class="filter-group">
+                                            <!-- <div class="filter-group">
                                                 <label for="searchType">Search By:</label>
                                                 <select id="searchType" [(ngModel)]="selectedSearchType" name="searchType">
                                                     <option value="name">Name/Email</option>
                                                     <option value="ssn">SSN</option>
                                                 </select>
-                                            </div>
+                                            </div> -->
 
                                             <!-- Governorate Filter -->
                                             <div class="filter-group">
@@ -138,9 +139,10 @@
                                             <!-- Gender Filter -->
                                             <div class="filter-group">
                                                 <label for="gender">Gender:</label>
-                                                <select id="gender" [(ngModel)]="selectedGender" name="gender">
-                                                    <option value="">All Genders</option>
-                                                    <option *ngFor="let gender of genders" [value]="gender">{{ gender }}</option>
+                                                <select id="gender" [(ngModel)]="searchData.gender" name="gender">
+                                                    <option value=null>All Genders</option>
+                                                    <option [value]="Gender.Male">Male</option>
+                                                    <option [value]="Gender.Female">Female</option>
                                                 </select>
                                             </div>
 
@@ -179,12 +181,12 @@
                                 <th>
                                     Status
                                     <!-- Status Filter Dots -->
-                                    <!-- <span id="dots-container">
+                                    <span id="dots-container">
                                         <span class="dot green-dot" [class.selected]="currentFilter === 'active'"
-                                            (click)="setFilter('active')" title="Show Active"></span>
+                                            (click)="setFilter('active',Status.Active)" title="Show Active"></span>
                                         <span class="dot red-dot" [class.selected]="currentFilter === 'inactive'"
-                                            (click)="setFilter('inactive')" title="Show Inactive"></span>
-                                    </span> -->
+                                            (click)="setFilter('inactive',Status.Inactive)" title="Show Inactive"></span>
+                                    </span>
                                 </th>
                                 <th>Actions</th>
                             </tr>
@@ -245,11 +247,11 @@
                                 </td>
                                 <td>
                                     <!-- New Actions Dropdown -->
-                                    <div class="action-dropdown" [ngClass]="{'active': dropdownStates[0]}">
+                                    <div class="action-dropdown" [ngClass]="{'active': dropdownStates[i]}">
                                         <button 
                                             class="action-btn" 
                                             type="button"
-                                            (click)="toggleDropdown(0, $event)">
+                                            (click)="toggleDropdown(i, $event)">
                                             <i class='bx bx-dots-vertical-rounded'></i>
                                         </button>
                                         <div class="action-menu">

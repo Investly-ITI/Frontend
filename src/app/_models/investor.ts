@@ -20,6 +20,7 @@ export class InvestorSearch{
         public SearchInput:string,
         public pageNumber:number,
         public governmentId:number,
-        public gender:any
+        public gender:any,
+        public status:number
     ){}
 }

@@ -2,8 +2,9 @@ import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChange
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Investor } from '../../../_models/investor';
-import { Gender, Status } from '../../../_shared/enums';
+import {  Status } from '../../../_shared/enums';
 import { InvestorService } from '../../_services/investor.service';
+import { Gender } from '../../../_shared/general';
 
 @Component({
   selector: 'app-add-update',
@@ -25,6 +26,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   //* Profile image
   profileImageUrl: string = 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg';
   showImageOverlay: boolean = false;
+  Gender=Gender;
 
   constructor(private fb: FormBuilder, private investorService: InvestorService) { }
 
@@ -49,7 +51,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         phoneNumber: [this.selectedEntity?.user?.phoneNumber || ''],
         userType: [this.selectedEntity?.user?.userType || ''],
         nationalId: [this.selectedEntity?.user?.nationalId || '', Validators.required],
-        gender: [this.selectedEntity?.user?.gender || '', Validators.required],
+        gender: [this.selectedEntity?.user?.gender || Gender.Male, Validators.required],
         dateOfBirth: [this.selectedEntity?.user?.dateOfBirth || '',],
         status: [this.selectedEntity?.user?.status || Status.Active],
         governmentId: [this.selectedEntity?.user?.governmentId || ''],
@@ -104,7 +106,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
             cityId: this.formData.value.user.cityId || null,
             governmentId: this.formData.value.user.governmentId || null,
             userType: this.formData.value.user.userType || null,
-            gender:this.formData.value.user.gender=="1"?true:false
+            gender:this.formData.value.user.gender||null
           
           }
         };

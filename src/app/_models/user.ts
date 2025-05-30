@@ -1,5 +1,4 @@
-import { Gender, Status, UserType } from "../_shared/enums";
-import { getStatusLabel } from "../_shared/utils/enum.utils";
+import {  Status, UserType } from "../_shared/enums";
 
 export class User {
     constructor(
@@ -11,11 +10,11 @@ export class User {
         public phoneNumber:string,
         public userType:UserType,
         public nationalId:string,
-        public gender:boolean,
+        public gender:string,
         public dateOfBirth:Date,
         public frontIdPicPath:string,
         public backIdPicPath:string,
-        //public profileIdPicPath:string,
+        public profileIdPicPath:string,
         public governmentId:number,
         public cityId:number,
         public status:Status,
