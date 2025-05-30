@@ -15,7 +15,7 @@
             <label for="firstName">First Name</label>
             <div class="input-container">
                 <input type="text" id="firstName" class="form-input2" formControlName="firstName"
-                    [disabled]="!isEditMode" placeholder="Enter first name" />
+                     placeholder="Enter first name" />
                 <div *ngIf="formData.get('user.firstName')?.invalid && formData.get('user.firstName')?.touched"
                     class="text-danger">
                     First name is required.
@@ -26,12 +26,12 @@
         <div class="col-4">
             <label for="lastName">Last Name</label>
             <div class="input-container">
-                <input type="text" id="lastName" class="form-input2" formControlName="lastName" [disabled]="!isEditMode"
+                <input type="text" id="lastName" class="form-input2" formControlName="lastName" 
                     placeholder="Enter last name" />
                 <div *ngIf="formData.get('user.lastName')?.invalid && formData.get('user.lastName')?.touched"
                     class="text-danger">
                     last name is required.
-                </div>    
+                </div>
             </div>
         </div>
 
@@ -39,8 +39,8 @@
             <label for="dateOfBirth">Date of Birth</label>
             <div class="input-container">
                 <input type="date" id="dateOfBirth" class="form-input2" formControlName="dateOfBirth"
-                    [disabled]="!isEditMode" />
-               <!-- <div *ngIf="formData.get('user.dateOfBirth')?.invalid && formData.get('user.dateOfBirth')?.touched"
+                     />
+                <!-- <div *ngIf="formData.get('user.dateOfBirth')?.invalid && formData.get('user.dateOfBirth')?.touched"
                     class="text-danger">
                     First name is required.
                 </div>       -->
@@ -52,12 +52,12 @@
         <div class="col-4">
             <label for="email">Email</label>
             <div class="input-container">
-                <input type="email" id="email" class="form-input2" formControlName="email" [disabled]="!isEditMode"
+                <input type="email" id="email" class="form-input2" formControlName="email" 
                     placeholder="Enter email" />
-                 <div *ngIf="formData.get('user.email')?.invalid && formData.get('user.email')?.touched"
+                <div *ngIf="formData.get('user.email')?.invalid && formData.get('user.email')?.touched"
                     class="text-danger">
                     email is required.
-                </div>      
+                </div>
             </div>
         </div>
 
@@ -65,11 +65,11 @@
             <label for="nationalId">National ID</label>
             <div class="input-container">
                 <input type="text" id="nationalId" class="form-input2" formControlName="nationalId"
-                    [disabled]="!isEditMode" />
+                     />
                 <div *ngIf="formData.get('user.nationalId')?.invalid && formData.get('user.nationalId')?.touched"
                     class="text-danger">
                     nationalId is required.
-                </div>         
+                </div>
             </div>
         </div>
 
@@ -77,8 +77,8 @@
             <label for="phoneNumber">Phone Number</label>
             <div class="input-container">
                 <input type="text" id="phoneNumber" class="form-input2" formControlName="phoneNumber"
-                    [disabled]="!isEditMode" />
-                 <!-- <div *ngIf="formData.get('user.phoneNumber')?.invalid && formData.get('user.phoneNumber')?.touched"
+                     />
+                <!-- <div *ngIf="formData.get('user.phoneNumber')?.invalid && formData.get('user.phoneNumber')?.touched"
                     class="text-danger">
                     First name is required.
                 </div>        -->
@@ -87,37 +87,38 @@
     </div>
 
     <div class="row" [formGroupName]="'user'">
-     
+
         <div class="col-4">
             <label for="gender">Gender</label>
             <div class="input-container">
-                <select formControlName="gender" class="form-input2" [disabled]="!isEditMode" >
-                 <option [value]="Gender.Male" selected>Male</option> 
-                 <option [value]="Gender.Female"> Female</option>
+                <select formControlName="gender" class="form-input2" >
+                    <option [value]="Gender.Male" selected>Male</option>
+                    <option [value]="Gender.Female"> Female</option>
                 </select>
             </div>
-             <div *ngIf="formData.get('user.gender')?.invalid && formData.get('user.gender')?.touched"
-                    class="text-danger">
-                    gender is required.
-             </div>   
+            <div *ngIf="formData.get('user.gender')?.invalid && formData.get('user.gender')?.touched"
+                class="text-danger">
+                gender is required.
+            </div>
         </div>
 
-          <div class="col-4">
+      
+
+
+    </div>
+      <div class="col-4">
             <label for="investingType">Investing Type</label>
             <div class="input-container">
                 <input type="number" id="investingType" class="form-input2" formControlName="investingType"
-                    [disabled]="!isEditMode" />
+                     />
             </div>
 
-             <div *ngIf="formData.get('user.investingType')?.invalid && formData.get('user.investingType')?.touched"
-                    class="text-danger">
-                    investingType is required.
-             </div>  
+            <div *ngIf="formData.get('user.investingType')?.invalid && formData.get('user.investingType')?.touched"
+                class="text-danger">
+                investingType is required.
+            </div>
         </div>
-
-    
-    </div>
-<!-- 
+    <!-- 
     <div class="row" [formGroupName]="'user'">
         <div class="col-4">
             <label for="governmentId">Government</label>
@@ -135,7 +136,7 @@
         </div>
     </div> -->
 
-  
+
 </form>
 
 <!-- Modal Footer -->

@@ -62,7 +62,9 @@ export class InvestorComponent implements OnInit, OnDestroy {
   //* Activate/Deactivate Modal state
   isActivateDeactivateModalOpen: boolean = false;
   entityToModify: any = null; // Store the entity being modified
-  modifyAction: 'deactivate' | 'activate' = 'deactivate'; // Track the action type
+  modifyAction: 'deactivate' | 'activate' |'delete'= 'deactivate'; // Track the action type
+  entityIdToChangeStatus:number=0;
+  StatusChangedTo:number=0;
 
 
   //* Profile image
@@ -125,23 +127,6 @@ export class InvestorComponent implements OnInit, OnDestroy {
         this.isDarkMode = isDarkMode;
       }
     );
-
-    // Test toasts - testing
-    setTimeout(() => {
-      this.toastr.success('Welcome to Investly!', 'Success');
-    }, 1000);
-
-    setTimeout(() => {
-      this.toastr.info('Investor data loaded successfully', 'Information');
-    }, 2000);
-
-    setTimeout(() => {
-      this.toastr.warning('This is a warning message', 'Warning');
-    }, 3000);
-
-    setTimeout(() => {
-      this.toastr.error('This is an error message for testing', 'Error');
-    }, 4000);
   }
 
 
@@ -236,14 +221,6 @@ loadActiveInactiveCount(){
 
   //* Apply advanced search filters
   applyAdvancedSearch(): void {
-    if (this.searchData.gender === "1") {
-    this.searchData.gender = true;
-  } else if (this.searchData.gender === "0") {
-    this.searchData.gender = false;
-  } else {
-    this.searchData.gender = null; 
-  }
-  console.log(this.searchData.gender);
     this.loadData();
   }
 
@@ -252,7 +229,6 @@ loadActiveInactiveCount(){
   this.searchData.gender=null;
   this.searchData.governmentId=0;
   this.loadData();
-
   }
 
 
@@ -275,37 +251,33 @@ loadActiveInactiveCount(){
 
   closeModal(): void {
     this.isModalOpen = false;
-    // Delay resetting modal state until after animation completes
     setTimeout(() => {
       this.isEditMode = false;
       this.modalMode = 'view';
       this.selectedEntity = null;
-    }, 300); // Match the CSS transition duration
+    }, 300); 
   }
 
-  onSaveEntity(entityData: any): void {
+  onSaveEntity(entityData: Investor): void {
     this.closeModal();
     this.loadData();
+    this.loadActiveInactiveCount();
 
   }
 
   //* Activate/Deactivate Modal methods
-  openActivateDeactivateModal(entity: any, action: 'deactivate' | 'activate'): void {
+  openActivateDeactivateModal(id:number,entity: any, action: 'deactivate' | 'activate'|'delete',status:number): void {
 
     this.entityToModify = entity;
     this.modifyAction = action;
-
-    // Close all dropdowns when modal opens
+    this.entityIdToChangeStatus=id;
+    this.StatusChangedTo=status;
     this.dropdownStates = this.dropdownStates.map(() => false);
-
     this.isActivateDeactivateModalOpen = true;
   }
 
   closeActivateDeactivateModal(): void {
-
     this.isActivateDeactivateModalOpen = false;
-    // Delay resetting modal state until after animation completes
-
     setTimeout(() => {
       this.entityToModify = null;
       this.modifyAction = 'deactivate';
@@ -313,11 +285,21 @@ loadActiveInactiveCount(){
   }
 
   confirmActivateDeactivate(): void {
-
     if (this.entityToModify) {
-      console.log(`${this.modifyAction === 'deactivate' ? 'Deactivating' : 'Activating'} entity:`, this.entityToModify);
-
-      // Add your activate/deactivate logic/service here
+     var res3= this.InvestorService.changeStatus(this.entityIdToChangeStatus,this.StatusChangedTo).subscribe({
+      next:(response)=>{
+       if(response.isSuccess){
+        this.toastr.success(response.message,"Success");
+        this.loadData();
+        this.loadActiveInactiveCount();
+       }else{
+        this.toastr.error(response.message,"Error");
+       }
+         
+      },error:(err)=>{
+        this.toastr.error(err,"Error");
+      }
+     })
 
       this.closeActivateDeactivateModal();
     }
@@ -325,27 +307,23 @@ loadActiveInactiveCount(){
   }
 
 
-  //* Get digits array for flip animation
+  //* Handle search clear event (when X button is clicked)
+  onSearchClear(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    if (target.value === '') {
+      console.log('test clear'); 
+      this.searchData.SearchInput = '';
+      this.searchData.pageNumber=1;
+      this.loadData();
+      
+    }
+  }
+  
+    //* Get digits array for flip animation
   getDigitsArray(number: number): string[] {
     return number.toString().split('');
   }
 
-
-  //* Handle search clear event (when X button is clicked)
-  onSearchClear(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    
-    // Check if the input (empty value)
-    if (target.value === '') {
-      console.log('test clear'); 
-      this.searchData.SearchInput = '';
-      this.currentPage = 1; // Reset to first page
-      this.searchData.pageNumber = 1;
-      //+ call your function to load data unfiltered here !!!
-    }
-  }
-  
-  
   ngOnDestroy(): void {
     this.darkModeSubscription.unsubscribe();
   }

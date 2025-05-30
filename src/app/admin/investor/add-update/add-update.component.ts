@@ -2,9 +2,11 @@ import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChange
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Investor } from '../../../_models/investor';
-import {  Status } from '../../../_shared/enums';
+import { Status } from '../../../_shared/enums';
 import { InvestorService } from '../../_services/investor.service';
 import { Gender } from '../../../_shared/general';
+import { ToastrService } from 'ngx-toastr';
+import { identity } from 'rxjs';
 
 @Component({
   selector: 'app-add-update',
@@ -14,7 +16,7 @@ import { Gender } from '../../../_shared/general';
   styleUrl: './add-update.component.css'
 })
 export class AddUpdateComponent implements OnInit, OnChanges {
-  @Input() selectedEntity!: Investor ;
+  @Input() selectedEntity!: Investor;
   @Input() isEditMode: boolean = false;
   @Input() entityName: string = 'Investor';
   @Input() modalMode: 'add' | 'view' = 'view';
@@ -26,13 +28,12 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   //* Profile image
   profileImageUrl: string = 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg';
   showImageOverlay: boolean = false;
-  Gender=Gender;
+  Gender = Gender;
 
-  constructor(private fb: FormBuilder, private investorService: InvestorService) { }
-
-
+  constructor(private fb: FormBuilder, private investorService: InvestorService, private toastrService: ToastrService) { }
+  
   ngOnInit(): void {
-    
+
     this.initializeForm();
   }
 
@@ -44,14 +45,16 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   }
   initializeForm(): void {
     this.formData = this.fb.group({
-      userId: [this.selectedEntity?.userId || ''],
+      id: [this.selectedEntity?.id || null],
+      userId: [this.selectedEntity?.userId || null],
       investingType: [this.selectedEntity?.investingType || '', Validators.required],
       user: this.fb.group({
+        id: [this.selectedEntity?.user?.id || 0],
         firstName: [this.selectedEntity?.user?.firstName || '', Validators.required],
         lastName: [this.selectedEntity?.user?.lastName || '', Validators.required],
         email: [this.selectedEntity?.user?.email || '', [Validators.required, Validators.email]],
         phoneNumber: [this.selectedEntity?.user?.phoneNumber || ''],
-        userType: [this.selectedEntity?.user?.userType || ''],
+        userType: [this.selectedEntity?.user?.userType || 0],
         nationalId: [this.selectedEntity?.user?.nationalId || '', Validators.required],
         gender: [this.selectedEntity?.user?.gender || Gender.Male, Validators.required],
         dateOfBirth: [this.selectedEntity?.user?.dateOfBirth || '',],
@@ -60,7 +63,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         cityId: [this.selectedEntity?.user?.cityId || '']
       })
     });
-    if(!this.isEditMode){
+    if (!this.isEditMode) {
       this.formData.disable()
     }
   }
@@ -78,7 +81,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         nationalId: [''],
         gender: [''],
         dateOfBirth: [''],
-        status: [1], // Or Status.Active
+        status: [1], 
         governmentId: [''],
         cityId: ['']
       })
@@ -88,9 +91,11 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   toggleEditMode(): void {
     if (!this.isEditMode) {
       this.formData.enable();
-      this.isEditMode=true;
+      this.isEditMode = true;
     } else {
-     this.formData.disable();
+      //update
+      this.onSubmit();
+      
     }
   }
 
@@ -98,24 +103,25 @@ export class AddUpdateComponent implements OnInit, OnChanges {
     if (!this.formData.valid) {
       this.formData.markAllAsTouched();
     } else {
+
+      const investorPayload = {
+        ...this.formData.value,
+        user: {
+          ...this.formData.value.user,
+          cityId: this.formData.value.user.cityId || null,
+          governmentId: this.formData.value.user.governmentId || null,
+
+        }
+      };
       //add
-      if (this.selectedEntity?.id == null || this.selectedEntity?.id==0) {
-        const investorPayload = {
-          ...this.formData.value,
-          userId:0,
-          user: {
-            ...this.formData.value.user,
-            cityId: this.formData.value.user.cityId || null,
-            governmentId: this.formData.value.user.governmentId || null,
-            userType: this.formData.value.user.userType || null,
-            gender:this.formData.value.user.gender||null
-          
-          }
-        };
+      if (this.selectedEntity?.id == null || this.selectedEntity?.id == 0) {
         var res = this.investorService.add(investorPayload).subscribe({
           next: (response) => {
             if (response.isSuccess) {
+              this.toastrService.success(response.message, 'Success');
+              this.isEditMode = false;
               this.saveEntity.emit(this.formData.value);
+
             }
           }, error: (err) => {
             console.log(err);
@@ -123,11 +129,27 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         })
 
         //edit
-      }else{
+      } else {
 
-        
+        var res2 = this.investorService.update(investorPayload).subscribe({
+          next: (response) => {
+            if (response.isSuccess) {
+              this.toastrService.success(response.message, 'Success');
+              this.isEditMode = false;
+              this.saveEntity.emit(this.formData.value);
+
+            }else{
+              this.toastrService.error(response.message, 'Error');
+              this.isEditMode = false;
+            }
+          }, error: (err) => {
+            this.toastrService.error(err, 'Error');
+          }
+        })
+
+
       }
-      
+
     }
 
   }
