@@ -4,14 +4,22 @@ import { User } from "./user";
 
 export class Investor {
     constructor(
-    public Id :number,
-    public InvestorInvestingType:InvestorInvestingType,
-    public UserId:number,
-    public User:User
+    public id :number,
+    public investingType:InvestorInvestingType,
+    public userId:number,
+    public user:User
 
     ){}
 
-    get InvestorInvestingTypeLabel():string{
-       return getInvestorInvestingTypeLabel(this.InvestorInvestingType);
-    }
+    
+}
+
+export class InvestorSearch{
+    constructor(
+        public PageSize:number,
+        public SearchInput:string,
+        public pageNumber:number,
+        public governmentId:number,
+        public gender:any
+    ){}
 }

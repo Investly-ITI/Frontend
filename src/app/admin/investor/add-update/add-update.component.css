@@ -136,7 +136,7 @@ select.form-input2:disabled {
 /* Modal Footer */
 .modal-footer {
   display: flex;
-  justify-content: center;
+  justify-content: right;
   padding: 20px 0 0 0;
   border-top: 1px solid var(--custom);
   margin-top: 32px;

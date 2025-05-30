@@ -1,31 +1,33 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Investor } from '../../../_models/investor';
+import { Gender, Status } from '../../../_shared/enums';
+import { InvestorService } from '../../_services/investor.service';
 
 @Component({
   selector: 'app-add-update',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './add-update.component.html',
   styleUrl: './add-update.component.css'
 })
 export class AddUpdateComponent implements OnInit, OnChanges {
-  @Input() selectedEntity: any = null;
+  @Input() selectedEntity!: Investor ;
   @Input() isEditMode: boolean = false;
   @Input() entityName: string = 'Investor';
   @Input() modalMode: 'add' | 'view' = 'view';
   @Output() saveEntity = new EventEmitter<any>();
-
   //* Form data
-  formData = {
-    name: '',
-    age: '',
-    stage: ''
-  };
+  formData!: FormGroup;
+  investorData!: Investor;
 
   //* Profile image
   profileImageUrl: string = 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg';
   showImageOverlay: boolean = false;
+
+  constructor(private fb: FormBuilder, private investorService: InvestorService) { }
+
 
   ngOnInit(): void {
     this.initializeForm();
@@ -36,25 +38,44 @@ export class AddUpdateComponent implements OnInit, OnChanges {
       this.initializeForm();
     }
   }
-
   initializeForm(): void {
-    if (this.selectedEntity) {
-      this.formData = {
-        name: this.selectedEntity.name || 'Ahmed',
-        age: this.selectedEntity.age || '25',
-        stage: this.selectedEntity.stage || 'intermediate'
-      };
-    } else {
-      this.resetForm();
-    }
+    this.formData = this.fb.group({
+      userId: [this.selectedEntity?.userId || ''],
+      investingType: [this.selectedEntity?.investingType || '', Validators.required],
+      user: this.fb.group({
+        firstName: [this.selectedEntity?.user?.firstName || '', Validators.required],
+        lastName: [this.selectedEntity?.user?.fastName || '', Validators.required],
+        email: [this.selectedEntity?.user?.email || '', [Validators.required, Validators.email]],
+        phoneNumber: [this.selectedEntity?.user?.phoneNumber || ''],
+        userType: [this.selectedEntity?.user?.userType || ''],
+        nationalId: [this.selectedEntity?.user?.nationalId || '', Validators.required],
+        gender: [this.selectedEntity?.user?.gender || '', Validators.required],
+        dateOfBirth: [this.selectedEntity?.user?.dateOfBirth || '',],
+        status: [this.selectedEntity?.user?.status || Status.Active],
+        governmentId: [this.selectedEntity?.user?.governmentId || ''],
+        cityId: [this.selectedEntity?.user?.cityId || '']
+      })
+    });
   }
 
   resetForm(): void {
-    this.formData = {
-      name: '',
-      age: '',
-      stage: ''
-    };
+    this.formData = this.fb.group({
+      userId: [''],
+      investingType: [''],
+      user: this.fb.group({
+        firstName: [''],
+        lastName: [''],
+        email: [''],
+        phoneNumber: [''],
+        userType: [''],
+        nationalId: [''],
+        gender: [''],
+        dateOfBirth: [''],
+        status: [1], // Or Status.Active
+        governmentId: [''],
+        cityId: ['']
+      })
+    });
   }
 
   toggleEditMode(): void {
@@ -68,18 +89,40 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   }
 
   onSubmit(): void {
-    const entityData = {
-      ...this.formData,
-      id: this.selectedEntity?.id || null
-    };
-    
-    // Emit the save event with the form data
-    //! TODO: data will be emitted to investor component, i am not sure if sarah wants to implement service here in this component on in the parent one , i will ask her
-    this.saveEntity.emit(entityData);
-    
-    // Only disable edit mode for view mode, add mode should close modal
-    if (this.modalMode === 'view' && this.selectedEntity) {
-      this.isEditMode = false;
+    if (!this.formData.valid) {
+      console.log("uuu");
+      this.formData.markAllAsTouched();
+    } else {
+      //add
+      if (this.selectedEntity?.id == null || this.selectedEntity?.id==0) {
+        
+        const investorPayload = {
+          ...this.formData.value,
+          userId:0,
+          user: {
+            ...this.formData.value.user,
+            cityId: this.formData.value.user.cityId || null,
+            governmentId: this.formData.value.user.governmentId || null,
+            userType: this.formData.value.user.userType || null,
+            gender:this.formData.value.user.gender=="1"?true:false
+          
+          }
+        };
+        var res = this.investorService.add(investorPayload).subscribe({
+          next: (response) => {
+            if (response.isSuccess) {
+              this.saveEntity.emit(this.formData.value);
+            }
+          }, error: (err) => {
+            console.log(err);
+          }
+        })
+      }
+      //console.log(this.formData.value);
+      if (this.modalMode === 'view' && this.selectedEntity) {
+        this.isEditMode = false;
+      }
     }
+
   }
 }

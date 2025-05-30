@@ -13,7 +13,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AddUpdateComponent } from './add-update/add-update.component';
 import { InvestorService } from '../_services/investor.service';
 import { DarkModeService } from '../_services/dark-mode.service';
-
+import { Investor, InvestorSearch } from '../../_models/investor';
+import { StatusLabelPipe } from '../../_shared/pipes/enum.pipe';
+import { Status } from '../../_shared/enums';
+import { ArrayDataSource } from '@angular/cdk/collections';
 @Component({
   selector: 'app-investor',
   imports: [
@@ -26,7 +29,8 @@ import { DarkModeService } from '../_services/dark-mode.service';
     NgxSkeletonLoaderModule,
     MatSelectModule,
     MatCheckboxModule,
-    AddUpdateComponent,
+    StatusLabelPipe,
+    AddUpdateComponent, // Add this import
   ],
   templateUrl: './investor.component.html',
   styleUrl: './investor.component.css'
@@ -38,7 +42,7 @@ export class InvestorComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   isLoading2: boolean = true;
   showNoResults: boolean = false;
-  dropdownStates: boolean[] = [false, false, false, false, false]; //+ Current five dropdowns for the component , gonna use index when using ngFor
+  dropdownStates: boolean[] = [false]; 
   animationComplete: boolean = true;
   isAdvancedSearchOpen: boolean = false; // Advanced search dropdown state
 
@@ -56,19 +60,22 @@ export class InvestorComponent implements OnInit, OnDestroy {
   entityToModify: any = null; // Store the entity being modified
   modifyAction: 'deactivate' | 'activate' = 'deactivate'; // Track the action type
 
-  //* Form data
-  formData = {
-    name: '',
-    age: '',
-    stage: ''
-  };
 
   //* Profile image
   profileImageUrl: string = 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg';
 
   //* Pagination and filtering
-  itemsPerPage: number = 10;
-  currentFilter: string = '';
+  searchData: InvestorSearch = {
+    pageNumber: 1,
+    PageSize: 5,
+    SearchInput: '',
+    governmentId: 0,
+    gender: null
+  }
+  pageSize:number=5;
+  currentPage: number = 1;
+  totalCount: number = 0;
+  totalPages: number = 0;
 
   //* Advanced search filters
   selectedGovernomate: string = '';
@@ -88,10 +95,14 @@ export class InvestorComponent implements OnInit, OnDestroy {
   //* Generic entity configuration
   entityName: string = 'Investor';
   entityNamePlural: string = 'Investors';
-  
+
   //* Animation states for statistics
-  displayActiveCount: number = 30; 
-  displayInactiveCount: number = 20; 
+  displayActiveCount: number = 0;
+  displayInactiveCount: number = 0;
+
+  //*Data
+  loadedListData: Investor[] = [];
+  Status = Status
 
 
   //* Constructor
@@ -117,16 +128,53 @@ export class InvestorComponent implements OnInit, OnDestroy {
     this.darkModeSubscription.unsubscribe();
   }
 
-  loadData(){
-   this.InvestorService.getAllInvestors().subscribe({
-    next:(response)=>{
-      console.log(response)
-    },
-    error:(err)=>{
-      console.log(err);
-    }
-   }) 
+  loadData() {
+    this.searchData.pageNumber=this.currentPage;
+    console.log(this.searchData);
+    this.isLoading = true;
+    this.InvestorService.getpagintedData(this.searchData).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        if (response.isSuccess) {
+          this.loadedListData = response.data.list;
+          this.pageSize=response.data.pageSize;
+          this.totalCount=response.data.totalCount;
+          this.currentPage=response.data.currentPage;
+          this.totalPages=Math.ceil(this.totalCount / this.pageSize);
+          this.showNoResults = response.data.list.length === 0 ? true : false;
+          this.dropdownStates=new Array(this.loadedListData.length).fill(false);
+          console.log(this.showNoResults);
+        }
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    })
   }
+
+goToNextPage() {
+  if (this.currentPage < this.totalPages) {
+    this.currentPage++;
+    this.loadData();
+  }
+}
+goToPreviousPage() {
+  if (this.currentPage > 1) {
+    this.currentPage--;
+    this.loadData();
+  }
+}
+
+loadActiveInactiveCount(){
+  var sub2= this.InvestorService.getTotalActiveInactive().subscribe({
+    next:(response)=>{
+      this.displayActiveCount=response.data.totalActive;
+      this.displayInactiveCount=response.data.totalInactive
+    },error:(err)=>{
+       console.log(err);
+    }
+  })
+}
 
 
   //! METHODS:
@@ -136,7 +184,7 @@ export class InvestorComponent implements OnInit, OnDestroy {
     if (event) {
       event.stopPropagation();
     }
-    
+
     //? Close all other dropdowns first, then toggle the clicked one
     this.dropdownStates = this.dropdownStates.map((state, i) => i === index ? !state : false);
   }
@@ -158,13 +206,13 @@ export class InvestorComponent implements OnInit, OnDestroy {
   }
 
   //* Setting filter of search
-  setFilter(filter: string): void {
-    this.currentFilter = this.currentFilter === filter ? '' : filter;
-  }
+  // setFilter(filter: string): void {
+  //   this.currentFilter = this.currentFilter === filter ? '' : filter;
+  // }
 
   //? MatMenu toggle (It's needed for the MatMenu dropdown but I don't remember what it does)
   hideSingleSelectionIndicator = signal(true);
-  
+
 
 
 
@@ -199,22 +247,8 @@ export class InvestorComponent implements OnInit, OnDestroy {
 
   onSaveEntity(entityData: any): void {
     console.log('Saving entity:', entityData);
-    
-    if (entityData.id) {
-      // Update existing entity
-      console.log('Updating entity with ID:', entityData.id);
-      // Here you would call your update service
-      // example:: this.entityService.update(entityData).subscribe(...)
-    } else {
-      // Add new entity
-      console.log('Adding new entity');
-      // Here you would call your create service
-      // example:: this.entityService.create(entityData).subscribe(...)
-    }
-    
-    if (this.modalMode === 'add') {
-      this.closeModal();
-    }
+    this.closeModal();
+
   }
 
   //* Activate/Deactivate Modal methods
@@ -252,7 +286,7 @@ export class InvestorComponent implements OnInit, OnDestroy {
 
   }
 
-  
+
   //* Animate statistics numbers
 
   //* Get digits array for flip animation
