@@ -29,12 +29,33 @@ export class DarkModeService {
   }
 
   private applyDarkMode(isDark: boolean): void {
+    // Apply to parent3 for app components
     const parentDiv = document.querySelector('.parent3');
     if (parentDiv) {
       if (isDark) {
         parentDiv.classList.add('dark');
       } else {
         parentDiv.classList.remove('dark');
+      }
+    }
+
+    // Apply to body for toastr and global components
+    const body = document.body;
+    if (body) {
+      if (isDark) {
+        body.classList.add('dark');
+      } else {
+        body.classList.remove('dark');
+      }
+    }
+
+    // Apply to html element
+    const html = document.documentElement;
+    if (html) {
+      if (isDark) {
+        html.classList.add('dark');
+      } else {
+        html.classList.remove('dark');
       }
     }
   }
