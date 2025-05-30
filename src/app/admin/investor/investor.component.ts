@@ -17,6 +17,7 @@ import { Investor, InvestorSearch } from '../../_models/investor';
 import { StatusLabelPipe } from '../../_shared/pipes/enum.pipe';
 import { Status } from '../../_shared/enums';
 import { ArrayDataSource } from '@angular/cdk/collections';
+
 @Component({
   selector: 'app-investor',
   imports: [
@@ -35,6 +36,7 @@ import { ArrayDataSource } from '@angular/cdk/collections';
   templateUrl: './investor.component.html',
   styleUrl: './investor.component.css'
 })
+
 export class InvestorComponent implements OnInit, OnDestroy {
 
   //* State management (Flags)
@@ -104,16 +106,15 @@ export class InvestorComponent implements OnInit, OnDestroy {
   loadedListData: Investor[] = [];
   Status = Status
 
-
   //* Constructor
   constructor(
     private InvestorService: InvestorService,
-    private darkModeService: DarkModeService
+    private darkModeService: DarkModeService,
+    private toastr: ToastrService
   ) {}
-
   ngOnInit(): void {
-    console.log("777777");
     this.loadData();
+    this.loadActiveInactiveCount();
     
     // Subscribe to dark mode changes
     this.darkModeSubscription = this.darkModeService.darkMode$.subscribe(
@@ -121,6 +122,23 @@ export class InvestorComponent implements OnInit, OnDestroy {
         this.isDarkMode = isDarkMode;
       }
     );
+
+    // Test toasts - testing
+    setTimeout(() => {
+      this.toastr.success('Welcome to Investly!', 'Success');
+    }, 1000);
+
+    setTimeout(() => {
+      this.toastr.info('Investor data loaded successfully', 'Information');
+    }, 2000);
+
+    setTimeout(() => {
+      this.toastr.warning('This is a warning message', 'Warning');
+    }, 3000);
+
+    setTimeout(() => {
+      this.toastr.error('This is an error message for testing', 'Error');
+    }, 4000);
   }
 
   ngOnDestroy(): void {
@@ -321,6 +339,19 @@ loadActiveInactiveCount(){
     this.selectedSearchType = 'name';
     console.log('Search filters cleared');
     // Implement your clear logic here
+  }
+
+  //* Handle search clear event (when X button is clicked)
+  onSearchClear(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    
+    // Check if the input was cleared (empty value)
+    if (target.value === '') {
+      console.log('test clear'); 
+      this.searchData.SearchInput = '';
+      this.currentPage = 1; // Reset to first page
+      this.searchData.pageNumber = 1;
+    }
   }
 
 }
