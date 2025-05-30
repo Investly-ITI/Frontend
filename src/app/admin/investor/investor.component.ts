@@ -18,6 +18,7 @@ import { StatusLabelPipe } from '../../_shared/pipes/enum.pipe';
 import { Status } from '../../_shared/enums';
 import { ArrayDataSource } from '@angular/cdk/collections';
 import { Gender } from '../../_shared/general';
+
 @Component({
   selector: 'app-investor',
   imports: [
@@ -36,6 +37,7 @@ import { Gender } from '../../_shared/general';
   templateUrl: './investor.component.html',
   styleUrl: './investor.component.css'
 })
+
 export class InvestorComponent implements OnInit, OnDestroy {
 
   //* State management (Flags)
@@ -75,6 +77,7 @@ export class InvestorComponent implements OnInit, OnDestroy {
     gender: null,
     status:0
   }
+  
   pageSize:number=5;
   currentPage: number = 1;
   totalCount: number = 0;
@@ -106,13 +109,12 @@ export class InvestorComponent implements OnInit, OnDestroy {
   Status = Status
   Gender=Gender
 
-
   //* Constructor
   constructor(
     private InvestorService: InvestorService,
-    private darkModeService: DarkModeService
+    private darkModeService: DarkModeService,
+    private toastr: ToastrService
   ) {}
-
   ngOnInit(): void {
     this.loadData();
     this.loadActiveInactiveCount();
@@ -123,6 +125,23 @@ export class InvestorComponent implements OnInit, OnDestroy {
         this.isDarkMode = isDarkMode;
       }
     );
+
+    // Test toasts - testing
+    setTimeout(() => {
+      this.toastr.success('Welcome to Investly!', 'Success');
+    }, 1000);
+
+    setTimeout(() => {
+      this.toastr.info('Investor data loaded successfully', 'Information');
+    }, 2000);
+
+    setTimeout(() => {
+      this.toastr.warning('This is a warning message', 'Warning');
+    }, 3000);
+
+    setTimeout(() => {
+      this.toastr.error('This is an error message for testing', 'Error');
+    }, 4000);
   }
 
 
@@ -312,7 +331,22 @@ loadActiveInactiveCount(){
   }
 
 
-   ngOnDestroy(): void {
+  //* Handle search clear event (when X button is clicked)
+  onSearchClear(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    
+    // Check if the input (empty value)
+    if (target.value === '') {
+      console.log('test clear'); 
+      this.searchData.SearchInput = '';
+      this.currentPage = 1; // Reset to first page
+      this.searchData.pageNumber = 1;
+      //+ call your function to load data unfiltered here !!!
+    }
+  }
+  
+  
+  ngOnDestroy(): void {
     this.darkModeSubscription.unsubscribe();
   }
 
