@@ -12,6 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AddUpdateComponent } from './add-update/add-update.component';
 import { InvestorService } from '../_services/investor.service';
+import { DarkModeService } from '../_services/dark-mode.service';
 import { Investor, InvestorSearch } from '../../_models/investor';
 import { StatusLabelPipe } from '../../_shared/pipes/enum.pipe';
 import { Status } from '../../_shared/enums';
@@ -34,15 +35,19 @@ import { ArrayDataSource } from '@angular/cdk/collections';
   templateUrl: './investor.component.html',
   styleUrl: './investor.component.css'
 })
-export class InvestorComponent implements OnInit {
+export class InvestorComponent implements OnInit, OnDestroy {
 
   //* State management (Flags)
-  isDarkMode: boolean = false;
+  isDarkMode: boolean = true;
   isLoading: boolean = false;
   isLoading2: boolean = true;
   showNoResults: boolean = false;
   dropdownStates: boolean[] = [false]; 
   animationComplete: boolean = true;
+  isAdvancedSearchOpen: boolean = false; // Advanced search dropdown state
+
+  //* Subscription for dark mode
+  private darkModeSubscription: Subscription = new Subscription();
 
   //* Modal state
   isModalOpen: boolean = false;
@@ -72,6 +77,21 @@ export class InvestorComponent implements OnInit {
   totalCount: number = 0;
   totalPages: number = 0;
 
+  //* Advanced search filters
+  selectedGovernomate: string = '';
+  selectedGender: string = '';
+  selectedSearchType: string = 'name'; // 'name' or 'ssn'
+  searchQuery: string = '';
+
+  //* Dropdown data
+  governorates: string[] = [
+    'Cairo',
+    'Alexandria',
+    'Giza'
+  ];
+
+  genders: string[] = ['Male', 'Female'];
+  
   //* Generic entity configuration
   entityName: string = 'Investor';
   entityNamePlural: string = 'Investors';
@@ -86,13 +106,27 @@ export class InvestorComponent implements OnInit {
 
 
   //* Constructor
-  constructor(private InvestorService: InvestorService) { }
+  constructor(
+    private InvestorService: InvestorService,
+    private darkModeService: DarkModeService
+  ) {}
 
   ngOnInit(): void {
+    console.log("777777");
     this.loadData();
-    this.loadActiveInactiveCount();
+    
+    // Subscribe to dark mode changes
+    this.darkModeSubscription = this.darkModeService.darkMode$.subscribe(
+      (isDarkMode) => {
+        this.isDarkMode = isDarkMode;
+      }
+    );
   }
 
+  ngOnDestroy(): void {
+    // Clean up subscription
+    this.darkModeSubscription.unsubscribe();
+  }
 
   loadData() {
     this.searchData.pageNumber=this.currentPage;
@@ -145,11 +179,6 @@ loadActiveInactiveCount(){
 
   //! METHODS:
 
-  //* Toggle dark mode
-  toggleDarkMode(): void {
-    this.isDarkMode = !this.isDarkMode;
-  }
-
   //* Toggle dropdown
   toggleDropdown(index: number, event?: Event) {
     if (event) {
@@ -164,10 +193,15 @@ loadActiveInactiveCount(){
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
     const target = event.target as HTMLElement;
-    const dropdown = target.closest('.dropdown');
-
-    if (!dropdown) {
+    const actionDropdown = target.closest('.action-dropdown');
+    const advancedSearch = target.closest('.advanced-search-dropdown');
+    
+    if (!actionDropdown) {
       this.dropdownStates = this.dropdownStates.map(() => false);
+    }
+    
+    if (!advancedSearch) {
+      this.isAdvancedSearchOpen = false;
     }
   }
 
@@ -258,6 +292,35 @@ loadActiveInactiveCount(){
   //* Get digits array for flip animation
   getDigitsArray(number: number): string[] {
     return number.toString().split('');
+  }
+
+  //* Toggle advanced search dropdown
+  toggleAdvancedSearch(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.isAdvancedSearchOpen = !this.isAdvancedSearchOpen;
+  }
+
+  //* Apply advanced search filters
+  applyAdvancedSearch(): void {
+    console.log('Applying search filters:', {
+      searchType: this.selectedSearchType,
+      searchQuery: this.searchQuery,
+      governorate: this.selectedGovernomate,
+      gender: this.selectedGender
+    });
+    // Implement your search logic here
+    this.isAdvancedSearchOpen = false;
+  }
+
+  //* Clear advanced search filters
+  clearAdvancedSearch(): void {
+    this.selectedGovernomate = '';
+    this.selectedGender = '';
+    this.selectedSearchType = 'name';
+    console.log('Search filters cleared');
+    // Implement your clear logic here
   }
 
 }

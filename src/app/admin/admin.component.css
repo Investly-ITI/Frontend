@@ -243,6 +243,8 @@
   width: calc(100% - 280px);
   left: 280px;
   transition: .3s ease;
+  height: 100vh;
+  overflow: hidden;
 }
 
 :host #sidebar.hide ~ #content {
@@ -265,6 +267,7 @@
   top: 0;
   left: 0;
   z-index: 1000;
+  flex-shrink: 0;
 }
 
 :host #content nav::before {
@@ -465,4 +468,13 @@
     padding-left: 10px;
     padding-right: 10px;
   }
+}
+
+/* ========================================
+   CHILD COMPONENT CONTAINER
+======================================== */
+:host .Child {
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }

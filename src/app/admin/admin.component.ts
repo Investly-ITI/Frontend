@@ -3,6 +3,7 @@ import { RouterLink, RouterModule, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotificationDropDownComponent } from "./_core/notification-drop-down/notification-drop-down.component";
+import { DarkModeService } from './_services/dark-mode.service';
 
 
 @Component({
@@ -21,7 +22,7 @@ export class AdminComponent implements OnInit {
 
 
   constructor(
-
+    private darkModeService: DarkModeService
   ){}
 
 
@@ -57,13 +58,11 @@ export class AdminComponent implements OnInit {
     const switchMode = document.getElementById('switch-mode') as HTMLInputElement;
 
     if (switchMode) {
-      const parentDiv = document.querySelector('.parent3');
-      switchMode.addEventListener('change', function (this: HTMLInputElement) {
-        if (this.checked) {
-          parentDiv?.classList.add('dark');
-        } else {
-          parentDiv?.classList.remove('dark');
-        }
+      // Set initial state based on service
+      switchMode.checked = this.darkModeService.isDarkMode();
+      
+      switchMode.addEventListener('change', () => {
+        this.darkModeService.toggleDarkMode();
       });
     }
 
