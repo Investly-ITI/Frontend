@@ -28,3 +28,19 @@ export class User {
 
 }
 
+export class UserLogin{
+    constructor(
+        public email:string,
+        public password:string
+    ){}
+}
+
+export class LoggedInUser{
+    constructor(
+
+        public name:string,
+        public email:string,
+        public userType:UserType
+    ){}
+}
+
