@@ -3,10 +3,12 @@ import { AdminComponent } from './admin/admin.component';
 import { InvestorComponent } from './admin/investor/investor.component';
 import { LoginComponent } from './account/login/login.component';
 import { LoginStaffComponent } from './account/login-staff/login-staff.component';
+import { SignupComponent } from './account/signup/signup.component';
 
 export const routes: Routes = [
 
    {path:'login', component: LoginComponent, title: 'Login - Investly'},
+   {path:'signup', component: SignupComponent, title: 'Sign Up - Investly'},
    {path:'staff-login', component: LoginStaffComponent, title: 'Staff Login - Investly'}, // Using existing component for now
    
    
