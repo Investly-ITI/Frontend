@@ -1,0 +1,634 @@
+<!-- ========================================
+     SIGNUP PAGE CONTAINER
+======================================== -->
+<div class="signup-container">
+  <!-- ========================================
+       BACKGROUND CAROUSEL & BRANDING
+  ======================================== -->
+  <div class="signup-background">
+    <!-- Carousel Background -->
+    <div class="carousel-container">
+      <div class="carousel-slide active" 
+           style="background-image: url('https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');">
+      </div>
+      <div class="carousel-slide" 
+           style="background-image: url('https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');">
+      </div>
+      <div class="carousel-slide" 
+           style="background-image: url('https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');">
+      </div>
+      <div class="carousel-slide" 
+           style="background-image: url('https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');">
+      </div>
+      
+      <!-- Gradient Overlay -->
+      <div class="gradient-overlay"></div>
+      
+      <!-- Floating Elements -->
+      <div class="floating-elements">
+        <div class="floating-icon" style="animation-delay: 0s;"><i class='bx bx-bulb'></i></div>
+        <div class="floating-icon" style="animation-delay: 4s;"><i class='bx bx-trending-up'></i></div>
+        <div class="floating-icon" style="animation-delay: 6s;"><i class='bx bx-dollar-circle'></i></div>
+        <div class="floating-icon" style="animation-delay: 8s;"><i class='bx bx-rocket'></i></div>
+      </div>
+    </div>
+    
+    <!-- Brand Section -->
+    <div class="signup-brand">
+      <div class="brand-container">
+        <img src="Logo-Investly-Cut.png" alt="Investly">
+        <span class="brand-text">nvestly</span>
+      </div>
+      <div class="brand-tagline">
+        <p>Where Ideas Meet Capital</p>
+        <div class="tagline-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       SIGNUP FORM CARD
+  ======================================== -->
+  <div class="signup-card">
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+      </div>
+      <div class="progress-text">
+        Step {{ currentStep }} of {{ userType === 'founder' ? 3 : 4 }}
+      </div>
+    </div>
+
+    <!-- Form Container with Transitions -->
+    <div class="signup-form-container">
+
+      <!-- ========================================
+           STEP 1: USER TYPE SELECTION
+      ======================================== -->
+      <div *ngIf="currentStep === 1" class="step-content" id="step-1">
+        <div class="step-header">
+          <h1>Join Our Community</h1>
+          <p>Choose your role to get started on your investment journey</p>
+        </div>
+
+        <form [formGroup]="typeSelectionForm" class="user-type-form">
+          <div class="user-type-options">
+            <label class="user-type-card" [class.selected]="typeSelectionForm.get('userType')?.value === 'investor'">
+              <input type="radio" formControlName="userType" value="investor">
+              <div class="card-content">
+                <div class="card-icon">
+                  <i class='bx bx-trending-up'></i>
+                </div>
+                <div class="card-info">
+                  <h3>Investor</h3>
+                  <p>Fund innovative startups and grow your portfolio with promising ventures</p>
+                  <ul>
+                    <li>Access to curated investment opportunities</li>
+                    <li>Real-time investment monitoring and insights</li>
+                    <li>Connect with promising founders</li>
+                  </ul>
+                </div>
+              </div>
+            </label>
+
+            <label class="user-type-card" [class.selected]="typeSelectionForm.get('userType')?.value === 'founder'">
+              <input type="radio" formControlName="userType" value="founder">
+              <div class="card-content">
+                <div class="card-icon">
+                  <i class='bx bx-rocket'></i>
+                </div>
+                <div class="card-info">
+                  <h3>Founder</h3>
+                  <p>Raise capital for your startup and connect with investors who believe in your vision</p>
+                  <ul>
+                    <li>Pitch to verified investors</li>
+                    <li>Access to funding opportunities</li>
+                    <li>Mentorship and guidance</li>
+                  </ul>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <div *ngIf="typeSelectionForm.get('userType')?.invalid && typeSelectionForm.get('userType')?.touched" class="error-message">
+            Please select your role to continue
+          </div>
+        </form>
+      </div>
+
+      <!-- ========================================
+           STEP 2: PERSONAL INFORMATION
+      ======================================== -->
+      <div *ngIf="currentStep === 2" class="step-content" id="step-2">
+        <div class="step-header">
+          <h1>Personal Information</h1>
+          <p>Tell us about yourself to create your account</p>
+        </div>
+
+        <form [formGroup]="personalInfoForm" class="personal-info-form">
+          <!-- Name Fields -->
+          <div class="form-row">
+            <div class="form-group half">
+              <label for="firstName">First Name:</label>
+              <div class="input-container">
+                <i class='bx bx-user'></i>
+                <input 
+                  type="text" 
+                  id="firstName" 
+                  class="form-input" 
+                  formControlName="firstName"
+                  placeholder="Enter your first name"
+                  [class.error]="personalInfoForm.get('firstName')?.invalid && personalInfoForm.get('firstName')?.touched"
+                />
+              </div>
+              <div *ngIf="personalInfoForm.get('firstName')?.invalid && personalInfoForm.get('firstName')?.touched" class="error-message">
+                <span *ngIf="personalInfoForm.get('firstName')?.errors?.['required']">First name is required</span>
+                <span *ngIf="personalInfoForm.get('firstName')?.errors?.['minlength']">Must be at least 2 characters</span>
+              </div>
+            </div>
+
+            <div class="form-group half">
+              <label for="lastName">Last Name:</label>
+              <div class="input-container">
+                <i class='bx bx-user'></i>
+                <input 
+                  type="text" 
+                  id="lastName" 
+                  class="form-input" 
+                  formControlName="lastName"
+                  placeholder="Enter your last name"
+                  [class.error]="personalInfoForm.get('lastName')?.invalid && personalInfoForm.get('lastName')?.touched"
+                />
+              </div>
+              <div *ngIf="personalInfoForm.get('lastName')?.invalid && personalInfoForm.get('lastName')?.touched" class="error-message">
+                <span *ngIf="personalInfoForm.get('lastName')?.errors?.['required']">Last name is required</span>
+                <span *ngIf="personalInfoForm.get('lastName')?.errors?.['minlength']">Must be at least 2 characters</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Email and Date of Birth -->
+          <div class="form-row">
+            <div class="form-group half">
+              <label for="email">Email Address:</label>
+              <div class="input-container">
+                <i class='bx bx-envelope'></i>
+                <input 
+                  type="email" 
+                  id="email" 
+                  class="form-input" 
+                  formControlName="email"
+                  placeholder="Enter your email"
+                  [class.error]="personalInfoForm.get('email')?.invalid && personalInfoForm.get('email')?.touched"
+                />
+              </div>
+              <div *ngIf="personalInfoForm.get('email')?.invalid && personalInfoForm.get('email')?.touched" class="error-message">
+                <span *ngIf="personalInfoForm.get('email')?.errors?.['required']">Email is required</span>
+                <span *ngIf="personalInfoForm.get('email')?.errors?.['email']">Please enter a valid email</span>
+              </div>
+            </div>
+
+            <div class="form-group half">
+              <label for="dateOfBirth">Date of Birth:</label>
+              <div class="input-container">
+                <i class='bx bx-calendar'></i>
+                <input 
+                  type="date" 
+                  id="dateOfBirth" 
+                  class="form-input" 
+                  formControlName="dateOfBirth"
+                  [class.error]="personalInfoForm.get('dateOfBirth')?.invalid && personalInfoForm.get('dateOfBirth')?.touched"
+                />
+              </div>
+              <div *ngIf="personalInfoForm.get('dateOfBirth')?.invalid && personalInfoForm.get('dateOfBirth')?.touched" class="error-message">
+                <span *ngIf="personalInfoForm.get('dateOfBirth')?.errors?.['required']">Date of birth is required</span>
+                <span *ngIf="personalInfoForm.get('dateOfBirth')?.errors?.['ageRestriction']">You must be 21 or older to register</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label for="phoneNumber">Phone Number:</label>
+            <div class="phone-input-container">
+              <select class="country-code-select" formControlName="countryCode">
+                <option *ngFor="let country of countryCodes" [value]="country.code">
+                  {{country.code}} ({{country.country}})
+                </option>
+              </select>
+              <div class="input-container phone-input">
+                <i class='bx bx-phone'></i>
+                <input 
+                  type="tel" 
+                  id="phoneNumber" 
+                  class="form-input" 
+                  formControlName="phoneNumber"
+                  placeholder="Enter your phone number"
+                  [class.error]="personalInfoForm.get('phoneNumber')?.invalid && personalInfoForm.get('phoneNumber')?.touched"
+                />
+              </div>
+            </div>
+            <div *ngIf="personalInfoForm.get('phoneNumber')?.invalid && personalInfoForm.get('phoneNumber')?.touched" class="error-message">
+              <span *ngIf="personalInfoForm.get('phoneNumber')?.errors?.['required']">Phone number is required</span>
+              <span *ngIf="personalInfoForm.get('phoneNumber')?.errors?.['pattern']">Please enter a valid phone number (8-15 digits)</span>
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="form-row">
+            <div class="form-group half">
+              <label for="government">Government:</label>
+              <div class="input-container" 
+                   [class.error]="personalInfoForm.get('government')?.invalid && personalInfoForm.get('government')?.touched">
+                <i class='bx bx-map'></i>
+                <select 
+                  class="form-input" 
+                  id="government"
+                  formControlName="government"
+                  (change)="onGovernorateChange($any($event.target).value)"
+                  [class.error]="personalInfoForm.get('government')?.invalid && personalInfoForm.get('government')?.touched">
+                  <option value="">Select Government/State</option>
+                  <option *ngFor="let gov of governorates" [value]="gov">{{ gov }}</option>
+                </select>
+              </div>
+              <div *ngIf="personalInfoForm.get('government')?.invalid && personalInfoForm.get('government')?.touched" class="error-message">
+                Government/State is required
+              </div>
+            </div>
+
+            <div class="form-group half">
+              <label for="city">City:</label>
+              <div class="input-container" 
+                   [class.error]="personalInfoForm.get('city')?.invalid && personalInfoForm.get('city')?.touched">
+                <i class='bx bx-building'></i>
+                <select 
+                  class="form-input" 
+                  id="city"
+                  formControlName="city"
+                  [disabled]="!selectedGovernorate"
+                  [class.error]="personalInfoForm.get('city')?.invalid && personalInfoForm.get('city')?.touched">
+                  <option value="">{{ selectedGovernorate ? 'Select City' : 'Select Government First' }}</option>
+                  <option *ngFor="let city of availableCities" [value]="city">{{ city }}</option>
+                </select>
+              </div>
+              <div *ngIf="personalInfoForm.get('city')?.invalid && personalInfoForm.get('city')?.touched" class="error-message">
+                City is required
+              </div>
+            </div>
+          </div>
+
+          <!-- Street Address - Full Width Row -->
+          <div class="form-group">
+            <label for="street">Street Address:</label>
+            <div class="input-container">
+              <i class='bx bx-map'></i>
+              <input 
+                type="text" 
+                id="street" 
+                class="form-input" 
+                formControlName="street"
+                placeholder="Enter your full street address"
+                [class.error]="personalInfoForm.get('street')?.invalid && personalInfoForm.get('street')?.touched"
+              />
+            </div>
+            <div *ngIf="personalInfoForm.get('street')?.invalid && personalInfoForm.get('street')?.touched" class="error-message">
+              Street address is required
+            </div>
+          </div>
+
+          <!-- National ID and Gender -->
+          <div class="form-row">
+            <div class="form-group half">
+              <label for="nationalId">National ID:</label>
+              <div class="input-container">
+                <i class='bx bx-id-card'></i>
+                <input 
+                  type="text" 
+                  id="nationalId" 
+                  class="form-input" 
+                  formControlName="nationalId"
+                  placeholder="Enter your national ID"
+                  [class.error]="personalInfoForm.get('nationalId')?.invalid && personalInfoForm.get('nationalId')?.touched"
+                />
+              </div>
+              <div *ngIf="personalInfoForm.get('nationalId')?.invalid && personalInfoForm.get('nationalId')?.touched" class="error-message">
+                <span *ngIf="personalInfoForm.get('nationalId')?.errors?.['required']">National ID is required</span>
+                <span *ngIf="personalInfoForm.get('nationalId')?.errors?.['pattern']">National ID must be 14 digits</span>
+              </div>
+            </div>
+
+            <div class="form-group half">
+              <label for="gender">Gender:</label>
+              <div class="input-container">
+                <i class='bx bx-user-circle'></i>
+                <select 
+                  id="gender" 
+                  class="form-input" 
+                  formControlName="gender"
+                  [class.error]="personalInfoForm.get('gender')?.invalid && personalInfoForm.get('gender')?.touched"
+                >
+                  <option value="">Select your gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+              <div *ngIf="personalInfoForm.get('gender')?.invalid && personalInfoForm.get('gender')?.touched" class="error-message">
+                Gender selection is required
+              </div>
+            </div>
+          </div>
+
+          <!-- Password Fields -->
+          <div class="form-row">
+            <div class="form-group half">
+              <label for="password">Password:</label>
+              <div class="input-container">
+                <i class='bx bx-lock'></i>
+                <input 
+                  type="password" 
+                  id="password" 
+                  class="form-input" 
+                  formControlName="password"
+                  placeholder="Create a strong password"
+                  [class.error]="personalInfoForm.get('password')?.invalid && personalInfoForm.get('password')?.touched"
+                />
+              </div>
+              <div *ngIf="personalInfoForm.get('password')?.invalid && personalInfoForm.get('password')?.touched" class="error-message">
+                <span *ngIf="personalInfoForm.get('password')?.errors?.['required']">Password is required</span>
+                <span *ngIf="personalInfoForm.get('password')?.errors?.['minlength']">Password must be at least 8 characters</span>
+                <span *ngIf="personalInfoForm.get('password')?.errors?.['passwordStrength']">Password must contain uppercase, lowercase, number, and special character</span>
+              </div>
+            </div>
+
+            <div class="form-group half">
+              <label for="confirmPassword">Confirm Password:</label>
+              <div class="input-container">
+                <i class='bx bx-lock-alt'></i>
+                <input 
+                  type="password" 
+                  id="confirmPassword" 
+                  class="form-input" 
+                  formControlName="confirmPassword"
+                  placeholder="Confirm your password"
+                  [class.error]="personalInfoForm.get('confirmPassword')?.invalid && personalInfoForm.get('confirmPassword')?.touched"
+                />
+              </div>
+              <div *ngIf="personalInfoForm.get('confirmPassword')?.invalid && personalInfoForm.get('confirmPassword')?.touched" class="error-message">
+                <span *ngIf="personalInfoForm.get('confirmPassword')?.errors?.['required']">Please confirm your password</span>
+              </div>
+              <div *ngIf="personalInfoForm.errors?.['passwordMismatch'] && personalInfoForm.get('confirmPassword')?.touched" class="error-message">
+                Passwords do not match
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- ========================================
+           STEP 3: DOCUMENT UPLOAD
+      ======================================== -->
+      <div *ngIf="currentStep === 3" class="step-content" id="step-3">
+        <div class="step-header">
+          <h1>Document Upload</h1>
+          <p>Upload your documents for verification</p>
+        </div>
+
+        <form [formGroup]="documentsForm" class="documents-form">
+          <!-- Profile Picture -->
+          <div class="upload-section">
+            <h3><i class='bx bx-user'></i> Profile Picture</h3>
+            <div class="upload-card">
+              <div class="upload-area" [class.has-file]="profilePicture">
+                <input 
+                  type="file" 
+                  id="profilePicture" 
+                  (change)="onFileSelect($event, 'profile')"
+                  accept="image/*"
+                  class="file-input"
+                />
+                <label for="profilePicture" class="upload-label">
+                  <i class='bx bx-cloud-upload'></i>
+                  <span *ngIf="!profilePicture">Click to upload profile picture</span>
+                  <span *ngIf="profilePicture" class="file-name">{{ profilePicture.name }}</span>
+                  <small>JPG, PNG, GIF up to 5MB</small>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- National ID Card -->
+          <div class="upload-section">
+            <h3><i class='bx bx-id-card'></i> National ID Card</h3>
+            <div class="upload-row">
+              <!-- Front Side -->
+              <div class="upload-card half">
+                <h4>Front Side</h4>
+                <div class="upload-area" [class.has-file]="nationalCardFront">
+                  <input 
+                    type="file" 
+                    id="cardFront" 
+                    (change)="onFileSelect($event, 'cardFront')"
+                    accept="image/*"
+                    class="file-input"
+                  />
+                  <label for="cardFront" class="upload-label">
+                    <i class='bx bx-cloud-upload'></i>
+                    <span *ngIf="!nationalCardFront">Upload front side</span>
+                    <span *ngIf="nationalCardFront" class="file-name">{{ nationalCardFront.name }}</span>
+                    <small>JPG, PNG, GIF up to 5MB</small>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Back Side -->
+              <div class="upload-card half">
+                <h4>Back Side</h4>
+                <div class="upload-area" [class.has-file]="nationalCardBack">
+                  <input 
+                    type="file" 
+                    id="cardBack" 
+                    (change)="onFileSelect($event, 'cardBack')"
+                    accept="image/*"
+                    class="file-input"
+                  />
+                  <label for="cardBack" class="upload-label">
+                    <i class='bx bx-cloud-upload'></i>
+                    <span *ngIf="!nationalCardBack">Upload back side</span>
+                    <span *ngIf="nationalCardBack" class="file-name">{{ nationalCardBack.name }}</span>
+                    <small>JPG, PNG, GIF up to 5MB</small>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upload Guidelines -->
+          <div class="upload-guidelines">
+            <h4>Upload Guidelines:</h4>
+            <ul>
+              <li>Ensure documents are clear and readable</li>
+              <li>All corners of the ID card should be visible</li>
+              <li>Avoid glare or shadows on the documents</li>
+              <li>Accepted formats: JPG, PNG, GIF</li>
+              <li>Maximum file size: 5MB per image</li>
+            </ul>
+          </div>
+        </form>
+      </div>
+
+      <!-- ========================================
+           STEP 4: INVESTOR PREFERENCES (Investors Only)
+      ======================================== -->
+      <div *ngIf="currentStep === 4 && userType === 'investor'" class="step-content" id="step-4">
+        <div class="step-header">
+          <h1>Investment Preferences</h1>
+          <p>Tell us about your investment goals and preferences</p>
+        </div>
+
+        <form [formGroup]="investorPreferencesForm" class="investor-preferences-form">
+          <!-- Investment Type -->
+          <div class="preference-section">
+            <h3>How would you like to participate?</h3>
+            <div class="investment-type-options">
+              <label *ngFor="let type of investmentTypes" 
+                     class="investment-type-card" 
+                     [class.selected]="investorPreferencesForm.get('investmentType')?.value === type.value">
+                <input type="radio" [value]="type.value" formControlName="investmentType" (change)="onInvestmentTypeChange()">
+                <div class="card-content">
+                  <h4>{{ type.label }}</h4>
+                  <p>{{ type.description }}</p>
+                </div>
+              </label>
+            </div>
+            <div *ngIf="investorPreferencesForm.get('investmentType')?.invalid && investorPreferencesForm.get('investmentType')?.touched" class="error-message">
+              Please select your investment type
+            </div>
+          </div>
+
+          <!-- Investment Stages -->
+          <div class="preference-section">
+            <h3>Which stages are you interested in? (Select multiple)</h3>
+            <div class="investment-stages-grid">
+              <label *ngFor="let stage of investmentStages" 
+                     class="stage-card" 
+                     [class.selected]="isStageSelected(stage.value)">
+                <input type="checkbox" [value]="stage.value" (change)="onStageToggle(stage.value)">
+                <div class="card-content">
+                  <h4>{{ stage.label }}</h4>
+                  <p>{{ stage.description }}</p>
+                </div>
+              </label>
+            </div>
+            <div *ngIf="investorPreferencesForm.get('investmentStages')?.invalid && investorPreferencesForm.get('investmentStages')?.touched" class="error-message">
+              Please select at least one investment stage
+            </div>
+          </div>
+
+          <!-- Funding Range (shown only if funding or both is selected) -->
+          <div *ngIf="showFundingRange" class="preference-section">
+            <h3>What's your preferred funding range?</h3>
+            <div class="funding-range-slider">
+              <div class="range-values">
+                <span class="min-value">{{formatCurrency(selectedFundingMin)}}</span>
+                <span class="range-separator">-</span>
+                <span class="max-value">{{formatCurrency(selectedFundingMax)}}</span>
+              </div>
+              
+              <div class="dual-range-container">
+                <div class="range-track">
+                  <div class="range-fill" 
+                       [style.left.%]="((selectedFundingMin - minFunding) / (maxFunding - minFunding)) * 100"
+                       [style.width.%]="((selectedFundingMax - selectedFundingMin) / (maxFunding - minFunding)) * 100">
+                  </div>
+                </div>
+                
+                <input 
+                  type="range" 
+                  class="range-slider range-min"
+                  [min]="minFunding" 
+                  [max]="maxFunding" 
+                  [value]="selectedFundingMin"
+                  (input)="onFundingMinChange(+$any($event.target).value)"
+                  step="500"
+                />
+                
+                <input 
+                  type="range" 
+                  class="range-slider range-max"
+                  [min]="minFunding" 
+                  [max]="maxFunding" 
+                  [value]="selectedFundingMax"
+                  (input)="onFundingMaxChange(+$any($event.target).value)"
+                  step="500"
+                />
+              </div>
+              
+              <div class="range-indicators">
+                <div *ngFor="let range of fundingRanges" 
+                     class="range-indicator"
+                     [style.left.%]="getIndicatorPosition(range.value)">
+                  <div class="indicator-dot"></div>
+                  <span class="indicator-label">{{range.label}}</span>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="investorPreferencesForm.get('fundingRange')?.invalid && investorPreferencesForm.get('fundingRange')?.touched" class="error-message">
+              Please select your funding range
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================
+         NAVIGATION BUTTONS
+    ======================================== -->
+    <div class="navigation-buttons">
+      <button 
+        type="button" 
+        class="btn btn-secondary" 
+        (click)="previousStep()"
+        [disabled]="currentStep === 1"
+      >
+        <i class='bx bx-chevron-left'></i>
+        Previous
+      </button>
+
+      <button 
+        type="button" 
+        class="btn btn-primary" 
+        (click)="isLastStep ? onSubmit() : nextStep()"
+        [disabled]="isLoading"
+      >
+        <span *ngIf="!isLoading">
+          {{ isLastStep ? 'Finish' : 'Next' }}
+          <i class='bx' [class.bx-check]="isLastStep" [class.bx-chevron-right]="!isLastStep"></i>
+        </span>
+        <span *ngIf="isLoading" class="loading-spinner">
+          <i class='bx bx-loader-alt'></i>
+          Processing...
+        </span>
+      </button>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="signup-footer">
+      <p>Already have an account? <a routerLink="/login" class="login-link">Sign in here</a></p>
+    </div>
+  </div>
+
+  <!-- ========================================
+       DARK MODE TOGGLE
+  ======================================== -->
+  <div class="theme-toggle">
+    <input type="checkbox" id="theme-switch" [checked]="isDarkMode" (change)="toggleTheme()">
+    <label for="theme-switch" class="switch-label">
+      <span class="switch-slider"></span>
+    </label>
+  </div>
+</div> 
