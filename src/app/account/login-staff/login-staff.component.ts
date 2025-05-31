@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../_services/auth.service';
+import { UserLogin } from '../../_models/user';
+import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
+import { JwtService } from '../../_services/jwt.service';
 
 @Component({
   selector: 'app-login-staff',
@@ -13,8 +18,17 @@ export class LoginStaffComponent implements OnInit {
   showPassword = false;
   isLoading = false;
   isDarkMode = false;
+  loginData: UserLogin = {
+    email: "",
+    password: ""
+  }
 
-  constructor(private formBuilder: FormBuilder) {}
+  constructor(private formBuilder: FormBuilder
+    , private auth: AuthService
+    , private toastr: ToastrService
+    , private router: Router
+    , private jwt:JwtService
+  ) { }
 
   ngOnInit(): void {
     this.initializeForm();
@@ -46,19 +60,19 @@ export class LoginStaffComponent implements OnInit {
     this.applyTheme();
     localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
   }
-  
+
   private applyTheme(): void {
     const body = document.body;
-    
+
     // Add transition class for smooth animation
     body.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-    
+
     if (this.isDarkMode) {
       body.classList.add('dark');
     } else {
       body.classList.remove('dark');
     }
-    
+
     // Remove transition after animation completes to avoid performance issues
     setTimeout(() => {
       body.style.transition = '';
@@ -68,13 +82,24 @@ export class LoginStaffComponent implements OnInit {
   onSubmit(): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
-      
-      // Simulate API call
-      setTimeout(() => {
-        console.log('Staff Login form submitted:', this.loginForm.value);
-        this.isLoading = false;
-        // Here you would call an authentication service for staff
-      }, 2000);
+      this.loginData = { ...this.loginForm.value }
+      var sub = this.auth.login(this.loginData).subscribe({
+        next: (response) => {
+          if (response.isSuccess) {
+            this.toastr.success(response.message, "Success");
+            this.jwt.saveToken(response.data);
+            
+            setTimeout(() => {
+              this.router.navigate(['admin/investor']);
+            }, 1500);
+
+          } else {
+            this.toastr.error(response.message, "Error");
+          }
+        },error:(err)=>{
+          this.toastr.error("something went wrong","Error");
+        }
+      })
     } else {
       // Mark all fields as touched to show validation errors
       Object.keys(this.loginForm.controls).forEach(key => {
