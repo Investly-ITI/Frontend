@@ -1,0 +1,98 @@
+<!-- ========================================
+     LOGIN PAGE CONTAINER
+======================================== -->
+<div class="login-container">
+  <!-- Background Pattern -->
+  <div class="background-pattern"></div>
+  
+  <!-- Theme Toggle -->
+  <div class="theme-toggle">
+    <input type="checkbox" id="theme-switch" [checked]="isDarkMode" (change)="toggleTheme()">
+    <label for="theme-switch" class="switch-label">
+      <span class="switch-slider"></span>
+    </label>
+  </div>
+
+  <!-- Main Login Card -->
+  <div class="login-card">
+    <!-- Brand Section -->
+    <div class="brand-section">
+      <div class="logo-container">
+        <img src="Logo-Investly-Cut.png" alt="Investly">
+        <h1 class="brand-title">nvestly</h1>
+      </div>
+      <p class="brand-subtitle">Staff Login!</p>
+    </div>
+
+    <!-- Login Form -->
+    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <!-- Email Field -->
+      <div class="form-group">
+        <div class="input-wrapper" [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+          <input 
+            type="email" 
+            id="email" 
+            class="form-input" 
+            formControlName="email"
+            placeholder="Email address"
+            autocomplete="email"
+          />
+          <label for="email" class="form-label">Email</label>
+          <i class='bx bx-envelope input-icon'></i>
+        </div>
+        <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="error-message">
+          <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</span>
+          <span *ngIf="loginForm.get('email')?.errors?.['email']">Please enter a valid email</span>
+        </div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <div class="input-wrapper" [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+          <input 
+            [type]="showPassword ? 'text' : 'password'" 
+            id="password" 
+            class="form-input" 
+            formControlName="password"
+            placeholder="Password"
+            autocomplete="current-password"
+          />
+          <label for="password" class="form-label">Password</label>
+          <i class='bx bx-lock input-icon'></i>
+          <button 
+            type="button" 
+            class="password-toggle" 
+            (click)="togglePassword()"
+            tabindex="-1"
+          >
+            <i [class]="showPassword ? 'bx bx-hide' : 'bx bx-show'"></i>
+          </button>
+        </div>
+        <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error-message">
+          <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required</span>
+          <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters</span>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button 
+        type="submit" 
+        class="submit-btn"
+        [disabled]="loginForm.invalid || isLoading"
+      >
+        <span *ngIf="!isLoading" class="btn-content">
+          <span>Sign In</span>
+          <i class='bx bx-right-arrow-alt'></i>
+        </span>
+        <span *ngIf="isLoading" class="loading-content">
+          <i class='bx bx-loader-alt'></i>
+          <span>Signing in...</span>
+        </span>
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <div class="login-footer">
+    </div>
+  </div>
+</div>
