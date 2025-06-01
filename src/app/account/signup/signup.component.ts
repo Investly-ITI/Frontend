@@ -191,7 +191,7 @@ export class SignupComponent implements OnInit, OnDestroy {
     // Step 4: Investor preferences (only for investors)
     this.investorPreferencesForm = this.formBuilder.group({
       investmentType: ['', Validators.required],
-      investmentStages: [[], Validators.required],
+      investmentStages: [[], this.arrayRequiredValidator],
       fundingRange: [`${this.selectedFundingMin}-${this.selectedFundingMax}`]
     });
   }
@@ -232,6 +232,12 @@ export class SignupComponent implements OnInit, OnDestroy {
     if (!password || !confirmPassword) return null;
     
     return password.value === confirmPassword.value ? null : { passwordMismatch: true };
+  }
+
+  // Custom validator for investment stages array
+  private arrayRequiredValidator(control: any) {
+    const value = control.value;
+    return value && Array.isArray(value) && value.length > 0 ? null : { required: true };
   }
 
   private checkDarkMode(): void {
@@ -422,7 +428,7 @@ export class SignupComponent implements OnInit, OnDestroy {
     if (this.validateCurrentStep()) {
       this.isLoading = true;
       
-      // Simulate service ccalling
+      // Simulate service calling
       setTimeout(() => {
         console.log('Registration completed:', {
           userType: this.userType,
@@ -435,9 +441,32 @@ export class SignupComponent implements OnInit, OnDestroy {
           investorPreferences: this.userType === 'investor' ? this.investorPreferencesForm.value : null
         });
         
-        this.isLoading = false;
-        // Navigate to login or dashboard !
+        this.isLoading = false;        // Navigate to login or dashboard !
       }, 2000);
+    } else {
+      // Show specific error message based on current step
+      let errorMessage = '';
+      switch (this.currentStep) {
+        case 3:
+          if (!this.profilePicture) errorMessage += 'Please upload your profile picture. ';
+          if (!this.nationalCardFront) errorMessage += 'Please upload the front of your national ID. ';
+          if (!this.nationalCardBack) errorMessage += 'Please upload the back of your national ID. ';
+          break;
+        case 4:
+          if (this.userType === 'investor') {
+            const investmentType = this.investorPreferencesForm.get('investmentType')?.value;
+            const stages = this.investorPreferencesForm.get('investmentStages')?.value;
+            if (!investmentType) errorMessage += 'Please select your investment type. ';
+            if (!stages || stages.length === 0) errorMessage += 'Please select at least one investment stage. ';
+          }
+          break;
+        default:
+          errorMessage = 'Please fill in all required fields.';
+      }
+      
+      if (errorMessage) {
+        alert(errorMessage);
+      }
     }
   }
 
