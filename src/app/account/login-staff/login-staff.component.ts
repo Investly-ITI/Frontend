@@ -84,12 +84,11 @@ export class LoginStaffComponent implements OnInit {
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.loginData = { ...this.loginForm.value }
-      var sub = this.auth.login(this.loginData).subscribe({
+      var sub = this.jwt.generateToken(this.loginData).subscribe({
         next: (response) => {
           if (response.isSuccess) {
             this.toastr.success(response.message, "Success");
-            this.jwt.saveToken(response.data);
-            
+            this.auth.login(response.data);
             setTimeout(() => {
               this.router.navigate(['admin/investor']);
             }, 1500);

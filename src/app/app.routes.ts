@@ -4,6 +4,7 @@ import { InvestorComponent } from './admin/investor/investor.component';
 import { LoginComponent } from './account/login/login.component';
 import { LoginStaffComponent } from './account/login-staff/login-staff.component';
 import { SignupComponent } from './account/signup/signup.component';
+import { adminGuard } from './_guards/admin.guard';
 
 export const routes: Routes = [
 
@@ -12,7 +13,7 @@ export const routes: Routes = [
    {path:'staff-login', component: LoginStaffComponent, title: 'Staff Login - Investly'}, // Using existing component for now
    
    
-   {path:'admin',component: AdminComponent,children:[
+   {path:'admin',component: AdminComponent,canActivate:[adminGuard], children:[
 
       {path:'investor',component:InvestorComponent, title: 'Investor Management'},
       {path:'',redirectTo:'investor',pathMatch:'full'},

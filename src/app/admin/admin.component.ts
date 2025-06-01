@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotificationDropDownComponent } from "./_core/notification-drop-down/notification-drop-down.component";
 import { DarkModeService } from './_services/dark-mode.service';
+import { LoggedInUser } from '../_models/user';
+import { AuthService } from '../_services/auth.service';
 
 
 @Component({
@@ -19,10 +21,11 @@ export class AdminComponent implements OnInit {
   notifications: Notification[] = []; //! you need to define notification interface / model and import it then start populating this array with data from your service in loadNotifications method
   isNotificationsOpen: boolean = false;
   isNotificationsClosing: boolean = false;
-
+  loggedInUser:LoggedInUser|null=null;
 
   constructor(
-    private darkModeService: DarkModeService
+    private darkModeService: DarkModeService,
+    private auth:AuthService
   ){}
 
 
@@ -66,7 +69,10 @@ export class AdminComponent implements OnInit {
       });
     }
 
-    
+     this.auth.CurrentUser$.subscribe(user=>{
+           this.loggedInUser=user;
+     })
+
   }
 
   //* Notifications Methods:

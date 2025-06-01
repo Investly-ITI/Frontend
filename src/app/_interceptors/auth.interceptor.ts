@@ -3,10 +3,11 @@ import { inject } from '@angular/core';
 import { JwtService } from '../_services/jwt.service';
 import { catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import { AuthService } from '../_services/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const jwtService = inject(JwtService);
-  const token = jwtService.getToken();
+  const authService = inject(AuthService);
+  const token = authService.getToken();
   const router=inject(Router);
 
   let authReq=req;
@@ -17,9 +18,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   }
   return next(authReq).pipe(
     catchError(err=>{
-      if(err.status===403){
-        //jwtService.clearToken()
-        router.navigate(['/staff-login'])
+      if(err.status===403||err.status===401){
+        authService.logout();
+        location.reload();
       }
        return throwError(() => err);
     })
