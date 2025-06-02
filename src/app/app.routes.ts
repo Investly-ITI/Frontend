@@ -5,6 +5,7 @@ import { LoginComponent } from './account/login/login.component';
 import { LoginStaffComponent } from './account/login-staff/login-staff.component';
 import { SignupComponent } from './account/signup/signup.component';
 import { adminGuard } from './_guards/admin.guard';
+import { FounderComponent } from './admin/founder/founder.component';
 
 export const routes: Routes = [
 
@@ -17,6 +18,8 @@ export const routes: Routes = [
 
       {path:'investor',component:InvestorComponent, title: 'Investor Management'},
       {path:'',redirectTo:'investor',pathMatch:'full'},
+      {path:'founder',component:FounderComponent, title: 'Founder Management'},
+     
 
    ]},
 

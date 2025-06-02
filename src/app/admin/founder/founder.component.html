@@ -1,0 +1,361 @@
+<div class="parent3" [ngClass]="{'dark': isDarkMode}">
+    <section id="content">
+        <main>
+          
+            <div class="head-title">
+                <div class="left">
+
+                  
+                    <ul class="breadcrumb">
+                        <li><a>Dashboard</a></li>
+                        <li><i class='bx bx-chevron-right'></i></li>
+                        <li><a class="active">Founders</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="box-info">
+          
+                <li>
+                    <i class='bx bxs-user-check' style="font-size: 2.5em;"></i>
+                    <span class="text">
+                        <h3 class="animated-number">
+                            <span class="digit-container"
+                                *ngFor="let digit of getDigitsArray(displayActiveCount); let i = index">
+                                <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                                    [ngClass]="{'animate': animationComplete}">
+                                    {{ digit }}
+                                </span>
+                            </span>
+                        </h3>
+                        <p>Active {{ entityNamePlural }}</p>
+                    </span>
+                </li>
+
+                <li>
+                    <i class='bx bxs-user-x' style="font-size: 2.5em;"></i>
+                    <span class="text">
+                        <h3 class="animated-number">
+                            <span class="digit-container"
+                                *ngFor="let digit of getDigitsArray(displayInactiveCount); let i = index">
+                                <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                                    [ngClass]="{'animate': animationComplete}">
+                                    {{ digit }}
+                                </span>
+                            </span>
+                        </h3>
+                        <p>Inactive {{ entityNamePlural }}</p>
+                    </span>
+                </li>
+            </div>
+
+
+            <div class="table-data">
+                <div class="order">
+                  
+                    <div class="table-header">
+                       
+                        <div class="table-header-left">
+                            <h2>{{ entityNamePlural }}</h2>
+                          
+                        </div>
+
+                      
+                        <div class="table-header-right">
+                         
+                            <div class="items-per-page">
+                                <label>
+                                    <b>Items:</b>
+                                    <select [(ngModel)]="searchData.PageSize" name="itemsPerPage"
+                                        (change)="loadData();">
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                         
+                            <form>
+                                <div class="form-input">
+                                   
+                                    <input type="search" [(ngModel)]="searchData.SearchInput" name="searchQuery"
+                                        placeholder="Search by name or email..." (search)="onSearchClear($event)">
+                                    
+                                    <button type="submit" class="search-btn" (click)="loadData();"><i
+                                            class='bx bx-search'></i></button>
+                                    <div id="search-btns">
+                                       
+                                        <button mat-icon-button type="button"
+                                            style="border: none; background-color: var(--light);"
+                                            title="Advanced Search" (click)="toggleAdvancedSearch($event)">
+                                            <i class='bx bx-filter'
+                                                style="color: var(--dark); margin-left: 0.7em; font-size: 1.3em;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="advanced-search-dropdown">
+                                    <div class="advanced-search-menu" [ngClass]="{'show': isAdvancedSearchOpen}">
+                                        <div class="advanced-search-content">
+                                            <h4>Search Filters</h4>
+
+                                            <div class="filter-group">
+                                                <label for="governorate">Governorate:</label>
+                                                <select id="governorate" [(ngModel)]="selectedGovernomate"
+                                                    name="governorate">
+                                                    <option value="">All Governorates</option>
+                                                    <option *ngFor="let gov of governorates" [value]="gov">{{ gov }}
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <div class="filter-group">
+                                                <label for="gender">Gender:</label>
+                                                <select id="gender" [(ngModel)]="searchData.Gender" name="gender">
+                                                    <option value=null>All Genders</option>
+                                                    <option [value]="Gender.Male">Male</option>
+                                                    <option [value]="Gender.Female">Female</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="filter-group">
+                                                <label for="status">Status:</label>
+                                                <select id="status" [(ngModel)]="searchData.status" name="status">
+                                        
+                                                        <option value=0>All Status</option>
+                                                    <option [value]="Status.Active">Active</option>
+                                                    <option [value]="Status.Inactive">Inactive</option>
+                                                    <option [value]="Status.Deleted">Deleted</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="advanced-search-actions">
+                                                <button type="button" class="clear-btn" (click)="clearAdvancedSearch()">
+                                                    <i class='bx bx-x'></i>
+                                                    Clear
+                                                </button>
+                                                <button type="button" class="apply-btn" (click)="applyAdvancedSearch()">
+                                                    <i class='bx bx-search'></i>
+                                                    Apply
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                 
+                    <table style="border-spacing: 15px; border-collapse: separate;">
+                     
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th style="cursor: pointer">
+                                    Created At
+                                    <i class="bx bx-sort"></i>
+                                </th>
+                                <th>
+                                    Status
+                                    <span id="dots-container">
+                                        <span class="dot green-dot" [class.selected]="currentFilter === 'active'"
+                                            (click)="setFilter('active',Status.Active)" title="Show Active"></span>
+                                        <span class="dot red-dot" [class.selected]="currentFilter === 'inactive'"
+                                            (click)="setFilter('inactive',Status.Inactive)"
+                                            title="Show Inactive"></span>
+                                    </span>
+                                </th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                    
+                        <tbody>
+                          
+                            <tr *ngIf="showNoResults" class="no-results-row">
+                                <td colspan="7"
+                                    style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
+                                    No {{ entityNamePlural }} Found
+                                </td>
+                            </tr>
+
+                          
+                            <tr *ngIf="!isLoading2" class="no-results-row">
+                                <td colspan="7"
+                                    style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
+                                    Yet
+                                </td>
+                            </tr>
+
+                            <tr *ngIf="isLoading" class="no-results-row">
+                                <td colspan="7"
+                                    style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
+                                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;"
+                                        id="spinner">
+                                        <mat-spinner style="color: white;" class="mat-spinner"></mat-spinner>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr *ngFor="let item of loadedListData;let i=index">
+                                <td>
+                                    <img src="https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg"
+                                        alt="User Image">
+                                    <p>{{item.user.firstName}}</p>
+                                </td>
+                                <td>{{item.user.email}}</td>
+                                <td>{{item.user.createdAt|date}}</td>
+                                <td>
+                                    <span class="status process"
+                                        [ngStyle]="{color: item.user.status === Status.Active ? '#2ed134' :'#e6382f'}"
+                                        style="min-width: 100px; display: inline-block; text-align: center; padding: 10px 0px;">
+                                        {{ item.user.status|statusLabel }}
+                                    </span>
+                                </td>
+                                <td>
+                                   
+                                    <div class="action-dropdown" [ngClass]="{'active': dropdownStates[i]}">
+                                        <button class="action-btn" type="button" (click)="toggleDropdown(i, $event)">
+                                            <i class='bx bx-dots-vertical-rounded'></i>
+                                        </button>
+                                        <div class="action-menu">
+                                         <button class="action-item view" type="button" (click)="openModal(item)">
+                                                <i class='bx bx-show'></i>
+                                                View Details
+                                            </button>
+
+                                            <button class="action-item"
+                                                [ngClass]="item.user.status === Status.Inactive ?'active':'deactivate'"
+                                                type="button"
+                                                (click)="openActivateDeactivateModal(item.id,`${item.user.firstName} ${item.user.lastName}`, item.user.status === Status.Active ? 'deactivate' : 'activate', item.user.status === Status.Active ? Status.Inactive:Status.Active)">
+                                                <i
+                                                    [class]="'bx ' + (item.user.status === Status.Active ? 'bx-x-circle' : 'bx-check-circle')"></i>
+                                                {{ item.user.status === Status.Active ? 'Deactivate' : 'Activate' }}
+                                            </button>
+                                            <div class="action-divider"></div>
+                                            <button class="action-item " type="button"
+                                                (click)="openActivateDeactivateModal(item.id,`${item.user.firstName} ${item.user.lastName}`, 'delete', Status.Deleted)" >
+                                                <i class='bx bx-trash'></i>
+                                                delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                    <div class="pagination-controls">
+                        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+                            <i class='bx bx-chevron-left' style="font-size: 1.7em;"></i>
+                        </button>
+                        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+                            <i class='bx bx-chevron-right' style="font-size: 1.7em;"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <div class="modal-overlay" [ngClass]="{'show': isModalOpen}" (click)="closeModal()">
+        <div class="modal-container" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ modalMode === 'view' ? 'View ' + entityName : entityName + ' Details' }}</h3>
+                <button type="button" class="close-btn" (click)="closeModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+
+           <div class="modal-body">
+            <app-viewdetails 
+             
+                [selectedEntity]="selectedEntity"
+                [entityName]="entityName"
+                [modalMode]="modalMode"
+                (closeModal)="closeModal()">
+            </app-viewdetails>
+        </div>
+        </div>
+    </div>
+
+   
+   <div class="modal-overlay" [ngClass]="{ 'show': isActivateDeactivateModalOpen }" (click)="closeActivateDeactivateModal()">
+  <div class="modal-container activate-deactivate-modal" (click)="$event.stopPropagation()" *ngIf="entityToModify">
+   
+    <div class="modal-header">
+      <h3>
+        {{ modifyAction === 'deactivate' ? 'Deactivate' : modifyAction === 'activate' ? 'Activate' : 'Delete' }} {{ entityName }}
+      </h3>
+      <button type="button" class="close-btn" (click)="closeActivateDeactivateModal()">
+        <i class='bx bx-x'></i>
+      </button>
+    </div>
+
+  
+    <div class="modal-body">
+      <div class="activate-deactivate-confirmation">
+        <div class="action-icon">
+          <i
+            class="bx"
+            [ngClass]="{
+              'bx-error-circle': modifyAction === 'deactivate' || modifyAction === 'delete',
+              'bx-check-circle': modifyAction === 'activate'
+            }"
+            [style.color]="
+              modifyAction === 'deactivate' ? 'var(--red)' :
+              modifyAction === 'activate' ? 'var(--green)' :
+              'var(--danger)'
+            "
+          ></i>
+        </div>
+
+        <p class="confirmation-text">
+          Are you sure you want to {{ modifyAction }} this {{ entityToModify.toLowerCase() }}?
+
+          <span *ngIf="modifyAction === 'deactivate'" class="warning-text">
+            This action will make the {{ entityName.toLowerCase() }} inactive.
+          </span>
+
+          <span *ngIf="modifyAction === 'activate'" class="success-text">
+            This action will make the {{ entityName.toLowerCase() }} active.
+          </span>
+
+          <span *ngIf="modifyAction === 'delete'" class="danger-text">
+            This action will permanently remove the {{ entityName.toLowerCase() }} from the system.
+          </span>
+        </p>
+      </div>
+    </div>
+
+  
+    <div class="modal-footer activate-deactivate-modal-footer">
+      <button type="button" class="cancel-btn" (click)="closeActivateDeactivateModal()">Cancel</button>
+
+      <button
+        type="button"
+        class="confirm-btn"
+        [ngClass]="{
+          'deactivate': modifyAction === 'deactivate',
+          'activate': modifyAction === 'activate',
+          'delete': modifyAction === 'delete'
+        }"
+        (click)="confirmActivateDeactivate()"
+      >
+        <i
+          class="bx"
+          [ngClass]="{
+            'bx-x-circle': modifyAction === 'deactivate',
+            'bx-check-circle': modifyAction === 'activate',
+            'bx-trash': modifyAction === 'delete'
+          }"
+        ></i>
+        {{ modifyAction === 'deactivate' ? 'Deactivate' : modifyAction === 'activate' ? 'Activate' : 'Delete' }}
+      </button>
+    </div>
+  </div>
+</div>
