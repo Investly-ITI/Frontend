@@ -17,6 +17,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { StatusLabelPipe } from '../../_shared/pipes/enum.pipe';
 import { FormsModule } from '@angular/forms';
 import { ViewdetailsComponent } from './viewdetails/viewdetails.component';
+import { GovernrateService } from '../../_services/governorate.service';
+import { Governorate } from '../../_models/governorate';
+import { City } from '../../_models/city';
 
 @Component({
   selector: 'app-founder',
@@ -45,6 +48,8 @@ isLoading2: boolean = true;
   animationComplete: boolean = true;
   isAdvancedSearchOpen: boolean = false; 
   currentFilter:string='';
+  governorates: Governorate[] = [];
+  cities: City[] = [];
 
  private darkModeSubscription: Subscription = new Subscription();
    isModalOpen: boolean = false;
@@ -72,16 +77,12 @@ isLoading2: boolean = true;
   totalCount: number = 0;
   totalPages: number = 0;
 
-    selectedGovernomate: string = '';
+    selectedGovernrate: string = '';
+     selectedCity: string = '';
   selectedGender: string = '';
   selectedSearchType: string = 'name'; 
   searchQuery: string = '';
 
-    governorates: string[] = [
-    'Cairo',
-    'Alexandria',
-    'Giza'
-  ];
   entityName: string = 'Founder';
   entityNamePlural: string = 'Founders';
 
@@ -92,12 +93,13 @@ isLoading2: boolean = true;
     Gender=Gender
      
   constructor(private FounderService:FounderService,  private darkModeService: DarkModeService,
-      private toastr: ToastrService) { }
+      private toastr: ToastrService,private governrateService:GovernrateService) { }
 
   ngOnInit(): void {
     this.loadData();
   
     this.loadactiveInactiveCount();
+     this.loadGovernments();
     this.darkModeSubscription = this.darkModeService.darkMode$.subscribe(
       (isDarkMode) => {
         this.isDarkMode = isDarkMode;
@@ -130,6 +132,24 @@ loadData()
       }
     });
 
+}
+loadGovernments(){
+  
+    this.isLoading = true;
+    this.governrateService.getGovernrates().subscribe({
+      next: (response) => {   
+        this.governorates = response.data;
+        this.isLoading = false;
+          this.isAdvancedSearchOpen = false;
+      },
+      error: (error) => {
+        console.error('Error loading governates:', error);
+        this.toastr.error('Failed to load governates.');
+        this.isLoading = false;
+      }
+    });
+
+    
 }
 loadactiveInactiveCount(): void
   {
@@ -274,10 +294,33 @@ goToPreviousPage() {
         this.selectedEntity = null;
       }, 300); 
     }
-  
+ onGovernorateChange(governorateId: number): void {
+    this.selectedCity = ''; 
+    this.cities = [];
+    
+    if (governorateId>0) {
+      
+      this.loadCities(governorateId);
+      this.searchData.GovernmentId = governorateId;
+    } else {
+      this.searchData.GovernmentId = 0;
+    }
+  }
+ loadCities(governorateId: number): void {
+    this.governrateService.getCitiesByGovernrateId(governorateId).subscribe({
+      next: (response) => {
+        this.cities = response.data;
+        console.log('Cities loaded:', this.cities);
+      },
+      error: (error) => {
+        console.error('Error loading cities:', error);
+        this.toastr.error('Failed to load cities.');
+      }
+    });
+  }
 
   ngOnDestroy(): void {
     this.darkModeSubscription.unsubscribe();
   }
-
+    
 }

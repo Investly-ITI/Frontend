@@ -99,16 +99,23 @@
                                     <div class="advanced-search-menu" [ngClass]="{'show': isAdvancedSearchOpen}">
                                         <div class="advanced-search-content">
                                             <h4>Search Filters</h4>
-
-                                            <div class="filter-group">
+                                            <div class="filter-row">
+                                              <div class="filter-group">
                                                 <label for="governorate">Governorate:</label>
-                                                <select id="governorate" [(ngModel)]="selectedGovernomate"
-                                                    name="governorate">
-                                                    <option value="">All Governorates</option>
-                                                    <option *ngFor="let gov of governorates" [value]="gov">{{ gov }}
-                                                    </option>
-                                                </select>
-                                            </div>
+                                                  <select id="governorate"  [(ngModel)]="selectedGovernrate" (ngModelChange)="onGovernorateChange($event)" name="governorate">
+                                                           <option value="">All Governorates</option>
+                                                            <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
+                                                 </select>
+                                         </div>
+                
+                                          <div class="filter-group">
+                                             <label for="city">City:</label>
+                                        <select id="city" [(ngModel)]="selectedCity" name="city" [disabled]="!selectedGovernrate || cities.length === 0">
+                                                     <option value="">All Cities</option>
+                                                      <option *ngFor="let city of cities" [value]="city.id">{{ city.nameEn }}</option>
+                                        </select>
+                                         </div>
+                                      </div>
 
                                             <div class="filter-group">
                                                 <label for="gender">Gender:</label>
