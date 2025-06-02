@@ -33,7 +33,8 @@ export class BusinessSearchDto {
         public searchInput?: string,
         public categoryId?: number,
         public founderId?: number,
-        public stage?: Stage 
+        public stage?: Stage ,
+
     ) { }
 }
 

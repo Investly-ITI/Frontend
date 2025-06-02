@@ -20,6 +20,8 @@ export class BusinessIdeasComponent implements OnInit {
 
   businessList: BusinessListDto | null = null;
   businessIdeas: BusinessDto[] = [];
+  isViewDetailsModalOpen: boolean = false;
+  selectedIdeaForDetails: BusinessDto | null = null;
   isLoading: boolean = false;
   error: string | null = null;
 
@@ -190,6 +192,16 @@ export class BusinessIdeasComponent implements OnInit {
     this.onSearch(); 
     this.isAdvancedSearchOpen = false; 
   }
+openViewDetailsModal(idea: BusinessDto): void {
+        this.selectedIdeaForDetails = idea;
+        this.isViewDetailsModalOpen = true;
+        // Close action dropdown if open
+        this.dropdownStates.fill(false);
+    }
 
+    closeViewDetailsModal(): void {
+        this.isViewDetailsModalOpen = false;
+        this.selectedIdeaForDetails = null;
+    }
   
 }
