@@ -1,29 +1,21 @@
-<!-- ========================================
-     MAIN CONTAINER & THEME
-======================================== -->
 <div class="parent3" [ngClass]="{'dark': isDarkMode}">
     <section id="content">
         <main>
-            <!-- ========================================
-                 PAGE HEADER & NAVIGATION
-            ======================================== -->
+          
             <div class="head-title">
                 <div class="left">
 
-                    <!-- Breadcrumb Navigation -->
+                  
                     <ul class="breadcrumb">
                         <li><a>Dashboard</a></li>
                         <li><i class='bx bx-chevron-right'></i></li>
-                        <li><a class="active">Investors</a></li>
+                        <li><a class="active">Founders</a></li>
                     </ul>
                 </div>
             </div>
 
-            <!-- ========================================
-                 STATISTICS BOXES
-            ======================================== -->
             <div class="box-info">
-                <!-- Active Entities Count -->
+          
                 <li>
                     <i class='bx bxs-user-check' style="font-size: 2.5em;"></i>
                     <span class="text">
@@ -40,7 +32,6 @@
                     </span>
                 </li>
 
-                <!-- Inactive Entities Count -->
                 <li>
                     <i class='bx bxs-user-x' style="font-size: 2.5em;"></i>
                     <span class="text">
@@ -58,27 +49,20 @@
                 </li>
             </div>
 
-            <!-- ========================================
-                 MAIN DATA TABLE SECTION
-            ======================================== -->
+
             <div class="table-data">
                 <div class="order">
-                    <!-- ========================================
-                         TABLE HEADER & CONTROLS
-                    ======================================== -->
+                  
                     <div class="table-header">
-                        <!-- Left Side: Title & Add Button -->
+                       
                         <div class="table-header-left">
                             <h2>{{ entityNamePlural }}</h2>
-                            <button type="button" class="add-entity-btn" (click)="openAddModal()">
-                                <i class='bx bx-plus'></i>
-                                Add
-                            </button>
+                          
                         </div>
 
-                        <!-- Right Side: Controls & Search -->
+                      
                         <div class="table-header-right">
-                            <!-- Items Per Page Selector -->
+                         
                             <div class="items-per-page">
                                 <label>
                                     <b>Items:</b>
@@ -91,17 +75,17 @@
                                 </label>
                             </div>
 
-                            <!-- Search Form & Filters -->
+                         
                             <form>
                                 <div class="form-input">
-                                    <!-- Search Input -->
+                                   
                                     <input type="search" [(ngModel)]="searchData.SearchInput" name="searchQuery"
                                         placeholder="Search by name or email..." (search)="onSearchClear($event)">
-                                    <!-- Search & Filter Buttons -->
+                                    
                                     <button type="submit" class="search-btn" (click)="loadData();"><i
                                             class='bx bx-search'></i></button>
                                     <div id="search-btns">
-                                        <!-- Advanced Search Button -->
+                                       
                                         <button mat-icon-button type="button"
                                             style="border: none; background-color: var(--light);"
                                             title="Advanced Search" (click)="toggleAdvancedSearch($event)">
@@ -111,49 +95,38 @@
                                     </div>
                                 </div>
 
-                                <!-- Advanced Search Dropdown -->
                                 <div class="advanced-search-dropdown">
                                     <div class="advanced-search-menu" [ngClass]="{'show': isAdvancedSearchOpen}">
                                         <div class="advanced-search-content">
                                             <h4>Search Filters</h4>
-
-                                            <!-- Search Type Filter -->
-                                            <!-- <div class="filter-group">
-                                                <label for="searchType">Search By:</label>
-                                                <select id="searchType" [(ngModel)]="selectedSearchType" name="searchType">
-                                                    <option value="name">Name/Email</option>
-                                                    <option value="ssn">SSN</option>
-                                                </select>
-                                            </div> -->
-
-                                            <!-- Governorate Filter -->
+                                            <div class="filter-row">
                                               <div class="filter-group">
                                                 <label for="governorate">Governorate:</label>
-                                                   <select  id="governorate" [(ngModel)]="selectedGovernrate"(ngModelChange)="onGovernorateChange($event)"name="governorate">
-                                                            <option value="">All Governorates</option>
-                                                              <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
-                                                     </select>
-                                            </div>
-                                              <!-- City Filter -->
+                                                  <select id="governorate"  [(ngModel)]="selectedGovernrate" (ngModelChange)="onGovernorateChange($event)" name="governorate">
+                                                           <option value="">All Governorates</option>
+                                                            <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
+                                                 </select>
+                                         </div>
+                
                                           <div class="filter-group">
-                                               <label for="city">City:</label>
-                                                    <select id="city" [(ngModel)]="selectedCity"name="city"[disabled]="!selectedGovernrate || cities.length === 0">
-                                                            <option value="">All Cities</option>
-                                                            <option *ngFor="let city of cities" [value]="city.id">{{ city.nameEn }}</option>
-                                                    </select>
-                                            </div>
+                                             <label for="city">City:</label>
+                                        <select id="city" [(ngModel)]="selectedCity" name="city" [disabled]="!selectedGovernrate || cities.length === 0">
+                                                     <option value="">All Cities</option>
+                                                      <option *ngFor="let city of cities" [value]="city.id">{{ city.nameEn }}</option>
+                                        </select>
+                                         </div>
+                                      </div>
 
-                                            <!-- Gender Filter -->
                                             <div class="filter-group">
                                                 <label for="gender">Gender:</label>
-                                                <select id="gender" [(ngModel)]="searchData.gender" name="gender">
+                                                <select id="gender" [(ngModel)]="searchData.Gender" name="gender">
                                                     <option value=null>All Genders</option>
                                                     <option [value]="Gender.Male">Male</option>
                                                     <option [value]="Gender.Female">Female</option>
                                                 </select>
                                             </div>
-                                                <!-- status Filter -->
-                                             <div class="filter-group">
+
+                                            <div class="filter-group">
                                                 <label for="status">Status:</label>
                                                 <select id="status" [(ngModel)]="searchData.status" name="status">
                                         
@@ -164,7 +137,6 @@
                                                 </select>
                                             </div>
 
-                                            <!-- Action Buttons -->
                                             <div class="advanced-search-actions">
                                                 <button type="button" class="clear-btn" (click)="clearAdvancedSearch()">
                                                     <i class='bx bx-x'></i>
@@ -182,23 +154,19 @@
                         </div>
                     </div>
 
-                    <!-- ========================================
-                         DATA TABLE
-                    ======================================== -->
+                 
                     <table style="border-spacing: 15px; border-collapse: separate;">
-                        <!-- Table Header -->
+                     
                         <thead>
                             <tr>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th style="cursor: pointer">
-                                    <!-- //+ You need to use (click)="toggleSort('createdAt')" for example in th tag when you implement the sorting logic -->
                                     Created At
                                     <i class="bx bx-sort"></i>
                                 </th>
                                 <th>
                                     Status
-                                    <!-- Status Filter Dots -->
                                     <span id="dots-container">
                                         <span class="dot green-dot" [class.selected]="currentFilter === 'active'"
                                             (click)="setFilter('active',Status.Active)" title="Show Active"></span>
@@ -211,12 +179,9 @@
                             </tr>
                         </thead>
 
-                        <!-- Table Body -->
+                    
                         <tbody>
-                            <!-- ========================================
-                                 EMPTY STATES & LOADING
-                            ======================================== -->
-                            <!-- No Results Found -->
+                          
                             <tr *ngIf="showNoResults" class="no-results-row">
                                 <td colspan="7"
                                     style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
@@ -224,16 +189,14 @@
                                 </td>
                             </tr>
 
-                            <!-- No Active/Inactive Entities -->
+                          
                             <tr *ngIf="!isLoading2" class="no-results-row">
                                 <td colspan="7"
                                     style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
-                                    <!-- No {{ currentFilter === 'active' ? 'Active' : 'Inactive' }} {{ entityNamePlural }} -->
                                     Yet
                                 </td>
                             </tr>
 
-                            <!-- Loading Spinner -->
                             <tr *ngIf="isLoading" class="no-results-row">
                                 <td colspan="7"
                                     style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
@@ -243,11 +206,6 @@
                                     </div>
                                 </td>
                             </tr>
-
-                            <!-- ========================================
-                                 DATA ROWS - SAMPLE DATA
-                            ======================================== -->
-                            <!-- Active Entity Row Example -->
 
                             <tr *ngFor="let item of loadedListData;let i=index">
                                 <td>
@@ -265,13 +223,13 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <!-- New Actions Dropdown -->
+                                   
                                     <div class="action-dropdown" [ngClass]="{'active': dropdownStates[i]}">
                                         <button class="action-btn" type="button" (click)="toggleDropdown(i, $event)">
                                             <i class='bx bx-dots-vertical-rounded'></i>
                                         </button>
                                         <div class="action-menu">
-                                            <button class="action-item view" type="button" (click)="openModal(item)">
+                                         <button class="action-item view" type="button" (click)="openModal(item)">
                                                 <i class='bx bx-show'></i>
                                                 View Details
                                             </button>
@@ -298,9 +256,6 @@
                         </tbody>
                     </table>
 
-                    <!-- ========================================
-                         PAGINATION CONTROLS
-                    ======================================== -->
                     <div class="pagination-controls">
                         <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">
                             <i class='bx bx-chevron-left' style="font-size: 1.7em;"></i>
@@ -314,35 +269,31 @@
         </main>
     </section>
 
-    <!-- ========================================
-         ADD/UPDATE INVESTOR MODAL
-    ======================================== -->
     <div class="modal-overlay" [ngClass]="{'show': isModalOpen}" (click)="closeModal()">
         <div class="modal-container" (click)="$event.stopPropagation()">
-            <!-- Modal Header -->
             <div class="modal-header">
-                <h3>{{ modalMode === 'add' ? 'Add New ' + entityName : entityName + ' Details' }}</h3>
+                <h3>{{ modalMode === 'view' ? 'View ' + entityName : entityName + ' Details' }}</h3>
                 <button type="button" class="close-btn" (click)="closeModal()">
                     <i class='bx bx-x'></i>
                 </button>
             </div>
 
-            <!-- Modal Body -->
-            <div class="modal-body">
-                <app-add-update [selectedEntity]="selectedEntity" [isEditMode]="isEditMode || modalMode === 'add'"
-                    [entityName]="entityName" [modalMode]="modalMode" (saveEntity)="onSaveEntity($event)">
-                </app-add-update>
-            </div>
+           <div class="modal-body">
+            <app-viewdetails 
+             
+                [selectedEntity]="selectedEntity"
+                [entityName]="entityName"
+                [modalMode]="modalMode"
+                (closeModal)="closeModal()">
+            </app-viewdetails>
+        </div>
         </div>
     </div>
 
-    <!-- ========================================
-         ACTIVATE/DEACTIVATE/delete CONFIRMATION MODAL
-    ======================================== -->
+   
    <div class="modal-overlay" [ngClass]="{ 'show': isActivateDeactivateModalOpen }" (click)="closeActivateDeactivateModal()">
   <div class="modal-container activate-deactivate-modal" (click)="$event.stopPropagation()" *ngIf="entityToModify">
-    
-    <!-- Modal Header -->
+   
     <div class="modal-header">
       <h3>
         {{ modifyAction === 'deactivate' ? 'Deactivate' : modifyAction === 'activate' ? 'Activate' : 'Delete' }} {{ entityName }}
@@ -352,7 +303,7 @@
       </button>
     </div>
 
-    <!-- Modal Body -->
+  
     <div class="modal-body">
       <div class="activate-deactivate-confirmation">
         <div class="action-icon">
@@ -388,7 +339,7 @@
       </div>
     </div>
 
-    <!-- Modal Footer -->
+  
     <div class="modal-footer activate-deactivate-modal-footer">
       <button type="button" class="cancel-btn" (click)="closeActivateDeactivateModal()">Cancel</button>
 
