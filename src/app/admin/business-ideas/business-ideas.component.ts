@@ -20,6 +20,7 @@ export class BusinessIdeasComponent implements OnInit {
 
   businessList: BusinessListDto | null = null;
   businessIdeas: BusinessDto[] = [];
+  animationComplete: boolean = true;
   isViewDetailsModalOpen: boolean = false;
   selectedIdeaForDetails: BusinessDto | null = null;
   isLoading: boolean = false;
@@ -45,6 +46,13 @@ export class BusinessIdeasComponent implements OnInit {
   public BusinessIdeaStatus = BusinessIdeaStatus; 
   public Stage = Stage;                           
 
+    entityNamePlural: string = 'Business Idea';
+
+  displayActiveCount: number = 0;
+  displayInactiveCount: number = 0;
+  displayPendingCount: number = 0;
+  displayRejectedCount: number = 0;
+
   getBusinessIdeaStatusName = getBusinessIdeaStatusLabel;
   getStageName = getStageLabel;
 
@@ -56,6 +64,7 @@ export class BusinessIdeasComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadBusinessIdeas();
+    this.loadIdeasCount();
 
   }
 
@@ -98,6 +107,7 @@ export class BusinessIdeasComponent implements OnInit {
     if (this.businessList && this.searchParams.pageNumber * this.searchParams.pageSize < this.businessList.totalCount) {
       this.searchParams.pageNumber++;
       this.loadBusinessIdeas();
+
     }
   }
 
@@ -105,6 +115,7 @@ export class BusinessIdeasComponent implements OnInit {
     if (this.searchParams.pageNumber > 1) {
       this.searchParams.pageNumber--;
       this.loadBusinessIdeas();
+
     }
   }
 
@@ -125,15 +136,16 @@ export class BusinessIdeasComponent implements OnInit {
         .subscribe({
           next: (res) => {
             if (res.isSuccess) {
-              Swal.fire('Deleted!', 'Business idea has been soft-deleted.', 'success');
+              Swal.fire('Deleted!', 'Business idea has been deleted.', 'success');
               this.loadBusinessIdeas(); 
               this.closeSoftDeleteModal();
+              this.loadIdeasCount();
             } else {
-              Swal.fire('Error!', res.message || 'Failed to soft-delete business idea.', 'error');
+              Swal.fire('Error!', res.message || 'Failed to delete business idea.', 'error');
             }
           },
           error: (err) => {
-            Swal.fire('Error!', 'An error occurred while soft-deleting.', 'error');
+            Swal.fire('Error!', 'An error occurred while deleting.', 'error');
             console.error('Soft delete error:', err);
           }
         });
@@ -145,6 +157,7 @@ export class BusinessIdeasComponent implements OnInit {
     this.newStatus = currentStatus !== undefined ? currentStatus : null;
     this.currentStatusName = currentStatus !== undefined ? this.getBusinessIdeaStatusName(currentStatus) : 'N/A';
     this.isStatusUpdateModalOpen = true;
+
   }
 
   closeStatusUpdateModal(): void {
@@ -162,7 +175,8 @@ export class BusinessIdeasComponent implements OnInit {
             if (res.isSuccess) {
               Swal.fire('Updated!', 'Business idea status has been updated.', 'success');
               this.closeStatusUpdateModal();
-              this.loadBusinessIdeas(); 
+              this.loadBusinessIdeas();
+              this.loadIdeasCount(); 
             } else {
               Swal.fire('Error!', res.message || 'Failed to update status.', 'error');
             }
@@ -203,5 +217,20 @@ openViewDetailsModal(idea: BusinessDto): void {
         this.isViewDetailsModalOpen = false;
         this.selectedIdeaForDetails = null;
     }
-  
+    getDigitsArray(number: number): string[] {
+    return number.toString().split('');
+  }
+loadIdeasCount(){
+  var sum= this.businessService.GetBusinessIdeasCounts().subscribe({
+    next:(response)=>{
+      this.displayActiveCount=response.data.totalActive;
+      this.displayInactiveCount=response.data.totalInactive
+      this.displayPendingCount=response.data.totalPending
+      this.displayRejectedCount=response.data.totalRejected
+    },error:(err)=>{
+       console.log(err);
+    }
+  })
+}
+
 }

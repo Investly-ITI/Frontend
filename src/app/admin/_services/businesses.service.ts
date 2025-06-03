@@ -46,4 +46,8 @@ export class BusinessService {
     const params = new HttpParams().set('newStatus', newStatus.toString());
     return this.http.put<ResponseDto<object>>(`${this.baseUrl}/${id}/Update`, {}, { params });
   }
+  GetBusinessIdeasCounts(): Observable<ResponseDto<any>> {
+      var result = this.http.get<ResponseDto<any>>(`${this.baseUrl}/ideas-counts`);
+      return result;
+    }
 }

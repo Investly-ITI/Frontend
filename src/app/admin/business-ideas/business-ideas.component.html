@@ -10,7 +10,76 @@
                     </ul>
                 </div>
             </div>
+             <div class="box-info">
+    <!-- Active Entities Count -->
+    <li>
+        <i class='bx bxs-bulb' style="font-size: 2.5em; color: #2ed134;"></i>
+        <span class="text">
+            <h3 class="animated-number">
+                <span class="digit-container"
+                    *ngFor="let digit of getDigitsArray(displayActiveCount); let i = index">
+                    <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                        [ngClass]="{'animate': animationComplete}">
+                        {{ digit }}
+                    </span>
+                </span>
+            </h3>
+            <p>Active {{ entityNamePlural }}</p>
+        </span>
+    </li>
+     <!-- Inactive Entities Count -->
+    <li>
+        <i class='bx bxs-bulb' style="font-size: 2.5em; color: #6c757d;"></i>
+        <span class="text">
+            <h3 class="animated-number">
+                <span class="digit-container"
+                    *ngFor="let digit of getDigitsArray(displayInactiveCount); let i = index">
+                    <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                        [ngClass]="{'animate': animationComplete}">
+                        {{ digit }}
+                    </span>
+                </span>
+            </h3>
+            <p>Inactive {{ entityNamePlural }}</p>
+        </span>
+    </li>
 
+    <!-- Pending Entities Count -->
+    <li>
+        <i class='bx bxs-hourglass' style="font-size: 2.5em; color: #ffab00;"></i>
+        <span class="text">
+            <h3 class="animated-number">
+                <span class="digit-container"
+                    *ngFor="let digit of getDigitsArray(displayPendingCount); let i = index">
+                    <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                        [ngClass]="{'animate': animationComplete}">
+                        {{ digit }}
+                    </span>
+                </span>
+            </h3>
+            <p>Pending {{ entityNamePlural }}</p>
+        </span>
+    </li>
+    
+    <!-- Rejected Entities Count -->
+    <li>
+        <i class='bx bxs-no-entry' style="font-size: 2.5em; color: #e6382f;"></i>
+        <span class="text">
+            <h3 class="animated-number">
+                <span class="digit-container"
+                    *ngFor="let digit of getDigitsArray(displayRejectedCount); let i = index">
+                    <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                        [ngClass]="{'animate': animationComplete}">
+                        {{ digit }}
+                    </span>
+                </span>
+            </h3>
+            <p>Rejected {{ entityNamePlural }}</p>
+        </span>
+    </li>
+    
+   
+</div>
             <div class="table-data">
                 <div class="order">
                     <div class="table-header">
@@ -34,7 +103,7 @@
                             <form (submit)="onSearch(); $event.preventDefault();">
                                 <div class="form-input">
                                     <input type="search" [(ngModel)]="searchParams.searchInput" name="searchQuery"
-                                        placeholder="Search ..." (keyup.enter)="onSearch()">
+                                        placeholder="Search by title, founder, category, location ..." (keyup.enter)="onSearch()">
                                     <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
                                     <div id="search-btns">
                                         <button type="button" style="border: none; background-color: var(--light);"
@@ -85,11 +154,7 @@
                                 <th>Category</th>
                                 <th>
                                     Status
-                                    <span id="dots-container" style="margin-left: 5px; cursor: pointer;">
-                                        <span class="dot" style="background-color: #2ed134; border-color: #2ed134;" title="Show Active"></span>
-                                        <span class="dot" style="background-color: #e6382f; border-color: #e6382f;" title="Show Rejected/Inactive"></span>
-                                        <span class="dot" style="background-color: #ffab00; border-color: #ffab00;" title="Show Pending"></span>
-                                    </span>
+                                
                                 </th>
                                 <th>Actions</th>
                             </tr>
