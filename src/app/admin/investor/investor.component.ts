@@ -18,6 +18,9 @@ import { StatusLabelPipe } from '../../_shared/pipes/enum.pipe';
 import { Status } from '../../_shared/enums';
 import { ArrayDataSource } from '@angular/cdk/collections';
 import { Gender } from '../../_shared/general';
+import { Governorate } from '../../_models/governorate';
+import { City } from '../../_models/city';
+import { GovernrateService } from '../../_services/governorate.service';
 
 @Component({
   selector: 'app-investor',
@@ -86,17 +89,15 @@ export class InvestorComponent implements OnInit, OnDestroy {
   totalPages: number = 0;
 
   //* Advanced search filters
-  selectedGovernomate: string = '';
+    selectedGovernrate: string = '';
+     selectedCity: string = '';
   selectedGender: string = '';
   selectedSearchType: string = 'name'; // 'name' or 'ssn'
   searchQuery: string = '';
 
   //* Dropdown data
-  governorates: string[] = [
-    'Cairo',
-    'Alexandria',
-    'Giza'
-  ];
+  governorates: Governorate[] = [];
+   cities: City[] = [];
   
   //* Generic entity configuration
   entityName: string = 'Investor';
@@ -115,12 +116,13 @@ export class InvestorComponent implements OnInit, OnDestroy {
   constructor(
     private InvestorService: InvestorService,
     private darkModeService: DarkModeService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private governrateService:GovernrateService
   ) {}
   ngOnInit(): void {
     this.loadData();
     this.loadActiveInactiveCount();
-    
+    this.loadGovernments();
     // Subscribe to dark mode changes
     this.darkModeSubscription = this.darkModeService.darkMode$.subscribe(
       (isDarkMode) => {
@@ -153,7 +155,24 @@ export class InvestorComponent implements OnInit, OnDestroy {
       }
     })
   }
+loadGovernments(){
+  
+    this.isLoading = true;
+    this.governrateService.getGovernrates().subscribe({
+      next: (response) => {   
+        this.governorates = response.data;
+        this.isLoading = false;
+          this.isAdvancedSearchOpen = false;
+      },
+      error: (error) => {
+        console.error('Error loading governates:', error);
+        this.toastr.error('Failed to load governates.');
+        this.isLoading = false;
+      }
+    });
 
+    
+}
 goToNextPage() {
   if (this.currentPage < this.totalPages) {
     this.currentPage++;
@@ -323,6 +342,31 @@ loadActiveInactiveCount(){
   getDigitsArray(number: number): string[] {
     return number.toString().split('');
   }
+   onGovernorateChange(governorateId: number): void {
+    this.selectedCity = ''; 
+    this.cities = [];
+    
+    if (governorateId>0) {
+      
+      this.loadCities(governorateId);
+      this.searchData.governmentId = governorateId;
+    } else {
+      this.searchData.governmentId = 0;
+    }
+  }
+ loadCities(governorateId: number): void {
+    this.governrateService.getCitiesByGovernrateId(governorateId).subscribe({
+      next: (response) => {
+        this.cities = response.data;
+        console.log('Cities loaded:', this.cities);
+      },
+      error: (error) => {
+        console.error('Error loading cities:', error);
+        this.toastr.error('Failed to load cities.');
+      }
+    });
+  }
+
 
   ngOnDestroy(): void {
     this.darkModeSubscription.unsubscribe();

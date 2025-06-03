@@ -1,0 +1,80 @@
+<div class="profile-picture-section">
+    <div class="profile-picture-container" (mouseenter)="showImageOverlay = true"
+        (mouseleave)="showImageOverlay = false">
+        <img [src]="profileImageUrl" alt="Profile Picture" class="profile-picture">
+        <div class="image-overlay" [ngClass]="{'show': showImageOverlay}">
+            <i class='bx bx-edit-alt'></i>
+        </div>
+    </div>
+</div>
+<form class="modal-form" [formGroup]="formData">
+  <div class="row" [formGroupName]="'user'">
+    <div class="col-4">
+      <label for="firstName">First Name</label>
+      <div class="input-container">
+        <input type="text" id="firstName" class="form-input2" formControlName="firstName" />
+      </div>
+
+    </div>
+
+    <div class="col-4">
+      <label for="lastName">Last Name</label>
+      <div class="input-container">
+        <input type="text" id="lastName" class="form-input2" formControlName="lastName" />
+      </div>
+    </div>
+
+    <div class="col-4">
+      <label for="dateOfBirth">Date of Birth</label>
+      <div class="input-container">
+        <input type="date" id="dateOfBirth" class="form-input2" formControlName="dateOfBirth" />
+      </div>
+    </div>
+  </div>
+
+  <div class="row" [formGroupName]="'user'">
+    <div class="col-4">
+      <label for="email">Email</label>
+      <div class="input-container">
+        <input type="email" id="email" class="form-input2" formControlName="email" />
+      </div>
+    </div>
+
+    <div class="col-4">
+      <label for="nationalId">National ID</label>
+      <div class="input-container">
+        <input type="text" id="nationalId" class="form-input2" formControlName="nationalId" />
+      </div>
+    </div>
+
+    <div class="col-4">
+      <label for="phoneNumber">Phone Number</label>
+      <div class="input-container">
+        <input type="text" id="phoneNumber" class="form-input2" formControlName="phoneNumber" />
+      </div>
+    </div>
+    
+  </div>
+  
+
+  <div class="row" [formGroupName]="'user'">
+    <div class="col-4">
+      <label for="gender">Gender</label>
+      <div class="input-container">
+        <select formControlName="gender" class="form-input2">
+          <option [value]="Gender.Male">Male</option>
+          <option [value]="Gender.Female">Female</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+</form>
+
+
+<div class="modal-footer">
+  <button type="button" class="action-btn close-btn" (click)="closeModal.emit()">
+    <i class='bx bx-x'></i>
+    Close
+  </button>
+</div>

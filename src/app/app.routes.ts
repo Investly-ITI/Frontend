@@ -6,6 +6,7 @@ import { LoginStaffComponent } from './account/login-staff/login-staff.component
 import { SignupComponent } from './account/signup/signup.component';
 import { adminGuard } from './_guards/admin.guard';
 import { BusinessIdeasComponent } from './admin/business-ideas/business-ideas.component';
+import { FounderComponent } from './admin/founder/founder.component';
 
 export const routes: Routes = [
 
@@ -19,6 +20,8 @@ export const routes: Routes = [
       {path:'investor',component:InvestorComponent, title: 'Investor Management'},
       {path:'business-ideas',component:BusinessIdeasComponent, title: 'Business Ideas Management'},
       {path:'',redirectTo:'investor',pathMatch:'full'},
+      {path:'founder',component:FounderComponent, title: 'Founder Management'},
+     
 
    ]},
 
