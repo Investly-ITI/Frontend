@@ -1,4 +1,4 @@
-import { BusinessIdeaStatus, Stage } from "../_shared/enums"; 
+import { BusinessIdeaStatus, InvestingStages } from "../_shared/enums"; 
 
 export class BusinessDto {
     constructor(
@@ -7,7 +7,7 @@ export class BusinessDto {
         public categoryId: number,
         public title: string,
         public airate?: number,
-        public stage?: Stage, 
+        public stage?: InvestingStages, 
         public location?: string,
         public capital?: number,
         public isDrafted?: boolean,
@@ -34,6 +34,6 @@ export class BusinessSearchDto {
         public searchInput?: string,
         public categoryId?: number,
         public founderId?: number,
-        public stage?: Stage,
+        public stage?: InvestingStages,
     ) { }
 }

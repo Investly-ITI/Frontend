@@ -25,12 +25,7 @@ export enum InvestorInvestingType {
 
 }
 
-export enum Stage {
-Ideation=1,
-Startup=2,
-Intermediate=3,
-Advanced=4,
-}
+
  export enum InvestingStages{
     ideation=1,
     startup=2,
