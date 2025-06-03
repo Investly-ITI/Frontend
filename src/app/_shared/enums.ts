@@ -31,3 +31,10 @@ Startup=2,
 Intermediate=3,
 Advanced=4,
 }
+ export enum InvestingStages{
+    ideation=1,
+    startup=2,
+    intermediate=3,
+    advanced=4
+ }
+
