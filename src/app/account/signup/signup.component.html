@@ -240,19 +240,19 @@
             <div class="form-group half">
               <label for="government">Government:</label>
               <div class="input-container" 
-                   [class.error]="personalInfoForm.get('government')?.invalid && personalInfoForm.get('government')?.touched">
+                   [class.error]="personalInfoForm.get('governmentId')?.invalid && personalInfoForm.get('governmentId')?.touched">
                 <i class='bx bx-map'></i>
                 <select 
                   class="form-input" 
                   id="government"
-                  formControlName="government"
+                  formControlName="governmentId"
                   (change)="onGovernorateChange($any($event.target).value)"
-                  [class.error]="personalInfoForm.get('government')?.invalid && personalInfoForm.get('government')?.touched">
+                  [class.error]="personalInfoForm.get('governmentId')?.invalid && personalInfoForm.get('governmentId')?.touched">
                   <option value="">Select Government</option>
                   <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
                 </select>
               </div>
-              <div *ngIf="personalInfoForm.get('government')?.invalid && personalInfoForm.get('government')?.touched" class="error-message">
+              <div *ngIf="personalInfoForm.get('governmentId')?.invalid && personalInfoForm.get('governmentId')?.touched" class="error-message">
                 Government/State is required
               </div>
             </div>
@@ -260,19 +260,19 @@
             <div class="form-group half">
               <label for="city">City:</label>
               <div class="input-container" 
-                   [class.error]="personalInfoForm.get('city')?.invalid && personalInfoForm.get('city')?.touched">
+                   [class.error]="personalInfoForm.get('cityId')?.invalid && personalInfoForm.get('cityId')?.touched">
                 <i class='bx bx-building'></i>
                 <select 
                   class="form-input" 
                   id="city"
-                  formControlName="city"
+                  formControlName="cityId"
                   [disabled]="!selectedGovernorate"
-                  [class.error]="personalInfoForm.get('city')?.invalid && personalInfoForm.get('city')?.touched">
+                  [class.error]="personalInfoForm.get('cityId')?.invalid && personalInfoForm.get('cityId')?.touched">
                   <option value="">{{ selectedGovernorate ? 'Select City' : 'Select Government First' }}</option>
                   <option *ngFor="let city of citiesByGovernorate" [value]="city.id">{{ city.nameEn }}</option>
                 </select>
               </div>
-              <div *ngIf="personalInfoForm.get('city')?.invalid && personalInfoForm.get('city')?.touched" class="error-message">
+              <div *ngIf="personalInfoForm.get('cityId')?.invalid && personalInfoForm.get('cityId')?.touched" class="error-message">
                 City is required
               </div>
             </div>
@@ -287,12 +287,12 @@
                 type="text" 
                 id="street" 
                 class="form-input" 
-                formControlName="street"
+                formControlName="address"
                 placeholder="Enter your full street address"
-                [class.error]="personalInfoForm.get('street')?.invalid && personalInfoForm.get('street')?.touched"
+                [class.error]="personalInfoForm.get('address')?.invalid && personalInfoForm.get('address')?.touched"
               />
             </div>
-            <div *ngIf="personalInfoForm.get('street')?.invalid && personalInfoForm.get('street')?.touched" class="error-message">
+            <div *ngIf="personalInfoForm.get('address')?.invalid && personalInfoForm.get('address')?.touched" class="error-message">
               Street address is required
             </div>
           </div>
@@ -493,15 +493,15 @@
             <div class="investment-type-options">
               <label *ngFor="let type of investmentTypes" 
                      class="investment-type-card" 
-                     [class.selected]="investorPreferencesForm.get('investmentType')?.value === type.value">
-                <input type="radio" [value]="type.value" formControlName="investmentType" (change)="onInvestmentTypeChange()">
+                     [class.selected]="investorPreferencesForm.get('investingType')?.value === type.value">
+                <input type="radio" [value]="type.value" formControlName="investingType" (change)="onInvestmentTypeChange()">
                 <div class="card-content">
                   <h4>{{ type.label }}</h4>
                   <p>{{ type.description }}</p>
                 </div>
               </label>
             </div>
-            <div *ngIf="investorPreferencesForm.get('investmentType')?.invalid && investorPreferencesForm.get('investmentType')?.touched" class="error-message">
+            <div *ngIf="investorPreferencesForm.get('investingType')?.invalid && investorPreferencesForm.get('investingType')?.touched" class="error-message">
               Please select your investment type
             </div>
           </div>
@@ -520,7 +520,7 @@
                 </div>
               </label>
             </div>
-            <div *ngIf="investorPreferencesForm.get('investmentStages')?.invalid && investorPreferencesForm.get('investmentStages')?.touched" class="error-message">
+            <div *ngIf="investorPreferencesForm.get('interestedBusinessStages')?.invalid && investorPreferencesForm.get('interestedBusinessStages')?.touched" class="error-message">
               Please select at least one investment stage
             </div>
           </div>

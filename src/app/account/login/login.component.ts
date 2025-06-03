@@ -1,7 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { UserLogin } from '../../_models/user';
+import { JwtService } from '../../_services/jwt.service';
+import { ToastrService } from 'ngx-toastr';
+import { AuthService } from '../../_services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -14,7 +19,12 @@ export class LoginComponent implements OnInit, OnDestroy {
   showPassword = false;
   isLoading = false;
   isDarkMode = false;
-  
+  loginData: UserLogin = {
+    email: "",
+    password: ""
+  };
+  private unsubscribe: Subscription[] = [];
+
   // Carousel properties
   private carouselInterval: any;
   private currentSlideIndex = 3;
@@ -25,7 +35,12 @@ export class LoginComponent implements OnInit, OnDestroy {
     'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
   ];
 
-  constructor(private formBuilder: FormBuilder) {}
+  constructor(private formBuilder: FormBuilder
+    , private jwt: JwtService
+    , private toastr: ToastrService
+    , private router: Router
+    , private auth: AuthService
+  ) { }
 
   ngOnInit(): void {
     this.initializeForm();
@@ -42,8 +57,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   private initializeForm(): void {
     this.loginForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      rememberMe: [false]
+      password: ['', [Validators.required, Validators.minLength(6)]]
+      //, rememberMe: [false]
     });
   }
 
@@ -68,10 +83,10 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     // Remove active class from current slide
     slides[this.currentSlideIndex].classList.remove('active');
-    
+
     // Move to next slide
     this.currentSlideIndex = (this.currentSlideIndex + 1) % slides.length;
-    
+
     // Add active class to new slide
     slides[this.currentSlideIndex].classList.add('active');
   }
@@ -88,16 +103,16 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   private applyTheme(): void {
     const body = document.body;
-    
+
     // Add transition class for smooth animation
     body.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-    
+
     if (this.isDarkMode) {
       body.classList.add('dark');
     } else {
       body.classList.remove('dark');
     }
-    
+
     // Remove transition after animation completes
     setTimeout(() => {
       body.style.transition = '';
@@ -107,13 +122,25 @@ export class LoginComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
-      
-      // Simulate API call
-      setTimeout(() => {
-        console.log('Login form submitted:', this.loginForm.value);
-        this.isLoading = false;
-        // implelemt the service here
-      }, 2000);
+
+      this.loginData = { ...this.loginForm.value }
+      var sub = this.jwt.generateToken(this.loginData).subscribe({
+        next: (response) => {
+          if (response.isSuccess) {
+            this.toastr.success(response.message, "Success");
+            this.auth.login(response.data);
+            setTimeout(() => {
+              //this.router.navigate(['admin/investor']);
+            }, 1500);
+
+          } else {
+            this.toastr.error(response.message, "Error");
+          }
+        }, error: (err) => {
+          this.toastr.error("something went wrong", "Error");
+        }
+      })
+      this.unsubscribe.push(sub);
     } else {
       // Mark all fields as touched to show validation errors
       Object.keys(this.loginForm.controls).forEach(key => {
