@@ -320,7 +320,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="cancel-btn" (click)="closeStatusUpdateModal()">Cancel</button>
-            <button type="button" class="confirm-btn" (click)="submitStatusUpdate()">Update</button>
+            <button type="button" class="confirm-btn" style="background-color: #2ed134; color: #fff;" (click)="submitStatusUpdate()">Update</button>
         </div>
     </div>
 </div>
@@ -346,7 +346,7 @@
             </div>
             <div class="modal-footer activate-deactivate-modal-footer">
                 <button type="button" class="cancel-btn" (click)="closeSoftDeleteModal()">Cancel</button>
-                <button type="button" class="confirm-btn delete" (click)="performSoftDelete()">
+                <button type="button" class="confirm-btn delete" style="background-color: red; color: #fff;"(click)="performSoftDelete()">
                     <i class='bx bx-trash'></i> Delete
                 </button>
             </div>
