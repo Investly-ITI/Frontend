@@ -12,7 +12,8 @@ export class BusinessDto {
         public capital?: number,
         public isDrafted?: boolean,
         public filePath?: string,
-        public status?: BusinessIdeaStatus, 
+        public status?: BusinessIdeaStatus,
+        public rejectedReason?: string,
         public createdAt?: string, 
         public categoryName?: string,
         public founderName?: string
@@ -33,8 +34,7 @@ export class BusinessSearchDto {
         public searchInput?: string,
         public categoryId?: number,
         public founderId?: number,
-        public stage?: Stage ,
-
+        public stage?: Stage,
     ) { }
 }
 

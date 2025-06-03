@@ -153,8 +153,7 @@
                                 <th>Founder</th>
                                 <th>Category</th>
                                 <th>
-                                    Status
-                                
+                                    Status   
                                 </th>
                                 <th>Actions</th>
                             </tr>
@@ -172,15 +171,7 @@
                                             'color': idea.status === BusinessIdeaStatus.Active ? '#2ed134' :
                                                      idea.status === BusinessIdeaStatus.Pending ? '#ffab00' :
                                                      idea.status === BusinessIdeaStatus.Rejected ? '#e6382f' :
-                                                     idea.status === BusinessIdeaStatus.Inactive ? '#6c757d' : '#000',
-                                            'background-color': idea.status === BusinessIdeaStatus.Active ? 'var(--status-active-bg, #cff6dd)' :
-                                                                idea.status === BusinessIdeaStatus.Pending ? 'var(--status-pending-bg, #fff0c2)' :
-                                                                idea.status === BusinessIdeaStatus.Rejected ? 'var(--status-rejected-bg, #fde2e0)' :
-                                                                idea.status === BusinessIdeaStatus.Inactive ? 'var(--status-inactive-bg, #e9ecef)' : 'transparent',
-                                            'padding': '4px 8px',
-                                            'border-radius': '10px', 
-                                            'font-weight': '500', 
-                                            'font-size': '0.85em' 
+                                                     idea.status === BusinessIdeaStatus.Inactive ? '#adb5bd' : '#000'
                                         }">
                                         {{ idea.status ? getBusinessIdeaStatusName(idea.status) : 'N/A' }}
                                     </span>
@@ -284,6 +275,10 @@
                         <strong class="detail-label">AI Rate:</strong>
                         <span class="detail-value">{{ selectedIdeaForDetails.airate != null ? selectedIdeaForDetails.airate + '%' : 'N/A' }}</span>
                     </div>
+                    <div class="detail-row" *ngIf="selectedIdeaForDetails.rejectedReason">
+                        <strong class="detail-label">Rejected Reason:</strong>
+                        <span class="detail-value">{{ selectedIdeaForDetails.rejectedReason }}</span>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -296,35 +291,39 @@
 
 
     <div class="modal-overlay" [ngClass]="{ 'show': isStatusUpdateModalOpen }" (click)="closeStatusUpdateModal()">
-        <div class="modal-container" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-                <h3>Update Business Idea Status</h3>
-                <button type="button" class="close-btn" (click)="closeStatusUpdateModal()">
-                    <i class='bx bx-x'></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Current Status: 
-                    <strong [ngStyle]="{
-                        'color': newStatus === BusinessIdeaStatus.Active ? '#2ed134' :
-                                 newStatus === BusinessIdeaStatus.Pending ? '#ffab00' :
-                                 newStatus === BusinessIdeaStatus.Rejected ? '#e6382f' :
-                                 newStatus === BusinessIdeaStatus.Inactive ? '#6c757d' : '#000'
-                    }">{{ currentStatusName }}</strong>
-                </p>
-                <select [(ngModel)]="newStatus" name="newStatusSelect" class="form-control" style="width: 100%; padding: 10px; margin-top:10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
-                    <option [ngValue]="null" disabled>Select New Status</option>
-                    <option *ngFor="let status of businessStatuses" [ngValue]="status">
-                        {{ getBusinessIdeaStatusName(status) }}
-                    </option>
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="cancel-btn" (click)="closeStatusUpdateModal()">Cancel</button>
-                <button type="button" class="confirm-btn" (click)="submitStatusUpdate()">Update</button>
+    <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Update Business Idea Status</h3>
+            <button type="button" class="close-btn" (click)="closeStatusUpdateModal()">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Current Status:
+                <strong>{{ currentStatusName }}</strong>
+            </p>
+            <select [(ngModel)]="newStatus" name="newStatusSelect" class="form-control" style="width: 100%; padding: 10px; margin-top:10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
+                <option [ngValue]="null" disabled>Select New Status</option>
+                <option *ngFor="let status of businessStatuses" [ngValue]="status">
+                    {{ getBusinessIdeaStatusName(status) }}
+                </option>
+            </select>
+
+            <!-- Show textarea only if Rejected is selected -->
+            <div class="form-group" *ngIf="newStatus === BusinessIdeaStatus.Rejected">
+                <label for="rejectedReason">Reason for Rejection:</label>
+                <textarea id="rejectedReason" [(ngModel)]="rejectedReasonInput" name="rejectedReason"
+                          rows="4" class="form-control" required
+                          placeholder="Please provide a detailed reason for rejecting this idea."
+                          style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc;"></textarea>
             </div>
         </div>
+        <div class="modal-footer">
+            <button type="button" class="cancel-btn" (click)="closeStatusUpdateModal()">Cancel</button>
+            <button type="button" class="confirm-btn" (click)="submitStatusUpdate()">Update</button>
+        </div>
     </div>
+</div>
 
     <div class="modal-overlay" [ngClass]="{ 'show': isSoftDeleteModalOpen }" (click)="closeSoftDeleteModal()">
         <div class="modal-container activate-deactivate-modal" (click)="$event.stopPropagation()">

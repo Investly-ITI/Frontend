@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit ,HostListener} from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { FormsModule } from '@angular/forms'; 
 import { BusinessService } from '../_services/businesses.service'; 
@@ -7,7 +7,7 @@ import { getBusinessIdeaStatusLabel, getStageLabel } from '../../_shared/utils/e
 import { BusinessIdeaStatus, Stage } from '../../_shared/enums';
 
 import { Observable, catchError, of } from 'rxjs';
-import Swal from 'sweetalert2';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-business-ideas',
@@ -25,6 +25,7 @@ export class BusinessIdeasComponent implements OnInit {
   selectedIdeaForDetails: BusinessDto | null = null;
   isLoading: boolean = false;
   error: string | null = null;
+  rejectedReasonInput: string = '';
 
   searchParams: BusinessSearchDto = new BusinessSearchDto();
 
@@ -60,7 +61,10 @@ export class BusinessIdeasComponent implements OnInit {
 
   isDarkMode: boolean = false; 
 
-  constructor(private businessService: BusinessService) { }
+  constructor(
+    private businessService: BusinessService,
+    private toastr: ToastrService // Inject ToastrService
+  ) { }
 
   ngOnInit(): void {
     this.loadBusinessIdeas();
@@ -118,7 +122,18 @@ export class BusinessIdeasComponent implements OnInit {
 
     }
   }
-
+ @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    const actionDropdown = target.closest('.action-dropdown');
+    const advancedSearch = target.closest('.advanced-search-dropdown');
+    if (!actionDropdown) {
+      this.dropdownStates = this.dropdownStates.map(() => false);
+    }
+    if (!advancedSearch) {
+      this.isAdvancedSearchOpen = false;
+    }
+  }
 
   openSoftDeleteModal(businessId: number): void {
     this.selectedIdeaIdForSoftDelete = businessId;
@@ -136,16 +151,16 @@ export class BusinessIdeasComponent implements OnInit {
         .subscribe({
           next: (res) => {
             if (res.isSuccess) {
-              Swal.fire('Deleted!', 'Business idea has been deleted.', 'success');
+              this.toastr.success('Business idea has been deleted.', 'Deleted!');
               this.loadBusinessIdeas(); 
               this.closeSoftDeleteModal();
               this.loadIdeasCount();
             } else {
-              Swal.fire('Error!', res.message || 'Failed to delete business idea.', 'error');
+              this.toastr.error(res.message || 'Failed to delete business idea.', 'Error!');
             }
           },
           error: (err) => {
-            Swal.fire('Error!', 'An error occurred while deleting.', 'error');
+            this.toastr.error('An error occurred while deleting.', 'Error!');
             console.error('Soft delete error:', err);
           }
         });
@@ -156,8 +171,18 @@ export class BusinessIdeasComponent implements OnInit {
     this.selectedBusinessId = businessId;
     this.newStatus = currentStatus !== undefined ? currentStatus : null;
     this.currentStatusName = currentStatus !== undefined ? this.getBusinessIdeaStatusName(currentStatus) : 'N/A';
-    this.isStatusUpdateModalOpen = true;
 
+    const idea = this.businessIdeas.find(b => b.id === businessId);
+    if (idea && idea.status === this.BusinessIdeaStatus.Rejected) {
+      this.rejectedReasonInput = idea.rejectedReason || '';
+    } else {
+      this.rejectedReasonInput = '';
+    }
+    this.isStatusUpdateModalOpen = true;
+    if (currentStatus !== undefined && currentStatus !== null) {
+      this.businessStatuses = (Object.values(BusinessIdeaStatus)
+        .filter(value => typeof value === 'number' && value !== currentStatus) as BusinessIdeaStatus[]);
+    }
   }
 
   closeStatusUpdateModal(): void {
@@ -165,29 +190,41 @@ export class BusinessIdeasComponent implements OnInit {
     this.selectedBusinessId = null;
     this.newStatus = null;
     this.currentStatusName = null;
+    this.rejectedReasonInput = '';
   }
 
   submitStatusUpdate(): void {
     if (this.selectedBusinessId !== null && this.newStatus !== null) {
-      this.businessService.updateBusinessStatus(this.selectedBusinessId, this.newStatus)
+      if (this.newStatus === this.BusinessIdeaStatus.Rejected) {
+        if (!this.rejectedReasonInput || !this.rejectedReasonInput.trim()) {
+          this.toastr.error('Rejected reason is required.', 'Error!');
+          console.error('Rejected reason is required.');
+          return;
+        }
+      }
+      const rejectedReason = this.newStatus === this.BusinessIdeaStatus.Rejected ? this.rejectedReasonInput : undefined;
+      this.businessService.updateBusinessStatus(this.selectedBusinessId, this.newStatus, rejectedReason)
         .subscribe({
           next: (res) => {
             if (res.isSuccess) {
-              Swal.fire('Updated!', 'Business idea status has been updated.', 'success');
+              this.toastr.success('Business idea status has been updated.', 'Updated!');
               this.closeStatusUpdateModal();
               this.loadBusinessIdeas();
               this.loadIdeasCount(); 
             } else {
-              Swal.fire('Error!', res.message || 'Failed to update status.', 'error');
+              this.toastr.error(res.message || 'Failed to update status.', 'Error!');
+              if (res.message && res.message.toLowerCase().includes('rejected status requires a reason')) {
+                console.error('Rejected reason is required.');
+              }
             }
           },
           error: (err) => {
-            Swal.fire('Error!', 'An error occurred while updating status.', 'error');
+            this.toastr.error('An error occurred while updating status.', 'Error!');
             console.error('Status update error:', err);
           }
         });
     } else {
-      Swal.fire('Warning', 'Please select a status.', 'warning');
+      this.toastr.warning('Please select a status.', 'Warning');
     }
   }
 
@@ -209,7 +246,6 @@ export class BusinessIdeasComponent implements OnInit {
 openViewDetailsModal(idea: BusinessDto): void {
         this.selectedIdeaForDetails = idea;
         this.isViewDetailsModalOpen = true;
-        // Close action dropdown if open
         this.dropdownStates.fill(false);
     }
 

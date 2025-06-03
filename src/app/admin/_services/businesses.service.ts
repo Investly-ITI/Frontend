@@ -9,7 +9,7 @@ import { environment } from '../../../../src/environments/environment';
   providedIn: 'root'
 })
 export class BusinessService {
-  private baseUrl = `${environment.apiUrl}/Business`;
+  private baseUrl = `${environment.apiUrl}/api/admin/Business`;
 
   constructor(private http: HttpClient) { }
 
@@ -42,8 +42,11 @@ export class BusinessService {
     return this.http.put<ResponseDto<object>>(`${this.baseUrl}/${id}/Delete`, {});
   }
 
-  updateBusinessStatus(id: number, newStatus: BusinessIdeaStatus): Observable<ResponseDto<object>> {
-    const params = new HttpParams().set('newStatus', newStatus.toString());
+  updateBusinessStatus(id: number, newStatus: BusinessIdeaStatus, rejectedReason?: string): Observable<ResponseDto<object>> {
+    let params = new HttpParams().set('newStatus', newStatus.toString());
+    if (newStatus === BusinessIdeaStatus.Rejected && rejectedReason) {
+      params = params.set('rejectedReason', rejectedReason);
+    }
     return this.http.put<ResponseDto<object>>(`${this.baseUrl}/${id}/Update`, {}, { params });
   }
   GetBusinessIdeasCounts(): Observable<ResponseDto<any>> {
