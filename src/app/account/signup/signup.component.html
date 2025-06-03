@@ -216,11 +216,7 @@
           <div class="form-group">
             <label for="phoneNumber">Phone Number:</label>
             <div class="phone-input-container">
-              <select class="country-code-select" formControlName="countryCode">
-                <option *ngFor="let country of countryCodes" [value]="country.code">
-                  {{country.code}} ({{country.country}})
-                </option>
-              </select>
+              <input class="country-code-select" formControlName="countryCode"  readonly/>
               <div class="input-container phone-input">
                 <i class='bx bx-phone'></i>
                 <input 
@@ -252,8 +248,8 @@
                   formControlName="government"
                   (change)="onGovernorateChange($any($event.target).value)"
                   [class.error]="personalInfoForm.get('government')?.invalid && personalInfoForm.get('government')?.touched">
-                  <option value="">Select Government/State</option>
-                  <option *ngFor="let gov of governorates" [value]="gov">{{ gov }}</option>
+                  <option value="">Select Government</option>
+                  <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
                 </select>
               </div>
               <div *ngIf="personalInfoForm.get('government')?.invalid && personalInfoForm.get('government')?.touched" class="error-message">
@@ -273,7 +269,7 @@
                   [disabled]="!selectedGovernorate"
                   [class.error]="personalInfoForm.get('city')?.invalid && personalInfoForm.get('city')?.touched">
                   <option value="">{{ selectedGovernorate ? 'Select City' : 'Select Government First' }}</option>
-                  <option *ngFor="let city of availableCities" [value]="city">{{ city }}</option>
+                  <option *ngFor="let city of citiesByGovernorate" [value]="city.id">{{ city.nameEn }}</option>
                 </select>
               </div>
               <div *ngIf="personalInfoForm.get('city')?.invalid && personalInfoForm.get('city')?.touched" class="error-message">
@@ -333,8 +329,8 @@
                   [class.error]="personalInfoForm.get('gender')?.invalid && personalInfoForm.get('gender')?.touched"
                 >
                   <option value="">Select your gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
+                  <option [value]="Genders.Male">{{Genders.Male}}</option>
+                  <option [value]="Genders.Female">{{Genders.Female}}</option>
                 </select>
               </div>
               <div *ngIf="personalInfoForm.get('gender')?.invalid && personalInfoForm.get('gender')?.touched" class="error-message">

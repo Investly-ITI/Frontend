@@ -2,6 +2,11 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { Governorate } from '../../_models/governorate';
+import { City } from '../../_models/city';
+import { GovernrateService } from '../../_services/governorate.service';
+import { Subscription } from 'rxjs';
+import { Gender } from '../../_shared/general';
 
 @Component({
   selector: 'app-signup',
@@ -15,6 +20,7 @@ export class SignupComponent implements OnInit, OnDestroy {
   userType: 'investor' | 'founder' | null = null;
   isDarkMode = false;
   isLoading = false;
+  private unsubscribe: Subscription[] = []; 
 
   // Form groups for each step
   typeSelectionForm!: FormGroup;
@@ -41,7 +47,7 @@ export class SignupComponent implements OnInit, OnDestroy {
     { code: '+91', country: 'India' }
   ];
 
-  selectedCountryCode = '+20';
+  selectedCountryCode = this.countryCodes.find(c=>c.code==='+20');
 
   // Investment options
   investmentTypes = [
@@ -70,70 +76,14 @@ export class SignupComponent implements OnInit, OnDestroy {
   selectedFundingMax = 100000;   // 100K EGP (initial maximum)
 
   // Egyptian Governorates list
-  governorates = [
-    'Cairo',
-    'Alexandria',
-    'Giza',
-    'Sharkia',
-    'Dakahlia',
-    'Beheira',
-    'Kafr El Sheikh',
-    'Gharbia',
-    'Monufia',
-    'Qalyubia',
-    'Fayyum',
-    'Beni Suef',
-    'Minya',
-    'Asyut',
-    'Sohag',
-    'Qena',
-    'Luxor',
-    'Aswan',
-    'Red Sea',
-    'New Valley',
-    'Matrouh',
-    'North Sinai',
-    'South Sinai',
-    'Ismailia',
-    'Suez',
-    'Port Said',
-    'Damietta'
-  ];
+  governorates:Governorate[] = [];
 
   // Egyptian Cities grouped by governorate
-  citiesByGovernorate: { [key: string]: string[] } = {
-    'Cairo': ['Nasr City', 'Heliopolis', 'Maadi', 'Zamalek', 'Downtown', 'New Cairo', 'Helwan', 'Shubra', 'Dokki', 'Giza Square'],
-    'Alexandria': ['Montaza', 'Raml Station', 'Sidi Gaber', 'Smouha', 'Miami', 'Glim', 'Agami', 'Borg El Arab', 'Dekheila', 'Abu Qir'],
-    'Giza': ['6th of October', 'Sheikh Zayed', 'Dokki', 'Mohandessin', 'Faisal', 'Haram', 'Imbaba', 'Bulaq al-Dakrur', 'Kerdasa', 'Badrashein'],
-    'Sharkia': ['Zagazig', 'Bilbeis', 'Minya al-Qamh', 'Abu Hammad', 'Faqous', 'Kafr Saqr', 'Awlad Saqr', 'Mashtul al-Suq', 'Diarb Najm', 'Abu Kabir'],
-    'Dakahlia': ['Mansoura', 'Talkha', 'Mit Ghamr', 'Dekernes', 'Aga', 'Manzala', 'Temay al-Amdid', 'Sherbin', 'Matariya', 'Belqas'],
-    'Beheira': ['Damanhour', 'Kafr al-Dawwar', 'Rashid', 'Edko', 'Abu al-Matamir', 'Abu Hummus', 'Delengat', 'Mahmudiyya', 'Rahmaniyya', 'Badr'],
-    'Kafr El Sheikh': ['Kafr El Sheikh', 'Desouk', 'Fuwwah', 'Metoubes', 'Qallin', 'Sidi Salem', 'Hamoul', 'Baltim', 'Riyadh', 'Beila'],
-    'Gharbia': ['Tanta', 'Mahalla al-Kubra', 'Kafr al-Zayat', 'Zifta', 'Santa', 'Samannoud', 'Basyoun', 'Qutour', 'Kafr al-Sheikh'],
-    'Monufia': ['Shibin al-Kom', 'Menouf', 'Ashmoun', 'al-Bagour', 'Quesna', 'Berket al-Saba', 'Tala', 'al-Shohada', 'Sadat City'],
-    'Qalyubia': ['Banha', 'Shubra al-Khayma', 'al-Qanater al-Khairiyya', 'Qaha', 'Kafr Shukr', 'Tokh', 'Khosous', 'Obour City'],
-    'Fayyum': ['Fayyum', 'Tamiya', 'Snuris', 'Itsa', 'Yusuf al-Siddiq', 'Ibshaway'],
-    'Beni Suef': ['Beni Suef', 'al-Wasta', 'Naser', 'Ihnasya', 'ببا', 'Fashn', 'Sumusta'],
-    'Minya': ['Minya', 'Mallawi', 'Samalut', 'Matay', 'Bani Mazar', 'Abu Qurqas', 'Derr Mawas', 'Maghagha', 'Adwa'],
-    'Asyut': ['Asyut', 'Dayrut', 'Qusiya', 'Manfalut', 'Abnoub', 'Abu Tig', 'Sahel Selim', 'al-Badari', 'Sidfa', 'al-Ghanayim', 'Abnub'],
-    'Sohag': ['Sohag', 'Akhmeem', 'al-Balyana', 'al-Maragha', 'al-Monsha\'a', 'Dar al-Salam', 'Juhayna', 'Saqultah', 'Gerga', 'Tahta', 'Tima'],
-    'Qena': ['Qena', 'Nag Hammadi', 'Qus', 'Dishna', 'Abu Tesht', 'Naqada', 'Farshut', 'al-Waqf'],
-    'Luxor': ['Luxor', 'Esna', 'Armant', 'al-Tod'],
-    'Aswan': ['Aswan', 'Kom Ombo', 'Edfu', 'Nasr al-Nuba', 'Kalabsha', 'Abu Simbel'],
-    'Red Sea': ['Hurghada', 'Safaga', 'al-Qusayr', 'Marsa Alam', 'Shalatin', 'Halaib'],
-    'New Valley': ['Kharga', 'Mut', 'Farafra', 'Balat', 'Paris'],
-    'Matrouh': ['Marsa Matrouh', 'al-Hamam', 'Dabaa', 'al-Alamein', 'Sallum', 'Siwa'],
-    'North Sinai': ['Arish', 'Sheikh Zuweid', 'Rafah', 'Bir al-Abd', 'al-Hasana'],
-    'South Sinai': ['Sharm al-Sheikh', 'Dahab', 'Nuweiba', 'Taba', 'Saint Catherine', 'Ras Sidr', 'Abu Rudeis'],
-    'Ismailia': ['Ismailia', 'al-Tal al-Kabir', 'Abu Suwir', 'Qantara Sharq', 'Qantara Gharb', 'Kasaseen'],
-    'Suez': ['Suez', 'al-Arbaeen', 'Ataqah', 'Faisal'],
-    'Port Said': ['Port Said', 'Port Fouad', 'al-Arab', 'al-Manakh', 'al-Sharq', 'al-Dawahy'],
-    'Damietta': ['Damietta', 'Ras al-Bar', 'Faraskur', 'Zarqa', 'Kafr al-Batikh']
-  };
+  citiesByGovernorate:City[]=[];
+  selectedGovernorate: boolean=false;
 
-  selectedGovernorate: string = '';
-  availableCities: string[] = [];
-
+  //
+Genders=Gender;
   // Carousel properties
   private carouselInterval: any;
   private currentSlideIndex = 0;
@@ -144,12 +94,16 @@ export class SignupComponent implements OnInit, OnDestroy {
     'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
   ];
 
-  constructor(private formBuilder: FormBuilder) {}
+  constructor(
+    private formBuilder: FormBuilder
+    ,private governorateService:GovernrateService
+  ) {}
 
   ngOnInit(): void {
     this.initializeForms();
     this.checkDarkMode();
     this.startCarousel();
+    this.loadGovernorates();
   }
 
   ngOnDestroy(): void {
@@ -157,6 +111,38 @@ export class SignupComponent implements OnInit, OnDestroy {
       clearInterval(this.carouselInterval);
     }
   }
+
+  public loadGovernorates(){
+     var subGov=this.governorateService.getGovernrates().subscribe({
+      next:(response)=> {
+        if(response.isSuccess==true){
+          this.governorates=response.data;
+        }
+      },
+      error:(err)=>{
+       console.log("errr");
+      }
+     })
+     this.unsubscribe.push(subGov);
+  }
+
+    // Handle governorate selection change
+  onGovernorateChange(governorate: number) {
+    var subcity= this.governorateService.getCitiesByGovernrateId(governorate).subscribe({
+      next:(response)=>{
+         if(response.isSuccess){
+          this.citiesByGovernorate=response.data;
+          this.selectedGovernorate=true;
+         }
+      },error:(err)=>{
+      console.log(err);
+      }
+    })
+
+    // this.personalInfoForm.patchValue({ city: '' });
+    
+  }
+
 
   private initializeForms(): void {
     // Step 1: User type selection
@@ -170,14 +156,17 @@ export class SignupComponent implements OnInit, OnDestroy {
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       dateOfBirth: ['', [Validators.required, this.ageValidator]],
-      countryCode: ['+20', Validators.required],
+      countryCode: [`${this.selectedCountryCode?.code } ${this.selectedCountryCode?.country}`, Validators.required],
       phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{8,15}$/)]],
       street: ['', Validators.required],
       government: ['', Validators.required],
       city: ['', Validators.required],
       nationalId: ['', [Validators.required, Validators.pattern(/^\d{14}$/)]],
       gender: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(8), this.passwordValidator]],
+      password: ['', [Validators.required, 
+        //Validators.minLength(8),
+       //  this.passwordValidator
+        ]],
       confirmPassword: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
 
@@ -291,13 +280,16 @@ export class SignupComponent implements OnInit, OnDestroy {
 
   // Step navigation
   nextStep(): void {
-    if (this.validateCurrentStep()) {
-      const maxSteps = this.userType === 'founder' ? 3 : 4;
+   // if (this.validateCurrentStep()) {
+   console.log(this.userType);
+      this.userType="investor";
+      const maxSteps=4;
+      //const maxSteps = this.userType === 'founder' ? 3 : 4;
       if (this.currentStep < maxSteps) {
         this.currentStep++;
         this.animateStepTransition('next');
       }
-    }
+    //}
   }
 
   previousStep(): void {
@@ -532,11 +524,5 @@ export class SignupComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Handle governorate selection change
-  onGovernorateChange(governorate: string) {
-    this.selectedGovernorate = governorate;
-    this.availableCities = this.citiesByGovernorate[governorate] || [];
-    // Reset city selection when governorate changes
-    this.personalInfoForm.patchValue({ city: '' });
-  }
+
 } 
