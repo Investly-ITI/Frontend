@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { BusinessSearchDto, BusinessListDto, ResponseDto, BusinessDto } from '../../_models/businesses';
+import { BusinessSearchDto, BusinessListDto, BusinessDto } from '../../_models/businesses';
+import { Response } from '../../_models/response';
 import { BusinessIdeaStatus } from '../../_shared/enums';
 import { environment } from '../../../../src/environments/environment';
 
@@ -13,7 +14,7 @@ export class BusinessService {
 
   constructor(private http: HttpClient) { }
 
-  getAllBusinesses(searchDto: BusinessSearchDto): Observable<ResponseDto<BusinessListDto>> {
+  getAllBusinesses(searchDto: BusinessSearchDto): Observable<Response<BusinessListDto>> {
     let params = new HttpParams();
 
     if (searchDto.pageSize !== undefined && searchDto.pageSize !== null) {
@@ -35,22 +36,22 @@ export class BusinessService {
       params = params.set('stage', searchDto.stage.toString());
     }
 
-    return this.http.get<ResponseDto<BusinessListDto>>(`${this.baseUrl}/All`, { params });
+    return this.http.get<Response<BusinessListDto>>(`${this.baseUrl}/All`, { params });
   }
 
-  softDeleteBusiness(id: number): Observable<ResponseDto<object>> {
-    return this.http.put<ResponseDto<object>>(`${this.baseUrl}/${id}/Delete`, {});
+  softDeleteBusiness(id: number): Observable<Response<object>> {
+    return this.http.put<Response<object>>(`${this.baseUrl}/${id}/Delete`, {});
   }
 
-  updateBusinessStatus(id: number, newStatus: BusinessIdeaStatus, rejectedReason?: string): Observable<ResponseDto<object>> {
+  updateBusinessStatus(id: number, newStatus: BusinessIdeaStatus, rejectedReason?: string): Observable<Response<object>> {
     let params = new HttpParams().set('newStatus', newStatus.toString());
     if (newStatus === BusinessIdeaStatus.Rejected && rejectedReason) {
       params = params.set('rejectedReason', rejectedReason);
     }
-    return this.http.put<ResponseDto<object>>(`${this.baseUrl}/${id}/Update`, {}, { params });
+    return this.http.put<Response<object>>(`${this.baseUrl}/${id}/Update`, {}, { params });
   }
-  GetBusinessIdeasCounts(): Observable<ResponseDto<any>> {
-      var result = this.http.get<ResponseDto<any>>(`${this.baseUrl}/ideas-counts`);
+  GetBusinessIdeasCounts(): Observable<Response<any>> {
+      var result = this.http.get<Response<any>>(`${this.baseUrl}/ideas-counts`);
       return result;
     }
 }

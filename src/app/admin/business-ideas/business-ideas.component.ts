@@ -2,7 +2,8 @@ import { Component, OnInit ,HostListener} from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { FormsModule } from '@angular/forms'; 
 import { BusinessService } from '../_services/businesses.service'; 
-import { BusinessDto, BusinessListDto, BusinessSearchDto, ResponseDto } from '../../_models/businesses';
+import { BusinessDto, BusinessListDto, BusinessSearchDto } from '../../_models/businesses';
+import { Response } from '../../_models/response';
 import { getBusinessIdeaStatusLabel, getStageLabel } from '../../_shared/utils/enum.utils';
 import { BusinessIdeaStatus, Stage } from '../../_shared/enums';
 
@@ -81,7 +82,7 @@ export class BusinessIdeasComponent implements OnInit {
           this.error = 'Failed to load business ideas. Please try again.';
           this.isLoading = false;
           console.error('Error loading businesses:', err);
-          return of(new ResponseDto<BusinessListDto>());
+          return of(new Response<BusinessListDto>({ businesses: [], totalCount: 0 }, false, this.error, 500));
         })
       )
       .subscribe(response => {

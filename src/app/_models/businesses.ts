@@ -37,12 +37,3 @@ export class BusinessSearchDto {
         public stage?: Stage,
     ) { }
 }
-
-export class ResponseDto<T> {
-    constructor(
-        public data: T | null = null,
-        public isSuccess: boolean = false,
-        public message: string | null = null,
-        public statusCode: number = 0
-    ) { }
-}
