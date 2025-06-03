@@ -16,6 +16,16 @@ export enum InvestorInvestingType {
      Founder = 3,
  }
 
+ export enum BusinessIdeaStatus {
+   Active = 1,
+    Inactive = 2,
+    Deleted = 3,
+    Pending = 4,
+    Rejected = 5,
+
+}
+
+
  export enum InvestingStages{
     ideation=1,
     startup=2,

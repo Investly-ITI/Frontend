@@ -1,0 +1,354 @@
+<div class="parent3" [ngClass]="{'dark': isDarkMode}">
+    <section id="content">
+        <main>
+            <div class="head-title">
+                <div class="left">
+                    <ul class="breadcrumb">
+                        <li><a>Dashboard</a></li>
+                        <li><i class='bx bx-chevron-right'></i></li>
+                        <li><a class="active">Business Ideas</a></li>
+                    </ul>
+                </div>
+            </div>
+             <div class="box-info">
+    <!-- Active Entities Count -->
+    <li>
+        <i class='bx bxs-bulb' style="font-size: 2.5em; color: #2ed134;"></i>
+        <span class="text">
+            <h3 class="animated-number">
+                <span class="digit-container"
+                    *ngFor="let digit of getDigitsArray(displayActiveCount); let i = index">
+                    <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                        [ngClass]="{'animate': animationComplete}">
+                        {{ digit }}
+                    </span>
+                </span>
+            </h3>
+            <p>Active {{ entityNamePlural }}</p>
+        </span>
+    </li>
+     <!-- Inactive Entities Count -->
+    <li>
+        <i class='bx bxs-bulb' style="font-size: 2.5em; color: #6c757d;"></i>
+        <span class="text">
+            <h3 class="animated-number">
+                <span class="digit-container"
+                    *ngFor="let digit of getDigitsArray(displayInactiveCount); let i = index">
+                    <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                        [ngClass]="{'animate': animationComplete}">
+                        {{ digit }}
+                    </span>
+                </span>
+            </h3>
+            <p>Inactive {{ entityNamePlural }}</p>
+        </span>
+    </li>
+
+    <!-- Pending Entities Count -->
+    <li>
+        <i class='bx bxs-hourglass' style="font-size: 2.5em; color: #ffab00;"></i>
+        <span class="text">
+            <h3 class="animated-number">
+                <span class="digit-container"
+                    *ngFor="let digit of getDigitsArray(displayPendingCount); let i = index">
+                    <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                        [ngClass]="{'animate': animationComplete}">
+                        {{ digit }}
+                    </span>
+                </span>
+            </h3>
+            <p>Pending {{ entityNamePlural }}</p>
+        </span>
+    </li>
+    
+    <!-- Rejected Entities Count -->
+    <li>
+        <i class='bx bxs-no-entry' style="font-size: 2.5em; color: #e6382f;"></i>
+        <span class="text">
+            <h3 class="animated-number">
+                <span class="digit-container"
+                    *ngFor="let digit of getDigitsArray(displayRejectedCount); let i = index">
+                    <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                        [ngClass]="{'animate': animationComplete}">
+                        {{ digit }}
+                    </span>
+                </span>
+            </h3>
+            <p>Rejected {{ entityNamePlural }}</p>
+        </span>
+    </li>
+    
+   
+</div>
+            <div class="table-data">
+                <div class="order">
+                    <div class="table-header">
+                        <div class="table-header-left">
+                            <h2>Business Ideas</h2>
+                        </div>
+
+                        <div class="table-header-right">
+                            <div class="items-per-page">
+                                <label>
+                                    <b>Items:</b>
+                                    <select [(ngModel)]="searchParams.pageSize" name="itemsPerPage"
+                                        (change)="onPageSizeChange()">
+                                        <option [ngValue]="5">5</option>
+                                        <option [ngValue]="10">10</option>
+                                        <option [ngValue]="25">25</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <form (submit)="onSearch(); $event.preventDefault();">
+                                <div class="form-input">
+                                    <input type="search" [(ngModel)]="searchParams.searchInput" name="searchQuery"
+                                        placeholder="Search by title, founder, category, location ..." (keyup.enter)="onSearch()">
+                                    <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
+                                    <div id="search-btns">
+                                        <button type="button" style="border: none; background-color: var(--light);"
+                                            title="Advanced Search" (click)="toggleAdvancedSearch($event)">
+                                            <i class='bx bx-filter'
+                                                style="color: var(--dark); margin-left: 0.7em; font-size: 1.3em;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="advanced-search-dropdown">
+                                    <div class="advanced-search-menu" [ngClass]="{'show': isAdvancedSearchOpen}" (click)="$event.stopPropagation()">
+                                        <div class="advanced-search-content">
+                                            <h4>Search Filters</h4>
+                                            <div class="filter-group">
+                                                <label for="stage">Stage:</label>
+                                                <select id="stage" [(ngModel)]="searchParams.stage" name="stage" (ngModelChange)="$event === null ? searchParams.stage = undefined : ''">
+                                                    <option [ngValue]="undefined">All Stages</option>
+                                                    <option *ngFor="let stage of stages" [ngValue]="stage">
+                                                        {{ getStageName(stage) }}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="advanced-search-actions">
+                                                <button type="button" class="clear-btn" (click)="searchParams.stage = undefined; onSearch(); isAdvancedSearchOpen = false;">
+                                                    <i class='bx bx-x'></i> Clear
+                                                </button>
+                                                <button type="button" class="apply-btn" (click)="applyAdvancedSearch()">
+                                                    <i class='bx bx-search'></i> Apply
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div *ngIf="isLoading && !businessIdeas.length" class="loading-indicator" style="text-align: center; padding: 20px;">Loading business ideas...</div>
+                    <div *ngIf="error && !isLoading" class="error-message" style="text-align: center; padding: 20px; color: var(--danger);">{{ error }}</div>
+                    <div *ngIf="!isLoading && !error && businessIdeas.length === 0" class="no-data-message" style="text-align: center; padding: 20px;">No business ideas found.</div>
+
+                    <table style="border-spacing: 15px; border-collapse: separate;" *ngIf="!isLoading || businessIdeas.length > 0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Founder</th>
+                                <th>Category</th>
+                                <th>
+                                    Status   
+                                </th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let idea of businessIdeas; let i = index">
+                                <td>
+                                    <p>{{ idea.title || 'N/A' }}</p>
+                                </td>
+                                <td>{{ idea.founderName || 'N/A' }}</td>
+                                <td>{{ idea.categoryName || 'N/A' }}</td>
+                                <td>
+                                    <span class="status"
+                                        [ngStyle]="{
+                                            'color': idea.status === BusinessIdeaStatus.Active ? '#2ed134' :
+                                                     idea.status === BusinessIdeaStatus.Pending ? '#ffab00' :
+                                                     idea.status === BusinessIdeaStatus.Rejected ? '#e6382f' :
+                                                     idea.status === BusinessIdeaStatus.Inactive ? '#adb5bd' : '#000'
+                                        }">
+                                        {{ idea.status ? getBusinessIdeaStatusName(idea.status) : 'N/A' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-dropdown" [ngClass]="{'active': dropdownStates[i]}">
+                                        <button class="action-btn" type="button" (click)="toggleDropdown(i, $event)">
+                                            <i class='bx bx-dots-vertical-rounded'></i>
+                                        </button>
+                                        <div class="action-menu">
+                                            <button class="action-item view" type="button" (click)="openViewDetailsModal(idea)">
+                                                <i class='bx bx-show'></i> View Details
+                                            </button>
+                                            <div class="action-divider"></div>
+                                            <button class="action-item edit" type="button" (click)="openStatusUpdateModal(idea.id, idea.status)">
+                                                <i class='bx bx-edit'></i> Update Status
+                                            </button>
+                                            <div class="action-divider"></div>
+                                            <button class="action-item delete" type="button" (click)="openSoftDeleteModal(idea.id)">
+                                                <i class='bx bx-trash'></i> Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr *ngIf="!isLoading && !error && businessIdeas.length === 0 && businessList && businessList.totalCount > 0">
+                                <td colspan="5" style="text-align: center; padding: 20px;">No business ideas match your current filters.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="pagination-controls" *ngIf="businessList && businessList.totalCount > searchParams.pageSize">
+                        <button (click)="prevPage()" [disabled]="searchParams.pageNumber === 1">
+                            <i class='bx bx-chevron-left' style="font-size: 1.7em;"></i>
+                        </button>
+                        <span>Page {{ searchParams.pageNumber }} of {{ businessList.totalCount > 0 ? Math.ceil(businessList.totalCount / searchParams.pageSize) : 1 }}</span>
+                        <button (click)="nextPage()"
+                            [disabled]="!businessList || searchParams.pageNumber * searchParams.pageSize >= businessList.totalCount">
+                            <i class='bx bx-chevron-right' style="font-size: 1.7em;"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <div class="modal-overlay" [ngClass]="{ 'show': isViewDetailsModalOpen }" (click)="closeViewDetailsModal()">
+        <div class="modal-container view-details-modal" (click)="$event.stopPropagation()" *ngIf="selectedIdeaForDetails">
+            <div class="modal-header">
+                <h3>Business Idea Details: {{ selectedIdeaForDetails.title }}</h3>
+                <button type="button" class="close-btn" (click)="closeViewDetailsModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+             <div class="modal-body">
+                <div class="details-content">
+                    <div class="detail-row">
+                        <strong class="detail-label">Title:</strong>
+                        <span class="detail-value">{{ selectedIdeaForDetails.title || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">Founder:</strong>
+                        <span class="detail-value">{{ selectedIdeaForDetails.founderName || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">Category:</strong>
+                        <span class="detail-value">{{ selectedIdeaForDetails.categoryName || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">Stage:</strong>
+                        <span class="detail-value">{{ selectedIdeaForDetails.stage ? getStageName(selectedIdeaForDetails.stage) : 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">Capital:</strong>
+                        <span class="detail-value">{{ (selectedIdeaForDetails.capital !== null && selectedIdeaForDetails.capital !== undefined) ? (selectedIdeaForDetails.capital | currency:'EGP ':'symbol':'1.2-2') : 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">Location:</strong>
+                        <span class="detail-value">{{ selectedIdeaForDetails.location || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">Created At:</strong>
+                        <span class="detail-value">{{ selectedIdeaForDetails.createdAt ? (selectedIdeaForDetails.createdAt | date:'medium') : 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">Status:</strong>
+                        <span class="detail-value status" [ngClass]="{
+                            'status-active': selectedIdeaForDetails.status === BusinessIdeaStatus.Active,
+                            'status-pending': selectedIdeaForDetails.status === BusinessIdeaStatus.Pending,
+                            'status-rejected': selectedIdeaForDetails.status === BusinessIdeaStatus.Rejected,
+                            'status-inactive': selectedIdeaForDetails.status === BusinessIdeaStatus.Inactive
+                        }">
+                            {{ selectedIdeaForDetails.status ? getBusinessIdeaStatusName(selectedIdeaForDetails.status) : 'N/A' }}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">File Path:</strong>
+                        <span class="detail-value">{{ selectedIdeaForDetails.filePath ? selectedIdeaForDetails.filePath : 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">AI Rate:</strong>
+                        <span class="detail-value">{{ selectedIdeaForDetails.airate != null ? selectedIdeaForDetails.airate + '%' : 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row" *ngIf="selectedIdeaForDetails.rejectedReason">
+                        <strong class="detail-label">Rejected Reason:</strong>
+                        <span class="detail-value">{{ selectedIdeaForDetails.rejectedReason }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel-btn" (click)="closeViewDetailsModal()">Close</button>
+            </div>
+        </div>
+           
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" [ngClass]="{ 'show': isStatusUpdateModalOpen }" (click)="closeStatusUpdateModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Update Business Idea Status</h3>
+            <button type="button" class="close-btn" (click)="closeStatusUpdateModal()">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Current Status:
+                <strong>{{ currentStatusName }}</strong>
+            </p>
+            <select [(ngModel)]="newStatus" name="newStatusSelect" class="form-control" style="width: 100%; padding: 10px; margin-top:10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
+                <option [ngValue]="null" disabled>Select New Status</option>
+                <option *ngFor="let status of businessStatuses" [ngValue]="status">
+                    {{ getBusinessIdeaStatusName(status) }}
+                </option>
+            </select>
+
+            <!-- Show textarea only if Rejected is selected -->
+            <div class="form-group" *ngIf="newStatus === BusinessIdeaStatus.Rejected">
+                <label for="rejectedReason">Reason for Rejection:</label>
+                <textarea id="rejectedReason" [(ngModel)]="rejectedReasonInput" name="rejectedReason"
+                          rows="4" class="form-control" required
+                          placeholder="Please provide a detailed reason for rejecting this idea."
+                          style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc;"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="cancel-btn" (click)="closeStatusUpdateModal()">Cancel</button>
+            <button type="button" class="confirm-btn" (click)="submitStatusUpdate()">Update</button>
+        </div>
+    </div>
+</div>
+
+    <div class="modal-overlay" [ngClass]="{ 'show': isSoftDeleteModalOpen }" (click)="closeSoftDeleteModal()">
+        <div class="modal-container activate-deactivate-modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Delete Business Idea</h3>
+                <button type="button" class="close-btn" (click)="closeSoftDeleteModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="activate-deactivate-confirmation">
+                    <div class="action-icon">
+                        <i class="bx bx-trash" style="color: var(--danger);"></i>
+                    </div>
+                    <p class="confirmation-text danger-text">
+                        Are you sure you want to delete this business idea?
+                        This action will mark the business idea as inactive and it will no longer be publicly visible.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer activate-deactivate-modal-footer">
+                <button type="button" class="cancel-btn" (click)="closeSoftDeleteModal()">Cancel</button>
+                <button type="button" class="confirm-btn delete" (click)="performSoftDelete()">
+                    <i class='bx bx-trash'></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
