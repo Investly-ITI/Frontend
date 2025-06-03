@@ -5,7 +5,7 @@ import { BusinessService } from '../_services/businesses.service';
 import { BusinessDto, BusinessListDto, BusinessSearchDto } from '../../_models/businesses';
 import { Response } from '../../_models/response';
 import { getBusinessIdeaStatusLabel, getStageLabel } from '../../_shared/utils/enum.utils';
-import { BusinessIdeaStatus, Stage } from '../../_shared/enums';
+import { BusinessIdeaStatus, InvestingStages } from '../../_shared/enums';
 
 import { Observable, catchError, of, Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
@@ -31,7 +31,7 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
 
   searchParams: BusinessSearchDto = new BusinessSearchDto();
 
-  stages: Stage[] = Object.values(Stage).filter(value => typeof value === 'number') as Stage[];
+  stages: InvestingStages[] = Object.values(InvestingStages).filter(value => typeof value === 'number') as InvestingStages[];
   businessStatuses: BusinessIdeaStatus[] = Object.values(BusinessIdeaStatus).filter(value => typeof value === 'number') as BusinessIdeaStatus[];
 
   isStatusUpdateModalOpen: boolean = false;
@@ -47,7 +47,7 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
   isAdvancedSearchOpen: boolean = false;
 
   public BusinessIdeaStatus = BusinessIdeaStatus; 
-  public Stage = Stage;                           
+  public Stage = InvestingStages;                           
 
     entityNamePlural: string = 'Business Idea';
 

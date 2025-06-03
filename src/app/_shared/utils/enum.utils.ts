@@ -1,4 +1,4 @@
-import { InvestorInvestingType, Status, UserType,BusinessIdeaStatus ,Stage } from "../enums";
+import { InvestorInvestingType, Status, UserType,BusinessIdeaStatus ,InvestingStages } from "../enums";
 
 export function getStatusLabel(value:number):string{
     console.log(Status[value]);
@@ -18,5 +18,5 @@ export function getBusinessIdeaStatusLabel(value: number): string {
 }
 
 export function getStageLabel(value: number): string {
-    return Stage[value] ?? 'Unknown';
+    return InvestingStages[value] ?? 'Unknown';
 }
