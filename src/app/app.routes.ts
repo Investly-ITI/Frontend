@@ -6,6 +6,7 @@ import { LoginStaffComponent } from './account/login-staff/login-staff.component
 import { SignupComponent } from './account/signup/signup.component';
 import { adminGuard } from './_guards/admin.guard';
 import { FounderComponent } from './admin/founder/founder.component';
+import { ContactRequestComponent } from './admin/contact-request/contact-request.component';
 
 export const routes: Routes = [
 
@@ -19,6 +20,7 @@ export const routes: Routes = [
       {path:'investor',component:InvestorComponent, title: 'Investor Management'},
       {path:'',redirectTo:'investor',pathMatch:'full'},
       {path:'founder',component:FounderComponent, title: 'Founder Management'},
+      {path:'Contact-Request',component:ContactRequestComponent, title: 'Investor Contact Request'},
      
 
    ]},

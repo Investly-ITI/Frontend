@@ -1,0 +1,376 @@
+<!-- ========================================
+     MAIN CONTAINER & THEME
+======================================== -->
+<div class="parent3" [ngClass]="{'dark': isDarkMode}">
+    <section id="content">
+        <main>
+            <!-- ========================================
+                 PAGE HEADER & NAVIGATION
+            ======================================== -->
+            <div class="head-title">
+                <div class="left">
+                    <!-- Breadcrumb Navigation -->
+                    <ul class="breadcrumb">
+                        <li><a>Dashboard</a></li>
+                        <li><i class='bx bx-chevron-right'></i></li>
+                        <li><a class="active">Contact Requests</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ========================================
+                 STATISTICS BOXES
+            ======================================== -->
+            <div class="box-info">
+                <!-- Active Contact Requests Count -->
+                <li>
+                    <i class='bx bxs-check-circle' style="font-size: 2.5em;"></i>
+                    <span class="text">
+                        <h3 class="animated-number">
+                            <span class="digit-container"
+                                *ngFor="let digit of getDigitsArray(displayActiveCount); let i = index">
+                                <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                                    [ngClass]="{'animate': animationComplete}">
+                                    {{ digit }}
+                                </span>
+                            </span>
+                        </h3>
+                        <p>Active {{ entityNamePlural }}</p>
+                    </span>
+                </li>
+
+                <!-- Inactive Contact Requests Count -->
+                <li>
+                    <i class='bx bxs-x-circle' style="font-size: 2.5em;"></i>
+                    <span class="text">
+                        <h3 class="animated-number">
+                            <span class="digit-container"
+                                *ngFor="let digit of getDigitsArray(displayInactiveCount); let i = index">
+                                <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                                    [ngClass]="{'animate': animationComplete}">
+                                    {{ digit }}
+                                </span>
+                            </span>
+                        </h3>
+                        <p>Inactive {{ entityNamePlural }}</p>
+                    </span>
+                </li>
+            </div>
+
+            <!-- ========================================
+                 MAIN DATA TABLE SECTION
+            ======================================== -->
+            <div class="table-data">
+                <div class="order">
+                    <!-- ========================================
+                         TABLE HEADER & CONTROLS
+                    ======================================== -->
+                    <div class="table-header">
+                        <!-- Left Side: Title & Add Button -->
+                        <div class="table-header-left">
+                            <h2>{{ entityNamePlural }}</h2>
+                            <button type="button" class="add-entity-btn" (click)="openAddModal()">
+                                <i class='bx bx-plus'></i>
+                                Add
+                            </button>
+                        </div>
+
+                        <!-- Right Side: Controls & Search -->
+                        <div class="table-header-right">
+                            <!-- Items Per Page Selector -->
+                            <div class="items-per-page">
+                                <label>
+                                    <b>Items:</b>
+                                    <select [(ngModel)]="searchData.pageSize" name="itemsPerPage"
+                                        (change)="loadData()">
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <!-- Search Form & Filters -->
+                            <form>
+                                <div class="form-input">
+                                    <!-- Search Input -->
+                                    <input type="search" [(ngModel)]="searchData.searchTerm" name="searchQuery"
+                                        placeholder="Search by name or business..." (search)="onSearchClear($event)">
+                                    <!-- Search & Filter Buttons -->
+                                    <button type="submit" class="search-btn" (click)="loadData()"><i
+                                            class='bx bx-search'></i></button>
+                                    <div id="search-btns">
+                                        <!-- Advanced Search Button -->
+                                        <button mat-icon-button type="button"
+                                            style="border: none; background-color: var(--light);"
+                                            title="Advanced Search" (click)="toggleAdvancedSearch($event)">
+                                            <i class='bx bx-filter'
+                                                style="color: var(--dark); margin-left: 0.7em; font-size: 1.3em;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Advanced Search Dropdown -->
+                                <div class="advanced-search-dropdown">
+                                    <div class="advanced-search-menu" [ngClass]="{'show': isAdvancedSearchOpen}">
+                                        <div class="advanced-search-content">
+                                            <h4>Search Filters</h4>
+
+                                            <!-- Investor ID Filter -->
+                                            <div class="filter-group">
+                                                <label for="investorId">Investor ID:</label>
+                                                <input type="number" id="investorId" [(ngModel)]="selectedInvestorId" 
+                                                    name="investorId" placeholder="Enter Investor ID">
+                                            </div>
+
+                                            <!-- Founder ID Filter -->
+                                            <div class="filter-group">
+                                                <label for="founderId">Founder ID:</label>
+                                                <input type="number" id="founderId" [(ngModel)]="selectedFounderId" 
+                                                    name="founderId" placeholder="Enter Founder ID">
+                                            </div>
+
+                                            <!-- Status Filter -->
+                                            <div class="filter-group">
+                                                <label for="status">Status:</label>
+                                                <select id="status" [(ngModel)]="selectedStatus" name="status">
+                                                    <option value="">All Statuses</option>
+                                                    <option value="true">Active</option>
+                                                    <option value="false">Inactive</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Action Buttons -->
+                                            <div class="advanced-search-actions">
+                                                <button type="button" class="clear-btn" (click)="clearAdvancedSearch()">
+                                                    <i class='bx bx-x'></i>
+                                                    Clear
+                                                </button>
+                                                <button type="button" class="apply-btn" (click)="applyAdvancedSearch()">
+                                                    <i class='bx bx-search'></i>
+                                                    Apply
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- ========================================
+                         DATA TABLE
+                    ======================================== -->
+                    <table style="border-spacing: 15px; border-collapse: separate;">
+                        <!-- Table Header -->
+                        <thead>
+                            <tr>
+                                <th>Investor</th>
+                                <th>Founder</th>
+                                <th>Business</th>
+                                <th>Created At</th>
+                                <th>
+                                    Status
+                                    <!-- Status Filter Dots -->
+                                    <span id="dots-container">
+                                        <span class="dot green-dot" [class.selected]="currentFilter === 'active'"
+                                            (click)="setFilter('active', true)" title="Show Active"></span>
+                                        <span class="dot red-dot" [class.selected]="currentFilter === 'inactive'"
+                                            (click)="setFilter('inactive', false)" title="Show Inactive"></span>
+                                    </span>
+                                </th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <!-- Table Body -->
+                        <tbody>
+                            <!-- ========================================
+                                 EMPTY STATES & LOADING
+                            ======================================== -->
+                            <!-- No Results Found -->
+                            <tr *ngIf="showNoResults" class="no-results-row">
+                                <td colspan="6"
+                                    style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
+                                    No {{ entityNamePlural }} Found
+                                </td>
+                            </tr>
+
+                            <!-- Loading Spinner -->
+                            <tr *ngIf="isLoading" class="no-results-row">
+                                <td colspan="6"
+                                    style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
+                                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;"
+                                        id="spinner">
+                                        <mat-spinner style="color: white;" class="mat-spinner"></mat-spinner>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- ========================================
+                                 DATA ROWS
+                            ======================================== -->
+                            <tr *ngFor="let item of loadedListData; let i = index">
+                                <td>
+                                    <p>{{ item.founderName }}</p>
+                                </td>
+                                <td>{{ item.businessTitle }}</td>
+                                <td>{{ item.createdAt | date:'mediumDate' }}</td>
+                                <td>
+                                    <span class="status process"
+                                        [ngStyle]="{color: item.status ? '#2ed134' : '#e6382f'}"
+                                        style="min-width: 100px; display: inline-block; text-align: center; padding: 10px 0px;">
+                                        {{ item.status ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <!-- Actions Dropdown -->
+                                    <div class="action-dropdown" [ngClass]="{'active': dropdownStates[i]}">
+                                        <button class="action-btn" type="button" (click)="toggleDropdown(i, $event)">
+                                            <i class='bx bx-dots-vertical-rounded'></i>
+                                        </button>
+                                        <div class="action-menu">
+                                            <button class="action-item view" type="button" (click)="openModal(item)">
+                                                <i class='bx bx-show'></i>
+                                                View Details
+                                            </button>
+
+                                            <button class="action-item"
+                                                [ngClass]="item.status ? 'deactivate' : 'active'"
+                                                type="button"
+                                                (click)="openActivateDeactivateModal(item.id, item.investorName, item.status ? 'deactivate' : 'activate', item.status ? 0 : 1)">
+                                                <i [class]="'bx ' + (item.status ? 'bx-x-circle' : 'bx-check-circle')"></i>
+                                                {{ item.status ? 'Deactivate' : 'Activate' }}
+                                            </button>
+                                            <div class="action-divider"></div>
+                                            <button class="action-item delete" type="button"
+                                                (click)="openActivateDeactivateModal(item.id, item.investorName, 'delete', 0)">
+                                                <i class='bx bx-trash'></i>
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- ========================================
+                         PAGINATION CONTROLS
+                    ======================================== -->
+                    <div class="pagination-controls">
+                        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+                            <i class='bx bx-chevron-left' style="font-size: 1.7em;"></i>
+                        </button>
+                        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+                        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages || totalPages === 0">
+                            <i class='bx bx-chevron-right' style="font-size: 1.7em;"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <!-- ========================================
+         ADD/UPDATE CONTACT REQUEST MODAL
+    ======================================== -->
+    <div class="modal-overlay" [ngClass]="{'show': isModalOpen}" (click)="closeModal()">
+        <div class="modal-container" (click)="$event.stopPropagation()">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h3>{{ modalMode === 'add' ? 'Add New ' + entityName : entityName + ' Details' }}</h3>
+                <button type="button" class="close-btn" (click)="closeModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <!-- <div class="modal-body">
+                <app-add-update [selectedEntity]="selectedEntity" [isEditMode]="isEditMode || modalMode === 'add'"
+                    [entityName]="entityName" [modalMode]="modalMode" (saveEntity)="onSaveEntity($event)">
+                </app-add-update>
+            </div> -->
+
+        </div>
+    </div>
+
+    <!-- ========================================
+         ACTIVATE/DEACTIVATE/DELETE CONFIRMATION MODAL
+    ======================================== -->
+    <div class="modal-overlay" [ngClass]="{ 'show': isActivateDeactivateModalOpen }" (click)="closeActivateDeactivateModal()">
+        <div class="modal-container activate-deactivate-modal" (click)="$event.stopPropagation()" *ngIf="entityToModify">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h3>
+                    {{ modifyAction === 'deactivate' ? 'Deactivate' : modifyAction === 'activate' ? 'Activate' : 'Delete' }} {{ entityName }}
+                </h3>
+                <button type="button" class="close-btn" (click)="closeActivateDeactivateModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <div class="activate-deactivate-confirmation">
+                    <div class="action-icon">
+                        <i
+                            class="bx"
+                            [ngClass]="{
+                                'bx-error-circle': modifyAction === 'deactivate' || modifyAction === 'delete',
+                                'bx-check-circle': modifyAction === 'activate'
+                            }"
+                            [style.color]="
+                                modifyAction === 'deactivate' ? 'var(--red)' :
+                                modifyAction === 'activate' ? 'var(--green)' :
+                                'var(--danger)'
+                            "
+                        ></i>
+                    </div>
+
+                    <p class="confirmation-text">
+                        Are you sure you want to {{ modifyAction }} this contact request between {{ entityToModify }}?
+
+                        <span *ngIf="modifyAction === 'deactivate'" class="warning-text">
+                            This will make the contact request inactive.
+                        </span>
+
+                        <span *ngIf="modifyAction === 'activate'" class="success-text">
+                            This will make the contact request active.
+                        </span>
+
+                        <span *ngIf="modifyAction === 'delete'" class="danger-text">
+                            This will permanently remove the contact request from the system.
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer activate-deactivate-modal-footer">
+                <button type="button" class="cancel-btn" (click)="closeActivateDeactivateModal()">Cancel</button>
+
+                <button
+                    type="button"
+                    class="confirm-btn"
+                    [ngClass]="{
+                        'deactivate': modifyAction === 'deactivate',
+                        'activate': modifyAction === 'activate',
+                        'delete': modifyAction === 'delete'
+                    }"
+                    (click)="confirmActivateDeactivate()"
+                >
+                    <i
+                        class="bx"
+                        [ngClass]="{
+                            'bx-x-circle': modifyAction === 'deactivate',
+                            'bx-check-circle': modifyAction === 'activate',
+                            'bx-trash': modifyAction === 'delete'
+                        }"
+                    ></i>
+                    {{ modifyAction === 'deactivate' ? 'Deactivate' : modifyAction === 'activate' ? 'Activate' : 'Delete' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
