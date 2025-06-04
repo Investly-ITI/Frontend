@@ -7,6 +7,7 @@ import { SignupComponent } from './account/signup/signup.component';
 import { LandingPageComponent } from './main/landing-page/landing-page.component';
 import { MainLayoutComponent } from './_shared/components/main-layout.component';
 import { adminGuard } from './_guards/admin.guard';
+import { BusinessIdeasComponent } from './admin/business-ideas/business-ideas.component';
 import { FounderComponent } from './admin/founder/founder.component';
 import { FounderComponent as FounderProfileComponent } from './founder/founder.component';
 

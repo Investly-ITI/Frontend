@@ -75,8 +75,10 @@
           <h1>Join Our Community</h1>
           <p>Choose your role to get started on your investment journey</p>
         </div>
-
         <form [formGroup]="typeSelectionForm" class="user-type-form">
+          <div *ngIf="typeSelectionForm.get('userType')?.invalid && typeSelectionForm.get('userType')?.touched" class="error-message">
+            Please select your role to continue
+          </div>
           <div class="user-type-options">
             <label class="user-type-card" [class.selected]="typeSelectionForm.get('userType')?.value === 'investor'">
               <input type="radio" formControlName="userType" value="investor">
@@ -115,9 +117,7 @@
             </label>
           </div>
 
-          <div *ngIf="typeSelectionForm.get('userType')?.invalid && typeSelectionForm.get('userType')?.touched" class="error-message">
-            Please select your role to continue
-          </div>
+       
         </form>
       </div>
 
@@ -216,11 +216,7 @@
           <div class="form-group">
             <label for="phoneNumber">Phone Number:</label>
             <div class="phone-input-container">
-              <select class="country-code-select" formControlName="countryCode">
-                <option *ngFor="let country of countryCodes" [value]="country.code">
-                  {{country.code}} ({{country.country}})
-                </option>
-              </select>
+              <input class="country-code-select" formControlName="countryCode"  readonly/>
               <div class="input-container phone-input">
                 <i class='bx bx-phone'></i>
                 <input 
@@ -244,19 +240,19 @@
             <div class="form-group half">
               <label for="government">Government:</label>
               <div class="input-container" 
-                   [class.error]="personalInfoForm.get('government')?.invalid && personalInfoForm.get('government')?.touched">
+                   [class.error]="personalInfoForm.get('governmentId')?.invalid && personalInfoForm.get('governmentId')?.touched">
                 <i class='bx bx-map'></i>
                 <select 
                   class="form-input" 
                   id="government"
-                  formControlName="government"
+                  formControlName="governmentId"
                   (change)="onGovernorateChange($any($event.target).value)"
-                  [class.error]="personalInfoForm.get('government')?.invalid && personalInfoForm.get('government')?.touched">
-                  <option value="">Select Government/State</option>
-                  <option *ngFor="let gov of governorates" [value]="gov">{{ gov }}</option>
+                  [class.error]="personalInfoForm.get('governmentId')?.invalid && personalInfoForm.get('governmentId')?.touched">
+                  <option value="">Select Government</option>
+                  <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
                 </select>
               </div>
-              <div *ngIf="personalInfoForm.get('government')?.invalid && personalInfoForm.get('government')?.touched" class="error-message">
+              <div *ngIf="personalInfoForm.get('governmentId')?.invalid && personalInfoForm.get('governmentId')?.touched" class="error-message">
                 Government/State is required
               </div>
             </div>
@@ -264,19 +260,19 @@
             <div class="form-group half">
               <label for="city">City:</label>
               <div class="input-container" 
-                   [class.error]="personalInfoForm.get('city')?.invalid && personalInfoForm.get('city')?.touched">
+                   [class.error]="personalInfoForm.get('cityId')?.invalid && personalInfoForm.get('cityId')?.touched">
                 <i class='bx bx-building'></i>
                 <select 
                   class="form-input" 
                   id="city"
-                  formControlName="city"
+                  formControlName="cityId"
                   [disabled]="!selectedGovernorate"
-                  [class.error]="personalInfoForm.get('city')?.invalid && personalInfoForm.get('city')?.touched">
+                  [class.error]="personalInfoForm.get('cityId')?.invalid && personalInfoForm.get('cityId')?.touched">
                   <option value="">{{ selectedGovernorate ? 'Select City' : 'Select Government First' }}</option>
-                  <option *ngFor="let city of availableCities" [value]="city">{{ city }}</option>
+                  <option *ngFor="let city of citiesByGovernorate" [value]="city.id">{{ city.nameEn }}</option>
                 </select>
               </div>
-              <div *ngIf="personalInfoForm.get('city')?.invalid && personalInfoForm.get('city')?.touched" class="error-message">
+              <div *ngIf="personalInfoForm.get('cityId')?.invalid && personalInfoForm.get('cityId')?.touched" class="error-message">
                 City is required
               </div>
             </div>
@@ -291,12 +287,12 @@
                 type="text" 
                 id="street" 
                 class="form-input" 
-                formControlName="street"
+                formControlName="address"
                 placeholder="Enter your full street address"
-                [class.error]="personalInfoForm.get('street')?.invalid && personalInfoForm.get('street')?.touched"
+                [class.error]="personalInfoForm.get('address')?.invalid && personalInfoForm.get('address')?.touched"
               />
             </div>
-            <div *ngIf="personalInfoForm.get('street')?.invalid && personalInfoForm.get('street')?.touched" class="error-message">
+            <div *ngIf="personalInfoForm.get('address')?.invalid && personalInfoForm.get('address')?.touched" class="error-message">
               Street address is required
             </div>
           </div>
@@ -333,8 +329,8 @@
                   [class.error]="personalInfoForm.get('gender')?.invalid && personalInfoForm.get('gender')?.touched"
                 >
                   <option value="">Select your gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
+                  <option [value]="Genders.Male">{{Genders.Male}}</option>
+                  <option [value]="Genders.Female">{{Genders.Female}}</option>
                 </select>
               </div>
               <div *ngIf="personalInfoForm.get('gender')?.invalid && personalInfoForm.get('gender')?.touched" class="error-message">
@@ -497,15 +493,15 @@
             <div class="investment-type-options">
               <label *ngFor="let type of investmentTypes" 
                      class="investment-type-card" 
-                     [class.selected]="investorPreferencesForm.get('investmentType')?.value === type.value">
-                <input type="radio" [value]="type.value" formControlName="investmentType" (change)="onInvestmentTypeChange()">
+                     [class.selected]="investorPreferencesForm.get('investingType')?.value === type.value">
+                <input type="radio" [value]="type.value" formControlName="investingType" (change)="onInvestmentTypeChange()">
                 <div class="card-content">
                   <h4>{{ type.label }}</h4>
                   <p>{{ type.description }}</p>
                 </div>
               </label>
             </div>
-            <div *ngIf="investorPreferencesForm.get('investmentType')?.invalid && investorPreferencesForm.get('investmentType')?.touched" class="error-message">
+            <div *ngIf="investorPreferencesForm.get('investingType')?.invalid && investorPreferencesForm.get('investingType')?.touched" class="error-message">
               Please select your investment type
             </div>
           </div>
@@ -524,7 +520,7 @@
                 </div>
               </label>
             </div>
-            <div *ngIf="investorPreferencesForm.get('investmentStages')?.invalid && investorPreferencesForm.get('investmentStages')?.touched" class="error-message">
+            <div *ngIf="investorPreferencesForm.get('interestedBusinessStages')?.invalid && investorPreferencesForm.get('interestedBusinessStages')?.touched" class="error-message">
               Please select at least one investment stage
             </div>
           </div>
