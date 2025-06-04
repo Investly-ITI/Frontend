@@ -1,0 +1,251 @@
+<!-- ========================================
+     LANDING PAGE CONTAINER
+======================================== -->
+<div class="landing-page">
+  <!-- ========================================
+       HERO SECTION
+  ======================================== -->
+  <section class="hero-section">
+    <!-- Background Carousel -->
+    <div class="hero-background">
+      <div 
+        *ngFor="let image of heroImages; let i = index" 
+        class="hero-slide"
+        [class.active]="i === currentHeroImageIndex"
+        [style.background-image]="'url(' + image + ')'"
+      ></div>
+      
+      <!-- Gradient Overlay -->
+      <div class="hero-overlay"></div>
+      
+      <!-- Floating Elements -->
+      <div class="floating-elements">
+        <div class="floating-icon"><i class='bx bx-trending-up'></i></div>
+        <div class="floating-icon"><i class='bx bx-dollar-circle'></i></div>
+        <div class="floating-icon"><i class='bx bx-rocket'></i></div>
+        <div class="floating-icon"><i class='bx bx-target-lock'></i></div>
+      </div>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="hero-content">
+      <div class="hero-container">
+        <!-- Brand Section -->
+        <div class="hero-brand">
+          <div class="brand-container">
+            <img src="Logo-Investly-Cut.png" alt="Investly">
+            <span class="brand-text">nvestly</span>
+          </div>
+          <p class="brand-tagline">Where Ideas Meet Capital</p>
+        </div>
+
+        <!-- Main Hero Text -->
+        <div class="hero-main">
+          <h1 class="hero-title">Invest in founders building the future</h1>
+          <p class="hero-description">
+            Get equity and front row seats to the startups and innovative businesses you love - for as little as 500 EGP !
+          </p>
+          
+          <!-- CTA Buttons -->
+          <div class="hero-actions">
+            <button class="btn btn-primary hero-cta" (click)="navigateToSignup()">
+              <i class='bx bx-user-plus'></i>
+              <span>Join Investly</span>
+            </button>
+            <button class="btn btn-secondary hero-cta" (click)="navigateToExplore()">
+              <i class='bx bx-search-alt'></i>
+              <span>Explore Startups</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       FEATURED INVESTMENTS (AUTO-SCROLLING)
+  ======================================== -->
+  <section class="featured-investments">
+    <div class="investments-marquee">
+      <div class="investments-track">
+        <div 
+          *ngFor="let investment of featuredInvestments" 
+          class="investment-card"
+        >
+          <div class="founder-avatar">
+            <img [src]="investment.image" [alt]="investment.founder">
+          </div>
+          <div class="investment-content">
+            <h3 class="founder-name">{{ investment.founder }}</h3>
+            <div class="investment-amount">{{ investment.invested }} invested</div>
+            <div class="investor-count">{{ investment.investors | number }} investors</div>
+            <div class="coinvestor-badge">
+              <i class='bx bx-check-circle'></i>
+              <span>{{ investment.coinvestor }} co-invested</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Duplicate for seamless loop -->
+        <div 
+          *ngFor="let investment of featuredInvestments" 
+          class="investment-card"
+        >
+          <div class="founder-avatar">
+            <img [src]="investment.image" [alt]="investment.founder">
+          </div>
+          <div class="investment-content">
+            <h3 class="founder-name">{{ investment.founder }}</h3>
+            <div class="investment-amount">{{ investment.invested }} invested</div>
+            <div class="investor-count">{{ investment.investors | number }} investors</div>
+            <div class="coinvestor-badge">
+              <i class='bx bx-check-circle'></i>
+              <span>{{ investment.coinvestor }} co-invested</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Second Row - Scrolling in opposite direction -->
+    <div class="investments-marquee">
+      <div class="investments-track investments-track-reverse">
+        <div 
+          *ngFor="let investment of featuredInvestmentsRow2" 
+          class="investment-card"
+        >
+          <div class="founder-avatar">
+            <img [src]="investment.image" [alt]="investment.founder">
+          </div>
+          <div class="investment-content">
+            <h3 class="founder-name">{{ investment.founder }}</h3>
+            <div class="investment-amount">{{ investment.invested }} invested</div>
+            <div class="investor-count">{{ investment.investors | number }} investors</div>
+            <div class="coinvestor-badge">
+              <i class='bx bx-check-circle'></i>
+              <span>{{ investment.coinvestor }} co-invested</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Duplicate for seamless loop -->
+        <div 
+          *ngFor="let investment of featuredInvestmentsRow2" 
+          class="investment-card"
+        >
+          <div class="founder-avatar">
+            <img [src]="investment.image" [alt]="investment.founder">
+          </div>
+          <div class="investment-content">
+            <h3 class="founder-name">{{ investment.founder }}</h3>
+            <div class="investment-amount">{{ investment.invested }} invested</div>
+            <div class="investor-count">{{ investment.investors | number }} investors</div>
+            <div class="coinvestor-badge">
+              <i class='bx bx-check-circle'></i>
+              <span>{{ investment.coinvestor }} co-invested</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       PLATFORM STATISTICS
+  ======================================== -->
+  <section class="platform-stats">
+    <div class="stats-container">
+      <h2 class="stats-title">Join over 1 million investors</h2>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">{{ platformStats.medianInvestment }}</div>
+          <div class="stat-description">median investment</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-number">{{ platformStats.foundersSupported }}</div>
+          <div class="stat-description">founders funded</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-number">{{ platformStats.totalRaised }}</div>
+          <div class="stat-description">raised on Investly</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-number">{{ platformStats.investors }}</div>
+          <div class="stat-description">active investors</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-number">{{ platformStats.successfulExits }}</div>
+          <div class="stat-description">successful exits</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-number">{{ platformStats.avgRate }}</div>
+          <div class="stat-description">average Rate</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       HOW IT WORKS SECTION
+  ======================================== -->
+  <section class="how-it-works">
+    <div class="how-it-works-container">
+      <h2 class="section-title">How Investly Works</h2>
+      
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-icon">
+            <i class='bx bx-search-alt'></i>
+          </div>
+          <h3>Discover</h3>
+          <p>Browse innovative startups and investment opportunities across various industries.</p>
+        </div>
+        
+        <div class="step-card">
+          <div class="step-icon">
+            <i class='bx bx-line-chart'></i>
+          </div>
+          <h3>Analyze</h3>
+          <p>Review detailed business plans, financial projections, and founder backgrounds.</p>
+        </div>
+        
+        <div class="step-card">
+          <div class="step-icon">
+            <i class='bx bx-dollar'></i>
+          </div>
+          <h3>Invest</h3>
+          <p>Start investing with as little as 500 EGP and become part of the startup journey.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       CALL TO ACTION SECTION
+  ======================================== -->
+  <section class="cta-section">
+    <div class="cta-container">
+      <div class="cta-content">
+        <h2>Ready to start investing?</h2>
+        <p>Join thousands of investors who are already funding the future</p>
+        
+        <div class="cta-actions">
+          <button class="btn btn-primary cta-btn" (click)="navigateToSignup()">
+            <i class='bx bx-user-plus'></i>
+            <span>Get Started Today</span>
+          </button>
+          <button class="btn btn-secondary cta-btn" style="background-color: var(--light);" (click)="navigateToExplore()">
+            <i class='bx bx-search-alt'></i>
+            <span>Browse Opportunities</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

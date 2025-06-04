@@ -1,0 +1,250 @@
+/* ========================================
+   ADD BY FORM COMPONENT STYLES
+======================================== */
+
+.form-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--dark);
+  font-family: var(--poppins);
+  margin-bottom: 0.5rem;
+}
+
+:host-context(.dark) .form-title {
+  color: var(--light);
+}
+
+.form-description {
+  color: var(--dark-grey);
+  font-family: var(--poppins);
+  margin: 0;
+}
+
+/* Form Structure */
+.business-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.form-section {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--grey);
+  border-right: 4px solid var(--light);
+}
+
+:host-context(.dark) .form-section {
+  background: var(--custom);
+  border-right: 4px solid var(--light);
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--light);
+  font-family: var(--poppins);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--light);
+}
+
+/* Form Elements */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: var(--dark);
+  font-family: var(--poppins);
+  font-size: 0.95rem;
+}
+
+:host-context(.dark) .form-label {
+  color: var(--light);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--light);
+  border-radius: 12px;
+  font-family: var(--poppins);
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: white;
+  color: var(--dark);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--light);
+  box-shadow: 0 0 0 3px rgba(48, 172, 170, 0.1);
+}
+
+.form-control.textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
+}
+
+:host-context(.dark) .form-control {
+  background: var(--grey);
+  border-color: var(--light2);
+  color: var(--light);
+}
+
+:host-context(.dark) .form-control::placeholder {
+  color: var(--light);
+  opacity: 0.6;
+}
+
+/* Category Questions */
+.category-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.category-questions .form-group {
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid var(--grey);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-family: var(--poppins);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 200px;
+  justify-content: center;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-primary {
+  background: var(--light);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--blue);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(48, 172, 170, 0.3);
+}
+
+/* Form Hint */
+.form-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--dark-grey);
+  font-family: var(--poppins);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.form-hint i {
+  color: var(--light);
+  font-size: 1.1rem;
+}
+
+/* Progress Indicator */
+.form-section:first-of-type {
+  border-left: 4px solid var(--light);
+}
+
+.form-section:nth-of-type(2) {
+  border-left: 4px solid var(--light);
+  
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .form-section {
+    padding: 1.5rem;
+  }
+  
+  .form-title {
+    font-size: 1.25rem;
+  }
+  
+  .section-title {
+    font-size: 1.1rem;
+  }
+  
+  .btn {
+    min-width: auto;
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .form-container {
+    padding: 0 0.5rem;
+  }
+  
+  .form-section {
+    padding: 1rem;
+  }
+} 

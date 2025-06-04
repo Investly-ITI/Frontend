@@ -1,0 +1,101 @@
+<!-- ========================================
+     NAVBAR CONTAINER
+======================================== -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- ========================================
+         BRAND SECTION (LOGO + TEXT)
+    ======================================== -->
+    <div class="navbar-brand" (click)="navigateTo('/')">
+      <div class="brand-container">
+        <img src="Logo-Investly-Cut.png" alt="Investly">
+      </div>
+    </div>
+
+    <!-- ========================================
+         NAVIGATION MENU (DESKTOP)
+    ======================================== -->
+    <div class="navbar-menu" [class.active]="isMobileMenuOpen">
+      <ul class="navbar-nav">
+        <!-- Explore -->
+        <li class="nav-item">
+          <a class="nav-link" (click)="navigateTo('/explore')">
+            <i class='bx bx-search-alt'></i>
+            <span>Explore</span>
+          </a>
+        </li>
+
+        <!-- Ideas Dropdown -->
+        <li class="nav-item dropdown" [class.active]="isIdeasDropdownOpen">
+          <a class="nav-link dropdown-toggle" (click)="toggleIdeasDropdown()">
+            <i class='bx bx-bulb'></i>
+            <span>Ideas</span>
+            <i class='bx bx-caret-down'></i>
+          </a>
+          
+          <div class="dropdown-menu" [class.show]="isIdeasDropdownOpen">
+            <a class="dropdown-item" (click)="navigateToProfile('ideas', 'addIdea')">
+              <i class='bx bx-plus-circle'></i>
+              <span>Add Idea</span>
+            </a>
+            <a class="dropdown-item" (click)="navigateToProfile('ideas', 'myIdeas')">
+              <i class='bx bx-user-circle'></i>
+              <span>My Ideas</span>
+            </a>
+          </div>
+        </li>
+
+        <!-- Contact Us -->
+        <li class="nav-item">
+          <a class="nav-link" (click)="navigateTo('/contact')">
+            <i class='bx bx-envelope'></i>
+            <span>Contact Us</span>
+          </a>
+        </li>
+
+        <!-- About Us -->
+        <li class="nav-item">
+          <a class="nav-link" (click)="navigateTo('/about')">
+            <i class='bx bx-info-circle'></i>
+            <span>About Us</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- ========================================
+           AUTH BUTTONS
+      ======================================== -->
+      <div class="navbar-actions">
+        <!-- Auth Buttons -->
+        <div class="auth-buttons">
+          <button class="btn btn-secondary" (click)="navigateTo('/login')">
+            <i class='bx bx-log-in'></i>
+            <span>Sign In</span>
+          </button>
+          <button class="btn btn-primary" (click)="navigateTo('/signup')">
+            <i class='bx bx-user-plus'></i>
+            <span>Sign Up</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================
+         MOBILE MENU TOGGLE
+    ======================================== -->
+    <div class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+      <span class="hamburger-line" [class.active]="isMobileMenuOpen"></span>
+      <span class="hamburger-line" [class.active]="isMobileMenuOpen"></span>
+      <span class="hamburger-line" [class.active]="isMobileMenuOpen"></span>
+    </div>
+  </div>
+
+  <!-- ========================================
+       DROPDOWN OVERLAY (MOBILE)
+  ======================================== -->
+  <div 
+    class="dropdown-overlay" 
+    [class.active]="isIdeasDropdownOpen || isMobileMenuOpen"
+    (click)="closeDropdowns(); isMobileMenuOpen = false"
+  ></div>
+</nav>

@@ -1,0 +1,446 @@
+/* ========================================
+   IMPORTS & FONTS
+======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap');
+
+/* ========================================
+   BASE STYLES & RESET
+======================================== */
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+}
+
+:host * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ========================================
+   CSS VARIABLES
+======================================== */
+:host {
+  --poppins: 'Poppins', system-ui, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  --lato: 'Lato', system-ui, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  --oswald: 'Oswald', system-ui, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+
+  --light: #30acaa;
+  --light2: #F9F9F9;
+  --blue: #3C91E6;
+  --light-blue: #CFE8FF;
+  --grey: #eee;
+  --dark-grey: #AAAAAA;
+  --dark: #18384e;
+  --red: #DB504A;
+  --yellow: #FFCE26;
+  --light-yellow: #FFF2C6;
+  --orange: #FD7238;
+  --light-orange: #FFE0D3;
+  --custom: #e2e2e2;
+  --success: #10B981;
+  --error: #EF4444;
+  --warning: #F59E0B;
+}
+
+/* ========================================
+   DARK MODE VARIABLES
+======================================== */
+:host-context(.dark) {
+  --light2: #18384e;
+  --light: #30acaa;
+  --grey: #102837;
+  --dark: #30acaa;
+  --custom: #102837;
+}
+
+/* ========================================
+   PROFILE CONTAINER
+======================================== */
+.profile-container {
+  width: 100%;
+  background: var(--light2);
+  min-height: 100vh;
+}
+
+:host-context(.dark) .profile-container {
+  background: var(--light2);
+}
+
+/* ========================================
+   PROFILE HEADER
+======================================== */
+.profile-header {
+  background: linear-gradient(135deg, var(--light) 0%, var(--blue) 100%);
+  padding: 2rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  opacity: 0.3;
+}
+
+/* Infinite Wave Animation */
+.profile-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    -45deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.1) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 50%,
+    transparent 75%,
+    rgba(255, 255, 255, 0.1) 75%
+  );
+  background-size: 60px 60px;
+  animation: moveWaves 8s linear infinite;
+  z-index: 1;
+}
+
+@keyframes moveWaves {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 60px 60px;
+  }
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.profile-avatar {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.profile-avatar:hover {
+  transform: scale(1.05);
+}
+
+.profile-avatar img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  object-fit: cover;
+  transition: all 0.3s ease;
+}
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.profile-avatar:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.avatar-overlay:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.avatar-overlay i {
+  font-size: 2rem;
+  color: white;
+  transition: transform 0.2s ease;
+}
+
+.avatar-overlay:hover i {
+  transform: scale(1.1);
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-family: var(--oswald);
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.profile-title {
+  font-size: 1.2rem;
+  font-weight: 500;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+  font-family: var(--poppins);
+}
+
+.profile-location {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  opacity: 0.8;
+  font-family: var(--poppins);
+}
+
+.profile-stats {
+  display: flex;
+  gap: 2rem;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: var(--oswald);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  font-family: var(--poppins);
+}
+
+/* ========================================
+   PROFILE CONTENT
+======================================== */
+.profile-content {
+  display: flex;
+  min-height: calc(100vh - 200px);
+}
+
+/* ========================================
+   SIDEBAR NAVIGATION
+======================================== */
+.profile-sidebar {
+  width: 280px;
+  background: white;
+  border-right: 1px solid var(--grey);
+  padding: 2rem 0;
+}
+
+:host-context(.dark) .profile-sidebar {
+  background: var(--custom);
+  border-right-color: var(--grey);
+}
+
+.sidebar-nav {
+  position: sticky;
+  top: 2rem;
+}
+
+.nav-list {
+  list-style: none;
+}
+
+.nav-item {
+  margin-bottom: 0.5rem;
+}
+
+.nav-button {
+  width: 100%;
+  padding: 1rem 2rem;
+  background: none;
+  border: none;
+  text-align: left;
+  font-family: var(--poppins);
+  font-size: 1rem;
+  color: var(--dark);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-button::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--light);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.nav-button:hover::before,
+.nav-button.active::before {
+  transform: scaleY(1);
+}
+
+.nav-button:hover {
+  background: var(--grey);
+  color: var(--light);
+}
+
+.nav-button.active {
+  background: var(--grey);
+  color: var(--light);
+  font-weight: 600;
+}
+
+:host-context(.dark) .nav-button {
+  color: var(--dark);
+}
+
+:host-context(.dark) .nav-button:hover,
+:host-context(.dark) .nav-button.active {
+  background: var(--grey);
+  color: var(--light);
+}
+
+.nav-button i {
+  font-size: 1.2rem;
+  width: 20px;
+  text-align: center;
+}
+
+.badge {
+  background: var(--light);
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+/* ========================================
+   MAIN CONTENT AREA
+======================================== */
+.profile-main {
+  flex: 1;
+  padding: 2rem;
+  background: var(--light2);
+}
+
+:host-context(.dark) .profile-main {
+  background: var(--light2);
+}
+
+/* ========================================
+   ANIMATIONS
+======================================== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+======================================== */
+@media screen and (max-width: 1024px) {
+  .profile-content {
+    flex-direction: column;
+  }
+
+  .profile-sidebar {
+    width: 100%;
+    padding: 1rem 0;
+  }
+
+  .sidebar-nav {
+    position: static;
+  }
+
+  .nav-list {
+    display: flex;
+    overflow-x: auto;
+    padding: 0 1rem;
+    gap: 0.5rem;
+  }
+
+  .nav-item {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .nav-button {
+    white-space: nowrap;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    background: var(--grey);
+  }
+
+  .nav-button.active {
+    background: var(--light);
+    color: white;
+  }
+
+  .profile-main {
+    padding: 1.5rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .profile-stats {
+    justify-content: center;
+  }
+
+  .profile-name {
+    font-size: 2rem;
+  }
+
+  .profile-main {
+    padding: 1rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .profile-header {
+    padding: 1.5rem 1rem;
+  }
+
+  .profile-name {
+    font-size: 1.75rem;
+  }
+} 
