@@ -6,6 +6,7 @@ import { NotificationDropDownComponent } from "./_core/notification-drop-down/no
 import { DarkModeService } from './_services/dark-mode.service';
 import { LoggedInUser } from '../_models/user';
 import { AuthService } from '../_services/auth.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -22,6 +23,7 @@ export class AdminComponent implements OnInit {
   isNotificationsOpen: boolean = false;
   isNotificationsClosing: boolean = false;
   loggedInUser:LoggedInUser|null=null;
+  private  unsubscribe: Subscription[] = []; 
 
   constructor(
     private darkModeService: DarkModeService,
@@ -69,9 +71,10 @@ export class AdminComponent implements OnInit {
       });
     }
 
-     this.auth.CurrentUser$.subscribe(user=>{
+     var sub=this.auth.CurrentUser$.subscribe(user=>{
            this.loggedInUser=user;
      })
+     this.unsubscribe.push(sub);
 
   }
 
@@ -97,7 +100,9 @@ export class AdminComponent implements OnInit {
     //+ Implement your logic to load notifications here (Service Call)
   }
 
-
+  ngOnDestroy() {
+    this.unsubscribe.forEach((sb) => sb.unsubscribe());
+  }
 
 
 }

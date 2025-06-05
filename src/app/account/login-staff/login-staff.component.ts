@@ -6,6 +6,7 @@ import { UserLogin } from '../../_models/user';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { JwtService } from '../../_services/jwt.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-login-staff',
@@ -23,6 +24,7 @@ export class LoginStaffComponent implements OnInit {
     email: "",
     password: ""
   }
+  private  unsubscribe: Subscription[] = []; 
 
   constructor(private formBuilder: FormBuilder
     , private auth: AuthService
@@ -100,11 +102,16 @@ export class LoginStaffComponent implements OnInit {
           this.toastr.error("something went wrong","Error");
         }
       })
+      this.unsubscribe.push(sub);
     } else {
       // Mark all fields as touched to show validation errors
       Object.keys(this.loginForm.controls).forEach(key => {
         this.loginForm.get(key)?.markAsTouched();
       });
     }
+  }
+
+  ngOnDestroy() {
+    this.unsubscribe.forEach((sb) => sb.unsubscribe());
   }
 }
