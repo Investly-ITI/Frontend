@@ -1,14 +1,18 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { InvestorContactRequest, InvestorContactResponse } from '../../_models/contact-request';
-import { Observable } from 'rxjs';
+
+import { map, Observable } from 'rxjs';
+import { InvestorContactItem, InvestorContactRequest, InvestorContactResponse, UpdateContactRequestStatusDto } from '../../_models/contact-request';
+import { ContactRequestStatus } from '../../_shared/enums';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class InvestorContactRequestService {
-  private baseUrl = `${environment.apiUrl}/api/admin/InvestorContact`
+  private baseUrl = `${environment.apiUrl}/api/admin/InvestorContact`;
+
   constructor(private httpClient: HttpClient) { }
 
   getInvestorContacts(request?: InvestorContactRequest): Observable<InvestorContactResponse> {
@@ -32,9 +36,9 @@ export class InvestorContactRequestService {
       }
       
       if (request.statusFilter !== undefined) {
-        params = params.set('statusFilter', request.statusFilter.toString());
+        const statusString = ContactRequestStatus[request.statusFilter]; // Convert number to string
+        params = params.set('statusFilter', statusString); // e.g., "Pending"
       }
-      
       if (request.columnOrderBy) {
         params = params.set('columnOrderBy', request.columnOrderBy);
       }
@@ -51,29 +55,37 @@ export class InvestorContactRequestService {
     return this.httpClient.get<InvestorContactResponse>(`${this.baseUrl}`, { params });
   }
 
-  // Helper method to get investor contacts with default pagination
-  getInvestorContactsPaginated(pageNumber: number = 1, pageSize: number = 10): Observable<InvestorContactResponse> {
-    return this.getInvestorContacts({ pageNumber, pageSize });
+  getInvestorContactsCount(status?: ContactRequestStatus): Observable<number> {
+    let params = new HttpParams();
+
+    if (status !== undefined) {
+      params = params.set('statusFilter', status.toString());
+    }
+
+    return this.httpClient
+      .get<InvestorContactResponse>(`${this.baseUrl}`, { params })
+      .pipe(
+        // If you want the count of filtered items from the server:
+        map(response => response.totalFilteredItems)
+      );
   }
 
-  // Helper method to search investor contacts
-  searchInvestorContacts(searchTerm: string, pageNumber: number = 1, pageSize: number = 10): Observable<InvestorContactResponse> {
-    return this.getInvestorContacts({ searchTerm, pageNumber, pageSize });
+  updateContactRequestStatus(dto: UpdateContactRequestStatusDto): Observable<InvestorContactItem> {
+    // The dto.newStatus will automatically be the numeric value from the enum
+    return this.httpClient.put<InvestorContactItem>(`${this.baseUrl}/update-status`, dto);
   }
 
-  // Helper method to filter by status
-  getInvestorContactsByStatus(status: boolean, pageNumber: number = 1, pageSize: number = 10): Observable<InvestorContactResponse> {
-    return this.getInvestorContacts({ statusFilter: status, pageNumber, pageSize });
+
+  // Helper methods that pass the numeric enum values
+  getPendingContactsCount(): Observable<number> {
+    return this.getInvestorContactsCount(ContactRequestStatus.Pending); // Will pass 1
   }
 
-  // Helper method to filter by investor
-  getInvestorContactsByInvestor(investorId: number, pageNumber: number = 1, pageSize: number = 10): Observable<InvestorContactResponse> {
-    return this.getInvestorContacts({ investorIdFilter: investorId, pageNumber, pageSize });
+  getAcceptedContactsCount(): Observable<number> {
+    return this.getInvestorContactsCount(ContactRequestStatus.Accepted); // Will pass 2
   }
 
-  // Helper method to filter by founder
-  getInvestorContactsByFounder(founderId: number, pageNumber: number = 1, pageSize: number = 10): Observable<InvestorContactResponse> {
-    return this.getInvestorContacts({ founderIdFilter: founderId, pageNumber, pageSize });
+  getDeclinedContactsCount(): Observable<number> {
+    return this.getInvestorContactsCount(ContactRequestStatus.Declined); // Will pass 3
   }
-
 }

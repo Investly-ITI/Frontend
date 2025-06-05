@@ -10,15 +10,15 @@ import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 import { ToastrService } from 'ngx-toastr';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-// import { AddUpdateComponent } from './add-update/add-update.component';
 import { InvestorContactRequestService } from '../_services/investor-contact-request.service';
 import { DarkModeService } from '../_services/dark-mode.service';
-import { InvestorContactRequest, InvestorContactItem, InvestorContactResponse } from '../../_models/contact-request';
+import { InvestorContactRequest, InvestorContactItem, InvestorContactResponse, UpdateContactRequestStatusDto } from '../../_models/contact-request';
+import { ContactRequestStatus } from '../../_shared/enums';
 import { StatusLabelPipe } from '../../_shared/pipes/enum.pipe';
-import { Status } from '../../_shared/enums';
 
 @Component({
   selector: 'app-contact-request',
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -30,13 +30,11 @@ import { Status } from '../../_shared/enums';
     MatSelectModule,
     MatCheckboxModule,
     StatusLabelPipe,
-    // AddUpdateComponent,
   ],
   templateUrl: './contact-request.component.html',
-  styleUrl: './contact-request.component.css'
+  styleUrls: ['./contact-request.component.css']
 })
 export class ContactRequestComponent implements OnInit, OnDestroy {
-
   //* State management (Flags)
   isDarkMode: boolean = true;
   isLoading: boolean = false;
@@ -56,13 +54,12 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
   modalMode: 'add' | 'view' = 'view';
   selectedEntity: InvestorContactItem | null = null;
 
-  //* Activate/Deactivate Modal state
-  isActivateDeactivateModalOpen: boolean = false;
-  entityToModify: InvestorContactItem | string | null = null;
-  modifyAction: 'deactivate' | 'activate' | 'delete' = 'deactivate';
-  entityIdToChangeStatus: number = 0;
-  StatusChangedTo: number = 0;
-
+  //* Status change modal
+  isStatusChangeModalOpen = false;
+  selectedRequest: InvestorContactItem | null = null;
+  statusChangeAction: 'accept' | 'decline' | 'pending'| null = null;
+  declineReason = '';
+  
   //* Pagination and filtering
   searchData: InvestorContactRequest = {
     pageNumber: 1,
@@ -74,7 +71,7 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
     columnOrderBy: '',
     orderByDirection: undefined
   };
-  
+
   pageSize: number = 5;
   currentPage: number = 1;
   totalCount: number = 0;
@@ -86,19 +83,18 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
   selectedStatus: string = '';
   searchQuery: string = '';
   
-  //* Generic entity configuration
+  //* Entity configuration
   entityName: string = 'Contact Request';
   entityNamePlural: string = 'Contact Requests';
 
-  //* Animation states for statistics
-  displayActiveCount: number = 0;
-  displayInactiveCount: number = 0;
-
+  //* Statistics
+  pendingCount: number = 0;
+  acceptedCount: number = 0;
+  declinedCount: number = 0;
   //* Data
   loadedListData: InvestorContactItem[] = [];
-  Status = Status;
+  ContactRequestStatus = ContactRequestStatus; // Make enum available in template
 
-  //* Constructor
   constructor(
     private contactRequestService: InvestorContactRequestService,
     private darkModeService: DarkModeService,
@@ -107,7 +103,7 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadData();
-    this.loadActiveInactiveCount();
+    this.loadStatusCounts();
     this.darkModeSubscription = this.darkModeService.darkMode$.subscribe(
       (isDarkMode) => {
         this.isDarkMode = isDarkMode;
@@ -115,13 +111,12 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
     );
   }
 
-  loadData() {
+  loadData(): void {
     this.searchData.pageNumber = this.currentPage;
     this.isLoading = true;
     
     this.contactRequestService.getInvestorContacts(this.searchData).subscribe({
       next: (response: InvestorContactResponse) => {
-        this.isLoading = false;
         this.loadedListData = response.items;
         this.pageSize = response.pageSize;
         this.totalCount = response.totalFilteredItems;
@@ -129,108 +124,119 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
         this.totalPages = response.totalPages;
         this.showNoResults = response.items.length === 0;
         this.dropdownStates = new Array(this.loadedListData.length).fill(false);
-        this.isAdvancedSearchOpen = false;
+        this.isLoading = false;
       },
       error: (err) => {
-        console.log(err);
+        this.toastr.error('Failed to load contact requests');
         this.isLoading = false;
       }
     });
   }
 
-  loadActiveInactiveCount() {
-    // Load active count (status = true)
-    this.contactRequestService.getInvestorContacts({ 
-      pageNumber: 1,
-      pageSize: 1,
-      statusFilter: true 
-    }).subscribe({
-      next: (response: InvestorContactResponse) => {
-        this.displayActiveCount = response.totalFilteredItems;
-      },
-      error: (err) => {
-        console.log(err);
-      }
+  loadStatusCounts(): void {
+    this.contactRequestService.getPendingContactsCount().subscribe({
+      next: (count) => this.pendingCount = count,
+      error: (err) => console.error('Failed to load pending count', err)
     });
 
-    // Load inactive count (status = false)
-    this.contactRequestService.getInvestorContacts({ 
-      pageNumber: 1,
-      pageSize: 1,
-      statusFilter: false 
-    }).subscribe({
-      next: (response: InvestorContactResponse) => {
-        this.displayInactiveCount = response.totalFilteredItems;
-      },
-      error: (err) => {
-        console.log(err);
-      }
+    this.contactRequestService.getAcceptedContactsCount().subscribe({
+      next: (count) => this.acceptedCount = count,
+      error: (err) => console.error('Failed to load accepted count', err)
+    });
+
+    this.contactRequestService.getDeclinedContactsCount().subscribe({
+      next: (count) => this.declinedCount = count,
+      error: (err) => console.error('Failed to load declined count', err)
     });
   }
 
-  goToNextPage() {
+  //* Pagination
+  goToNextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
       this.loadData();
     }
   }
 
-  goToPreviousPage() {
+  goToPreviousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
       this.loadData();
     }
   }
 
-  //* Toggle dropdown
-  toggleDropdown(index: number, event?: Event) {
-    if (event) {
-      event.stopPropagation();
-    }
-    this.dropdownStates = this.dropdownStates.map((state, i) => i === index ? !state : false);
+  //* Status change methods
+  openStatusChangeModal(item: InvestorContactItem, action: 'accept' | 'decline' | 'pending'): void {
+    this.selectedRequest = item;
+    this.statusChangeAction = action;
+    this.isStatusChangeModalOpen = true;
+    this.dropdownStates = this.dropdownStates.map(() => false);
   }
 
-  //* Close dropdowns when clicking outside
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event) {
-    const target = event.target as HTMLElement;
-    const actionDropdown = target.closest('.action-dropdown');
-    const advancedSearch = target.closest('.advanced-search-dropdown');
-    if (!actionDropdown) {
-      this.dropdownStates = this.dropdownStates.map(() => false);
-    }
-    if (!advancedSearch) {
-      this.isAdvancedSearchOpen = false;
-    }
+  closeStatusChangeModal(): void {
+    this.isStatusChangeModalOpen = false;
+    this.selectedRequest = null;
+    this.statusChangeAction = null;
+    this.declineReason = '';
   }
 
-  //* Setting filter of search by status
-  setFilter(filter: string, status: boolean): void {
+  confirmStatusChange(): void {
+      if (!this.selectedRequest) return;
+
+      // Handle all three status cases
+      let newStatus: ContactRequestStatus;
+      switch (this.statusChangeAction) {
+          case 'pending':
+              newStatus = ContactRequestStatus.Pending;
+              break;
+          case 'accept':
+              newStatus = ContactRequestStatus.Accepted;
+              break;
+          case 'decline':
+              newStatus = ContactRequestStatus.Declined;
+              break;
+          default:
+              console.error('Unknown status change action:', this.statusChangeAction);
+              return;
+      }
+
+      const dto: UpdateContactRequestStatusDto = {
+          contactRequestId: this.selectedRequest.id,
+          newStatus,
+          declineReason: this.statusChangeAction === 'decline' ? this.declineReason : undefined
+      };
+
+      this.isLoading = true;
+      this.contactRequestService.updateContactRequestStatus(dto).subscribe({
+          next: () => {
+              this.toastr.success('Status updated successfully');
+              this.loadData();
+              this.loadStatusCounts();
+              this.closeStatusChangeModal();
+          },
+          error: (err) => {
+              this.toastr.error(err.error?.message || 'Failed to update status');
+              this.isLoading = false;
+          }
+      });
+  }
+
+  //* Filter methods
+  setFilter(filter: string, status: ContactRequestStatus): void {
     this.currentFilter = this.currentFilter === filter ? '' : filter;
-    this.searchData.statusFilter = status;
+    this.searchData.statusFilter = this.currentFilter ? status : undefined;
     this.loadData();
   }
 
-  //* Toggle advanced search dropdown
-  toggleAdvancedSearch(event?: Event) {
-    if (event) {
-      event.stopPropagation();
-    }
-    this.isAdvancedSearchOpen = !this.isAdvancedSearchOpen;
-  }
-
-  //* Apply advanced search filters
+  //* Search methods
   applyAdvancedSearch(): void {
-    // Convert string inputs to numbers where needed
     this.searchData.investorIdFilter = this.selectedInvestorId ? Number(this.selectedInvestorId) : undefined;
     this.searchData.founderIdFilter = this.selectedFounderId ? Number(this.selectedFounderId) : undefined;
-    this.searchData.statusFilter = this.selectedStatus ? this.selectedStatus === 'true' : undefined;
+    this.searchData.statusFilter = this.selectedStatus ? Number(this.selectedStatus) : undefined;
     this.searchData.searchTerm = this.searchQuery;
-    
     this.loadData();
   }
 
-  //* Clear advanced search filters
   clearAdvancedSearch(): void {
     this.searchData.investorIdFilter = undefined;
     this.searchData.founderIdFilter = undefined;
@@ -240,73 +246,44 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
     this.selectedFounderId = '';
     this.selectedStatus = '';
     this.searchQuery = '';
+    this.currentFilter = '';
     this.loadData();
   }
 
-  //* Modal methods:
-  openModal(item: InvestorContactItem): void {
-    this.isModalOpen = true;
-    this.isEditMode = false;
-    this.modalMode = 'view';
-    this.selectedEntity = item;
-    this.dropdownStates = this.dropdownStates.map(() => false);
+  //* UI helpers
+  toggleDropdown(index: number, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.dropdownStates = this.dropdownStates.map((state, i) => i === index ? !state : false);
   }
 
-  openAddModal(): void {
+  toggleAdvancedSearch(event?: Event): void {
+    if (event) event.stopPropagation();
+    this.isAdvancedSearchOpen = !this.isAdvancedSearchOpen;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.action-dropdown')) {
+      this.dropdownStates = this.dropdownStates.map(() => false);
+    }
+    if (!target.closest('.advanced-search-dropdown')) {
+      this.isAdvancedSearchOpen = false;
+    }
+  }
+
+  //* Modal methods
+  openModal(item: InvestorContactItem): void {
     this.isModalOpen = true;
-    this.isEditMode = true;
-    this.modalMode = 'add';
-    this.selectedEntity = null;
-    this.dropdownStates = this.dropdownStates.map(() => false);
+    this.modalMode = 'view';
+    this.selectedEntity = item;
   }
 
   closeModal(): void {
     this.isModalOpen = false;
     setTimeout(() => {
-      this.isEditMode = false;
-      this.modalMode = 'view';
       this.selectedEntity = null;
-    }, 300); 
-  }
-
-  onSaveEntity(entityData: InvestorContactItem): void {
-    this.closeModal();
-    this.loadData();
-    this.loadActiveInactiveCount();
-  }
-
-  //* Activate/Deactivate Modal methods
-  openActivateDeactivateModal(
-    id: number, 
-    entityName: string, 
-    action: 'deactivate' | 'activate' | 'delete',
-    status: number
-  ): void {
-    this.entityToModify = entityName;
-    this.modifyAction = action;
-    this.entityIdToChangeStatus = id;
-    this.StatusChangedTo = status;
-    this.dropdownStates = this.dropdownStates.map(() => false);
-    this.isActivateDeactivateModalOpen = true;
-  }
-
-  closeActivateDeactivateModal(): void {
-    this.isActivateDeactivateModalOpen = false;
-    setTimeout(() => {
-      this.entityToModify = null;
-      this.modifyAction = 'deactivate';
     }, 300);
-  }
-
-  confirmActivateDeactivate(): void {
-    if (this.entityToModify) {
-      // Implement status change logic here
-      // You'll need to call the appropriate service method
-      this.toastr.success("Status changed successfully", "Success");
-      this.loadData();
-      this.loadActiveInactiveCount();
-      this.closeActivateDeactivateModal();
-    }
   }
 
   //* Handle search clear event
@@ -317,11 +294,6 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
       this.searchData.pageNumber = 1;
       this.loadData();
     }
-  }
-
-  //* Get digits array for flip animation
-  getDigitsArray(number: number): string[] {
-    return number.toString().split('');
   }
 
   ngOnDestroy(): void {

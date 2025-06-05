@@ -1,11 +1,13 @@
 // investor-contact.interfaces.ts
 
+import { ContactRequestStatus } from "../_shared/enums";
+
 export interface InvestorContactRequest {
   pageNumber?: number;
   pageSize?: number;
   investorIdFilter?: number;
   founderIdFilter?: number;
-  statusFilter?: boolean;
+  statusFilter?: ContactRequestStatus;
   columnOrderBy?: string;
   orderByDirection?: 'ASC' | 'DESC';
   searchTerm?: string;
@@ -33,4 +35,10 @@ export interface InvestorContactResponse {
   totalItemsInTable: number;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
+}
+
+export interface UpdateContactRequestStatusDto {
+  contactRequestId: number;
+  newStatus: ContactRequestStatus;
+  declineReason?: string;  
 }
