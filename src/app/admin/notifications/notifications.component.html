@@ -9,7 +9,7 @@
                     <ul class="breadcrumb">
                         <li><a>Dashboard</a></li>
                         <li><i class='bx bx-chevron-right'></i></li>
-                        <li><a class="active">Founders</a></li>
+                        <li><a class="active">Notifcations</a></li>
                     </ul>
                 </div>
             </div>
@@ -37,14 +37,14 @@
                     <span class="text">
                         <h3 class="animated-number">
                             <span class="digit-container"
-                                *ngFor="let digit of getDigitsArray(displayInactiveCount); let i = index">
+                                *ngFor="let digit of getDigitsArray(displayDeletedCount); let i = index">
                                 <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
                                     [ngClass]="{'animate': animationComplete}">
                                     {{ digit }}
                                 </span>
                             </span>
                         </h3>
-                        <p>Inactive {{ entityNamePlural }}</p>
+                        <p>Deleted {{ entityNamePlural }}</p>
                     </span>
                 </li>
             </div>
@@ -99,41 +99,40 @@
                                     <div class="advanced-search-menu" [ngClass]="{'show': isAdvancedSearchOpen}">
                                         <div class="advanced-search-content">
                                             <h4>Search Filters</h4>
-                                            <div class="filter-row">
-                                              <div class="filter-group">
-                                                <label for="governorate">Governorate:</label>
-                                                  <select id="governorate"  [(ngModel)]="selectedGovernrate" (ngModelChange)="onGovernorateChange($event)" name="governorate">
-                                                           <option value="">All Governorates</option>
-                                                            <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
-                                                 </select>
-                                         </div>
+                                            
                 
-                                          <div class="filter-group">
-                                             <label for="city">City:</label>
-                                        <select id="city" [(ngModel)]="selectedCity" name="city" [disabled]="!selectedGovernrate || cities.length === 0">
-                                                     <option value="">All Cities</option>
-                                                      <option *ngFor="let city of cities" [value]="city.id">{{ city.nameEn }}</option>
-                                        </select>
-                                         </div>
-                                      </div>
-
                                             <div class="filter-group">
-                                                <label for="gender">Gender:</label>
-                                                <select id="gender" [(ngModel)]="searchData.Gender" name="gender">
-                                                    <option value=null>All Genders</option>
-                                                    <option [value]="Gender.Male">Male</option>
-                                                    <option [value]="Gender.Female">Female</option>
+                                                <label for="userTypeFrom">User Type From:</label>
+                                                <select id="userTypeFrom" [(ngModel)]="searchData.UserTypeFrom" name="userTypeFrom">
+                                                    <option value="0">All Users</option>
+                                                    <option [value]="userType.Staff">Staff</option>
+                                                    <option [value]="userType.Founder">Founder</option>
+                                                    <option [value]="userType.Investor">Investor</option>
                                                 </select>
                                             </div>
-
+                                            <div class="filter-group">
+                                                <label for="userTypeTo">User Type To:</label>
+                                                <select id="userTypeTo" [(ngModel)]="searchData.UserTypeTo" name="userTypeTo">
+                                                    <option value="0">All Users</option>
+                                                    <option [value]="userType.Staff">Staff</option>
+                                                    <option [value]="userType.Founder">Founder</option>
+                                                    <option [value]="userType.Investor">Investor</option>
+                                                </select>
+                                            </div>
                                             <div class="filter-group">
                                                 <label for="status">Status:</label>
-                                                <select id="status" [(ngModel)]="searchData.status" name="status">
-                                        
-                                                        <option value=0>All Status</option>
+                                                <select id="status" [(ngModel)]="searchData.Status" name="status">
+                                                    <option value="0">All Status</option>
                                                     <option [value]="Status.Active">Active</option>
-                                                    <option [value]="Status.Inactive">Inactive</option>
                                                     <option [value]="Status.Deleted">Deleted</option>
+                                                </select>
+                                            </div>
+                                            <div class="filter-group">
+                                                <label for="ReadStatus">Read Status:</label>
+                                                <select id="ReadStatus" [(ngModel)]="searchData.isRead" name="ReadStatus">
+                                                    <option value=null>All Read Status</option>
+                                                    <option [value]="1">Read</option>
+                                                    <option [value]="0">Unread</option>
                                                 </select>
                                             </div>
 
@@ -159,11 +158,16 @@
                      
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Email</th>
+                             
+                                <th>From</th>
+                                <th>To</th>
                                 <th style="cursor: pointer">
                                     Created At
                                     <i class="bx bx-sort"></i>
+                                </th>
+                                 <th style="cursor: pointer">
+                                    Is Read
+                                  
                                 </th>
                                 <th>
                                     Status
@@ -171,8 +175,8 @@
                                         <span class="dot green-dot" [class.selected]="currentFilter === 'active'"
                                             (click)="setFilter('active',Status.Active)" title="Show Active"></span>
                                         <span class="dot red-dot" [class.selected]="currentFilter === 'inactive'"
-                                            (click)="setFilter('inactive',Status.Inactive)"
-                                            title="Show Inactive"></span>
+                                            (click)="setFilter('inactive',Status.Deleted)"
+                                            title="Show Deleted"></span>
                                     </span>
                                 </th>
                                 <th>Actions</th>
@@ -190,7 +194,7 @@
                             </tr>
 
                           
-                            <tr *ngIf="!isLoading2" class="no-results-row">
+                                <tr *ngIf="!isLoading2" class="no-results-row">
                                 <td colspan="7"
                                     style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
                                     Yet
@@ -208,22 +212,27 @@
                             </tr>
 
                             <tr *ngFor="let item of loadedListData;let i=index">
+                             
                                 <td>
-                                    <img src="https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg"
-                                        alt="User Image">
-                                    <p>{{item.user.firstName}}</p>
+                                    <p>{{item.createdByNavigation?.firstName}} {{item.createdByNavigation?.lastName}}</p>
                                 </td>
-                                <td>{{item.user.email}}</td>
-                                <td>{{item.user.createdAt|date}}</td>
+                                <td>
+                                    <p>{{item.userIdToNavigation?.firstName}} {{item.userIdToNavigation?.lastName}}</p>
+                                </td>
+                                <td>{{item.createdAt|date}}</td>
+                              <td>
+                             <span [style.color]="item.isRead === 1 ? '#28a745' : '#dc3545'">
+                               {{ item.isRead === 1 ? 'Read' : 'Unread' }}
+                             </span>
+                               </td>
                                 <td>
                                     <span class="status process"
-                                        [ngStyle]="{color: item.user.status === Status.Active ? '#2ed134' :'#e6382f'}"
+                                        [ngStyle]="{color: item.status === Status.Active ? '#2ed134' :'#e6382f'}"
                                         style="min-width: 100px; display: inline-block; text-align: center; padding: 10px 0px;">
-                                        {{ item.user.status|statusLabel }}
+                                        {{ item.status === Status.Active ? 'Active' : 'Deleted' }}
                                     </span>
                                 </td>
                                 <td>
-                                   
                                     <div class="action-dropdown" [ngClass]="{'active': dropdownStates[i]}">
                                         <button class="action-btn" type="button" (click)="toggleDropdown(i, $event)">
                                             <i class='bx bx-dots-vertical-rounded'></i>
@@ -231,27 +240,22 @@
                                         <div class="action-menu">
                                          <button class="action-item view" type="button" (click)="openModal(item)">
                                                 <i class='bx bx-show'></i>
-                                                View Details
-                                            </button>
-                                          <button class="action-item view" type="button" (click)="SendNotificationModal(item)">
-                                                <i class='bx bx-bell'></i>
-
-                                                Send Notification
+                                                View Notification
                                             </button>
 
                                             <button class="action-item"
-                                                [ngClass]="item.user.status === Status.Inactive ?'active':'deactivate'"
+                                                [ngClass]="item.status === Status.Deleted ? 'active' : 'activate'"
                                                 type="button"
-                                                (click)="openActivateDeactivateModal(item.id,`${item.user.firstName} ${item.user.lastName}`, item.user.status === Status.Active ? 'deactivate' : 'activate', item.user.status === Status.Active ? Status.Inactive:Status.Active)">
-                                                <i
-                                                    [class]="'bx ' + (item.user.status === Status.Active ? 'bx-x-circle' : 'bx-check-circle')"></i>
-                                                {{ item.user.status === Status.Active ? 'Deactivate' : 'Activate' }}
+                                                *ngIf="item.status === Status.Deleted"
+                                                (click)="openActivateDeleteModal(item.id, item.title, 'activate', Status.Active)">
+                                                <i class="bx bx-check-circle"></i>
+                                                Activate
                                             </button>
                                             <div class="action-divider"></div>
-                                            <button class="action-item " type="button"
-                                                (click)="openActivateDeactivateModal(item.id,`${item.user.firstName} ${item.user.lastName}`, 'delete', Status.Deleted)" >
+                                            <button class="action-item" type="button"
+                                                (click)="openActivateDeleteModal(item.id, item.title, 'delete', Status.Deleted)" >
                                                 <i class='bx bx-trash'></i>
-                                                delete
+                                                Delete
                                             </button>
                                         </div>
                                     </div>
@@ -277,53 +281,30 @@
     <div class="modal-overlay" [ngClass]="{'show': isModalOpen}" (click)="closeModal()">
         <div class="modal-container" (click)="$event.stopPropagation()">
             <div class="modal-header">
-                <h3>{{ modalMode === 'view' ? 'View ' + entityName : entityName + ' Details' }}</h3>
+                <h3>Notification Details</h3>
                 <button type="button" class="close-btn" (click)="closeModal()">
                     <i class='bx bx-x'></i>
                 </button>
             </div>
-
-           <div class="modal-body">
-            <app-viewdetails 
+           <app-view-details 
              
                 [selectedEntity]="selectedEntity"
                 [entityName]="entityName"
                 [modalMode]="modalMode"
                 (closeModal)="closeModal()">
-            </app-viewdetails>
-        </div>
-        </div>
-    </div>
-    <div class="modal-overlay" [ngClass]="{'show': isNotitficationModalOpen}" (click)="closeNotitifcationModal()">
-        <div class="modal-container" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-                <h3>{{ modalMode === 'add' ? 'send ' + entityName : entityName  }}</h3>
-                <button type="button" class="close-btn" (click)="closeNotitifcationModal()">
-                    <i class='bx bx-x'></i>
-                </button>
-            </div>
-
-           <div class="modal-body">
-            <app-sendnotification 
-             
-                [selectedEntity]="selectedEntity"
-                [entityName]="entityName"
-                [notificationmodalMode]="notificationmodalMode"
-                (closeModal)="closeNotitifcationModal()">
-            </app-sendnotification>
-        </div>
+            </app-view-details>
         </div>
     </div>
 
    
-   <div class="modal-overlay" [ngClass]="{ 'show': isActivateDeactivateModalOpen }" (click)="closeActivateDeactivateModal()">
+   <div class="modal-overlay" [ngClass]="{ 'show': isActivateDeactivateModalOpen }" (click)="closeActivateDeleteModal()">
   <div class="modal-container activate-deactivate-modal" (click)="$event.stopPropagation()" *ngIf="entityToModify">
    
     <div class="modal-header">
       <h3>
-        {{ modifyAction === 'deactivate' ? 'Deactivate' : modifyAction === 'activate' ? 'Activate' : 'Delete' }} {{ entityName }}
+        {{ modifyAction === 'activate' ? 'Activate' : 'Delete' }} {{ entityName }}
       </h3>
-      <button type="button" class="close-btn" (click)="closeActivateDeactivateModal()">
+      <button type="button" class="close-btn" (click)="closeActivateDeleteModal()">
         <i class='bx bx-x'></i>
       </button>
     </div>
@@ -335,23 +316,17 @@
           <i
             class="bx"
             [ngClass]="{
-              'bx-error-circle': modifyAction === 'deactivate' || modifyAction === 'delete',
-              'bx-check-circle': modifyAction === 'activate'
+              'bx-check-circle': modifyAction === 'activate',
+              'bx-trash': modifyAction === 'delete'
             }"
             [style.color]="
-              modifyAction === 'deactivate' ? 'var(--red)' :
-              modifyAction === 'activate' ? 'var(--green)' :
-              'var(--danger)'
+              modifyAction === 'activate' ? 'var(--green)' : 'var(--danger)'
             "
           ></i>
         </div>
 
         <p class="confirmation-text">
           Are you sure you want to {{ modifyAction }} this {{ entityToModify.toLowerCase() }}?
-
-          <span *ngIf="modifyAction === 'deactivate'" class="warning-text">
-            This action will make the {{ entityName.toLowerCase() }} inactive.
-          </span>
 
           <span *ngIf="modifyAction === 'activate'" class="success-text">
             This action will make the {{ entityName.toLowerCase() }} active.
@@ -366,27 +341,25 @@
 
   
     <div class="modal-footer activate-deactivate-modal-footer">
-      <button type="button" class="cancel-btn" (click)="closeActivateDeactivateModal()">Cancel</button>
+      <button type="button" class="cancel-btn" (click)="closeActivateDeleteModal()">Cancel</button>
 
       <button
         type="button"
         class="confirm-btn"
         [ngClass]="{
-          'deactivate': modifyAction === 'deactivate',
           'activate': modifyAction === 'activate',
           'delete': modifyAction === 'delete'
         }"
-        (click)="confirmActivateDeactivate()"
+        (click)="confirmActivateDelete()"
       >
         <i
           class="bx"
           [ngClass]="{
-            'bx-x-circle': modifyAction === 'deactivate',
             'bx-check-circle': modifyAction === 'activate',
             'bx-trash': modifyAction === 'delete'
           }"
         ></i>
-        {{ modifyAction === 'deactivate' ? 'Deactivate' : modifyAction === 'activate' ? 'Activate' : 'Delete' }}
+        {{ modifyAction === 'activate' ? 'Activate' : 'Delete' }}
       </button>
     </div>
   </div>
