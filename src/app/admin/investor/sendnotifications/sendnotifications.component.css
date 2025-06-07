@@ -1,0 +1,136 @@
+.form-group {
+  margin-bottom: 18px;
+  padding: 12px 0;
+  /* Remove default gap if present */
+  gap: 0;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Input Container */
+.input-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+/* Form Input Styling */
+.form-input2 {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--custom);
+  border-radius: 8px;
+  background-color: var(--light);
+
+  font-family: var(--poppins);
+  font-size: 13px;
+  transition: all 0.3s ease;
+  outline: none;
+  box-sizing: border-box;
+  margin-bottom: 0;
+}
+
+.form-input2:focus {
+  border-color: var(--dark);
+  box-shadow: 0 0 0 2px rgba(24, 56, 78, 0.1);
+}
+
+.form-input2:disabled {
+  background-color: var(--custom);
+  color: var(--dark-grey);
+  cursor: not-allowed;
+}
+
+.form-input2::placeholder {
+  color: var(--dark-grey);
+}
+
+/* Select specific styling */
+select.form-input2 {
+  cursor: pointer;
+}
+
+select.form-input2:disabled {
+  cursor: not-allowed;
+}
+
+/* Modal Footer */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 18px;
+  border-top: 1px solid var(--custom);
+  margin-top: 28px;
+  width: 100%;
+  padding-right: 32px; /* More space to the right */
+  padding-bottom: 32px; /* Add more space at the bottom */
+}
+
+.action-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--poppins);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  justify-content: center;
+  background-color: var(--dark);
+  color: var(--light);
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn:disabled {
+  background-color: var(--dark-grey);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.action-btn i {
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.action-btn:hover:not(:disabled) i {
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .col-4 {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .modal-form {
+    padding: 1em 0.5em;
+    row-gap: 14px;
+  }
+  .form-group {
+    margin-bottom: 12px;
+    padding: 8px 0;
+  }
+  .modal-footer {
+    margin-top: 16px;
+    padding-top: 12px;
+  }
+}

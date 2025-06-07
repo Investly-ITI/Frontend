@@ -33,3 +33,7 @@ export enum InvestorInvestingType {
     advanced=4
  }
 
+export enum NotificationsStatus {
+    Active = 1,
+    Deleted = 2,
+}
