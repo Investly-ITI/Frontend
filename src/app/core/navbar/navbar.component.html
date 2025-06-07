@@ -63,11 +63,11 @@
       </ul>
 
       <!-- ========================================
-           AUTH BUTTONS
+           AUTH BUTTONS / USER PROFILE
       ======================================== -->
       <div class="navbar-actions">
-        <!-- Auth Buttons -->
-        <div class="auth-buttons">
+        <!-- Show Auth Buttons when NOT logged in -->
+        <div class="auth-buttons" *ngIf="!isAuthenticated">
           <button class="btn btn-secondary" (click)="navigateTo('/login')">
             <i class='bx bx-log-in'></i>
             <span>Sign In</span>
@@ -75,6 +75,24 @@
           <button class="btn btn-primary" (click)="navigateTo('/signup')">
             <i class='bx bx-user-plus'></i>
             <span>Sign Up</span>
+          </button>
+        </div>
+
+        <!-- Show User Profile when logged in -->
+        <div class="user-profile" *ngIf="isAuthenticated && currentUser">
+          <div class="user-info">
+            <span class="user-name">{{ currentUser.name }}</span>
+            <span class="user-type">{{ currentUser.userType === UserType.Founder ? 'Founder' : 
+                                       currentUser.userType === UserType.Investor ? 'Investor' : 'Staff' }}</span>
+          </div>
+          
+          <div class="profile-picture" (click)="onProfilePictureClick()" title="Go to Profile">
+            <img [src]="getProfilePictureUrl()" [alt]="currentUser.name + ' Profile Picture'">
+          </div>
+          
+          <button class="btn btn-logout" (click)="logout()" title="Logout">
+            <i class='bx bx-log-out'></i>
+            <span class="logout-text">Logout</span>
           </button>
         </div>
       </div>

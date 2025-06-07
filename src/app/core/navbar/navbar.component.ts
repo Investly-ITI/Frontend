@@ -1,6 +1,10 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../../_services/auth.service';
+import { LoggedInUser } from '../../_models/user';
+import { UserType } from '../../_shared/enums';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -8,14 +12,37 @@ import { RouterModule, Router } from '@angular/router';
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   isIdeasDropdownOpen = false;
   isMobileMenuOpen = false;
+  isAuthenticated = false;
+  currentUser: LoggedInUser | null = null;
+  UserType = UserType; // Expose enum to template
+  
+  private subscriptions: Subscription[] = [];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
-    // Navbar initialization (theme is now handled by footer component)
+    // Subscribe to authentication state
+    const authSub = this.authService.isAuthenticated$.subscribe(
+      isAuth => this.isAuthenticated = isAuth
+    );
+    
+    // Subscribe to current user data
+    const userSub = this.authService.CurrentUser$.subscribe(
+      user => this.currentUser = user
+    );
+    
+    this.subscriptions.push(authSub, userSub);
+  }
+
+  ngOnDestroy() {
+    // Clean up subscriptions
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   @HostListener('document:click', ['$event'])
@@ -69,5 +96,33 @@ export class NavbarComponent implements OnInit {
     this.router.navigate(['/profile'], { queryParams });
     this.closeDropdowns();
     this.isMobileMenuOpen = false;
+  }
+
+  // Navigate to founder/profile when profile picture is clicked
+  onProfilePictureClick() {
+    if (this.currentUser?.userType === UserType.Founder) {
+      this.router.navigate(['/profile']);
+    } else {
+      // For other user types, you can implement different navigation logic
+      this.router.navigate(['/profile']);
+    }
+    this.closeDropdowns();
+    this.isMobileMenuOpen = false;
+  }
+
+  // Logout functionality
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/']);
+    this.closeDropdowns();
+    this.isMobileMenuOpen = false;
+  }
+
+  // Get user profile picture URL
+  getProfilePictureUrl(): string {
+    // For now, return a default profile picture
+    // You can modify this to return actual user profile picture URL from user data
+    // If user has a profile picture, use: this.currentUser?.profilePicture || fallback
+    return 'Me.jpg'; // Using existing image from public folder as default
   }
 }
