@@ -39,16 +39,12 @@
 
 .form-section {
   background: white;
-  border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--grey);
-  border-right: 4px solid var(--light);
+  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); */
 }
 
 :host-context(.dark) .form-section {
   background: var(--custom);
-  border-right: 4px solid var(--light);
 }
 
 .section-title {
@@ -205,9 +201,6 @@
 }
 
 /* Progress Indicator */
-.form-section:first-of-type {
-  border-left: 4px solid var(--light);
-}
 
 .form-section:nth-of-type(2) {
   border-left: 4px solid var(--light);

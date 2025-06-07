@@ -80,6 +80,7 @@
   overflow: hidden;
 }
 
+/* Simple static triangular particles */
 .profile-header::before {
   content: '';
   position: absolute;
@@ -87,11 +88,16 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-  opacity: 0.3;
+  background: 
+    linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 50%, transparent 50%),
+    linear-gradient(-45deg, transparent 0%, transparent 50%, rgba(255, 255, 255, 0.08) 50%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.06) 30%, transparent 30%);
+  background-size: 80px 80px, 120px 120px, 100px 100px;
+  background-position: 0 0, 40px 40px, 20px 60px;
+  opacity: 0.5;
 }
 
-/* Infinite Wave Animation */
+/* Static subtle wave pattern */
 .profile-header::after {
   content: '';
   position: absolute;
@@ -100,26 +106,13 @@
   width: 100%;
   height: 100%;
   background: linear-gradient(
-    -45deg,
-    transparent 25%,
-    rgba(255, 255, 255, 0.1) 25%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 50%,
-    transparent 75%,
-    rgba(255, 255, 255, 0.1) 75%
+    45deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 60%
   );
-  background-size: 60px 60px;
-  animation: moveWaves 8s linear infinite;
+  background-size: 200px 200px;
   z-index: 1;
-}
-
-@keyframes moveWaves {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 60px 60px;
-  }
 }
 
 .header-content {
@@ -144,7 +137,7 @@
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  border: 4px solid rgba(255, 255, 255, 0.3);
+  border: 4px solid rgba(61, 59, 156, 0.3);
   object-fit: cover;
   transition: all 0.3s ease;
 }
@@ -291,7 +284,7 @@
 .nav-button::before {
   content: '';
   position: absolute;
-  left: 0;
+  left: 0px;
   top: 0;
   bottom: 0;
   width: 4px;
@@ -320,10 +313,14 @@
   color: var(--dark);
 }
 
+:host-context(.dark) .nav-button::before {
+  background: white
+}
+
 :host-context(.dark) .nav-button:hover,
 :host-context(.dark) .nav-button.active {
-  background: var(--grey);
-  color: var(--light);
+  background: var(--light);
+  color: white;
 }
 
 .nav-button i {

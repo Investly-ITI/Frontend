@@ -56,27 +56,30 @@
         <select 
           id="government" 
           class="form-control"
-          [(ngModel)]="government"
+          [(ngModel)]="governmentId"
+          (change)="onGovernorateChange($any($event.target).value)"
           name="government"
           required
         >
           <option value="">Select Government</option>
-          <option *ngFor="let gov of governments" [value]="gov">{{ gov }}</option>
+          <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
         </select>
       </div>
     </div>
 
     <div class="form-group">
       <label class="form-label" for="city">City *</label>
-      <input 
-        type="text" 
+      <select 
         id="city" 
         class="form-control"
-        [(ngModel)]="city"
+        [(ngModel)]="cityId"
+        [disabled]="!selectedGovernorate"
         name="city"
-        placeholder="Enter your city"
         required
       >
+        <option value="">{{ selectedGovernorate ? 'Select City' : 'Select Government First' }}</option>
+        <option *ngFor="let city of citiesByGovernorate" [value]="city.id">{{ city.nameEn }}</option>
+      </select>
     </div>
 
     <!-- File Upload Section -->
@@ -121,7 +124,7 @@
       <button 
         type="submit" 
         class="btn btn-primary"
-        [disabled]="!title || !category || !stage || !government || !city || uploadedFiles.length === 0"
+        [disabled]="!title || !category || !stage || !governmentId || !cityId || uploadedFiles.length === 0"
       >
         <i class='bx bx-upload'></i>
         Submit Business Idea

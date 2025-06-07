@@ -1,14 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { Governorate } from '../../../../_models/governorate';
+import { City } from '../../../../_models/city';
+import { GovernrateService } from '../../../../_services/governorate.service';
 
 interface BusinessFormData {
   // Common fields
   title: string;
   category: string;
   stage: string;
-  government: string;
-  city: string;
+  governmentId: string;
+  cityId: string;
   
   // Category-specific fields (dynamic)
   [key: string]: any;
@@ -27,13 +31,15 @@ interface QuestionConfig {
   templateUrl: './add-by-form.component.html',
   styleUrl: './add-by-form.component.css'
 })
-export class AddByFormComponent {
+export class AddByFormComponent implements OnInit, OnDestroy {
+  private unsubscribe: Subscription[] = [];
+  
   formData: BusinessFormData = {
     title: '',
     category: '',
     stage: '',
-    government: '',
-    city: ''
+    governmentId: '',
+    cityId: ''
   };
 
   categories: string[] = [
@@ -45,10 +51,10 @@ export class AddByFormComponent {
     'Idea', 'Prototype', 'MVP', 'Early Stage', 'Growth Stage', 'Expansion'
   ];
 
-  governments: string[] = [
-    'Cairo', 'Alexandria', 'Giza', 'Sharkia', 'Dakahlia', 
-    'Beheira', 'Kafr El Sheikh', 'Gharbia'
-  ];
+  // Replace static governments with dynamic data
+  governorates: Governorate[] = [];
+  citiesByGovernorate: City[] = [];
+  selectedGovernorate: boolean = false;
 
   // Category-specific questions
   categoryQuestions: { [key: string]: QuestionConfig[] } = {
@@ -96,6 +102,48 @@ export class AddByFormComponent {
     ]
   };
 
+  constructor(private governorateService: GovernrateService) { }
+
+  ngOnInit(): void {
+    this.loadGovernorates();
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe.forEach(sub => sub.unsubscribe());
+  }
+
+  public loadGovernorates() {
+    const subGov = this.governorateService.getGovernrates().subscribe({
+      next: (response) => {
+        if (response.isSuccess == true) {
+          this.governorates = response.data;
+        }
+      },
+      error: (err) => {
+        console.log("Error loading governorates:", err);
+      }
+    });
+    this.unsubscribe.push(subGov);
+  }
+
+  // Handle governorate selection change
+  onGovernorateChange(governorateId: number) {
+    const subcity = this.governorateService.getCitiesByGovernrateId(governorateId).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          this.citiesByGovernorate = response.data;
+          this.selectedGovernorate = true;
+          // Reset city selection when governorate changes
+          this.formData.cityId = '';
+        }
+      }, 
+      error: (err) => {
+        console.log("Error loading cities:", err);
+      }
+    });
+    this.unsubscribe.push(subcity);
+  }
+
   getCurrentCategoryQuestions(): QuestionConfig[] {
     return this.categoryQuestions[this.formData.category] || [];
   }
@@ -106,7 +154,7 @@ export class AddByFormComponent {
     
     // Remove old category-specific fields
     Object.keys(this.formData).forEach(key => {
-      if (!['title', 'category', 'stage', 'government', 'city'].includes(key)) {
+      if (!['title', 'category', 'stage', 'governmentId', 'cityId'].includes(key)) {
         delete this.formData[key];
       }
     });
@@ -129,7 +177,7 @@ export class AddByFormComponent {
 
   isFormValid(): boolean {
     const commonFieldsValid = !!(this.formData.title && this.formData.category && 
-                               this.formData.stage && this.formData.government && this.formData.city);
+                               this.formData.stage && this.formData.governmentId && this.formData.cityId);
     
     const categoryQuestions = this.getCurrentCategoryQuestions();
     const categoryFieldsValid = categoryQuestions.every(question => {

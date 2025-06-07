@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 interface Notification {
@@ -16,15 +16,29 @@ interface Notification {
   templateUrl: './founder-notifications.component.html',
   styleUrl: './founder-notifications.component.css'
 })
-export class FounderNotificationsComponent {
+export class FounderNotificationsComponent implements OnInit {
   @Input() notifications!: Notification[];
   @Output() notificationsChange = new EventEmitter<Notification[]>();
 
-  markNotificationAsRead(notificationId: string): void {
-    const notification = this.notifications.find(n => n.id === notificationId);
-    if (notification) {
-      notification.read = true;
-      this.notificationsChange.emit(this.notifications);
+  ngOnInit(): void {
+    // Automatically mark all notifications as read when the component loads
+    this.markAllNotificationsAsRead();
+  }
+
+  markAllNotificationsAsRead(): void {
+    if (this.notifications && this.notifications.length > 0) {
+      let hasChanges = false;
+      this.notifications.forEach(notification => {
+        if (!notification.read) {
+          notification.read = true;
+          hasChanges = true;
+        }
+      });
+      
+      // Only emit change if there were actual changes
+      if (hasChanges) {
+        this.notificationsChange.emit(this.notifications);
+      }
     }
   }
 

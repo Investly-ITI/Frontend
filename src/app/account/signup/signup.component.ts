@@ -574,27 +574,11 @@ export class SignupComponent implements OnInit, OnDestroy {
   // Calculate proper position for range indicators accounting for thumb width
   getIndicatorPosition(value: number): number {
     const percentage = ((value - this.minFunding) / (this.maxFunding - this.minFunding)) * 100;
-    const thumbWidthPercent = 1.4;
-    const paddingPercent = 1.5;
-
-    if (percentage === 0) {
-      return paddingPercent;
-    } else if (percentage === 100) {
-      return percentage - paddingPercent;
-    } else {
-      return percentage;
-    }
+    return Math.max(0, Math.min(100, percentage));
   }
 
-
-
-
-
-
-
-
-
-
-
-
+  // Navigate to landing page when brand is clicked
+  navigateToHome(): void {
+    this.router.navigate(['/']);
+  }
 } 

@@ -60,27 +60,30 @@
           <select 
             id="government" 
             class="form-control"
-            [(ngModel)]="formData.government"
+            [(ngModel)]="formData.governmentId"
+            (change)="onGovernorateChange($any($event.target).value)"
             name="government"
             required
           >
             <option value="">Select Government</option>
-            <option *ngFor="let gov of governments" [value]="gov">{{ gov }}</option>
+            <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
           </select>
         </div>
       </div>
 
       <div class="form-group">
         <label class="form-label" for="city">City *</label>
-        <input 
-          type="text" 
+        <select 
           id="city" 
           class="form-control"
-          [(ngModel)]="formData.city"
+          [(ngModel)]="formData.cityId"
+          [disabled]="!selectedGovernorate"
           name="city"
-          placeholder="Enter your city"
           required
         >
+          <option value="">{{ selectedGovernorate ? 'Select City' : 'Select Government First' }}</option>
+          <option *ngFor="let city of citiesByGovernorate" [value]="city.id">{{ city.nameEn }}</option>
+        </select>
       </div>
     </div>
 
