@@ -116,14 +116,18 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     
     this.contactRequestService.getInvestorContacts(this.searchData).subscribe({
-      next: (response: InvestorContactResponse) => {
-        this.loadedListData = response.items;
-        this.pageSize = response.pageSize;
-        this.totalCount = response.totalFilteredItems;
-        this.currentPage = response.currentPage;
-        this.totalPages = response.totalPages;
-        this.showNoResults = response.items.length === 0;
-        this.dropdownStates = new Array(this.loadedListData.length).fill(false);
+      next: (response) => {
+        if (response.isSuccess && response.data) {
+          this.loadedListData = response.data.items;
+          this.pageSize = response.data.pageSize;
+          this.totalCount = response.data.totalFilteredItems;
+          this.currentPage = response.data.currentPage;
+          this.totalPages = response.data.totalPages;
+          this.showNoResults = response.data.items.length === 0;
+          this.dropdownStates = new Array(this.loadedListData.length).fill(false);
+        } else {
+          this.toastr.error(response.message || 'Failed to load contact requests');
+        }
         this.isLoading = false;
       },
       error: (err) => {
@@ -133,19 +137,26 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
     });
   }
 
+
   loadStatusCounts(): void {
     this.contactRequestService.getPendingContactsCount().subscribe({
-      next: (count) => this.pendingCount = count,
+      next: (response) => {
+          this.pendingCount = response;
+      },
       error: (err) => console.error('Failed to load pending count', err)
     });
 
     this.contactRequestService.getAcceptedContactsCount().subscribe({
-      next: (count) => this.acceptedCount = count,
+      next: (response) => {
+          this.acceptedCount = response;
+      },
       error: (err) => console.error('Failed to load accepted count', err)
     });
 
     this.contactRequestService.getDeclinedContactsCount().subscribe({
-      next: (count) => this.declinedCount = count,
+      next: (response) => {
+          this.declinedCount = response;
+      },
       error: (err) => console.error('Failed to load declined count', err)
     });
   }
@@ -181,44 +192,48 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
   }
 
   confirmStatusChange(): void {
-      if (!this.selectedRequest) return;
+    if (!this.selectedRequest) return;
 
-      // Handle all three status cases
-      let newStatus: ContactRequestStatus;
-      switch (this.statusChangeAction) {
-          case 'pending':
-              newStatus = ContactRequestStatus.Pending;
-              break;
-          case 'accept':
-              newStatus = ContactRequestStatus.Accepted;
-              break;
-          case 'decline':
-              newStatus = ContactRequestStatus.Declined;
-              break;
-          default:
-              console.error('Unknown status change action:', this.statusChangeAction);
-              return;
+    let newStatus: ContactRequestStatus;
+    switch (this.statusChangeAction) {
+      case 'pending':
+        newStatus = ContactRequestStatus.Pending;
+        break;
+      case 'accept':
+        newStatus = ContactRequestStatus.Accepted;
+        break;
+      case 'decline':
+        newStatus = ContactRequestStatus.Declined;
+        break;
+      default:
+        console.error('Unknown status change action:', this.statusChangeAction);
+        return;
+    }
+
+    const dto: UpdateContactRequestStatusDto = {
+      contactRequestId: this.selectedRequest.id,
+      newStatus,
+      declineReason: this.statusChangeAction === 'decline' ? this.declineReason : undefined
+    };
+
+    this.isLoading = true;
+    this.contactRequestService.updateContactRequestStatus(dto).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          this.toastr.success(response.message || 'Status updated successfully');
+          this.loadData();
+          this.loadStatusCounts();
+        } else {
+          this.toastr.error(response.message || 'Failed to update status');
+        }
+        this.closeStatusChangeModal();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.toastr.error(err.error?.message || 'Failed to update status');
+        this.isLoading = false;
       }
-
-      const dto: UpdateContactRequestStatusDto = {
-          contactRequestId: this.selectedRequest.id,
-          newStatus,
-          declineReason: this.statusChangeAction === 'decline' ? this.declineReason : undefined
-      };
-
-      this.isLoading = true;
-      this.contactRequestService.updateContactRequestStatus(dto).subscribe({
-          next: () => {
-              this.toastr.success('Status updated successfully');
-              this.loadData();
-              this.loadStatusCounts();
-              this.closeStatusChangeModal();
-          },
-          error: (err) => {
-              this.toastr.error(err.error?.message || 'Failed to update status');
-              this.isLoading = false;
-          }
-      });
+    });
   }
 
   //* Filter methods
