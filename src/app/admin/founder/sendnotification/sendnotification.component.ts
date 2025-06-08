@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { notification, notificationSearch, sendnotification } from '../../../_models/notification';
 import { NotificationService } from '../../_services/notification.service';
@@ -8,6 +8,7 @@ import { Title } from '@angular/platform-browser';
 import { Founder } from '../../../_models/founder';
 import { LoggedInUser } from '../../../_models/user';
 import { AuthService } from '../../../_services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-sendnotification',
@@ -15,7 +16,7 @@ import { AuthService } from '../../../_services/auth.service';
   templateUrl: './sendnotification.component.html',
   styleUrl: './sendnotification.component.css'
 })
-export class SendnotificationComponent {
+export class SendnotificationComponent implements OnInit, OnDestroy {
   @Input() selectedEntity!: Founder;
 
   @Input() entityName: string = 'Notifcation';
@@ -27,14 +28,15 @@ export class SendnotificationComponent {
   formData!: FormGroup;
   notifcationData!: notification;
   loggedInUser:LoggedInUser|null=null;
+  sub!: Subscription;
 
   constructor(private fb: FormBuilder, private notificationService: NotificationService, private toastrService: ToastrService,private auth:AuthService) { }
 
   ngOnInit(): void {
     this.initializeForm();
-      var sub=this.auth.CurrentUser$.subscribe(user=>{
-           this.loggedInUser=user;
-     })
+    this.sub = this.auth.CurrentUser$.subscribe(user => {
+      this.loggedInUser = user;
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -95,6 +97,10 @@ onSubmit(): void {
   }
 }
 
- 
+  ngOnDestroy(): void {
+    if (this.sub) {
+      this.sub.unsubscribe();
+    }
+  }
 }
 
