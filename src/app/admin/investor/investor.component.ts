@@ -21,6 +21,7 @@ import { Gender } from '../../_shared/general';
 import { Governorate } from '../../_models/governorate';
 import { City } from '../../_models/city';
 import { GovernrateService } from '../../_services/governorate.service';
+import { SendnotificationsComponent } from "./sendnotifications/sendnotifications.component";
 
 @Component({
   selector: 'app-investor',
@@ -35,8 +36,9 @@ import { GovernrateService } from '../../_services/governorate.service';
     MatSelectModule,
     MatCheckboxModule,
     StatusLabelPipe,
-    AddUpdateComponent, // Add this import
-  ],
+    AddUpdateComponent,
+    SendnotificationsComponent
+],
   templateUrl: './investor.component.html',
   styleUrl: './investor.component.css'
 })
@@ -111,7 +113,9 @@ export class InvestorComponent implements OnInit, OnDestroy {
   loadedListData: Investor[] = [];
   Status = Status
   Gender=Gender
-
+  //notifications
+  isNotitficationModalOpen: boolean = false;
+    notificationmodalMode= 'add';
   //* Constructor
   constructor(
     private InvestorService: InvestorService,
@@ -366,7 +370,19 @@ loadActiveInactiveCount(){
       }
     });
   }
-
+  SendNotificationModal(item: Investor): void {
+      this.isNotitficationModalOpen = true;
+      this.notificationmodalMode = 'add';
+      this.selectedEntity = item;
+      this.dropdownStates = this.dropdownStates.map(() => false);
+    }
+      closeNotitifcationModal(): void {
+      this.isNotitficationModalOpen = false;
+      setTimeout(() => {
+        this.notificationmodalMode = 'add';
+        this.selectedEntity = null;
+      }, 300); 
+    }
 
   ngOnDestroy(): void {
     this.darkModeSubscription.unsubscribe();

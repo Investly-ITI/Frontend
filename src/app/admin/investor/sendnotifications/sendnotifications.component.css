@@ -1,0 +1,144 @@
+/* ========================================
+   CSS VARIABLES (inherit from parent)
+======================================== */
+:host {
+  --poppins: 'Poppins', sans-serif;
+  --light: #F9F9F9;
+  --light2: #30acaa;
+  --custom: #e2e2e2;
+  --dark: #18384e;
+  --dark-grey: #AAAAAA;
+}
+
+/* Modal Form Container */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-height: auto;
+  padding: 0.7em 0.5em 1em 0.5em; /* Even less top and left padding */
+  row-gap: 10px;
+}
+
+/* Add spacing for form groups, labels, inputs, and modal button */
+.form-group {
+  margin-bottom: 2px;
+  padding: 1px 0;
+  gap: 0;
+}
+
+.form-group label {
+  margin-bottom: 1px;
+ 
+  font-weight: 500;
+  font-size: 13px;
+  font-family: var(--poppins);
+  display: block;
+}
+
+/* Input Container */
+.input-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+/* Form Input Styling */
+.form-input2 {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--custom);
+  border-radius: 8px;
+  background-color: var(--light);
+  font-family: var(--poppins);
+  font-size: 13px;
+  transition: all 0.3s ease;
+  outline: none;
+  box-sizing: border-box;
+  margin-bottom: 0;
+}
+
+.form-input2:focus {
+  border-color: var(--dark);
+  box-shadow: 0 0 0 2px rgba(24, 56, 78, 0.1);
+}
+
+.form-input2:disabled,
+.form-input2[readonly] {
+  background-color: var(--custom);
+  color: var(--dark-grey);
+  cursor: not-allowed;
+}
+
+.form-input2::placeholder {
+  color: var(--dark-grey);
+}
+
+/* Modal Footer */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 18px;
+  border-top: 1px solid var(--custom);
+  margin-top: 28px;
+  width: 100%;
+  padding-right: 32px;
+  padding-bottom: 32px;
+}
+
+.action-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--poppins);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  justify-content: center;
+  background-color: var(--dark);
+  color: var(--light);
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn:disabled {
+  background-color: var(--dark-grey);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.action-btn i {
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.action-btn:hover:not(:disabled) i {
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .modal-form {
+    padding: 1em 0.5em;
+    row-gap: 4px;
+  }
+  .form-group {
+    margin-bottom: 3px;
+    padding: 2px 0;
+  }
+  .modal-footer {
+    margin-top: 16px;
+    padding-top: 12px;
+  }
+}

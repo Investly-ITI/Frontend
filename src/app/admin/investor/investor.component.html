@@ -275,7 +275,11 @@
                                                 <i class='bx bx-show'></i>
                                                 View Details
                                             </button>
+                                      <button class="action-item view" type="button" (click)="SendNotificationModal(item)">
+                                                <i class='bx bx-bell'></i>
 
+                                                Send Notification
+                                            </button> 
                                             <button class="action-item"
                                                 [ngClass]="item.user.status === Status.Inactive ?'active':'deactivate'"
                                                 type="button"
@@ -335,6 +339,27 @@
             </div>
         </div>
     </div>
+       <div class="modal-overlay" [ngClass]="{'show': isNotitficationModalOpen}" (click)="closeNotitifcationModal()">
+        <div class="modal-container" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ modalMode === 'add' ? 'send ' + entityName : entityName  }}</h3>
+                <button type="button" class="close-btn" (click)="closeNotitifcationModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+
+           <div class="modal-body">
+            <app-sendnotifications 
+             
+                [selectedEntity]="selectedEntity"
+                [entityName]="entityName"
+                [notificationmodalMode]="notificationmodalMode"
+                (closeModal)="closeNotitifcationModal()">
+            </app-sendnotifications>
+        </div>
+        </div>
+    </div>
+
 
     <!-- ========================================
          ACTIVATE/DEACTIVATE/delete CONFIRMATION MODAL
