@@ -1,12 +1,40 @@
+/* ========================================
+   CSS VARIABLES (inherit from parent)
+======================================== */
+:host {
+  --poppins: 'Poppins', sans-serif;
+  --light: #F9F9F9;
+  --light2: #30acaa;
+  --custom: #e2e2e2;
+  --dark: #18384e;
+  --dark-grey: #AAAAAA;
+}
+
+/* Modal Form Container */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-height: auto;
+  padding: 0.7em 0.5em 1em 0.5em; /* Even less top and left padding */
+  row-gap: 10px;
+}
+
+/* Add spacing for form groups, labels, inputs, and modal button */
 .form-group {
-  margin-bottom: 18px;
-  padding: 12px 0;
-  /* Remove default gap if present */
+  margin-bottom: 2px;
+  padding: 1px 0;
   gap: 0;
 }
 
 .form-group label {
-  margin-bottom: 8px;
+  margin-bottom: 1px;
+ 
+  font-weight: 500;
+  font-size: 13px;
+  font-family: var(--poppins);
   display: block;
 }
 
@@ -24,7 +52,6 @@
   border: 2px solid var(--custom);
   border-radius: 8px;
   background-color: var(--light);
-
   font-family: var(--poppins);
   font-size: 13px;
   transition: all 0.3s ease;
@@ -38,7 +65,8 @@
   box-shadow: 0 0 0 2px rgba(24, 56, 78, 0.1);
 }
 
-.form-input2:disabled {
+.form-input2:disabled,
+.form-input2[readonly] {
   background-color: var(--custom);
   color: var(--dark-grey);
   cursor: not-allowed;
@@ -46,15 +74,6 @@
 
 .form-input2::placeholder {
   color: var(--dark-grey);
-}
-
-/* Select specific styling */
-select.form-input2 {
-  cursor: pointer;
-}
-
-select.form-input2:disabled {
-  cursor: not-allowed;
 }
 
 /* Modal Footer */
@@ -65,8 +84,8 @@ select.form-input2:disabled {
   border-top: 1px solid var(--custom);
   margin-top: 28px;
   width: 100%;
-  padding-right: 32px; /* More space to the right */
-  padding-bottom: 32px; /* Add more space at the bottom */
+  padding-right: 32px;
+  padding-bottom: 32px;
 }
 
 .action-btn {
@@ -110,24 +129,13 @@ select.form-input2:disabled {
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
-  .row {
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .col-4 {
-    width: 100%;
-  }
-}
-
-@media screen and (max-width: 576px) {
   .modal-form {
     padding: 1em 0.5em;
-    row-gap: 14px;
+    row-gap: 4px;
   }
   .form-group {
-    margin-bottom: 12px;
-    padding: 8px 0;
+    margin-bottom: 3px;
+    padding: 2px 0;
   }
   .modal-footer {
     margin-top: 16px;

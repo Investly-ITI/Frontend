@@ -1,10 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Investor } from '../../../_models/investor';
 import { notification, notificationSearch, sendnotification } from '../../../_models/notification';
 import { NotificationService } from '../../_services/notification.service';
 import { ToastrService } from 'ngx-toastr';
+import { LoggedInUser } from '../../../_models/user';
+import { AuthService } from '../../../_services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-sendnotifications',
@@ -12,7 +15,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './sendnotifications.component.html',
   styleUrl: './sendnotifications.component.css'
 })
-export class SendnotificationsComponent {
+export class SendnotificationsComponent implements OnInit, OnDestroy {
 @Input() selectedEntity!: Investor;
 
   @Input() entityName: string = 'Notifcation';
@@ -22,12 +25,16 @@ export class SendnotificationsComponent {
   notificationToSend!:sendnotification;
   formData!: FormGroup;
   notifcationData!: notification;
+  loggedInUser: LoggedInUser | null = null;
+  sub!: Subscription;
   
-
-  constructor(private fb: FormBuilder, private notificationService: NotificationService, private toastrService: ToastrService) { }
+  constructor(private fb: FormBuilder, private notificationService: NotificationService, private toastrService: ToastrService,private auth:AuthService) { }
 
   ngOnInit(): void {
     this.initializeForm();
+    this.sub = this.auth.CurrentUser$.subscribe(user => {
+      this.loggedInUser = user;
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -39,7 +46,15 @@ export class SendnotificationsComponent {
   initializeForm(): void {
     this.formData = this.fb.group({
       title: [ '',Validators.required],
-      body: [ '',Validators.required]
+      body: [ '',Validators.required],
+       to: [
+        (this.selectedEntity?.user.firstName || '') +
+        ' ' +
+        (this.selectedEntity?.user?.lastName || '')
+      ],
+     
+      from: [this.loggedInUser?.name || '']
+      
     });
   }
 
@@ -83,5 +98,10 @@ onSubmit(): void {
   }
 }
 
+ngOnDestroy(): void {
+  if (this.sub) {
+    this.sub.unsubscribe();
+  }
+}
  
 }
