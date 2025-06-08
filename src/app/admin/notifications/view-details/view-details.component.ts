@@ -38,6 +38,16 @@ export class ViewDetailsComponent {
       id: [this.selectedEntity?.id || null],
       body: [this.selectedEntity?.body || ''],
       title: [this.selectedEntity?.title || ''],
+      to: [
+        (this.selectedEntity?.userIdToNavigation?.firstName || '') +
+        ' ' +
+        (this.selectedEntity?.userIdToNavigation?.lastName || '')
+      ],
+      from: [
+        (this.selectedEntity?.createdByNavigation?.firstName || '') +
+        ' ' +
+        (this.selectedEntity?.createdByNavigation?.lastName || '')
+      ],
     });
      if (this.modalMode === 'view') {
       this.formData.disable();

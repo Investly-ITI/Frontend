@@ -48,14 +48,13 @@
 
 /* Add spacing for form groups, labels, inputs, and modal button */
 .form-group {
-  margin-bottom: 18px;
-  padding: 12px 0;
-  /* Remove default gap if present */
+  margin-bottom: 4px;   /* Further reduced */
+  padding: 2px 0;       /* Further reduced */
   gap: 0;
 }
 
 .form-group label {
-  margin-bottom: 8px;
+  margin-bottom: 2px;   /* Further reduced */
   display: block;
 }
 
@@ -172,11 +171,11 @@ select.form-input2:disabled {
 @media screen and (max-width: 576px) {
   .modal-form {
     padding: 1em 0.5em;
-    row-gap: 14px;
+    row-gap: 4px; /* Further reduced */
   }
   .form-group {
-    margin-bottom: 12px;
-    padding: 8px 0;
+    margin-bottom: 3px;  /* Further reduced */
+    padding: 2px 0;      /* Further reduced */
   }
   .modal-footer {
     margin-top: 16px;

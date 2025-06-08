@@ -6,6 +6,8 @@ import { NotificationService } from '../../_services/notification.service';
 import { ToastrService } from 'ngx-toastr';
 import { Title } from '@angular/platform-browser';
 import { Founder } from '../../../_models/founder';
+import { LoggedInUser } from '../../../_models/user';
+import { AuthService } from '../../../_services/auth.service';
 
 @Component({
   selector: 'app-sendnotification',
@@ -24,12 +26,15 @@ export class SendnotificationComponent {
   notificationToSend!:sendnotification;
   formData!: FormGroup;
   notifcationData!: notification;
-  
+  loggedInUser:LoggedInUser|null=null;
 
-  constructor(private fb: FormBuilder, private notificationService: NotificationService, private toastrService: ToastrService) { }
+  constructor(private fb: FormBuilder, private notificationService: NotificationService, private toastrService: ToastrService,private auth:AuthService) { }
 
   ngOnInit(): void {
     this.initializeForm();
+      var sub=this.auth.CurrentUser$.subscribe(user=>{
+           this.loggedInUser=user;
+     })
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -41,7 +46,16 @@ export class SendnotificationComponent {
   initializeForm(): void {
     this.formData = this.fb.group({
       title: [ '',Validators.required],
-      body: [ '',Validators.required]
+      body: [ '',Validators.required],
+    to: [
+        (this.selectedEntity?.user.firstName || '') +
+        ' ' +
+        (this.selectedEntity?.user?.lastName || '')
+      ],
+     
+      from: [this.loggedInUser?.name || '']
+      
+     
     });
   }
 
