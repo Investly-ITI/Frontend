@@ -17,7 +17,8 @@ export class InvestorService {
     return result;
   }
 
-  add(data: Investor): Observable<Response<Investor>> {
+  add(data:FormData): Observable<Response<Investor>> {
+    console.log(data);
     var result = this.httpClient.post<Response<Investor>>(`${this.baseUrl}`, data);
     return result;
   }
@@ -26,8 +27,8 @@ export class InvestorService {
     var result = this.httpClient.get<Response<any>>(`${this.baseUrl}/total-active-inactive`);
     return result;
   }
-  
-  update(data:Investor):Observable<Response<Investor>>{
+
+  update(data:FormData):Observable<Response<Investor>>{
     var result= this.httpClient.put<Response<Investor>>(`${this.baseUrl}`,data);
     return result;
   }

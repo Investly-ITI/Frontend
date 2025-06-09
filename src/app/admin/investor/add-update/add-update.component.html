@@ -1,12 +1,14 @@
 <!-- Profile Picture Section -->
 <div class="profile-picture-section">
     <div class="profile-picture-container" (mouseenter)="showImageOverlay = true"
-        (mouseleave)="showImageOverlay = false">
+        (mouseleave)="showImageOverlay = false" (click)="triggerInput()">
         <img [src]="profileImageUrl" alt="Profile Picture" class="profile-picture">
         <div class="image-overlay" [ngClass]="{'show': showImageOverlay}">
             <i class='bx bx-edit-alt'></i>
         </div>
     </div>
+    <input #fileInput type="file" id="profileImageInput" accept="image/*" (change)="onFileSelected($event)"
+        class="file-input" style="display: none;" />
 </div>
 <!-- Form Section -->
 <form class="modal-form" [formGroup]="formData" (ngSubmit)="onSubmit()">
@@ -15,7 +17,7 @@
             <label for="firstName">First Name</label>
             <div class="input-container">
                 <input type="text" id="firstName" class="form-input2" formControlName="firstName"
-                     placeholder="Enter first name" />
+                    placeholder="Enter first name" />
                 <div *ngIf="formData.get('user.firstName')?.invalid && formData.get('user.firstName')?.touched"
                     class="text-danger">
                     First name is required.
@@ -26,7 +28,7 @@
         <div class="col-4">
             <label for="lastName">Last Name</label>
             <div class="input-container">
-                <input type="text" id="lastName" class="form-input2" formControlName="lastName" 
+                <input type="text" id="lastName" class="form-input2" formControlName="lastName"
                     placeholder="Enter last name" />
                 <div *ngIf="formData.get('user.lastName')?.invalid && formData.get('user.lastName')?.touched"
                     class="text-danger">
@@ -38,8 +40,7 @@
         <div class="col-4">
             <label for="dateOfBirth">Date of Birth</label>
             <div class="input-container">
-                <input type="date" id="dateOfBirth" class="form-input2" formControlName="dateOfBirth"
-                     />
+                <input type="date" id="dateOfBirth" class="form-input2" formControlName="dateOfBirth" />
                 <!-- <div *ngIf="formData.get('user.dateOfBirth')?.invalid && formData.get('user.dateOfBirth')?.touched"
                     class="text-danger">
                     First name is required.
@@ -52,8 +53,7 @@
         <div class="col-4">
             <label for="email">Email</label>
             <div class="input-container">
-                <input type="email" id="email" class="form-input2" formControlName="email" 
-                    placeholder="Enter email" />
+                <input type="email" id="email" class="form-input2" formControlName="email" placeholder="Enter email" />
                 <div *ngIf="formData.get('user.email')?.invalid && formData.get('user.email')?.touched"
                     class="text-danger">
                     email is required.
@@ -64,8 +64,7 @@
         <div class="col-4">
             <label for="nationalId">National ID</label>
             <div class="input-container">
-                <input type="text" id="nationalId" class="form-input2" formControlName="nationalId"
-                     />
+                <input type="text" id="nationalId" class="form-input2" formControlName="nationalId" />
                 <div *ngIf="formData.get('user.nationalId')?.invalid && formData.get('user.nationalId')?.touched"
                     class="text-danger">
                     nationalId is required.
@@ -76,8 +75,7 @@
         <div class="col-4">
             <label for="phoneNumber">Phone Number</label>
             <div class="input-container">
-                <input type="text" id="phoneNumber" class="form-input2" formControlName="phoneNumber"
-                     />
+                <input type="text" id="phoneNumber" class="form-input2" formControlName="phoneNumber" />
                 <!-- <div *ngIf="formData.get('user.phoneNumber')?.invalid && formData.get('user.phoneNumber')?.touched"
                     class="text-danger">
                     First name is required.
@@ -87,11 +85,56 @@
     </div>
 
     <div class="row" [formGroupName]="'user'">
+        <div class="col-4">
+            <label for="governmentId">Government</label>
+            <div class="input-container">
+                <select id="governmentId" class="form-input2" formControlName="governmentId"
+                    (change)="loadCities($any($event.target).value)">
+                    <option [value]=null selected>Select Government</option>
+                    <option *ngFor="let government of Governorates" [value]="government.id">
+                        {{ government.nameEn }}
+                    </option>
+                </select>
+            </div>
+            <div *ngIf="formData.get('user.governmentId')?.invalid && formData.get('user.governmentId')?.touched"
+                class="text-danger">
+                Government is required.
+            </div>
+        </div>
 
+        <div class="col-4">
+            <label for="cityId">City</label>
+            <div class="input-container">
+                <select id="cityId" class="form-input2" formControlName="cityId">
+                    <option [value]=null selected>Select City</option>
+                    <option *ngFor="let city of Cities" [value]="city.id">
+                        {{ city.nameEn }}
+                    </option>
+                </select>
+            </div>
+            <div *ngIf="formData.get('user.cityId')?.invalid && formData.get('user.cityId')?.touched"
+                class="text-danger">
+                City is required.
+            </div>
+        </div>
+
+        <div class="col-4">
+            <label for="address">Address</label>
+            <div class="input-container">
+                <input type="text" id="address" class="form-input2" formControlName="address" />
+            </div>
+            <div *ngIf="formData.get('user.address')?.invalid && formData.get('user.address')?.touched"
+                class="text-danger">
+                address is required.
+            </div>
+        </div>
+    </div>
+
+    <div class="row" [formGroupName]="'user'">
         <div class="col-4">
             <label for="gender">Gender</label>
             <div class="input-container">
-                <select formControlName="gender" class="form-input2" >
+                <select formControlName="gender" class="form-input2">
                     <option [value]="Gender.Male" selected>Male</option>
                     <option [value]="Gender.Female"> Female</option>
                 </select>
@@ -102,15 +145,19 @@
             </div>
         </div>
 
-      
-
-
     </div>
-      <div class="col-4">
+
+    <div class="row">
+        <div class="col-4">
             <label for="investingType">Investing Type</label>
             <div class="input-container">
-                <input type="number" id="investingType" class="form-input2" formControlName="investingType"
-                     />
+                <div class="input-container">
+                    <select formControlName="investingType" class="form-input2">
+                        <option [value]="investingTypes.Money" selected>funding with money</option>
+                        <option [value]="investingTypes.Experience">Experience</option>
+                        <option [value]="investingTypes.Both">Both</option>
+                    </select>
+                </div>
             </div>
 
             <div *ngIf="formData.get('user.investingType')?.invalid && formData.get('user.investingType')?.touched"
@@ -118,24 +165,7 @@
                 investingType is required.
             </div>
         </div>
-    <!-- 
-    <div class="row" [formGroupName]="'user'">
-        <div class="col-4">
-            <label for="governmentId">Government</label>
-            <div class="input-container">
-                <input type="text" id="governmentId" class="form-input2" formControlName="governmentId"
-                    [disabled]="!isEditMode" />
-            </div>
-        </div>
-
-        <div class="col-4">
-            <label for="cityId">City</label>
-            <div class="input-container">
-                <input type="text" id="cityId" class="form-input2" formControlName="cityId" [disabled]="!isEditMode" />
-            </div>
-        </div>
-    </div> -->
-
+    </div>
 
 </form>
 

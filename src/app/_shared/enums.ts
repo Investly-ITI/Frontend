@@ -2,6 +2,8 @@ export enum Status {
     Active = 1,
     Inactive = 2,
     Deleted = 3,
+    Pending=4,
+    Rejected=5
 }
 export enum InvestorInvestingType {
     Experience = 1,

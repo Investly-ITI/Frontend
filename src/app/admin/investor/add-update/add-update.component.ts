@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Investor } from '../../../_models/investor';
@@ -6,7 +6,12 @@ import { Status } from '../../../_shared/enums';
 import { InvestorService } from '../../_services/investor.service';
 import { Gender } from '../../../_shared/general';
 import { ToastrService } from 'ngx-toastr';
-import { identity } from 'rxjs';
+import { identity, Subscription } from 'rxjs';
+import { Governorate } from '../../../_models/governorate';
+import { GovernrateService } from '../../../_services/governorate.service';
+import { City } from '../../../_models/city';
+import { InvestorInvestingType } from '../../../_shared/enums';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-add-update',
@@ -20,29 +25,83 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   @Input() isEditMode: boolean = false;
   @Input() entityName: string = 'Investor';
   @Input() modalMode: 'add' | 'view' = 'view';
+  @Input() Governorates!: Governorate[];
   @Output() saveEntity = new EventEmitter<any>();
+
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>
+
+  ApiUrl: string = environment.apiUrl;
+
   //* Form data
   formData!: FormGroup;
   investorData!: Investor;
+
 
   //* Profile image
   profileImageUrl: string = 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg';
   showImageOverlay: boolean = false;
   Gender = Gender;
+  Cities: City[] = [];
+  investingTypes = InvestorInvestingType
+  private unsubscribe: Subscription[] = [];
 
-  constructor(private fb: FormBuilder, private investorService: InvestorService, private toastrService: ToastrService) { }
-  
+  //files
+
+  profilePicFile!:File
+
+
+  constructor(private fb: FormBuilder
+    , private investorService: InvestorService
+    , private toastrService: ToastrService
+    , private governorateService: GovernrateService
+
+  ) { }
+
   ngOnInit(): void {
-
+    this.isEditMode=false;
     this.initializeForm();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log(this.isEditMode);
+   
     if (changes['selectedEntity'] || changes['isEditMode']) {
       this.initializeForm();
     }
   }
+
+  triggerInput() {
+    this.fileInput.nativeElement.click();
+  }
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.profilePicFile=file;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.profileImageUrl = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+      this.formData.get('user')?.get('')
+    }
+  }
+
+  loadCities(goveId: number) {
+    console.log(goveId);
+    var sub = this.governorateService.getCitiesByGovernrateId(goveId).subscribe({
+      next: (response) => {
+        this.Cities = response.data;
+      },
+      error: (err) => {
+        console.log("something went wrong");
+      }
+    })
+
+
+  }
+
+
   initializeForm(): void {
     this.formData = this.fb.group({
       id: [this.selectedEntity?.id || null],
@@ -59,12 +118,20 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         gender: [this.selectedEntity?.user?.gender || Gender.Male, Validators.required],
         dateOfBirth: [this.selectedEntity?.user?.dateOfBirth || '',],
         status: [this.selectedEntity?.user?.status || Status.Active],
-        governmentId: [this.selectedEntity?.user?.governmentId || ''],
-        cityId: [this.selectedEntity?.user?.cityId || '']
+        governmentId: [this.selectedEntity?.user?.governmentId || null, Validators.required],
+        cityId: [this.selectedEntity?.user?.cityId || null],
+        address: [this.selectedEntity?.user?.address || ""]
       })
     });
     if (!this.isEditMode) {
       this.formData.disable()
+    }
+    const govId = this.formData.get('user.governmentId')?.value;
+    if (govId) {
+      this.loadCities(govId);
+    }
+    if(this.selectedEntity?.user?.profilePicPath!=null &&this.selectedEntity?.user?.profilePicPath!=''){
+      this.profileImageUrl=this.ApiUrl+"/"+this.selectedEntity?.user?.profilePicPath;
     }
   }
 
@@ -81,9 +148,10 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         nationalId: [''],
         gender: [''],
         dateOfBirth: [''],
-        status: [1], 
+        status: [1],
         governmentId: [''],
-        cityId: ['']
+        cityId: [''],
+        address:['']
       })
     });
   }
@@ -95,7 +163,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
     } else {
       //update
       this.onSubmit();
-      
+
     }
   }
 
@@ -103,54 +171,78 @@ export class AddUpdateComponent implements OnInit, OnChanges {
     if (!this.formData.valid) {
       this.formData.markAllAsTouched();
     } else {
-
-      const investorPayload = {
-        ...this.formData.value,
-        user: {
-          ...this.formData.value.user,
-          cityId: this.formData.value.user.cityId || null,
-          governmentId: this.formData.value.user.governmentId || null,
-
+      const rawData = this.formData.value;
+      const formPayload = new FormData();
+      for (const key in rawData) {
+        if (key !== 'user') {
+          const value = rawData[key];
+          if (value !== null && value !== undefined && value !== '') {
+            formPayload.append(`${key}`, value);
+          }
         }
-      };
+      }
+      if (rawData.user) {
+        for (const key in rawData.user) {
+          const value = rawData.user[key];
+          if (value !== null && value !== undefined && value !== '') {
+            formPayload.append(`user.${key}`, value);
+          }
+        }
+      }
+      //files
+      formPayload.append('user.PicFile',this.profilePicFile);
+
+
       //add
       if (this.selectedEntity?.id == null || this.selectedEntity?.id == 0) {
-        var res = this.investorService.add(investorPayload).subscribe({
+        var res = this.investorService.add(formPayload).subscribe({
           next: (response) => {
             if (response.isSuccess) {
               this.toastrService.success(response.message, 'Success');
               this.isEditMode = false;
               this.saveEntity.emit(this.formData.value);
 
+            } else {
+              this.toastrService.error(response.message, "Error");
+
             }
           }, error: (err) => {
-            console.log(err);
+            const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
+            this.toastrService.error(errorMsg, 'Error');
           }
         })
+        this.unsubscribe.push(res);
 
         //edit
       } else {
 
-        var res2 = this.investorService.update(investorPayload).subscribe({
+        var res2 = this.investorService.update(formPayload).subscribe({
           next: (response) => {
             if (response.isSuccess) {
               this.toastrService.success(response.message, 'Success');
               this.isEditMode = false;
               this.saveEntity.emit(this.formData.value);
 
-            }else{
+            } else {
               this.toastrService.error(response.message, 'Error');
               this.isEditMode = false;
             }
           }, error: (err) => {
-            this.toastrService.error(err, 'Error');
+            const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
+            this.toastrService.error(errorMsg, 'Error');
           }
         })
-
+        this.unsubscribe.push(res2);
 
       }
 
     }
 
   }
+
+  ngOnDestroy() {
+    this.unsubscribe.forEach((sb) => sb.unsubscribe());
+  }
 }
+
+

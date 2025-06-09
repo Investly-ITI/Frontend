@@ -20,3 +20,6 @@ export function getBusinessIdeaStatusLabel(value: number): string {
 export function getStageLabel(value: number): string {
     return InvestingStages[value] ?? 'Unknown';
 }
+
+
+
