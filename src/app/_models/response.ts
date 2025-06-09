@@ -4,6 +4,5 @@ export class Response<T>{
      public isSuccess:boolean,
      public message:string,
      public statusCode:number
-
     ){}
 }

@@ -18,6 +18,11 @@ export enum InvestorInvestingType {
      Founder = 3,
  }
 
+ export enum ContactRequestStatus {
+  Pending = 1,
+  Accepted = 2,
+  Declined = 3
+}
  export enum BusinessIdeaStatus {
    Active = 1,
     Inactive = 2,

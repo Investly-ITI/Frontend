@@ -8,6 +8,7 @@ import { adminGuard } from './_guards/admin.guard';
 import { BusinessIdeasComponent } from './admin/business-ideas/business-ideas.component';
 import { FounderComponent } from './admin/founder/founder.component';
 import { NotificationsComponent } from './admin/notifications/notifications.component';
+import { ContactRequestComponent } from './admin/contact-request/contact-request.component';
 
 export const routes: Routes = [
 
@@ -24,6 +25,7 @@ export const routes: Routes = [
       {path:'founder',component:FounderComponent, title: 'Founder Management'},
        {path:'notification',component:NotificationsComponent, title: 'Notifcation Management'},
       
+      {path:'Contact-Request',component:ContactRequestComponent, title: 'Investor Contact Request'},
      
 
    ]},

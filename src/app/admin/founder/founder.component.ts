@@ -42,7 +42,7 @@ export class FounderComponent implements OnInit {
   
   isDarkMode: boolean = true;
   isLoading: boolean = false;
-isLoading2: boolean = true;
+  isLoading2: boolean = true;
   showNoResults: boolean = false;
   dropdownStates: boolean[] = [false]; 
   animationComplete: boolean = true;
