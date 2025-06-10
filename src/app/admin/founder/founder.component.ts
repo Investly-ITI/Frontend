@@ -21,6 +21,7 @@ import { GovernrateService } from '../../_services/governorate.service';
 import { Governorate } from '../../_models/governorate';
 import { City } from '../../_models/city';
 import { SendnotificationComponent } from "./sendnotification/sendnotification.component";
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-founder',
@@ -52,16 +53,17 @@ export class FounderComponent implements OnInit {
   cities: City[] = [];
   isNotitficationModalOpen: boolean = false;
 
+    ApiUrl: string = environment.apiUrl;
+
  private darkModeSubscription: Subscription = new Subscription();
    isModalOpen: boolean = false;
   isEditMode: boolean = false;
   modalMode: 'add' | 'view' = 'view';
   notificationmodalMode= 'add';
   selectedEntity: any = null;
-
   isActivateDeactivateModalOpen: boolean = false;
   entityToModify: any = null; 
-  modifyAction: 'deactivate' | 'activate' |'delete'= 'deactivate'; 
+ modifyAction!:string; 
   entityIdToChangeStatus:number=0;
   StatusChangedTo:number=0;
 
@@ -180,7 +182,7 @@ goToPreviousPage() {
     this.loadData();
   }
 }
- toggleDropdown(index: number, event?: Event) {
+   toggleDropdown(index: number, event?: Event) {
     if (event) {
       event.stopPropagation();
     }
@@ -223,12 +225,12 @@ goToPreviousPage() {
   this.searchData.GovernmentId=0;
   this.loadData();
   }
-    openActivateDeactivateModal(id:number,entity: any, action: 'deactivate' | 'activate'|'delete',status:number): void {
+    openActivateDeactivateModal(id:number,entity: any, action:string,status:number): void {
 
     this.entityToModify = entity;
     this.modifyAction = action;
     this.entityIdToChangeStatus=id;
-    this.StatusChangedTo=status;
+    this.StatusChangedTo= status;
     this.dropdownStates = this.dropdownStates.map(() => false);
     this.isActivateDeactivateModalOpen = true;
   }
@@ -237,12 +239,59 @@ goToPreviousPage() {
     setTimeout(() => {
       this.entityToModify = null;
       this.modifyAction = 'deactivate';
-    }, 300); 
-
+    }, 300);
   }
+   getUserStatusColor(status:number){
+      switch (status) {
+    case Status.Active: return '#2ed134';   // Green
+    case Status.Inactive: return '#f0ad4e'; // Yellow
+    case Status.Deleted: return '#6c757d';  // Gray
+    case Status.Pending: return '#17a2b8';  // Blue
+    case Status.Rejected: return '#e6382f'; // Red
+    default: return '#000000';                   
+  }
+  }
+
+
+
+
+  getActionLabel(status: number): string {
+  switch (status) {
+    case Status.Active: return 'Deactivate';
+    case Status.Inactive: return 'Activate';
+    case Status.Pending: return 'Approve';
+    case Status.Rejected: return 'reject';
+    case Status.Deleted: return 'delete';
+    default: return 'Update';
+  }
+}
+
+getToggledStatus(status: number): number {
+  switch (status) {
+    case Status.Active: return Status.Inactive;
+    case Status.Inactive: return Status.Active;
+    case Status.Pending: return Status.Active; 
+    case Status.Rejected: return Status.Rejected; 
+    case Status.Deleted: return Status.Deleted; 
+    default: return Status.Pending;
+  }
+}
+
+getStatusIcon(status: number): string {
+  switch (status) {
+    case Status.Active: return 'bx-x-circle';
+    case Status.Inactive: return 'bx-check-circle';
+    case Status.Pending: return 'bx-check-circle';
+    case Status.Rejected: return 'bx-x-circle';
+    case Status.Deleted: return 'bx-x';
+    default: return 'bx-cog';
+  }
+}
+
    confirmActivateDeactivate(): void {
     if (this.entityToModify) {
-     var res3= this.FounderService.ChangeFounderStatus(this.entityIdToChangeStatus,this.StatusChangedTo).subscribe({
+     
+     var res3= this.FounderService.ChangeFounderStatus(this.entityIdToChangeStatus,this.getToggledStatus(this.StatusChangedTo)).subscribe({
       next:(response)=>{
        if(response.isSuccess){
         this.toastr.success(response.message,"Success");
@@ -261,6 +310,7 @@ goToPreviousPage() {
     }
 
   }
+
     onSearchClear(event: Event): void {
     const target = event.target as HTMLInputElement;
     if (target.value === '') {
@@ -334,7 +384,7 @@ goToPreviousPage() {
       }
     });
   }
-
+  
   ngOnDestroy(): void {
     this.darkModeSubscription.unsubscribe();
   }
