@@ -1617,4 +1617,191 @@ input:checked + .slider:before {
     padding: 10px 0px;
 }
 
+.action-item {
+    /* base styles */
+}
 
+.action-item.active {
+    color: #2ed134; /* green for accept */
+}
+
+.action-item.deactivate {
+    color: #e6382f; /* red for decline */
+}
+
+.action-item.pending {
+    color: #f39c12; /* orange for pending */
+}
+
+.action-item:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+/* Compact Modal Styles */
+.compact-modal {
+    max-width: 400px;
+    width: 90%;
+    padding: 0;
+}
+
+.compact-modal .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--custom);
+}
+
+.compact-modal .modal-body {
+    padding: 20px;
+    text-align: center;
+}
+
+.compact-modal .action-icon {
+    margin-bottom: 12px;
+}
+
+.compact-modal .action-icon i {
+    font-size: 42px;
+}
+
+.compact-modal .confirmation-text {
+    font-size: 15px;
+    line-height: 1.4;
+    margin-bottom: 16px;
+    color: var(--dark);
+}
+
+.compact-modal .decline-reason-section {
+    margin-top: 12px;
+    text-align: left;
+}
+
+.compact-modal .decline-reason-section label {
+    display: block;
+    font-size: 13px;
+    color: var(--dark);
+    margin-bottom: 6px;
+}
+
+.compact-modal .decline-reason-section textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--custom);
+    border-radius: 6px;
+    font-family: var(--poppins);
+    font-size: 13px;
+    resize: vertical;
+}
+
+.compact-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-top: 1px solid var(--custom);
+    gap: 12px;
+}
+
+.compact-footer .cancel-btn,
+.compact-footer .confirm-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.compact-footer .cancel-btn {
+    background: var(--grey);
+    color: var(--dark);
+    border: 1px solid var(--custom);
+}
+
+.compact-footer .cancel-btn:hover {
+    background: var(--custom);
+}
+
+.compact-footer .confirm-btn {
+    color: white;
+    border: none;
+}
+
+.compact-footer .confirm-btn.accept {
+    background: var(--green);
+}
+
+.compact-footer .confirm-btn.decline {
+    background: var(--red);
+}
+
+.compact-footer .confirm-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.detail-section {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.detail-section:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.detail-section h4 {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-section h4:before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dark);
+}
+
+.decline-reason-section {
+  margin: 16px 0;
+}
+
+.decline-reason-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.decline-reason-section textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.decline-reason-section textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.decline-reason-section textarea::placeholder {
+  color: #9ca3af;
+}

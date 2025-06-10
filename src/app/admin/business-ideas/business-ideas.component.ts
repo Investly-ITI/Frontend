@@ -1,4 +1,4 @@
-import { Component, OnInit ,HostListener} from '@angular/core';
+import { Component, OnInit ,HostListener, OnDestroy} from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { FormsModule } from '@angular/forms'; 
 import { BusinessService } from '../_services/businesses.service'; 
@@ -7,8 +7,9 @@ import { Response } from '../../_models/response';
 import { getBusinessIdeaStatusLabel, getStageLabel } from '../../_shared/utils/enum.utils';
 import { BusinessIdeaStatus, InvestingStages } from '../../_shared/enums';
 
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, of, Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { DarkModeService } from '../_services/dark-mode.service';
 
 @Component({
   selector: 'app-business-ideas',
@@ -17,7 +18,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './business-ideas.component.html',
   styleUrls: ['./business-ideas.component.css']
 })
-export class BusinessIdeasComponent implements OnInit {
+export class BusinessIdeasComponent implements OnInit, OnDestroy {
 
   businessList: BusinessListDto | null = null;
   businessIdeas: BusinessDto[] = [];
@@ -60,17 +61,26 @@ export class BusinessIdeasComponent implements OnInit {
 
   public Math = Math;
 
-  isDarkMode: boolean = false; 
+  isDarkMode: boolean = false;
+  private darkModeSubscription: Subscription = new Subscription();
 
   constructor(
     private businessService: BusinessService,
-    private toastr: ToastrService // Inject ToastrService
+    private toastr: ToastrService,
+    private darkModeService: DarkModeService // Inject DarkModeService
   ) { }
 
   ngOnInit(): void {
     this.loadBusinessIdeas();
     this.loadIdeasCount();
+    // Subscribe to dark mode changes
+    this.darkModeSubscription = this.darkModeService.darkMode$.subscribe((isDark) => {
+      this.isDarkMode = isDark;
+    });
+  }
 
+  ngOnDestroy(): void {
+    this.darkModeSubscription.unsubscribe();
   }
 
   loadBusinessIdeas(): void {
@@ -139,6 +149,8 @@ export class BusinessIdeasComponent implements OnInit {
   openSoftDeleteModal(businessId: number): void {
     this.selectedIdeaIdForSoftDelete = businessId;
     this.isSoftDeleteModalOpen = true;
+    this.dropdownStates = this.dropdownStates.map(() => false);
+
   }
 
   closeSoftDeleteModal(): void {
@@ -170,7 +182,8 @@ export class BusinessIdeasComponent implements OnInit {
 
   openStatusUpdateModal(businessId: number, currentStatus: BusinessIdeaStatus | undefined): void {
     this.selectedBusinessId = businessId;
-    this.newStatus = currentStatus !== undefined ? currentStatus : null;
+    this.newStatus = null;
+    this.dropdownStates = this.dropdownStates.map(() => false);
     this.currentStatusName = currentStatus !== undefined ? this.getBusinessIdeaStatusName(currentStatus) : 'N/A';
 
     const idea = this.businessIdeas.find(b => b.id === businessId);
@@ -180,10 +193,12 @@ export class BusinessIdeasComponent implements OnInit {
       this.rejectedReasonInput = '';
     }
     this.isStatusUpdateModalOpen = true;
-    if (currentStatus !== undefined && currentStatus !== null) {
-      this.businessStatuses = (Object.values(BusinessIdeaStatus)
-        .filter(value => typeof value === 'number' && value !== currentStatus) as BusinessIdeaStatus[]);
-    }
+    this.businessStatuses = (Object.values(BusinessIdeaStatus)
+      .filter(value =>
+        typeof value === 'number' &&
+        value !== currentStatus &&
+        value !== BusinessIdeaStatus.Deleted
+      ) as BusinessIdeaStatus[]);
   }
 
   closeStatusUpdateModal(): void {
@@ -247,7 +262,7 @@ export class BusinessIdeasComponent implements OnInit {
 openViewDetailsModal(idea: BusinessDto): void {
         this.selectedIdeaForDetails = idea;
         this.isViewDetailsModalOpen = true;
-        this.dropdownStates.fill(false);
+        this.dropdownStates = this.dropdownStates.map(() => false);
     }
 
     closeViewDetailsModal(): void {

@@ -21,6 +21,8 @@ import { Gender } from '../../_shared/general';
 import { Governorate } from '../../_models/governorate';
 import { City } from '../../_models/city';
 import { GovernrateService } from '../../_services/governorate.service';
+import { SendnotificationsComponent } from "./sendnotifications/sendnotifications.component";
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-investor',
@@ -35,8 +37,9 @@ import { GovernrateService } from '../../_services/governorate.service';
     MatSelectModule,
     MatCheckboxModule,
     StatusLabelPipe,
-    AddUpdateComponent, // Add this import
-  ],
+    AddUpdateComponent,
+    SendnotificationsComponent
+],
   templateUrl: './investor.component.html',
   styleUrl: './investor.component.css'
 })
@@ -65,9 +68,13 @@ export class InvestorComponent implements OnInit, OnDestroy {
   //* Activate/Deactivate Modal state
   isActivateDeactivateModalOpen: boolean = false;
   entityToModify: any = null; // Store the entity being modified
-  modifyAction: 'deactivate' | 'activate' |'delete'= 'deactivate'; // Track the action type
+  modifyAction!:string; // Track the action type
   entityIdToChangeStatus:number=0;
   StatusChangedTo:number=0;
+  
+
+  ApiUrl: string = environment.apiUrl;
+  
 
 
   //* Profile image
@@ -111,6 +118,10 @@ export class InvestorComponent implements OnInit, OnDestroy {
   loadedListData: Investor[] = [];
   Status = Status
   Gender=Gender
+  //notifications
+  isNotitficationModalOpen: boolean = false;
+  notificationmodalMode= 'add';
+
 
   //* Constructor
   constructor(
@@ -130,6 +141,7 @@ export class InvestorComponent implements OnInit, OnDestroy {
       }
     );
   }
+
 
 
   loadData() {
@@ -155,6 +167,53 @@ export class InvestorComponent implements OnInit, OnDestroy {
       }
     })
   }
+
+  getUserStatusColor(status:number){
+      switch (status) {
+    case Status.Active: return '#2ed134';   // Green
+    case Status.Inactive: return '#f0ad4e'; // Yellow
+    case Status.Deleted: return '#6c757d';  // Gray
+    case Status.Pending: return '#17a2b8';  // Blue
+    case Status.Rejected: return '#e6382f'; // Red
+    default: return '#000000';                   
+  }
+  }
+
+
+
+
+  getActionLabel(status: number): string {
+  switch (status) {
+    case Status.Active: return 'Deactivate';
+    case Status.Inactive: return 'Activate';
+    case Status.Pending: return 'Approve';
+    case Status.Rejected: return 'reject';
+    case Status.Deleted: return 'delete';
+    default: return 'Update';
+  }
+}
+
+getToggledStatus(status: number): number {
+  switch (status) {
+    case Status.Active: return Status.Inactive;
+    case Status.Inactive: return Status.Active;
+    case Status.Pending: return Status.Active; 
+    case Status.Rejected: return Status.Rejected; 
+    case Status.Deleted: return Status.Deleted; 
+    default: return Status.Pending;
+  }
+}
+
+getStatusIcon(status: number): string {
+  switch (status) {
+    case Status.Active: return 'bx-x-circle';
+    case Status.Inactive: return 'bx-check-circle';
+    case Status.Pending: return 'bx-check-circle';
+    case Status.Rejected: return 'bx-x-circle';
+    case Status.Deleted: return 'bx-x';
+    default: return 'bx-cog';
+  }
+}
 loadGovernments(){
   
     this.isLoading = true;
@@ -247,6 +306,7 @@ loadActiveInactiveCount(){
   clearAdvancedSearch(): void {
   this.searchData.gender=null;
   this.searchData.governmentId=0;
+  this.searchData.status=0;
   this.loadData();
   }
 
@@ -269,12 +329,13 @@ loadActiveInactiveCount(){
   }
 
   closeModal(): void {
+    console.log("666666");
     this.isModalOpen = false;
-    setTimeout(() => {
-      this.isEditMode = false;
+    //setTimeout(() => {
+      this.isEditMode = true;
       this.modalMode = 'view';
       this.selectedEntity = null;
-    }, 300); 
+    // }, 300); 
   }
 
   onSaveEntity(entityData: Investor): void {
@@ -285,7 +346,7 @@ loadActiveInactiveCount(){
   }
 
   //* Activate/Deactivate Modal methods
-  openActivateDeactivateModal(id:number,entity: any, action: 'deactivate' | 'activate'|'delete',status:number): void {
+  openActivateDeactivateModal(id:number,entity: any, action:string,status:number): void {
 
     this.entityToModify = entity;
     this.modifyAction = action;
@@ -366,7 +427,19 @@ loadActiveInactiveCount(){
       }
     });
   }
-
+  SendNotificationModal(item: Investor): void {
+      this.isNotitficationModalOpen = true;
+      this.notificationmodalMode = 'add';
+      this.selectedEntity = item;
+      this.dropdownStates = this.dropdownStates.map(() => false);
+    }
+      closeNotitifcationModal(): void {
+      this.isNotitficationModalOpen = false;
+      setTimeout(() => {
+        this.notificationmodalMode = 'add';
+        this.selectedEntity = null;
+      }, 300); 
+    }
 
   ngOnDestroy(): void {
     this.darkModeSubscription.unsubscribe();

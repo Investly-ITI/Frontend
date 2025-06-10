@@ -20,10 +20,11 @@ import { ViewdetailsComponent } from './viewdetails/viewdetails.component';
 import { GovernrateService } from '../../_services/governorate.service';
 import { Governorate } from '../../_models/governorate';
 import { City } from '../../_models/city';
+import { SendnotificationComponent } from "./sendnotification/sendnotification.component";
 
 @Component({
   selector: 'app-founder',
-  imports: [ CommonModule,
+  imports: [CommonModule,
     FormsModule,
     MatButtonToggleModule,
     MatDividerModule,
@@ -33,8 +34,7 @@ import { City } from '../../_models/city';
     MatSelectModule,
     MatCheckboxModule,
     StatusLabelPipe,
-    ViewdetailsComponent
-  ],
+    ViewdetailsComponent, SendnotificationComponent],
   templateUrl: './founder.component.html',
   styleUrl: './founder.component.css'
 })
@@ -42,7 +42,7 @@ export class FounderComponent implements OnInit {
   
   isDarkMode: boolean = true;
   isLoading: boolean = false;
-isLoading2: boolean = true;
+  isLoading2: boolean = true;
   showNoResults: boolean = false;
   dropdownStates: boolean[] = [false]; 
   animationComplete: boolean = true;
@@ -50,11 +50,13 @@ isLoading2: boolean = true;
   currentFilter:string='';
   governorates: Governorate[] = [];
   cities: City[] = [];
+  isNotitficationModalOpen: boolean = false;
 
  private darkModeSubscription: Subscription = new Subscription();
    isModalOpen: boolean = false;
   isEditMode: boolean = false;
   modalMode: 'add' | 'view' = 'view';
+  notificationmodalMode= 'add';
   selectedEntity: any = null;
 
   isActivateDeactivateModalOpen: boolean = false;
@@ -278,6 +280,7 @@ goToPreviousPage() {
       this.selectedEntity = item;
       this.dropdownStates = this.dropdownStates.map(() => false);
     }
+    
   
     openAddModal(): void {
       this.isModalOpen = true;
@@ -291,6 +294,19 @@ goToPreviousPage() {
       setTimeout(() => {
 
         this.modalMode = 'view';
+        this.selectedEntity = null;
+      }, 300); 
+    }
+     SendNotificationModal(item: Founder): void {
+      this.isNotitficationModalOpen = true;
+      this.notificationmodalMode = 'add';
+      this.selectedEntity = item;
+      this.dropdownStates = this.dropdownStates.map(() => false);
+    }
+      closeNotitifcationModal(): void {
+      this.isNotitficationModalOpen = false;
+      setTimeout(() => {
+        this.notificationmodalMode = 'add';
         this.selectedEntity = null;
       }, 300); 
     }
