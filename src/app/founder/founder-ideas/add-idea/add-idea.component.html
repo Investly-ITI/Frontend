@@ -1,0 +1,35 @@
+<!-- ========================================
+     ADD IDEA MAIN CONTAINER
+======================================== -->
+<div class="add-idea-container">
+  <div class="add-idea-header">
+    <h3 class="add-idea-title">Add New Business Idea</h3>
+    <p class="add-idea-description">Submit your business idea through document upload or detailed form</p>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'form'"
+      (click)="switchTab('form')"
+    >
+      <i class='bx bx-form'></i>
+      <span>Add By Form</span>
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'document'"
+      (click)="switchTab('document')"
+    >
+      <i class='bx bx-file'></i>
+      <span>Add By Document</span>
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <app-add-by-form *ngIf="activeTab === 'form'"></app-add-by-form>
+    <app-add-by-document *ngIf="activeTab === 'document'"></app-add-by-document>
+  </div>
+</div> 

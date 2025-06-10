@@ -1,0 +1,41 @@
+<!-- ========================================
+     FOUNDER IDEAS MAIN CONTAINER
+======================================== -->
+<div class="ideas-container">
+  <div class="ideas-header">
+    <h3 class="ideas-title">My Business Ideas</h3>
+    <p class="ideas-description">Manage your business ideas and submit new ones</p>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'myIdeas'"
+      (click)="switchTab('myIdeas')"
+    >
+      <i class='bx bx-list-ul'></i>
+      <span>My Ideas/Business</span>
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'addIdea'"
+      (click)="switchTab('addIdea')"
+    >
+      <i class='bx bx-plus-circle'></i>
+      <span>Add Idea/Business</span>
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <app-my-ideas 
+      *ngIf="activeTab === 'myIdeas'"
+      [ideas]="ideas"
+    ></app-my-ideas>
+    
+    <app-add-idea 
+      *ngIf="activeTab === 'addIdea'"
+    ></app-add-idea>
+  </div>
+</div> 

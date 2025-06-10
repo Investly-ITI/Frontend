@@ -1,0 +1,125 @@
+<!-- ========================================
+     PROFILE CONTAINER
+======================================== -->
+<div class="profile-container">
+  <!-- ========================================
+       PROFILE HEADER
+  ======================================== -->
+  <div class="profile-header">
+    <div class="header-content">
+      <div class="profile-avatar">
+        <img [src]="profileData.personalInfo.profilePicture" [alt]="profileData.personalInfo.firstName + ' ' + profileData.personalInfo.lastName">
+        <div class="avatar-overlay" (click)="triggerFileInput()">
+          <i class='bx bx-camera'></i>
+        </div>
+        <!-- Hidden file input -->
+        <input 
+          #fileInput 
+          type="file" 
+          accept="image/*" 
+          (change)="onProfilePictureChange($event)"
+          style="display: none;"
+        >
+      </div>
+      <div class="profile-info">
+        <h1 class="profile-name">{{ profileData.personalInfo.firstName }} {{ profileData.personalInfo.lastName }}</h1>
+        <p class="profile-title">Founder / Business Owner</p>
+        <p class="profile-location">
+          <i class='bx bx-map'></i>
+          {{ profileData.personalInfo.city }}, {{ profileData.personalInfo.government }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PROFILE CONTENT
+  ======================================== -->
+  <div class="profile-content">
+    <!-- ========================================
+         SIDEBAR NAVIGATION
+    ======================================== -->
+    <div class="profile-sidebar">
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li class="nav-item">
+            <button 
+              class="nav-button" 
+              [class.active]="activeSection === 'information'"
+              (click)="setActiveSection('information')"
+            >
+              <i class='bx bx-user'></i>
+              <span>Information</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button 
+              class="nav-button" 
+              [class.active]="activeSection === 'security'"
+              (click)="setActiveSection('security')"
+            >
+              <i class='bx bx-shield'></i>
+              <span>Security</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button 
+              class="nav-button" 
+              [class.active]="activeSection === 'ideas'"
+              (click)="setActiveSection('ideas')"
+            >
+              <i class='bx bx-bulb'></i>
+              <span>Ideas</span>
+              <span class="badge">{{ profileData.ideas.length }}</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button 
+              class="nav-button" 
+              [class.active]="activeSection === 'notifications'"
+              (click)="setActiveSection('notifications')"
+            >
+              <i class='bx bx-bell'></i>
+              <span>Notifications</span>
+              <span class="badge" *ngIf="getUnreadNotificationsCount() > 0">{{ getUnreadNotificationsCount() }}</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- ========================================
+         MAIN CONTENT AREA
+    ======================================== -->
+    <div class="profile-main">
+      <!-- Information Section -->
+      <app-founder-information 
+        *ngIf="activeSection === 'information'"
+        [personalInfo]="profileData.personalInfo"
+        (personalInfoChange)="onPersonalInfoChange($event)"
+      ></app-founder-information>
+
+      <!-- Security Section -->
+      <app-founder-security 
+        *ngIf="activeSection === 'security'"
+        [securitySettings]="profileData.securitySettings"
+        (securitySettingsChange)="onSecuritySettingsChange($event)"
+      ></app-founder-security>
+
+      <!-- Ideas Section -->
+      <app-founder-ideas 
+        #founderIdeas
+        *ngIf="activeSection === 'ideas'"
+        [ideas]="profileData.ideas"
+        (ideasChange)="onIdeasChange($event)"
+      ></app-founder-ideas>
+
+      <!-- Notifications Section -->
+      <app-founder-notifications 
+        *ngIf="activeSection === 'notifications'"
+        [notifications]="profileData.notifications"
+        (notificationsChange)="onNotificationsChange($event)"
+      ></app-founder-notifications>
+    </div>
+  </div>
+</div> 

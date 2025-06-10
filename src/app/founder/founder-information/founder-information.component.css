@@ -1,0 +1,347 @@
+/* ========================================
+   INFORMATION COMPONENT STYLES
+======================================== */
+
+/* Main Container with Animation */
+.content-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 70vh;
+  padding: 1rem;
+  animation: fadeInUp 0.6s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Section Headers */
+.section-header {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--dark);
+  font-family: var(--poppins);
+  margin-bottom: 0.5rem;
+}
+
+:host-context(.dark) .section-title {
+  color: var(--light);
+}
+
+.section-description {
+  font-size: 1rem;
+  color: var(--dark-grey);
+  font-family: var(--poppins);
+}
+
+/* Save Message */
+.save-message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  font-family: var(--poppins);
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+}
+
+.save-message.success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--success);
+}
+
+.save-message.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--error);
+}
+
+.save-message i {
+  font-size: 1.2rem;
+}
+
+/* Form Styles */
+.form-container {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--grey);
+}
+
+:host-context(.dark) .form-container {
+  background: var(--custom);
+  border-color: var(--grey);
+}
+
+.profile-form {
+  max-width: 800px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: var(--dark);
+  margin-bottom: 0.5rem;
+  font-family: var(--poppins);
+  font-size: 0.95rem;
+}
+
+:host-context(.dark) .form-label {
+  color: var(--light);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--light);
+  border-radius: 12px;
+  font-family: var(--poppins);
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: white;
+  color: var(--dark);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--light);
+  box-shadow: 0 0 0 3px rgba(48, 172, 170, 0.1);
+}
+
+.form-control:disabled {
+  background: var(--grey);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+:host-context(.dark) .form-control {
+  background: var(--grey);
+  border-color: var(--light2);
+  color: var(--light);
+}
+
+:host-context(.dark) .form-control:disabled {
+  background: var(--custom);
+  opacity: 0.5;
+}
+
+/* Form Validation Styles */
+.form-control.invalid {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Read-only field styles - Remove grey overlay, make them look normal */
+.form-control.readonly,
+.form-control.readonly:focus {
+  cursor: default !important;
+  box-shadow: none !important;
+}
+
+/* Edit icon styling for editable fields */
+.form-group.editable {
+  position: relative;
+}
+
+.form-group.editable .edit-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--light);
+  font-size: 1.1rem;
+  pointer-events: none;
+  margin-top: 12px; /* Account for label height */
+}
+
+:host-context(.dark) .form-group.editable .edit-icon {
+  color: var(--light2);
+}
+
+.error-message {
+  display: block;
+  color: var(--error);
+  font-size: 0.85rem;
+  font-family: var(--poppins);
+  margin-top: 0.5rem;
+  padding-left: 0.5rem;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Profile Picture Section */
+.profile-picture-section {
+  margin-bottom: 2rem;
+}
+
+.picture-upload {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.current-picture img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--grey);
+}
+
+/* Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-family: var(--poppins);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  background: var(--dark-grey) !important;
+  color: white !important;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn:disabled::before {
+  display: none;
+}
+
+.btn-primary {
+  background: var(--light);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--blue);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(48, 172, 170, 0.3);
+}
+
+.btn-secondary {
+  background: var(--grey);
+  color: var(--dark);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--dark-grey);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.form-actions {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--grey);
+}
+
+/* Loading Animation */
+.bx-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .picture-upload {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .form-container {
+    padding: 1rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .section-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* ========================================
+   FOUNDER INFORMATION COMPONENT STYLES
+======================================== */ 

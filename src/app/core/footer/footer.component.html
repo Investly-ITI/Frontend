@@ -1,0 +1,106 @@
+<!-- ========================================
+     FOOTER CONTAINER
+======================================== -->
+<footer class="footer">
+  <div class="footer-container">
+    <!-- ========================================
+         MAIN FOOTER CONTENT
+    ======================================== -->
+    <div class="footer-main">
+      <!-- Brand Section -->
+      <div class="footer-brand">
+        <div class="brand-container">
+          <img src="Logo-Investly-Cut.png" alt="Investly">
+          <span class="brand-text">nvestly</span>
+        </div>
+        <p class="brand-description">
+          Where Ideas Meet Capital. Connecting innovative entrepreneurs with forward-thinking investors to build the future together.
+        </p>
+        <div class="social-links">
+          <a 
+            *ngFor="let social of socialLinks" 
+            [href]="social.url" 
+            [title]="social.name"
+            class="social-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i [class]="social.icon"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Company Links -->
+      <div class="footer-section">
+        <h3>Company</h3>
+        <ul class="footer-links">
+          <li *ngFor="let link of companyLinks">
+            <a [routerLink]="link.route">{{ link.name }}</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Legal -->
+      <div class="footer-section">
+        <h3>Legal</h3>
+        <ul class="footer-links">
+          <li *ngFor="let link of legalLinks">
+            <a [routerLink]="link.route">{{ link.name }}</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="footer-section">
+        <h3>Contact Us</h3>
+        <div class="contact-info">
+          <div class="contact-item">
+            <i class='bx bx-envelope'></i>
+            <a href="mailto:info&#64;investly.com">info&#64;investly.com</a>
+          </div>
+          <div class="contact-item">
+            <i class='bx bx-phone'></i>
+            <a href="tel:+1234567890">+1 (234) 567-890</a>
+          </div>
+          <div class="contact-item">
+            <i class='bx bx-map'></i>
+            <span>123 Innovation Street<br>Tech City, TC 12345</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================
+         FOOTER BOTTOM
+    ======================================== -->
+    <div class="footer-bottom">
+      <div class="footer-bottom-content">
+        <div class="copyright">
+          <p>&copy; {{ currentYear }} Investly. All rights reserved.</p>
+        </div>
+        <div class="footer-bottom-links">
+          <a routerLink="/sitemap">Sitemap</a>
+          <a routerLink="/accessibility">Accessibility</a>
+          <a routerLink="/support">Support</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       FLOATING ACTION BUTTONS
+  ======================================== -->
+  <div class="floating-actions">
+    <button class="fab theme-fab" title="Toggle theme" (click)="toggleTheme()">
+      <i class='bx' [ngClass]="isDarkMode ? 'bx-sun' : 'bx-moon'"></i>
+    </button>
+    <button 
+      class="fab scroll-fab" 
+      title="Scroll to top" 
+      (click)="scrollToTop()"
+      [class.show]="showScrollButton"
+    >
+      <i class='bx bx-up-arrow-alt'></i>
+    </button>
+  </div>
+</footer>

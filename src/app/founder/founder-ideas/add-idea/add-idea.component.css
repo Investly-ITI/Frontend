@@ -1,0 +1,133 @@
+/* ========================================
+   ADD IDEA COMPONENT STYLES
+======================================== */
+
+.add-idea-container {
+  padding: 1rem;
+}
+
+.add-idea-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.add-idea-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--dark);
+  font-family: var(--poppins);
+  margin-bottom: 0.5rem;
+}
+
+:host-context(.dark) .add-idea-title {
+  color: var(--light);
+}
+
+.add-idea-description {
+  color: var(--dark-grey);
+  font-family: var(--poppins);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--grey);
+  padding-bottom: 1rem;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px 12px 0 0;
+  background: transparent;
+  color: var(--dark-grey);
+  font-family: var(--poppins);
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.tab-button:hover {
+  background: var(--grey);
+  color: var(--dark);
+}
+
+.tab-button.active {
+  background: var(--light);
+  color: white;
+  box-shadow: 0 4px 15px rgba(48, 172, 170, 0.2);
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid var(--light);
+}
+
+:host-context(.dark) .tab-button {
+  color: var(--#18384e);
+}
+
+:host-context(.dark) .tab-button:hover {
+  background: var(--custom);
+  color: var(--light);
+}
+
+.tab-button i {
+  font-size: 1.1rem;
+}
+
+/* Tab Content */
+.tab-content {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--grey);
+  border-top: 3px solid var(--light);
+  border-bottom: 3px solid var(--light);
+  min-height: 60vh;
+}
+
+:host-context(.dark) .tab-content {
+  background: var(--custom);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .tab-navigation {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .tab-button {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+  }
+  
+  .tab-content {
+    padding: 1rem;
+  }
+  
+  .add-idea-title {
+    font-size: 1.5rem;
+  }
+} 

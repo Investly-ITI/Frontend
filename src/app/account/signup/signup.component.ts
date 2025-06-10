@@ -535,18 +535,59 @@ export class SignupComponent implements OnInit, OnDestroy {
     return this.currentStep === maxSteps;
   }
 
-  // Funding range slider methods
+  // Funding range slider methods 
   onFundingMinChange(value: number) {
-    if (value <= this.selectedFundingMax) {
+    const minGap = 500; // Minimum gap of 500 EGP between min and max
+    
+    // Prevent minimum from exceeding maximum (with gap)
+    if (value >= this.selectedFundingMax) {
+      this.selectedFundingMin = this.selectedFundingMax - minGap;
+      // Update the DOM input value to reflect the corrected value
+      this.updateFormValue('min', this.selectedFundingMin);
+    } else {
       this.selectedFundingMin = value;
-      this.updateRangeFill();
     }
+    
+    this.updateRangeFill();
+    this.updateFormValue('range');
   }
 
   onFundingMaxChange(value: number) {
-    if (value >= this.selectedFundingMin) {
+    const minGap = 500; // Minimum gap of 500 EGP between min and max
+    
+    // Prevent maximum from going below minimum (with gap)
+    if (value <= this.selectedFundingMin) {
+      this.selectedFundingMax = this.selectedFundingMin + minGap;
+      // Update the DOM input value to reflect the corrected value
+      this.updateFormValue('max', this.selectedFundingMax);
+    } else {
       this.selectedFundingMax = value;
-      this.updateRangeFill();
+    }
+    
+    this.updateRangeFill();
+    this.updateFormValue('range');
+  }
+
+  // Helper method to update form values and DOM elements
+  private updateFormValue(type: 'min' | 'max' | 'range', value?: number) {
+    if (type === 'min' && value !== undefined) {
+      // Update the DOM input element for minimum slider
+      const minSlider = document.querySelector('input[type="range"].range-min') as HTMLInputElement;
+      if (minSlider) {
+        minSlider.value = value.toString();
+      }
+    } else if (type === 'max' && value !== undefined) {
+      // Update the DOM input element for maximum slider
+      const maxSlider = document.querySelector('input[type="range"].range-max') as HTMLInputElement;
+      if (maxSlider) {
+        maxSlider.value = value.toString();
+      }
+    } else if (type === 'range') {
+      // Update the form control with the current range
+      const fundingRangeControl = this.investorPreferencesForm.get('fundingRange');
+      if (fundingRangeControl) {
+        fundingRangeControl.setValue(`${this.selectedFundingMin}-${this.selectedFundingMax}`);
+      }
     }
   }
 
@@ -574,27 +615,11 @@ export class SignupComponent implements OnInit, OnDestroy {
   // Calculate proper position for range indicators accounting for thumb width
   getIndicatorPosition(value: number): number {
     const percentage = ((value - this.minFunding) / (this.maxFunding - this.minFunding)) * 100;
-    const thumbWidthPercent = 1.4;
-    const paddingPercent = 1.5;
-
-    if (percentage === 0) {
-      return paddingPercent;
-    } else if (percentage === 100) {
-      return percentage - paddingPercent;
-    } else {
-      return percentage;
-    }
+    return Math.max(0, Math.min(100, percentage));
   }
 
-
-
-
-
-
-
-
-
-
-
-
+  // Navigate to landing page when brand is clicked
+  navigateToHome(): void {
+    this.router.navigate(['/']);
+  }
 } 

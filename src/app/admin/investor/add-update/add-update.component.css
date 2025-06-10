@@ -10,6 +10,67 @@
   --dark-grey: #AAAAAA;
 }
 
+/* ========================================
+   MAIN CONTAINER
+======================================== */
+.add-update-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+/* ========================================
+   TAB NAVIGATION
+======================================== */
+.tab-navigation {
+  display: flex;
+  border-bottom: 2px solid var(--custom);
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 12px 24px;
+  font-family: var(--poppins);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark-grey);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.tab-button:hover {
+  color: var(--light2);
+  background-color: rgba(48, 172, 170, 0.1);
+}
+
+.tab-button.active {
+  color: var(--light2);
+  border-bottom-color: var(--light2);
+  background-color: rgba(48, 172, 170, 0.05);
+}
+
+.tab-button i {
+  font-size: 16px;
+}
+
+/* ========================================
+   TAB CONTENT
+======================================== */
+.tab-content {
+  min-height: 400px;
+}
+
+.tab-panel {
+  width: 100%;
+}
+
 /* Profile Picture Section */
 .profile-picture-section {
   display: flex;
@@ -63,6 +124,127 @@
 .image-overlay i {
   color: var(--light);
   font-size: 32px;
+}
+
+/* ========================================
+   DOCUMENTATION SECTION
+======================================== */
+.documentation-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px;
+}
+
+.section-title {
+  color: var(--dark);
+  font-family: var(--poppins);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.section-description {
+  color: var(--dark-grey);
+  font-family: var(--poppins);
+  font-size: 14px;
+  margin: 0;
+}
+
+.id-upload-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 20px;
+}
+
+.id-upload-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.id-upload-area {
+  width: 200px;
+  height: 140px;
+  border: 3px dashed var(--custom);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--light);
+}
+
+.id-upload-area:hover {
+  border-color: var(--light2);
+  background-color: rgba(48, 172, 170, 0.05);
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 8px;
+  color: var(--dark-grey);
+  font-family: var(--poppins);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.upload-placeholder i {
+  font-size: 32px;
+  color: var(--light2);
+}
+
+.id-image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.id-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.id-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.id-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.id-overlay i {
+  color: var(--light);
+  font-size: 24px;
+}
+
+.upload-label {
+  color: var(--dark);
+  font-family: var(--poppins);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
 }
 
 /* Form Styling */
@@ -183,7 +365,21 @@ select.form-input2:disabled {
   transform: scale(1.1);
 }
 
-/* Responsive */
+/* ========================================
+   RESPONSIVE DESIGN
+======================================== */
+@media screen and (max-width: 768px) {
+  .id-upload-container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .id-upload-area {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
 @media screen and (max-width: 576px) {
   .profile-picture-container {
     width: 100px;
@@ -196,5 +392,18 @@ select.form-input2:disabled {
   
   .form-input2 {
     font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .tab-button {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+  
+  .tab-button span {
+    display: none;
+  }
+  
+  .documentation-section {
+    padding: 15px;
   }
 }

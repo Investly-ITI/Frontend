@@ -1,0 +1,140 @@
+<!-- ========================================
+     ADD BY FORM COMPONENT
+======================================== -->
+<div class="form-container">
+  <div class="form-header">
+    <h4 class="form-title">Submit Business Form</h4>
+    <p class="form-description">Fill out detailed information about your business idea</p>
+  </div>
+
+  <form class="business-form" (ngSubmit)="onSubmit()">
+    <!-- Common Fields Section -->
+    <div class="form-section">
+      <h5 class="section-title">Basic Information</h5>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="title">Title *</label>
+          <input 
+            type="text" 
+            id="title" 
+            class="form-control"
+            [(ngModel)]="formData.title"
+            name="title"
+            placeholder="Enter your idea/business title"
+            required
+          >
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="category">Category *</label>
+          <select 
+            id="category" 
+            class="form-control"
+            [(ngModel)]="formData.category"
+            (ngModelChange)="onCategoryChange()"
+            name="category"
+            required
+          >
+            <option value="">Select Category</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="stage">Stage *</label>
+          <select 
+            id="stage" 
+            class="form-control"
+            [(ngModel)]="formData.stage"
+            name="stage"
+            required
+          >
+            <option value="">Select Stage</option>
+            <option *ngFor="let stg of stages" [value]="stg">{{ stg }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="government">Government *</label>
+          <select 
+            id="government" 
+            class="form-control"
+            [(ngModel)]="formData.governmentId"
+            (change)="onGovernorateChange($any($event.target).value)"
+            name="government"
+            required
+          >
+            <option value="">Select Government</option>
+            <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="city">City *</label>
+        <select 
+          id="city" 
+          class="form-control"
+          [(ngModel)]="formData.cityId"
+          [disabled]="!selectedGovernorate"
+          name="city"
+          required
+        >
+          <option value="">{{ selectedGovernorate ? 'Select City' : 'Select Government First' }}</option>
+          <option *ngFor="let city of citiesByGovernorate" [value]="city.id">{{ city.nameEn }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Category-Specific Questions -->
+    <div class="form-section" *ngIf="formData.category && getCurrentCategoryQuestions().length > 0">
+      <h5 class="section-title">{{ formData.category }} Specific Questions</h5>
+      
+      <div class="category-questions">
+        <div class="form-group" *ngFor="let question of getCurrentCategoryQuestions()">
+          <label class="form-label" [for]="question.key">{{ question.label }} *</label>
+          
+          <input 
+            *ngIf="question.type === 'text'"
+            type="text" 
+            [id]="question.key"
+            class="form-control"
+            [(ngModel)]="formData[question.key]"
+            [name]="question.key"
+            [placeholder]="question.placeholder"
+            required
+          >
+          
+          <textarea 
+            *ngIf="question.type === 'textarea'"
+            [id]="question.key"
+            class="form-control textarea"
+            [(ngModel)]="formData[question.key]"
+            [name]="question.key"
+            [placeholder]="question.placeholder"
+            rows="4"
+            required
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="form-actions">
+      <button 
+        type="submit" 
+        class="btn btn-primary"
+        [disabled]="!isFormValid()"
+      >
+        <i class='bx bx-check-circle'></i>
+        Submit Business Idea
+      </button>
+      
+      <div class="form-hint" *ngIf="!isFormValid()">
+        <i class='bx bx-info-circle'></i>
+        <span>Please fill in all required fields to submit your idea.</span>
+      </div>
+    </div>
+  </form>
+</div> 

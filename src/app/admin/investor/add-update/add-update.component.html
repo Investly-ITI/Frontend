@@ -1,29 +1,58 @@
-<!-- Profile Picture Section -->
-<div class="profile-picture-section">
-    <div class="profile-picture-container" (mouseenter)="showImageOverlay = true"
-        (mouseleave)="showImageOverlay = false" (click)="triggerInput()">
-        <img [src]="profileImageUrl" alt="Profile Picture" class="profile-picture">
-        <div class="image-overlay" [ngClass]="{'show': showImageOverlay}">
-            <i class='bx bx-edit-alt'></i>
-        </div>
-    </div>
+<!-- ========================================
+     ADD/UPDATE INVESTOR MAIN CONTAINER
+======================================== -->
+<div class="add-update-container">
+  <!-- Profile Picture Section -->
+  <div class="profile-picture-section">
+      <div class="profile-picture-container" (mouseenter)="showImageOverlay = true"
+          (mouseleave)="showImageOverlay = false" (click)="triggerInput()">
+          <img [src]="profileImageUrl" alt="Profile Picture" class="profile-picture">
+          <div class="image-overlay" [ngClass]="{'show': showImageOverlay}">
+              <i class='bx bx-edit-alt'></i>
+          </div>
+      </div>
     <input #fileInput type="file" id="profileImageInput" accept="image/*" (change)="onFileSelected($event)"
         class="file-input" style="display: none;" />
-</div>
-<!-- Form Section -->
-<form class="modal-form" [formGroup]="formData" (ngSubmit)="onSubmit()">
-    <div class="row" [formGroupName]="'user'">
-        <div class="col-4">
-            <label for="firstName">First Name</label>
-            <div class="input-container">
-                <input type="text" id="firstName" class="form-input2" formControlName="firstName"
-                    placeholder="Enter first name" />
-                <div *ngIf="formData.get('user.firstName')?.invalid && formData.get('user.firstName')?.touched"
-                    class="text-danger">
-                    First name is required.
-                </div>
-            </div>
-        </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'information'"
+      (click)="switchTab('information')"
+    >
+      <i class='bx bx-user'></i>
+      <span>Information</span>
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'documentation'"
+      (click)="switchTab('documentation')"
+    >
+      <i class='bx bx-file'></i>
+      <span>Documentation</span>
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <!-- Information Tab -->
+    <div *ngIf="activeTab === 'information'" class="tab-panel">
+      <!-- Form Section -->
+      <form class="modal-form" [formGroup]="formData" (ngSubmit)="onSubmit()">
+          <div class="row" [formGroupName]="'user'">
+              <div class="col-4">
+                  <label for="firstName">First Name</label>
+                  <div class="input-container">
+                      <input type="text" id="firstName" class="form-input2" formControlName="firstName"
+                          placeholder="Enter first name" />
+                      <div *ngIf="formData.get('user.firstName')?.invalid && formData.get('user.firstName')?.touched"
+                          class="text-danger">
+                          First name is required.
+                      </div>
+                  </div>
+              </div>
 
         <div class="col-4">
             <label for="lastName">Last Name</label>
@@ -160,26 +189,95 @@
                 </div>
             </div>
 
-            <div *ngIf="formData.get('user.investingType')?.invalid && formData.get('user.investingType')?.touched"
-                class="text-danger">
-                investingType is required.
-            </div>
-        </div>
+                  <div *ngIf="formData.get('user.investingType')?.invalid && formData.get('user.investingType')?.touched"
+                      class="text-danger">
+                      investingType is required.
+                  </div>
+              </div>
+          </div>
+      </form>
     </div>
 
-</form>
+    <!-- Documentation Tab -->
+    <div *ngIf="activeTab === 'documentation'" class="tab-panel">
+      <div class="documentation-section">
+        <h4 class="section-title">ID Documentation</h4>
+        <p class="section-description">Upload clear photos of both sides of the national ID</p>
+        
+        <div class="id-upload-container">
+          <!-- Front ID Upload -->
+          <div class="id-upload-card">
+            <div class="id-upload-area" 
+                 (click)="triggerFrontIdUpload()"
+                 (mouseenter)="showFrontIdOverlay = true"
+                 (mouseleave)="showFrontIdOverlay = false">
+              
+              <div *ngIf="!frontIdImageUrl" class="upload-placeholder">
+                <i class='bx bx-plus'></i>
+                <span>Front ID Picture</span>
+              </div>
+              
+              <div *ngIf="frontIdImageUrl" class="id-image-container">
+                <img [src]="frontIdImageUrl" alt="Front ID" class="id-image">
+                <div class="id-overlay" [ngClass]="{'show': showFrontIdOverlay}">
+                  <i class='bx bx-edit-alt'></i>
+                </div>
+              </div>
+            </div>
+            <label class="upload-label">Front Side</label>
+          </div>
 
-<!-- Modal Footer -->
-<div class="modal-footer">
-    <!-- Add Mode: Show Add Button -->
-    <button *ngIf="!selectedEntity" type="button" class="action-btn add-btn" (click)="onSubmit()">
-        <i class='bx bx-plus'></i>
-        Add {{ entityName }}
-    </button>
+          <!-- Back ID Upload -->
+          <div class="id-upload-card">
+            <div class="id-upload-area" 
+                 (click)="triggerBackIdUpload()"
+                 (mouseenter)="showBackIdOverlay = true"
+                 (mouseleave)="showBackIdOverlay = false">
+              
+              <div *ngIf="!backIdImageUrl" class="upload-placeholder">
+                <i class='bx bx-plus'></i>
+                <span>Back ID Picture</span>
+              </div>
+              
+              <div *ngIf="backIdImageUrl" class="id-image-container">
+                <img [src]="backIdImageUrl" alt="Back ID" class="id-image">
+                <div class="id-overlay" [ngClass]="{'show': showBackIdOverlay}">
+                  <i class='bx bx-edit-alt'></i>
+                </div>
+              </div>
+            </div>
+            <label class="upload-label">Back Side</label>
+          </div>
+        </div>
 
-    <!-- View Mode: Show Edit/Save Button -->
-    <button *ngIf="selectedEntity" type="button" class="action-btn edit-btn" (click)="toggleEditMode()">
-        <i class='bx' [ngClass]="isEditMode ? 'bx-check' : 'bx-edit-alt'"></i>
-        {{ isEditMode ? 'Save' : 'Edit' }}
-    </button>
+        <!-- Hidden file inputs -->
+        <input type="file" 
+               id="frontIdInput" 
+               accept="image/*" 
+               (change)="onFrontIdFileSelected($event)" 
+               style="display: none;">
+        
+        <input type="file" 
+               id="backIdInput" 
+               accept="image/*" 
+               (change)="onBackIdFileSelected($event)" 
+               style="display: none;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Footer -->
+  <div class="modal-footer">
+      <!-- Add Mode: Show Add Button -->
+      <button *ngIf="!selectedEntity" type="button" class="action-btn add-btn" (click)="onSubmit()">
+          <i class='bx bx-plus'></i>
+          Add {{ entityName }}
+      </button>
+
+      <!-- View Mode: Show Edit/Save Button -->
+      <button *ngIf="selectedEntity" type="button" class="action-btn edit-btn" (click)="toggleEditMode()">
+          <i class='bx' [ngClass]="isEditMode ? 'bx-check' : 'bx-edit-alt'"></i>
+          {{ isEditMode ? 'Save' : 'Edit' }}
+      </button>
+  </div>
 </div>

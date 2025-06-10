@@ -114,4 +114,9 @@ export class LoginStaffComponent implements OnInit {
   ngOnDestroy() {
     this.unsubscribe.forEach((sb) => sb.unsubscribe());
   }
+
+  // Navigate to landing page when brand is clicked
+  navigateToHome(): void {
+    this.router.navigate(['/']);
+  }
 }

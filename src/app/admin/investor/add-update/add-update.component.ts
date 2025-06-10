@@ -27,6 +27,10 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   @Input() modalMode: 'add' | 'view' = 'view';
   @Input() Governorates!: Governorate[];
   @Output() saveEntity = new EventEmitter<any>();
+  
+  //* Tab functionality
+  activeTab: 'information' | 'documentation' = 'information';
+  
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>
 
@@ -41,6 +45,12 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   profileImageUrl: string = 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg';
   showImageOverlay: boolean = false;
   Gender = Gender;
+
+  //* Documentation images
+  frontIdImageUrl: string | null = null;
+  backIdImageUrl: string | null = null;
+  showFrontIdOverlay: boolean = false;
+  showBackIdOverlay: boolean = false;
   Cities: City[] = [];
   investingTypes = InvestorInvestingType
   private unsubscribe: Subscription[] = [];
@@ -238,6 +248,42 @@ export class AddUpdateComponent implements OnInit, OnChanges {
 
     }
 
+  }
+
+  switchTab(tab: 'information' | 'documentation'): void {
+    this.activeTab = tab;
+  }
+
+  onFrontIdFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.frontIdImageUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  onBackIdFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.backIdImageUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  triggerFrontIdUpload(): void {
+    const fileInput = document.getElementById('frontIdInput') as HTMLInputElement;
+    fileInput?.click();
+  }
+
+  triggerBackIdUpload(): void {
+    const fileInput = document.getElementById('backIdInput') as HTMLInputElement;
+    fileInput?.click();
   }
 
   ngOnDestroy() {
