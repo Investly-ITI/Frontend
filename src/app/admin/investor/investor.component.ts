@@ -351,7 +351,7 @@ loadActiveInactiveCount(){
     this.entityToModify = entity;
     this.modifyAction = action;
     this.entityIdToChangeStatus=id;
-    this.StatusChangedTo=status;
+    this.StatusChangedTo= status;
     this.dropdownStates = this.dropdownStates.map(() => false);
     this.isActivateDeactivateModalOpen = true;
   }
@@ -366,7 +366,8 @@ loadActiveInactiveCount(){
 
   confirmActivateDeactivate(): void {
     if (this.entityToModify) {
-     var res3= this.InvestorService.changeStatus(this.entityIdToChangeStatus,this.StatusChangedTo).subscribe({
+     
+     var res3= this.InvestorService.changeStatus(this.entityIdToChangeStatus,this.getToggledStatus(this.StatusChangedTo)).subscribe({
       next:(response)=>{
        if(response.isSuccess){
         this.toastr.success(response.message,"Success");
