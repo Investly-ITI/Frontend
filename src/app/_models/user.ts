@@ -45,3 +45,8 @@ export class LoggedInUser{
     ){}
 }
 
+
+export interface DropdownDto {
+  id: number;
+  name: string;
+}
