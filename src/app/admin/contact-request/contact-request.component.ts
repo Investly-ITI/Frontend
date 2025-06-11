@@ -15,6 +15,9 @@ import { DarkModeService } from '../_services/dark-mode.service';
 import { InvestorContactRequest, InvestorContactItem, InvestorContactResponse, UpdateContactRequestStatusDto } from '../../_models/contact-request';
 import { ContactRequestStatus } from '../../_shared/enums';
 import { StatusLabelPipe } from '../../_shared/pipes/enum.pipe';
+import { DropdownDto } from '../../_models/user';
+import { InvestorService } from '../_services/investor.service';
+import { FounderService } from '../_services/founder.service';
 
 @Component({
   selector: 'app-contact-request',
@@ -94,15 +97,22 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
   //* Data
   loadedListData: InvestorContactItem[] = [];
   ContactRequestStatus = ContactRequestStatus; // Make enum available in template
+  investors: DropdownDto[] = [];
+  founders: DropdownDto[] = [];
+
 
   constructor(
     private contactRequestService: InvestorContactRequestService,
     private darkModeService: DarkModeService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private investorService: InvestorService,
+    private founderService: FounderService
   ) {}
 
   ngOnInit(): void {
     this.loadData();
+    this.loadInvestors();
+    this.loadFounders()
     this.loadStatusCounts();
     this.darkModeSubscription = this.darkModeService.darkMode$.subscribe(
       (isDarkMode) => {
@@ -125,6 +135,8 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
           this.totalPages = response.data.totalPages;
           this.showNoResults = response.data.items.length === 0;
           this.dropdownStates = new Array(this.loadedListData.length).fill(false);
+          this.isAdvancedSearchOpen = false;
+          console.log(response.data)
         } else {
           this.toastr.error(response.message || 'Failed to load contact requests');
         }
@@ -132,6 +144,34 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.toastr.error('Failed to load contact requests');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadInvestors(): void {
+    this.isLoading = true;    
+    this.investorService.getInvestorsForDropdown().subscribe({
+      next: (response) => {
+          this.investors = response.data;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading investors:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadFounders(): void {
+    this.isLoading = true;    
+    this.founderService.getFoundersForDropdown().subscribe({
+      next: (response) => {
+          this.founders = response.data;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading investors:', error);
         this.isLoading = false;
       }
     });
@@ -249,6 +289,7 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
     this.searchData.founderIdFilter = this.selectedFounderId ? Number(this.selectedFounderId) : undefined;
     this.searchData.statusFilter = this.selectedStatus ? Number(this.selectedStatus) : undefined;
     this.searchData.searchTerm = this.searchQuery;
+    console.log(this.selectedFounderId)
     this.loadData();
   }
 

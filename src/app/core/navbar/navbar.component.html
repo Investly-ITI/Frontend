@@ -26,7 +26,7 @@
         </li>
 
         <!-- Ideas Dropdown -->
-        <li class="nav-item dropdown" [class.active]="isIdeasDropdownOpen">
+        <li class="nav-item dropdown" *ngIf="isAuthenticated&&currentUser?.userType==UserType.Founder && currentUser?.status==Status.Active" [class.active]="isIdeasDropdownOpen">
           <a class="nav-link dropdown-toggle" (click)="toggleIdeasDropdown()">
             <i class='bx bx-bulb'></i>
             <span>Ideas</span>
@@ -67,7 +67,7 @@
       ======================================== -->
       <div class="navbar-actions">
         <!-- Show Auth Buttons when NOT logged in -->
-        <div class="auth-buttons" *ngIf="!isAuthenticated">
+        <div class="auth-buttons" *ngIf="!(isAuthenticated &&currentUser?.userType!== UserType.Staff)">
           <button class="btn btn-secondary" (click)="navigateTo('/login')">
             <i class='bx bx-log-in'></i>
             <span>Sign In</span>
@@ -79,11 +79,11 @@
         </div>
 
         <!-- Show User Profile when logged in -->
-        <div class="user-profile" *ngIf="isAuthenticated && currentUser">
+        <div class="user-profile" *ngIf="(isAuthenticated &&currentUser?.userType!== UserType.Staff)">
           <div class="user-info">
-            <span class="user-name">{{ currentUser.name }}</span>
-            <span class="user-type">{{ currentUser.userType === UserType.Founder ? 'Founder' : 
-                                       currentUser.userType === UserType.Investor ? 'Investor' : 'Staff' }}</span>
+            <span class="user-name">{{ currentUser?.name }}</span>
+            <span class="user-type">{{ currentUser?.userType === UserType.Founder ? 'Founder' : 
+                                       currentUser?.userType === UserType.Investor ? 'Investor' : 'Staff' }}</span>
           </div>
           
           <!-- Notification Bell Icon -->
@@ -96,7 +96,7 @@
           
           <div class="profile-picture-wrapper">
             <div class="profile-picture" (click)="onProfilePictureClick()" title="Go to Profile">
-              <img [src]="getProfilePictureUrl()" [alt]="currentUser.name + ' Profile Picture'">
+              <img [src]="getProfilePictureUrl()" [alt]="(currentUser?.name || 'User') + ' Profile Picture'">
             </div>
             <!-- Red exclamation mark notification indicator -->
             <div class="profile-alert-indicator" *ngIf="showProfileAlert">

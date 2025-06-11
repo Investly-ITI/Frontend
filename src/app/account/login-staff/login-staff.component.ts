@@ -86,7 +86,7 @@ export class LoginStaffComponent implements OnInit {
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.loginData = { ...this.loginForm.value }
-      var sub = this.jwt.generateToken(this.loginData).subscribe({
+      var sub = this.jwt.generateTokenStaff(this.loginData).subscribe({
         next: (response) => {
           if (response.isSuccess) {
             this.toastr.success(response.message, "Success");

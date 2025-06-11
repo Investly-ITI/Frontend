@@ -18,6 +18,10 @@ export class JwtService {
     var result = this.httpClient.post<Response<string>>(`${this.baseUrl}/login`, data);
     return result;
   }
+  generateTokenStaff(data: UserLogin): Observable<Response<string>> {
+    var result = this.httpClient.post<Response<string>>(`${this.baseUrl}/login-staff`, data);
+    return result;
+  }
 
 
   registerInvestor(data:FormData): Observable<Response<Investor>> {

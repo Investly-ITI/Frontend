@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../_services/auth.service';
 import { LoggedInUser } from '../../_models/user';
-import { UserType } from '../../_shared/enums';
+import { UserType,Status } from '../../_shared/enums';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -17,7 +18,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isMobileMenuOpen = false;
   isAuthenticated = false;
   currentUser: LoggedInUser | null = null;
-  UserType = UserType; // Expose enum to template
+  UserType = UserType; 
+  Status=Status
   
   // Profile notification indicator
   showProfileAlert = true; // Set to true to show red exclamation mark
@@ -30,12 +32,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // Subscribe to authentication state
     const authSub = this.authService.isAuthenticated$.subscribe(
       isAuth => this.isAuthenticated = isAuth
     );
     
-    // Subscribe to current user data
     const userSub = this.authService.CurrentUser$.subscribe(
       user => this.currentUser = user
     );
@@ -123,10 +123,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   // Get user profile picture URL
   getProfilePictureUrl(): string {
-    // For now, return a default profile picture
-    // You can modify this to return actual user profile picture URL from user data
-    // If user has a profile picture, use: this.currentUser?.profilePicture || fallback
-    return 'Me.jpg'; // Using existing image from public folder as default
+     if(this.currentUser?.profilePicPath!=null &&this.currentUser?.profilePicPath!='' &&this.currentUser?.profilePicPath!=undefined){
+      return environment.apiUrl+"/"+this.currentUser.profilePicPath
+     }else{
+       return 'Me.png'; 
+     }
   }
 
   // Navigate to notifications section in founder profile

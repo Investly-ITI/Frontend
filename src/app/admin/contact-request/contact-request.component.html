@@ -111,6 +111,12 @@
                                                 <select id="investor" [(ngModel)]="selectedInvestorId" name="investor">
                                                     <option value="">All Investors</option>
                                                     <!-- Add investor options here -->
+
+                                                    <option 
+                                                        *ngFor="let investor of investors" 
+                                                        [value]="investor.id">
+                                                        {{ investor.name }}
+                                                    </option>
                                                 </select>
                                             </div>
 
@@ -120,6 +126,12 @@
                                                 <select id="founder" [(ngModel)]="selectedFounderId" name="founder">
                                                     <option value="">All Founders</option>
                                                     <!-- Add founder options here -->
+                                                    <option 
+                                                        *ngFor="let founder of founders" 
+                                                        [value]="founder.id">
+                                                        {{ founder.name }}
+                                                    </option>
+
                                                 </select>
                                             </div>
 
@@ -246,29 +258,20 @@
                                                 View Details
                                             </button>
 
-                                            <!-- Accept Button (shown when not already accepted) -->
-                                            <button class="action-item active" type="button" 
-                                                    *ngIf="item.status !== ContactRequestStatus.Accepted"
-                                                    (click)="openStatusChangeModal(item, 'accept')">
-                                                <i class='bx bx-check-circle'></i>
-                                                Accept
-                                            </button>
+                                            <!-- Show Accept and Decline only if status is Pending -->
+                                            <ng-container *ngIf="item.status === ContactRequestStatus.Pending">
+                                                <button class="action-item active" type="button"
+                                                        (click)="openStatusChangeModal(item, 'accept')">
+                                                    <i class='bx bx-check-circle'></i>
+                                                    Accept
+                                                </button>
 
-                                            <!-- Decline Button (shown when not already declined) -->
-                                            <button class="action-item deactivate" type="button" 
-                                                    *ngIf="item.status !== ContactRequestStatus.Declined"
-                                                    (click)="openStatusChangeModal(item, 'decline')">
-                                                <i class='bx bx-x-circle'></i>
-                                                Decline
-                                            </button>
-
-                                            <!-- Pending Button (shown when not already pending) -->
-                                            <button class="action-item pending" type="button" 
-                                                    *ngIf="item.status !== ContactRequestStatus.Pending"
-                                                    (click)="openStatusChangeModal(item, 'pending')">
-                                                <i class='bx bx-time-five'></i>
-                                                Set to Pending
-                                            </button>
+                                                <button class="action-item deactivate" type="button"
+                                                        (click)="openStatusChangeModal(item, 'decline')">
+                                                    <i class='bx bx-x-circle'></i>
+                                                    Decline
+                                                </button>
+                                            </ng-container>
                                         </div>
                                     </div>
                                 </td>
@@ -283,9 +286,9 @@
                         <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">
                             <i class='bx bx-chevron-left' style="font-size: 1.7em;"></i>
                         </button>
-                        <span class="page-info">
+                        <!-- <span class="page-info">
                             Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} total)
-                        </span>
+                        </span> -->
                         <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">
                             <i class='bx bx-chevron-right' style="font-size: 1.7em;"></i>
                         </button>

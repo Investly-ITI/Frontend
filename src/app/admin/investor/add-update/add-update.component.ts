@@ -58,6 +58,8 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   //files
 
   profilePicFile!:File
+  FrontIdImageFile!: File;
+  BackIdImageFile!: File;
 
 
   constructor(private fb: FormBuilder
@@ -143,7 +145,24 @@ export class AddUpdateComponent implements OnInit, OnChanges {
     if(this.selectedEntity?.user?.profilePicPath!=null &&this.selectedEntity?.user?.profilePicPath!=''){
       this.profileImageUrl=this.ApiUrl+"/"+this.selectedEntity?.user?.profilePicPath;
     }
+   else
+  {
+    this.profileImageUrl='https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg';
   }
+  if (this.selectedEntity?.user?.frontIdPicPath) {
+    this.frontIdImageUrl = this.ApiUrl + '/' + this.selectedEntity.user.frontIdPicPath;
+  } else {
+    this.frontIdImageUrl = null;
+  }
+  if (this.selectedEntity?.user?.backIdPicPath) {
+    this.backIdImageUrl = this.ApiUrl + '/' + this.selectedEntity.user.backIdPicPath;
+  } else {
+    this.backIdImageUrl = null;
+  }
+
+  }
+
+
 
   resetForm(): void {
     this.formData = this.fb.group({
@@ -201,7 +220,8 @@ export class AddUpdateComponent implements OnInit, OnChanges {
       }
       //files
       formPayload.append('user.PicFile',this.profilePicFile);
-
+     formPayload.append('user.FrontIdPicFile',this.FrontIdImageFile);
+      formPayload.append('user.BackIdPicFile',this.BackIdImageFile);
 
       //add
       if (this.selectedEntity?.id == null || this.selectedEntity?.id == 0) {
@@ -226,6 +246,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         //edit
       } else {
 
+        console.log("update"+formPayload);
         var res2 = this.investorService.update(formPayload).subscribe({
           next: (response) => {
             if (response.isSuccess) {
@@ -257,6 +278,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   onFrontIdFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      this.FrontIdImageFile = file; 
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.frontIdImageUrl = e.target.result;
@@ -268,6 +290,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   onBackIdFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      this.BackIdImageFile = file; 
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.backIdImageUrl = e.target.result;

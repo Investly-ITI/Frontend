@@ -41,7 +41,14 @@ export class LoggedInUser{
 
         public name:string,
         public email:string,
-        public userType:UserType
+        public userType:UserType,
+        public status:Status,
+        public profilePicPath:string
     ){}
 }
 
+
+export interface DropdownDto {
+  id: number;
+  name: string;
+}

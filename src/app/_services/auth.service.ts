@@ -12,7 +12,9 @@ export interface DecodedToken {
   exp: number,
   email: string,
   userType: number,
-  name: string
+  name: string,
+  status:number,
+  profilePicPath:string
 }
 @Injectable({
   providedIn: 'root'
@@ -73,14 +75,14 @@ export class AuthService {
 
 
   private getUserData(): LoggedInUser | null {
-
     const decoded = this.getDecodedToken();
-    console.log(decoded);
     if (!decoded) { return null }
     var data: LoggedInUser = {
       email: decoded?.email,
       name: decoded?.name,
-      userType: Number(decoded?.userType)
+      userType: Number(decoded?.userType),
+      status:Number(decoded?.status),
+      profilePicPath:decoded?.profilePicPath
     }
     return data;
   }

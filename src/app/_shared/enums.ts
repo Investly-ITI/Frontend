@@ -24,7 +24,7 @@ export enum InvestorInvestingType {
   Declined = 3
 }
  export enum BusinessIdeaStatus {
-   Active = 1,
+    Active = 1,
     Inactive = 2,
     Deleted = 3,
     Pending = 4,
