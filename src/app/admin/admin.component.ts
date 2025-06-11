@@ -100,6 +100,12 @@ export class AdminComponent implements OnInit {
     //+ Implement your logic to load notifications here (Service Call)
   }
 
+  logout(){
+    this.auth.logout();
+    location.reload();
+    
+  }
+
   ngOnDestroy() {
     this.unsubscribe.forEach((sb) => sb.unsubscribe());
   }

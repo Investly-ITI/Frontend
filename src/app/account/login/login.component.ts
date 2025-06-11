@@ -119,25 +119,33 @@ export class LoginComponent implements OnInit, OnDestroy {
     }, 600);
   }
 
-  onSubmit(): void {
+  onSubmit(event:Event): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
-
       this.loginData = { ...this.loginForm.value }
       var sub = this.jwt.generateToken(this.loginData).subscribe({
         next: (response) => {
           if (response.isSuccess) {
+            console.log(response);
             this.toastr.success(response.message, "Success");
             this.auth.login(response.data);
             setTimeout(() => {
-              //this.router.navigate(['admin/investor']);
+              this.router.navigate(['/']);
             }, 1500);
 
           } else {
+            
+            console.log(response)
             this.toastr.error(response.message, "Error");
           }
         }, error: (err) => {
-          this.toastr.error("something went wrong", "Error");
+            const errorMsg =
+          err.status === 401 && err.error?.message
+            ? err.error.message
+            : "Something went wrong. Please try again.";
+
+        this.toastr.error(errorMsg, "Error");
+        this.isLoading = false;
         }
       })
       this.unsubscribe.push(sub);

@@ -12,11 +12,12 @@ import { FounderComponent } from './admin/founder/founder.component';
 import { FounderComponent as FounderProfileComponent } from './founder/founder.component';
 import { NotificationsComponent } from './admin/notifications/notifications.component';
 import { ContactRequestComponent } from './admin/contact-request/contact-request.component';
+import { NoAuthGuard } from './_guards/no-auth.guard';
 
 export const routes: Routes = [
    // Authentication routes (no layout - full screen)
-   { path: 'login', component: LoginComponent, title: 'Login - Investly' },
-   { path: 'signup', component: SignupComponent, title: 'Sign Up - Investly' },
+   { path: 'login', canActivate:[NoAuthGuard], component: LoginComponent, title: 'Login - Investly' },
+   { path: 'signup',canActivate:[NoAuthGuard], component: SignupComponent, title: 'Sign Up - Investly' },
    { path: 'staff-login', component: LoginStaffComponent, title: 'Staff Login - Investly' },
    
    // Main public route with layout (navbar + footer)
