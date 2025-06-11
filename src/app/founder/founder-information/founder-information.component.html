@@ -1,5 +1,5 @@
 <!-- ========================================
-     INFORMATION SECTION
+     FOUNDER INFORMATION MAIN CONTAINER
 ======================================== -->
 <div class="content-section">
   <div class="section-header">
@@ -13,184 +13,282 @@
     <span>{{ saveMessage }}</span>
   </div>
 
-  <div class="form-container">
-    <form class="profile-form">
-      <!-- Personal Details -->
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" for="firstName">First Name</label>
-          <input 
-            type="text" 
-            id="firstName" 
-            class="form-control readonly" 
-            [(ngModel)]="personalInfo.firstName"
-            name="firstName"
-            readonly
-            [disabled]="isSaving"
-          >
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="lastName">Last Name</label>
-          <input 
-            type="text" 
-            id="lastName" 
-            class="form-control readonly" 
-            [(ngModel)]="personalInfo.lastName"
-            name="lastName"
-            readonly
-            [disabled]="isSaving"
-          >
-        </div>
-      </div>
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'personal'"
+      (click)="switchTab('personal')"
+    >
+      <i class='bx bx-user'></i>
+      <span>Personal Details</span>
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'documentation'"
+      (click)="switchTab('documentation')"
+    >
+      <i class='bx bx-file'></i>
+      <span>Documentation</span>
+    </button>
+  </div>
 
-      <div class="form-row">
-        <div class="form-group editable">
-          <label class="form-label" for="email">Email Address</label>
-          <input 
-            type="email" 
-            id="email" 
-            class="form-control" 
-            [class.invalid]="!isEmailValid()"
-            [(ngModel)]="personalInfo.email"
-            (ngModelChange)="onFieldChange()"
-            name="email"
-            [disabled]="isSaving"
-          >
-          <i class='bx bx-edit edit-icon' style="color: var(--light);"></i>
-          <div class="error-message" *ngIf="!isEmailValid()">
-            {{ getFieldErrorMessage('email') }}
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <!-- Personal Details Tab -->
+    <div *ngIf="activeTab === 'personal'" class="tab-panel">
+      <div class="form-container">
+        <form class="profile-form">
+          <!-- Personal Details -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="firstName">First Name</label>
+              <input 
+                type="text" 
+                id="firstName" 
+                class="form-control readonly" 
+                [(ngModel)]="personalInfo.firstName"
+                name="firstName"
+                readonly
+                [disabled]="isSaving"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="lastName">Last Name</label>
+              <input 
+                type="text" 
+                id="lastName" 
+                class="form-control readonly" 
+                [(ngModel)]="personalInfo.lastName"
+                name="lastName"
+                readonly
+                [disabled]="isSaving"
+              >
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="email">Email Address</label>
+              <input 
+                type="email" 
+                id="email" 
+                class="form-control readonly" 
+                [(ngModel)]="personalInfo.email"
+                name="email"
+                readonly
+                [disabled]="isSaving"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="dateOfBirth">Date of Birth</label>
+              <input 
+                type="date" 
+                id="dateOfBirth" 
+                class="form-control readonly" 
+                [(ngModel)]="personalInfo.dateOfBirth"
+                name="dateOfBirth"
+                readonly
+                [disabled]="isSaving"
+              >
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group editable">
+              <label class="form-label" for="countryCode">Country Code</label>
+              <select 
+                id="countryCode" 
+                class="form-control" 
+                [(ngModel)]="personalInfo.countryCode"
+                (ngModelChange)="onFieldChange()"
+                name="countryCode"
+                [disabled]="isSaving"
+              >
+                <option value="+20">+20 (Egypt)</option>
+                <option value="+1">+1 (United States)</option>
+                <option value="+44">+44 (United Kingdom)</option>
+                <option value="+49">+49 (Germany)</option>
+                <option value="+33">+33 (France)</option>
+                <option value="+39">+39 (Italy)</option>
+                <option value="+34">+34 (Spain)</option>
+                <option value="+86">+86 (China)</option>
+                <option value="+81">+81 (Japan)</option>
+                <option value="+91">+91 (India)</option>
+              </select>
+              <i class='bx bx-edit edit-icon' style="color: var(--light);"></i>
+            </div>
+            <div class="form-group editable">
+              <label class="form-label" for="phoneNumber">Phone Number</label>
+              <input 
+                type="tel" 
+                id="phoneNumber" 
+                class="form-control" 
+                [class.invalid]="!isPhoneNumberValid()"
+                [(ngModel)]="personalInfo.phoneNumber"
+                (ngModelChange)="onFieldChange()"
+                name="phoneNumber"
+                [disabled]="isSaving"
+              >
+              <i class='bx bx-edit edit-icon' style="color: var(--light);"></i>
+              <div class="error-message" *ngIf="!isPhoneNumberValid()">
+                {{ getFieldErrorMessage('phoneNumber') }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="street">Street Address</label>
+            <input 
+              type="text" 
+              id="street" 
+              class="form-control readonly" 
+              [(ngModel)]="personalInfo.street"
+              name="street"
+              readonly
+              [disabled]="isSaving"
+            >
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="government">Government</label>
+              <input 
+                type="text" 
+                id="government" 
+                class="form-control readonly" 
+                [(ngModel)]="personalInfo.government"
+                name="government"
+                readonly
+                [disabled]="isSaving"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="city">City</label>
+              <input 
+                type="text" 
+                id="city" 
+                class="form-control readonly" 
+                [(ngModel)]="personalInfo.city"
+                name="city"
+                readonly
+                [disabled]="isSaving"
+              >
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="nationalId">National ID</label>
+              <input 
+                type="text" 
+                id="nationalId" 
+                class="form-control readonly" 
+                [(ngModel)]="personalInfo.nationalId"
+                name="nationalId"
+                readonly
+                [disabled]="isSaving"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="gender">Gender</label>
+              <input 
+                type="text" 
+                id="gender" 
+                class="form-control readonly" 
+                [(ngModel)]="personalInfo.gender"
+                name="gender"
+                readonly
+                [disabled]="isSaving"
+              >
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" (click)="onSave()" [disabled]="isSaving || !isFormValid()">
+              <i class='bx' [ngClass]="isSaving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
+              {{ isSaving ? 'Saving...' : 'Save Changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Documentation Tab -->
+    <div *ngIf="activeTab === 'documentation'" class="tab-panel">
+      <div class="documentation-container">
+        <div class="documentation-section">
+          <h4 class="section-title">ID Documentation</h4>
+          <p class="section-description">Upload clear photos of both sides of your national ID</p>
+          
+          <div class="id-upload-container">
+            <!-- Front ID Upload -->
+            <div class="id-upload-card">
+              <div class="id-upload-area" 
+                   (click)="triggerFrontIdUpload()"
+                   (mouseenter)="showFrontIdOverlay = true"
+                   (mouseleave)="showFrontIdOverlay = false">
+                
+                <div *ngIf="!frontIdImageUrl" class="upload-placeholder">
+                  <i class='bx bx-plus'></i>
+                  <span>Front ID Picture</span>
+                </div>
+                
+                <div *ngIf="frontIdImageUrl" class="id-image-container">
+                  <img [src]="frontIdImageUrl" alt="Front ID" class="id-image">
+                  <div class="id-overlay" [ngClass]="{'show': showFrontIdOverlay}">
+                    <i class='bx bx-edit-alt'></i>
+                  </div>
+                </div>
+              </div>
+              <label class="upload-label">Front Side</label>
+            </div>
+
+            <!-- Back ID Upload -->
+            <div class="id-upload-card">
+              <div class="id-upload-area" 
+                   (click)="triggerBackIdUpload()"
+                   (mouseenter)="showBackIdOverlay = true"
+                   (mouseleave)="showBackIdOverlay = false">
+                
+                <div *ngIf="!backIdImageUrl" class="upload-placeholder">
+                  <i class='bx bx-plus'></i>
+                  <span>Back ID Picture</span>
+                </div>
+                
+                <div *ngIf="backIdImageUrl" class="id-image-container">
+                  <img [src]="backIdImageUrl" alt="Back ID" class="id-image">
+                  <div class="id-overlay" [ngClass]="{'show': showBackIdOverlay}">
+                    <i class='bx bx-edit-alt'></i>
+                  </div>
+                </div>
+              </div>
+              <label class="upload-label">Back Side</label>
+            </div>
+          </div>
+
+          <!-- Hidden file inputs -->
+          <input type="file" 
+                 id="frontIdInput" 
+                 accept="image/*" 
+                 (change)="onFrontIdFileSelected($event)" 
+                 style="display: none;">
+          
+          <input type="file" 
+                 id="backIdInput" 
+                 accept="image/*" 
+                 (change)="onBackIdFileSelected($event)" 
+                 style="display: none;">
+
+          <!-- Documentation Save Actions -->
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" (click)="onSaveDocumentation()" [disabled]="isSaving || !hasDocumentationToSave()">
+              <i class='bx' [ngClass]="isSaving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
+              {{ isSaving ? 'Saving...' : 'Save Documentation' }}
+            </button>
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="dateOfBirth">Date of Birth</label>
-          <input 
-            type="date" 
-            id="dateOfBirth" 
-            class="form-control readonly" 
-            [(ngModel)]="personalInfo.dateOfBirth"
-            name="dateOfBirth"
-            readonly
-            [disabled]="isSaving"
-          >
-        </div>
       </div>
-
-      <div class="form-row">
-        <div class="form-group editable">
-          <label class="form-label" for="countryCode">Country Code</label>
-          <select 
-            id="countryCode" 
-            class="form-control" 
-            [(ngModel)]="personalInfo.countryCode"
-            (ngModelChange)="onFieldChange()"
-            name="countryCode"
-            [disabled]="isSaving"
-          >
-            <option value="+20">+20 (Egypt)</option>
-            <option value="+1">+1 (United States)</option>
-            <option value="+44">+44 (United Kingdom)</option>
-            <option value="+49">+49 (Germany)</option>
-            <option value="+33">+33 (France)</option>
-            <option value="+39">+39 (Italy)</option>
-            <option value="+34">+34 (Spain)</option>
-            <option value="+86">+86 (China)</option>
-            <option value="+81">+81 (Japan)</option>
-            <option value="+91">+91 (India)</option>
-          </select>
-          <i class='bx bx-edit edit-icon' style="color: var(--light);"></i>
-        </div>
-        <div class="form-group editable">
-          <label class="form-label" for="phoneNumber">Phone Number</label>
-          <input 
-            type="tel" 
-            id="phoneNumber" 
-            class="form-control" 
-            [class.invalid]="!isPhoneNumberValid()"
-            [(ngModel)]="personalInfo.phoneNumber"
-            (ngModelChange)="onFieldChange()"
-            name="phoneNumber"
-            [disabled]="isSaving"
-          >
-          <i class='bx bx-edit edit-icon' style="color: var(--light);"></i>
-          <div class="error-message" *ngIf="!isPhoneNumberValid()">
-            {{ getFieldErrorMessage('phoneNumber') }}
-          </div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="street">Street Address</label>
-        <input 
-          type="text" 
-          id="street" 
-          class="form-control readonly" 
-          [(ngModel)]="personalInfo.street"
-          name="street"
-          readonly
-          [disabled]="isSaving"
-        >
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" for="government">Government</label>
-          <input 
-            type="text" 
-            id="government" 
-            class="form-control readonly" 
-            [(ngModel)]="personalInfo.government"
-            name="government"
-            readonly
-            [disabled]="isSaving"
-          >
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="city">City</label>
-          <input 
-            type="text" 
-            id="city" 
-            class="form-control readonly" 
-            [(ngModel)]="personalInfo.city"
-            name="city"
-            readonly
-            [disabled]="isSaving"
-          >
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" for="nationalId">National ID</label>
-          <input 
-            type="text" 
-            id="nationalId" 
-            class="form-control readonly" 
-            [(ngModel)]="personalInfo.nationalId"
-            name="nationalId"
-            readonly
-            [disabled]="isSaving"
-          >
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="gender">Gender</label>
-          <input 
-            type="text" 
-            id="gender" 
-            class="form-control readonly" 
-            [(ngModel)]="personalInfo.gender"
-            name="gender"
-            readonly
-            [disabled]="isSaving"
-          >
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button type="button" class="btn btn-primary" (click)="onSave()" [disabled]="isSaving || !isFormValid()">
-          <i class='bx' [ngClass]="isSaving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
-          {{ isSaving ? 'Saving...' : 'Save Changes' }}
-        </button>
-      </div>
-    </form>
+    </div>
   </div>
 </div> 

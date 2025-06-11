@@ -21,6 +21,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
   UserType = UserType; 
   Status=Status
   
+  // Profile notification indicator
+  showProfileAlert = true; // Set to true to show red exclamation mark
+  
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -125,5 +128,32 @@ export class NavbarComponent implements OnInit, OnDestroy {
      }else{
        return 'Me.png'; 
      }
+  }
+
+  // Navigate to notifications section in founder profile
+  navigateToNotifications(): void {
+    // Navigate to notifications for all authenticated users
+    if (this.isAuthenticated && this.currentUser) {
+      this.router.navigate(['/profile'], { queryParams: { section: 'notifications' } });
+    }
+    
+    this.closeDropdowns();
+    this.isMobileMenuOpen = false;
+  }
+
+  // Get total notifications count (mock data for now)
+  getTotalNotificationsCount(): number {
+    // Check if user is currently viewing notifications section
+    const currentUrl = this.router.url;
+    const isOnNotificationsSection = currentUrl.includes('/profile') && currentUrl.includes('section=notifications');
+    
+    // If viewing notifications, return 0 since all notifications are marked as read
+    if (isOnNotificationsSection) {
+      return 0;
+    }
+    
+    // TODO: Replace with actual notification service call
+    // For now, return unread notifications count (mock: 2 unread out of 4 total)
+    return 2; // Mock unread notification count
   }
 }

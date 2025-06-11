@@ -227,7 +227,15 @@
 .form-actions {
   margin-top: 2rem;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
 }
 
 .btn {
@@ -260,6 +268,43 @@
   box-shadow: 0 8px 25px rgba(48, 172, 170, 0.3);
 }
 
+.btn-secondary {
+  background: var(--grey);
+  color: var(--dark);
+  border: 2px solid var(--light);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--light);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(48, 172, 170, 0.2);
+}
+
+:host-context(.dark) .btn-secondary {
+  background: var(--custom);
+  color: var(--light);
+  border-color: var(--light);
+}
+
+/* Form Hints */
+.form-hint,
+.draft-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--dark-grey);
+  font-family: var(--poppins);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.form-hint i,
+.draft-hint i {
+  color: var(--light);
+  font-size: 1.1rem;
+}
+
 /* Responsive Design */
 @media screen and (max-width: 768px) {
   .form-row {
@@ -283,4 +328,70 @@
   .file-info {
     width: 100%;
   }
+  
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .button-group .btn {
+    width: 100%;
+  }
+}
+
+/* Warning Notice */
+.warning-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.warning-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: rgba(251, 191, 36, 0.2);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.warning-icon i {
+  font-size: 1.5rem;
+  color: #f59e0b;
+}
+
+.warning-content {
+  flex: 1;
+}
+
+.warning-content h6 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--dark);
+  font-family: var(--poppins);
+  margin: 0 0 0.5rem 0;
+}
+
+:host-context(.dark) .warning-content h6 {
+  color: var(--light);
+}
+
+.warning-content p {
+  font-size: 0.9rem;
+  color: var(--dark-grey);
+  font-family: var(--poppins);
+  margin: 0;
+  line-height: 1.5;
+}
+
+:host-context(.dark) .warning-content p {
+  color: var(--light);
+  opacity: 0.8;
 } 

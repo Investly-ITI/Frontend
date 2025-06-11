@@ -58,8 +58,14 @@
               [class.active]="activeSection === 'security'"
               (click)="setActiveSection('security')"
             >
+              <div class="nav-button-content">
               <i class='bx bx-shield'></i>
               <span>Security</span>
+              </div>
+              <!-- Red exclamation mark notification indicator -->
+              <div class="security-alert-indicator" *ngIf="showSecurityAlert">
+                <i class='bx bx-error'></i>
+              </div>
             </button>
           </li>
           <li class="nav-item">
@@ -70,7 +76,7 @@
             >
               <i class='bx bx-bulb'></i>
               <span>Ideas</span>
-              <span class="badge">{{ profileData.ideas.length }}</span>
+              <span class="badge">{{ ideasCount }}</span>
             </button>
           </li>
           <li class="nav-item">
@@ -109,9 +115,8 @@
       <!-- Ideas Section -->
       <app-founder-ideas 
         #founderIdeas
-        *ngIf="activeSection === 'ideas'"
-        [ideas]="profileData.ideas"
-        (ideasChange)="onIdeasChange($event)"
+        [style.display]="activeSection === 'ideas' ? 'block' : 'none'"
+        (ideasCountChange)="onIdeasCountChange($event)"
       ></app-founder-ideas>
 
       <!-- Notifications Section -->

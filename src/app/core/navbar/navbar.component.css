@@ -465,9 +465,91 @@
   color: rgba(48, 172, 170, 0.8);
 }
 
-.profile-picture {
+.profile-picture-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Notification Bell Icon */
+.notification-bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
+  border-radius: 50%;
+  background: rgba(48, 172, 170, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: -0.25rem;
+}
+
+.notification-bell:hover {
+  background: rgba(48, 172, 170, 0.2);
+  transform: scale(1.05);
+}
+
+.notification-bell i {
+  font-size: 1.2rem;
+  color: var(--light);
+  transition: all 0.3s ease;
+}
+
+.notification-bell:hover i {
+  color: var(--dark);
+  transform: scale(1.1);
+}
+
+:host-context(.dark) .notification-bell {
+  background: rgba(48, 172, 170, 0.15);
+}
+
+:host-context(.dark) .notification-bell:hover {
+  background: rgba(48, 172, 170, 0.25);
+}
+
+:host-context(.dark) .notification-bell:hover i {
+  color: white;
+}
+
+/* Notification Badge */
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--red);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: 10px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--poppins);
+  border: 2px solid white;
+  animation: pulseNotification 3s infinite;
+}
+
+:host-context(.dark) .notification-badge {
+  border-color: var(--custom);
+}
+
+@keyframes pulseNotification {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.profile-picture {
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   overflow: hidden;
   cursor: pointer;
@@ -503,6 +585,44 @@
 
 .profile-picture:hover::before {
   opacity: 1;
+}
+
+/* Profile Alert Indicator (Red Exclamation Mark) */
+.profile-alert-indicator {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 26px;
+  height: 26px;
+  background: var(--red);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border: 2px solid white;
+  animation: pulseAlert 2s infinite;
+}
+
+:host-context(.dark) .profile-alert-indicator {
+  border-color: var(--dark);
+}
+
+.profile-alert-indicator i {
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+@keyframes pulseAlert {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
 }
 
 .btn-logout {
@@ -732,10 +852,6 @@
     gap: 1rem;
   }
 
-  .auth-buttons {
-    /* margin-right: 2rem; */
-  }
-  
   .auth-buttons .btn span {
     display: none;
   }
@@ -972,16 +1088,26 @@
   }
 
   .user-profile {
-    flex-direction: column;
-    gap: 0.75rem;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
     padding: 1rem;
     width: 100%;
-    text-align: center;
+    background: rgba(48, 172, 170, 0.05);
+    border: 1px solid rgba(48, 172, 170, 0.2);
+    border-radius: 12px;
   }
 
   .user-info {
-    align-items: center;
-    text-align: center;
+    flex: 1;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  :host-context(.dark) .user-profile {
+    background: rgba(48, 172, 170, 0.1);
+    border-color: rgba(48, 172, 170, 0.3);
   }
 
   .logout-text {
