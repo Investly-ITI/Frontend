@@ -1,0 +1,220 @@
+<!-- ========================================
+     EDIT IDEA DOCUMENT COMPONENT
+======================================== -->
+<div class="edit-container">
+  <!-- Header -->
+  <div class="edit-header">
+    <div class="header-info">
+      <h3 class="edit-title">
+        <i class='bx bx-edit'></i>
+        Edit Document Submission
+      </h3>
+      <div class="submission-type-badge document">
+        <i class='bx bx-file'></i>
+        <span>Document Submission</span>
+      </div>
+    </div>
+    <button class="back-button" (click)="onCancel()">
+      <i class='bx bx-arrow-back'></i>
+      <span>Back to Ideas</span>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="edit-body">
+    <!-- Document Edit Container -->
+    <div class="document-edit-container">
+      <div class="form-section">
+        <h4 class="section-title">
+          <i class='bx bx-info-circle'></i>
+          Basic Information
+        </h4>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="docTitle">Business Title:</label>
+            <input 
+              type="text" 
+              id="docTitle"
+              [(ngModel)]="documentTitle"
+              placeholder="Enter your business title"
+              class="form-input"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="docCategory">Category:</label>
+            <select 
+              id="docCategory"
+              [(ngModel)]="documentCategory"
+              class="form-select"
+              required
+            >
+              <option value="">Select a category</option>
+              <option *ngFor="let category of categories" [value]="category">
+                {{ category }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="docStage">Business Stage:</label>
+            <select 
+              id="docStage"
+              [(ngModel)]="documentStage"
+              class="form-select"
+              required
+            >
+              <option value="">Select business stage</option>
+              <option *ngFor="let stage of stages" [value]="stage">
+                {{ stage }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="docInvestmentType">Desired Investment Type:</label>
+            <select 
+              id="docInvestmentType"
+              [(ngModel)]="documentInvestmentType"
+              (ngModelChange)="onInvestmentTypeChange()"
+              class="form-select"
+              required
+            >
+              <option value="">Select investment type</option>
+              <option *ngFor="let type of investmentTypes" [value]="type">
+                {{ type }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="docGovernment">Governorate:</label>
+            <select 
+              id="docGovernment"
+              [(ngModel)]="documentGovernmentId"
+              (ngModelChange)="onGovernorateChange(+$event)"
+              class="form-select"
+              required
+            >
+              <option value="">Select governorate</option>
+              <option *ngFor="let gov of governorates" [value]="gov.id">
+                {{ gov.nameEn }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="docCity">City:</label>
+            <select 
+              id="docCity"
+              [(ngModel)]="documentCityId"
+              class="form-select"
+              [disabled]="!selectedGovernorate"
+              required
+            >
+              <option value="">{{ selectedGovernorate ? 'Select city' : 'Select governorate first' }}</option>
+              <option *ngFor="let city of citiesByGovernorate" [value]="city.id">
+                {{ city.nameEn }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group" *ngIf="isFundingRequired()">
+            <label for="docFundingGoal">Funding Goal (EGP):</label>
+            <input 
+              type="number" 
+              id="docFundingGoal"
+              [(ngModel)]="documentFundingGoal"
+              placeholder="Enter funding amount in EGP (minimum 5,000)"
+              class="form-input"
+              min="5000"
+              [required]="isFundingRequired()"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Document Management -->
+      <div class="form-section">
+        <h4 class="section-title">
+          <i class='bx bx-file'></i>
+          Document Management
+        </h4>
+
+        <!-- Existing Document -->
+        <div *ngIf="existingDocumentFile" class="existing-documents">
+          <h5 class="subsection-title">Current Document</h5>
+          <div class="document-list">
+            <div class="document-item existing">
+              <div class="document-info">
+                <i class='bx bx-file-blank'></i>
+                <span>{{ existingDocumentFile }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New File Preview -->
+        <div *ngIf="uploadedFile" class="new-documents">
+          <h5 class="subsection-title">New File to Upload</h5>
+          <div class="document-list">
+            <div class="document-item new">
+              <div class="document-info">
+                <i class='bx bx-file-blank'></i>
+                <span>{{ uploadedFile.name }}</span>
+                <small>({{ (uploadedFile.size / 1024 / 1024).toFixed(2) }} MB)</small>
+              </div>
+              <button 
+                type="button" 
+                class="remove-btn"
+                (click)="removeNewFile()"
+                title="Remove new file"
+              >
+                <i class='bx bx-x'></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload New Document -->
+        <div class="upload-section">
+          <h5 class="subsection-title">Upload New Document</h5>
+          <div class="upload-area">
+            <input 
+              type="file" 
+              id="documentUpload"
+              (change)="onFileSelected($event)"
+              accept=".pdf,.doc,.docx,.txt"
+              class="file-input"
+              hidden
+            >
+            <label for="documentUpload" class="upload-label">
+              <i class='bx bx-cloud-upload'></i>
+              <span>Click to upload document</span>
+              <small>Supported formats: PDF, DOC, DOCX, TXT (Max 10MB)</small>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="edit-footer">
+    <button type="button" class="btn btn-secondary" (click)="onCancel()">
+      <i class='bx bx-x'></i>
+      Cancel
+    </button>
+    <button 
+      type="button" 
+      class="btn btn-primary" 
+      (click)="onSaveChanges()"
+      [disabled]="!isFormValid()"
+    >
+      <i class='bx bx-save'></i>
+      Save Changes
+    </button>
+  </div>
+</div> 

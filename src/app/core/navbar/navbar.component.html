@@ -86,13 +86,27 @@
                                        currentUser.userType === UserType.Investor ? 'Investor' : 'Staff' }}</span>
           </div>
           
-          <div class="profile-picture" (click)="onProfilePictureClick()" title="Go to Profile">
-            <img [src]="getProfilePictureUrl()" [alt]="currentUser.name + ' Profile Picture'">
+          <!-- Notification Bell Icon -->
+          <div class="notification-bell" (click)="navigateToNotifications()" title="View Notifications">
+            <i class='bx bx-bell'></i>
+            <div class="notification-badge" *ngIf="getTotalNotificationsCount() > 0">
+              {{ getTotalNotificationsCount() }}
+            </div>
+          </div>
+          
+          <div class="profile-picture-wrapper">
+            <div class="profile-picture" (click)="onProfilePictureClick()" title="Go to Profile">
+              <img [src]="getProfilePictureUrl()" [alt]="currentUser.name + ' Profile Picture'">
+            </div>
+            <!-- Red exclamation mark notification indicator -->
+            <div class="profile-alert-indicator" *ngIf="showProfileAlert">
+              <i class='bx bx-error'></i>
+            </div>
           </div>
           
           <button class="btn btn-logout" (click)="logout()" title="Logout">
             <i class='bx bx-log-out'></i>
-            <span class="logout-text">Logout</span>
+            <span class="logout-text">Sign Out</span>
           </button>
         </div>
       </div>

@@ -26,8 +26,104 @@ export class FounderInformationComponent {
   @Input() personalInfo!: PersonalInfo;
   @Output() personalInfoChange = new EventEmitter<PersonalInfo>();
 
+  //* Tab functionality
+  activeTab: 'personal' | 'documentation' = 'personal';
+
   isSaving = false;
   saveMessage = '';
+
+  //* Documentation images
+  frontIdImageUrl: string | null = null;
+  backIdImageUrl: string | null = null;
+  showFrontIdOverlay: boolean = false;
+  showBackIdOverlay: boolean = false;
+
+  switchTab(tab: 'personal' | 'documentation'): void {
+    this.activeTab = tab;
+  }
+
+  onFrontIdFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.frontIdImageUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  onBackIdFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.backIdImageUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  triggerFrontIdUpload(): void {
+    const fileInput = document.getElementById('frontIdInput') as HTMLInputElement;
+    fileInput?.click();
+  }
+
+  triggerBackIdUpload(): void {
+    const fileInput = document.getElementById('backIdInput') as HTMLInputElement;
+    fileInput?.click();
+  }
+
+  hasDocumentationToSave(): boolean {
+    return this.frontIdImageUrl !== null && this.backIdImageUrl !== null;
+  }
+
+  async onSaveDocumentation(): Promise<void> {
+    if (!this.hasDocumentationToSave()) {
+      this.saveMessage = 'Please upload both front and back ID pictures before saving.';
+      return;
+    }
+
+    this.isSaving = true;
+    this.saveMessage = '';
+
+    try {
+      // Prepare documentation data for backend
+      const documentationData = {
+        frontIdImage: this.frontIdImageUrl,
+        backIdImage: this.backIdImageUrl
+      };
+      
+      await this.saveDocumentationData(documentationData);
+      
+      this.saveMessage = 'Documentation uploaded successfully!';
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        this.saveMessage = '';
+      }, 3000);
+    } catch (error) {
+      console.error('Error saving documentation:', error);
+      this.saveMessage = 'Failed to save documentation. Please try again.';
+    } finally {
+      this.isSaving = false;
+    }
+  }
+
+  private async saveDocumentationData(documentationData: any): Promise<void> {
+    // Simulate API call delay
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        // Simulate random success/failure for demo
+        if (Math.random() > 0.1) { // 90% success rate
+          console.log('Documentation saved:', documentationData);
+          resolve();
+        } else {
+          reject(new Error('Failed to save documentation'));
+        }
+      }, 1500);
+    });
+  }
 
   isFormValid(): boolean {
     return this.isEmailValid() &&
