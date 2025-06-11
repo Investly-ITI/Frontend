@@ -1621,16 +1621,28 @@ input:checked + .slider:before {
     /* base styles */
 }
 
-.action-item.active {
+.action-item.completed {
     color: #2ed134; /* green for accept */
 }
 
-.action-item.deactivate {
+.action-item.cancelled {
     color: #e6382f; /* red for decline */
 }
 
 .action-item.pending {
     color: #f39c12; /* orange for pending */
+}
+
+.completed {
+    color: #2ed134 !important; /* green for accept */
+}
+
+.cancelled {
+    color: #e6382f !important; /* red for decline */
+}
+
+.pending {
+    color: #f39c12 !important; /* orange for pending */
 }
 
 .action-item:hover {

@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Response } from '../../_models/response';
 import { Investor, InvestorSearch } from '../../_models/investor';
+import { DropdownDto } from '../../_models/user';
 
 @Injectable({
   providedIn: 'root'
@@ -37,5 +38,10 @@ export class InvestorService {
     var result= this.httpClient.put<Response<any>>(`${this.baseUrl}/change-status/${id}?status=${status}`,null);
     return result;
   }
+
+  getInvestorsForDropdown(): Observable<Response<DropdownDto[]>> {
+    return this.httpClient.get<Response<DropdownDto[]>>(`${this.baseUrl}/dropdown`);
+  }
+
 
 }

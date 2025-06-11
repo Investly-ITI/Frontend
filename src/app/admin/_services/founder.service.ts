@@ -4,6 +4,7 @@ import { HttpClient } from "@angular/common/http";
 import { FounderSearch } from "../../_models/founder";
 import { Observable } from "rxjs";
 import { Response } from "../../_models/response";
+import { DropdownDto } from "../../_models/user";
 
 @Injectable({
   providedIn: "root",   
@@ -32,4 +33,9 @@ GetFounderByID(id:number):Observable<Response<any>>
     var res= this.httpclinet.get<Response<any>>(`${this.baseUrl}/GetFounderById/${id}`);
     return res;
 }
+
+getFoundersForDropdown(): Observable<Response<DropdownDto[]>> {
+  return this.httpclinet.get<Response<DropdownDto[]>>(`${this.baseUrl}/dropdown`);
+}
+
 }
