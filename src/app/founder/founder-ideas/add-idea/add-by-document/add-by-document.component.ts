@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -13,6 +13,8 @@ import { GovernrateService } from '../../../../_services/governorate.service';
   styleUrl: './add-by-document.component.css'
 })
 export class AddByDocumentComponent implements OnInit, OnDestroy {
+  @Output() submissionStarted = new EventEmitter<void>();
+  
   private unsubscribe: Subscription[] = [];
   
   title = '';
@@ -20,7 +22,9 @@ export class AddByDocumentComponent implements OnInit, OnDestroy {
   stage = '';
   governmentId = '';
   cityId = '';
-  uploadedFiles: File[] = [];
+  investmentType = '';
+  fundingGoal = '';
+  uploadedFile: File | null = null;
 
   categories = [
     'Technology', 'Healthcare', 'Finance', 'Education', 'E-commerce',
@@ -28,7 +32,13 @@ export class AddByDocumentComponent implements OnInit, OnDestroy {
   ];
 
   stages = [
-    'Idea', 'Prototype', 'MVP', 'Early Stage', 'Growth Stage', 'Expansion'
+    'Ideation', 'Startup', 'Intermediate', 'Advanced'
+  ];
+
+  investmentTypes = [
+    'Industrial Experience',
+    'Funding',
+    'Both'
   ];
 
   // Replace static governments with dynamic data
@@ -79,25 +89,88 @@ export class AddByDocumentComponent implements OnInit, OnDestroy {
   }
 
   onFileSelected(event: any): void {
-    const files = Array.from(event.target.files) as File[];
-    this.uploadedFiles = [...this.uploadedFiles, ...files];
+    const file = event.target.files[0] as File;
+    if (file) {
+      // Check file size (10MB = 10 * 1024 * 1024 bytes)
+      const maxSize = 10 * 1024 * 1024;
+      if (file.size > maxSize) {
+        alert('File size exceeds 10MB limit. Please select a smaller file.');
+        event.target.value = '';
+        return;
+      }
+      this.uploadedFile = file;
+    }
+    // Clear the input so the same file can be selected again
+    event.target.value = '';
   }
 
-  removeFile(index: number): void {
-    this.uploadedFiles.splice(index, 1);
+  removeFile(): void {
+    this.uploadedFile = null;
+  }
+
+  onInvestmentTypeChange(): void {
+    // Clear funding goal when investment type doesn't require funding
+    if (this.investmentType === 'Industrial Experience') {
+      this.fundingGoal = '';
+    }
+  }
+
+  isFundingRequired(): boolean {
+    return this.investmentType === 'Funding' || this.investmentType === 'Both';
+  }
+
+  isFormValid(): boolean {
+    const basicValid = !!(this.title && this.category && this.stage && 
+                         this.governmentId && this.cityId && this.investmentType && this.uploadedFile);
+    
+    // Funding goal is only required if investment type requires funding
+    const fundingGoalValid = !this.isFundingRequired() || !!this.fundingGoal;
+    
+    return basicValid && fundingGoalValid;
   }
 
   onSubmit(): void {
+    if (!this.isFormValid()) {
+      console.error('Form is invalid');
+      return;
+    }
+    
+    // Emit submission started event
+    this.submissionStarted.emit();
+    
     const formData = {
       title: this.title,
       category: this.category,
       stage: this.stage,
       governmentId: this.governmentId,
       cityId: this.cityId,
-      files: this.uploadedFiles
+      investmentType: this.investmentType,
+      fundingGoal: this.fundingGoal,
+      file: this.uploadedFile
     };
     
     console.log('Submitting document-based idea:', formData);
-    // Submit to backend
+    // Submit to backend with status 'submitted'
+  }
+
+  onSaveAsDraft(): void {
+    if (!this.isFormValid()) {
+      console.error('All fields are required for draft');
+      return;
+    }
+
+    const formData = {
+      title: this.title,
+      category: this.category,
+      stage: this.stage,
+      governmentId: this.governmentId,
+      cityId: this.cityId,
+      investmentType: this.investmentType,
+      fundingGoal: this.fundingGoal,
+      file: this.uploadedFile
+    };
+    
+    console.log('Saving document-based idea as draft:', formData);
+    // Save to backend with status 'draft'
   }
 } 

@@ -1,13 +1,34 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { Governorate } from '../../../../_models/governorate';
-import { City } from '../../../../_models/city';
-import { GovernrateService } from '../../../../_services/governorate.service';
+import { Governorate } from '../../../_models/governorate';
+import { City } from '../../../_models/city';
+import { GovernrateService } from '../../../_services/governorate.service';
+
+interface Idea {
+  id: string;
+  title: string;
+  category: string;
+  status: 'approved' | 'draft' | 'submitted' | 'declined' | 'rejected-drafted';
+  stage: string;
+  description: string;
+  submittedDate: string;
+  government: string;
+  city: string;
+  fundingGoal?: string;
+  declineReason?: string;
+  submissionType: 'form' | 'document';
+  formData?: any;
+  documentFiles?: string[];
+  rejectionData?: {
+    message: string;
+    standards: string[];
+    rejectedAt: string;
+  };
+}
 
 interface BusinessFormData {
-  // Common fields
   title: string;
   category: string;
   stage: string;
@@ -15,8 +36,6 @@ interface BusinessFormData {
   cityId: string;
   investmentType: string;
   fundingGoal: string;
-  
-  // Category-specific fields (dynamic)
   [key: string]: any;
 }
 
@@ -28,16 +47,20 @@ interface QuestionConfig {
 }
 
 @Component({
-  selector: 'app-add-by-form',
+  selector: 'app-edit-idea-form',
   imports: [CommonModule, FormsModule],
-  templateUrl: './add-by-form.component.html',
-  styleUrl: './add-by-form.component.css'
+  templateUrl: './edit-idea-form.component.html',
+  styleUrl: './edit-idea-form.component.css'
 })
-export class AddByFormComponent implements OnInit, OnDestroy {
-  @Output() submissionStarted = new EventEmitter<void>();
-  
+export class EditIdeaFormComponent implements OnInit, OnDestroy {
   private unsubscribe: Subscription[] = [];
   
+  @Input() idea!: Idea;
+  @Output() onClose = new EventEmitter<void>();
+  @Output() onSave = new EventEmitter<Idea>();
+  @Output() saveStarted = new EventEmitter<void>();
+
+  // Form data for editing
   formData: BusinessFormData = {
     title: '',
     category: '',
@@ -63,7 +86,6 @@ export class AddByFormComponent implements OnInit, OnDestroy {
     'Both'
   ];
 
-  // Replace static governments with dynamic data
   governorates: Governorate[] = [];
   citiesByGovernorate: City[] = [];
   selectedGovernorate: boolean = false;
@@ -118,10 +140,25 @@ export class AddByFormComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadGovernorates();
+    this.initializeData();
   }
 
   ngOnDestroy(): void {
     this.unsubscribe.forEach(sub => sub.unsubscribe());
+  }
+
+  private initializeData(): void {
+    // Initialize form data
+    this.formData = {
+      title: this.idea.title,
+      category: this.idea.category,
+      stage: this.idea.stage,
+      governmentId: '', // Will be set after governorates load
+      cityId: '',
+      investmentType: this.idea.formData?.investmentType || '',
+      fundingGoal: this.idea.fundingGoal || '',
+      ...(this.idea.formData || {})
+    };
   }
 
   public loadGovernorates() {
@@ -129,6 +166,7 @@ export class AddByFormComponent implements OnInit, OnDestroy {
       next: (response) => {
         if (response.isSuccess == true) {
           this.governorates = response.data;
+          this.setInitialGovernorateAndCity();
         }
       },
       error: (err) => {
@@ -138,15 +176,27 @@ export class AddByFormComponent implements OnInit, OnDestroy {
     this.unsubscribe.push(subGov);
   }
 
-  // Handle governorate selection change
-  onGovernorateChange(governorateId: number) {
+  private setInitialGovernorateAndCity(): void {
+    // Find and set the governorate based on idea's government
+    const governorate = this.governorates.find(gov => gov.nameEn === this.idea.government);
+    if (governorate) {
+      this.formData.governmentId = governorate.id.toString();
+      this.onGovernorateChange(governorate.id);
+    }
+  }
+
+  onGovernorateChange(governorateId: number): void {
     const subcity = this.governorateService.getCitiesByGovernrateId(governorateId).subscribe({
       next: (response) => {
         if (response.isSuccess) {
           this.citiesByGovernorate = response.data;
           this.selectedGovernorate = true;
-          // Reset city selection when governorate changes
-          this.formData.cityId = '';
+          
+          // Find and set the city
+          const city = this.citiesByGovernorate.find(c => c.nameEn === this.idea.city);
+          if (city) {
+            this.formData.cityId = city.id.toString();
+          }
         }
       }, 
       error: (err) => {
@@ -161,10 +211,9 @@ export class AddByFormComponent implements OnInit, OnDestroy {
   }
 
   onCategoryChange(): void {
-    // Reset category-specific fields when category changes
     const categoryQuestions = this.getCurrentCategoryQuestions();
     
-    // Remove old category-specific fields
+    // Remove old category-specific fields but keep common fields
     Object.keys(this.formData).forEach(key => {
       if (!['title', 'category', 'stage', 'governmentId', 'cityId', 'investmentType', 'fundingGoal'].includes(key)) {
         delete this.formData[key];
@@ -188,27 +237,25 @@ export class AddByFormComponent implements OnInit, OnDestroy {
     return this.formData.investmentType === 'Funding' || this.formData.investmentType === 'Both';
   }
 
-  onSubmit(): void {
+  onSaveChanges(): void {
     if (!this.isFormValid()) {
       console.error('Form is invalid');
       return;
     }
     
-    // Emit submission started event
-    this.submissionStarted.emit();
+    // Emit save started event for AI review simulation
+    this.saveStarted.emit();
     
-    console.log('Submitting form-based idea:', this.formData);
-    // Submit to backend with status 'submitted'
-  }
-
-  onSaveAsDraft(): void {
-    if (!this.isFormValid()) {
-      console.error('All fields are required for draft');
-      return;
-    }
+    const updatedIdea: Idea = {
+      ...this.idea,
+      title: this.formData.title,
+      category: this.formData.category,
+      stage: this.formData.stage,
+      fundingGoal: this.formData.fundingGoal,
+      formData: { ...this.formData }
+    };
     
-    console.log('Saving form-based idea as draft:', this.formData);
-    // Save to backend with status 'draft'
+    this.onSave.emit(updatedIdea);
   }
 
   isFormValid(): boolean {
@@ -227,14 +274,7 @@ export class AddByFormComponent implements OnInit, OnDestroy {
     return commonFieldsValid && fundingGoalValid && categoryFieldsValid;
   }
 
-  isBasicInfoValid(): boolean {
-    const basicValid = !!(this.formData.title && this.formData.category && 
-                         this.formData.stage && this.formData.governmentId && 
-                         this.formData.cityId && this.formData.investmentType);
-    
-    // Funding goal is only required if investment type requires funding
-    const fundingGoalValid = !this.isFundingRequired() || !!this.formData.fundingGoal;
-    
-    return basicValid && fundingGoalValid;
+  onCancel(): void {
+    this.onClose.emit();
   }
 } 

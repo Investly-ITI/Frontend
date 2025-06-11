@@ -45,6 +45,221 @@
   font-family: var(--poppins);
 }
 
+/* ========================================
+   TAB NAVIGATION
+======================================== */
+.tab-navigation {
+  display: flex;
+  border-bottom: 2px solid var(--grey);
+  margin-bottom: 2rem;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 12px 24px;
+  font-family: var(--poppins);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark-grey);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.tab-button:hover {
+  color: var(--light);
+  background-color: rgba(48, 172, 170, 0.1);
+}
+
+.tab-button.active {
+  color: var(--light);
+  border-bottom-color: var(--light);
+  background-color: rgba(48, 172, 170, 0.05);
+}
+
+.tab-button i {
+  font-size: 16px;
+}
+
+:host-context(.dark) .tab-button {
+  color: var(--dark-grey);
+}
+
+:host-context(.dark) .tab-button:hover {
+  color: white;
+  background-color: rgba(48, 172, 170, 0.1);
+}
+
+:host-context(.dark) .tab-button.active {
+  color: var(--light);
+  border-bottom-color: var(--light2);
+}
+
+/* ========================================
+   TAB CONTENT
+======================================== */
+.tab-content {
+  min-height: 400px;
+}
+
+.tab-panel {
+  width: 100%;
+}
+
+/* ========================================
+   DOCUMENTATION SECTION
+======================================== */
+.documentation-container {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--grey);
+}
+
+:host-context(.dark) .documentation-container {
+  background: var(--custom);
+  border-color: var(--grey);
+}
+
+.documentation-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 800px;
+}
+
+.documentation-section .section-title {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.documentation-section .section-description {
+  margin: 0;
+}
+
+.id-upload-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 20px;
+}
+
+.id-upload-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.id-upload-area {
+  width: 200px;
+  height: 140px;
+  border: 3px dashed var(--grey);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--light);
+}
+
+.id-upload-area:hover {
+  border-color: var(--light);
+  background-color: var(--dark-grey);
+}
+
+:host-context(.dark) .id-upload-area {
+  background-color: var(--custom);
+  border-color: var(--light2);
+}
+
+:host-context(.dark) .id-upload-area:hover {
+  border-color: var(--light2);
+  background-color: rgba(48, 172, 170, 0.1);
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 8px;
+  color: white;
+  font-family: var(--poppins);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.upload-placeholder i {
+  font-size: 32px;
+  color: white;
+}
+
+:host-context(.dark) .upload-placeholder {
+  color: var(--dark-grey);
+}
+
+:host-context(.dark) .upload-placeholder i {
+  color: var(--light);
+}
+
+.id-image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.id-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.id-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.id-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.id-overlay i {
+  color: var(--light);
+  font-size: 24px;
+}
+
+.upload-label {
+  color: var(--dark);
+  font-family: var(--poppins);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+:host-context(.dark) .upload-label {
+  color: var(--light);
+}
+
 /* Save Message */
 .save-message {
   display: flex;
@@ -258,7 +473,7 @@
   width: 100%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s ease;
+  transition: left 0.5s;
 }
 
 .btn:hover::before {
@@ -275,7 +490,7 @@
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--blue);
+  background: var(--dark);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(48, 172, 170, 0.3);
 }
@@ -287,38 +502,41 @@
 
 .btn-secondary:hover:not(:disabled) {
   background: var(--dark-grey);
-  color: white;
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .form-actions {
+  display: flex;
+  justify-content: flex-start;
   margin-top: 2rem;
   padding-top: 2rem;
   border-top: 1px solid var(--grey);
 }
 
-/* Loading Animation */
 .bx-spin {
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateX(-20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
   }
 }
 
-/* Responsive Design */
+/* ========================================
+   RESPONSIVE DESIGN
+======================================== */
 @media screen and (max-width: 768px) {
   .form-row {
     grid-template-columns: 1fr;
@@ -327,12 +545,25 @@
 
   .picture-upload {
     flex-direction: column;
-    align-items: center;
     text-align: center;
   }
 
   .form-container {
-    padding: 1rem;
+    padding: 1.5rem;
+  }
+
+  .id-upload-container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .id-upload-area {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .documentation-container {
+    padding: 1.5rem;
   }
 }
 
@@ -340,8 +571,17 @@
   .section-title {
     font-size: 1.5rem;
   }
-}
 
-/* ========================================
-   FOUNDER INFORMATION COMPONENT STYLES
-======================================== */ 
+  .tab-button {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+  
+  .tab-button span {
+    display: none;
+  }
+  
+  .documentation-section {
+    padding: 15px;
+  }
+} 

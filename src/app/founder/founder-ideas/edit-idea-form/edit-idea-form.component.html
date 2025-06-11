@@ -1,0 +1,193 @@
+<!-- ========================================
+     EDIT IDEA FORM COMPONENT
+======================================== -->
+<div class="edit-container">
+  <!-- Header -->
+  <div class="edit-header">
+    <div class="header-info">
+      <h3 class="edit-title">
+        <i class='bx bx-edit'></i>
+        Edit Form Submission
+      </h3>
+      <div class="submission-type-badge form">
+        <i class='bx bx-edit'></i>
+        <span>Form Submission</span>
+      </div>
+    </div>
+    <button class="back-button" (click)="onCancel()">
+      <i class='bx bx-arrow-back'></i>
+      <span>Back to Ideas</span>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="edit-body">
+    <!-- Form Section -->
+    <div class="form-edit-container">
+      <div class="form-section">
+        <h4 class="section-title">
+          <i class='bx bx-info-circle'></i>
+          Basic Information
+        </h4>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="title">Business Title:</label>
+            <input 
+              type="text" 
+              id="title"
+              [(ngModel)]="formData.title"
+              placeholder="Enter your business title"
+              class="form-input"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="category">Category:</label>
+            <select 
+              id="category"
+              [(ngModel)]="formData.category"
+              (ngModelChange)="onCategoryChange()"
+              class="form-select"
+              required
+            >
+              <option value="">Select a category</option>
+              <option *ngFor="let category of categories" [value]="category">
+                {{ category }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="stage">Business Stage:</label>
+            <select 
+              id="stage"
+              [(ngModel)]="formData.stage"
+              class="form-select"
+              required
+            >
+              <option value="">Select business stage</option>
+              <option *ngFor="let stage of stages" [value]="stage">
+                {{ stage }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="investmentType">Desired Investment Type:</label>
+            <select 
+              id="investmentType"
+              [(ngModel)]="formData.investmentType"
+              (ngModelChange)="onInvestmentTypeChange()"
+              class="form-select"
+              required
+            >
+              <option value="">Select investment type</option>
+              <option *ngFor="let type of investmentTypes" [value]="type">
+                {{ type }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="government">Governorate:</label>
+            <select 
+              id="government"
+              [(ngModel)]="formData.governmentId"
+              (ngModelChange)="onGovernorateChange(+$event)"
+              class="form-select"
+              required
+            >
+              <option value="">Select governorate</option>
+              <option *ngFor="let gov of governorates" [value]="gov.id">
+                {{ gov.nameEn }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="city">City:</label>
+            <select 
+              id="city"
+              [(ngModel)]="formData.cityId"
+              class="form-select"
+              [disabled]="!selectedGovernorate"
+              required
+            >
+              <option value="">{{ selectedGovernorate ? 'Select city' : 'Select governorate first' }}</option>
+              <option *ngFor="let city of citiesByGovernorate" [value]="city.id">
+                {{ city.nameEn }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group" *ngIf="isFundingRequired()">
+            <label for="fundingGoal">Funding Goal (EGP):</label>
+            <input 
+              type="number" 
+              id="fundingGoal"
+              [(ngModel)]="formData['fundingGoal']"
+              placeholder="Enter funding amount in EGP (minimum 5,000)"
+              class="form-input"
+              min="5000"
+              [required]="isFundingRequired()"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Category-Specific Questions -->
+      <div class="form-section" *ngIf="formData.category && getCurrentCategoryQuestions().length > 0">
+        <h4 class="section-title">
+          <i class='bx bx-question-mark'></i>
+          {{ formData.category }} Specific Information
+        </h4>
+        
+        <div class="category-questions">
+          <div 
+            *ngFor="let question of getCurrentCategoryQuestions()" 
+            class="form-group"
+          >
+            <label [for]="question.key">{{ question.label }}:</label>
+            <input 
+              *ngIf="question.type === 'text'"
+              type="text" 
+              [id]="question.key"
+              [(ngModel)]="formData[question.key]"
+              [placeholder]="question.placeholder"
+              class="form-input"
+              required
+            >
+            <textarea 
+              *ngIf="question.type === 'textarea'"
+              [id]="question.key"
+              [(ngModel)]="formData[question.key]"
+              [placeholder]="question.placeholder"
+              class="form-textarea"
+              rows="4"
+              required
+            ></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="edit-footer">
+    <button type="button" class="btn btn-secondary" (click)="onCancel()">
+      <i class='bx bx-x'></i>
+      Cancel
+    </button>
+    <button 
+      type="button" 
+      class="btn btn-primary" 
+      (click)="onSaveChanges()"
+      [disabled]="!isFormValid()"
+    >
+      <i class='bx bx-save'></i>
+      Save Changes
+    </button>
+  </div>
+</div> 

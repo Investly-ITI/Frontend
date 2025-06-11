@@ -29,17 +29,7 @@ interface ProfileData {
     lastPasswordChange: string;
     accountStatus: 'active' | 'suspended' | 'pending';
   };
-  ideas: Array<{
-    id: string;
-    title: string;
-    description: string;
-    category: string;
-    status: 'draft' | 'submitted' | 'approved' | 'declined';
-    stage: string;
-    submittedDate: string;
-    government: string;
-    city: string;
-  }>;
+
   notifications: Array<{
     id: string;
     type: 'info' | 'success' | 'warning' | 'error';
@@ -65,8 +55,12 @@ interface ProfileData {
 export class FounderComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('founderIdeas') founderIdeasComponent!: FounderIdeasComponent;
-  
+
   activeSection: 'information' | 'security' | 'ideas' | 'notifications' = 'information';
+  ideasCount: number = 0;
+  
+  // Security alert indicator
+  showSecurityAlert = true; // Set to true to show red exclamation mark next to Security
   
   profileData: ProfileData = {
     personalInfo: {
@@ -91,58 +85,12 @@ export class FounderComponent implements OnInit {
       lastPasswordChange: '2024-01-15',
       accountStatus: 'active'
     },
-    ideas: [
-      {
-        id: '1',
-        title: 'Smart Agriculture Platform',
-        description: 'IoT-based platform for optimizing crop yields and water usage',
-        category: 'Agriculture',
-        status: 'approved',
-        stage: 'Idea',
-        submittedDate: '2024-01-10',
-        government: 'Alexandria',
-        city: 'Montaza'
-      },
-      {
-        id: '2',
-        title: 'EcoDelivery Service',
-        description: 'Electric vehicle delivery service for sustainable logistics',
-        category: 'Logistics',
-        status: 'submitted',
-        stage: 'Idea',
-        submittedDate: '2024-02-05',
-        government: 'Alexandria',
-        city: 'Montaza'
-      },
-      {
-        id: '3',
-        title: 'EdTech Learning Platform',
-        description: 'AI-powered personalized learning platform for students',
-        category: 'Education',
-        status: 'draft',
-        stage: 'Idea',
-        submittedDate: '2024-02-20',
-        government: 'Alexandria',
-        city: 'Montaza'
-      },
-      {
-        id: '4',
-        title: 'Social Media Management Tool',
-        description: 'Comprehensive platform for managing multiple social media accounts with analytics and scheduling features',
-        category: 'Technology',
-        status: 'declined',
-        stage: 'Idea',
-        submittedDate: '2024-01-25',
-        government: 'Alexandria',
-        city: 'Montaza'
-      }
-    ],
     notifications: [
       {
         id: '1',
-        type: 'success',
-        title: 'Funding Milestone Reached',
-        message: 'Your Smart Agriculture Platform has reached 30% funding goal!',
+        type: 'error',
+        title: 'Idea Submission Declined',
+        message: 'Your Smart Home Automation System proposal has been declined. Please review feedback and resubmit.',
         timestamp: '2024-02-25T10:30:00Z',
         read: false
       },
@@ -164,9 +112,9 @@ export class FounderComponent implements OnInit {
       },
       {
         id: '4',
-        type: 'info',
-        title: 'Monthly Report Available',
-        message: 'Your February funding report is now available in the dashboard.',
+        type: 'success',
+        title: 'Idea Approved',
+        message: 'Congratulations! Your AI-Powered Learning Platform has been approved for funding consideration.',
         timestamp: '2024-02-22T12:00:00Z',
         read: true
       }
@@ -271,8 +219,8 @@ export class FounderComponent implements OnInit {
     this.profileData.securitySettings = securitySettings;
   }
 
-  onIdeasChange(ideas: any[]): void {
-    this.profileData.ideas = ideas;
+  onIdeasCountChange(count: number): void {
+    this.ideasCount = count;
   }
 
   onNotificationsChange(notifications: any[]): void {
