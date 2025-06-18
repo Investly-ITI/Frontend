@@ -9,8 +9,8 @@ import { InvestingStages,DesiredInvestmentType } from '../../../../_shared/enums
 import { Category } from '../../../../_models/category';
 import { CategoryService } from '../../../../_services/category.service';
 import { ToastrService } from 'ngx-toastr';
-import { AddIdeaService } from '../../../_services/add-idea-service';
-import { StandardService } from '../../../_services/Stamdards.service';
+import { AddIdeaService } from '../../../_services/add-idea.service';
+import { StandardService } from '../../../_services/Standards.service';
 import { StandardAnswers } from '../../../../_models/standardanswers';
 
 @Component({

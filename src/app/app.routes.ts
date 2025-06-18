@@ -13,6 +13,7 @@ import { FounderComponent as FounderProfileComponent } from './founder/founder.c
 import { NotificationsComponent } from './admin/notifications/notifications.component';
 import { ContactRequestComponent } from './admin/contact-request/contact-request.component';
 import { NoAuthGuard } from './_guards/no-auth.guard';
+import { clientGuard } from './_guards/client.guard';
 
 export const routes: Routes = [
    // Authentication routes (no layout - full screen)
@@ -26,7 +27,7 @@ export const routes: Routes = [
       component: MainLayoutComponent,
       children: [
          { path: '', component: LandingPageComponent, title: 'Investly - Home' },
-         { path: 'profile', component: FounderProfileComponent, title: 'Profile - Investly' }
+         { path: 'profile',canActivate:[clientGuard], component: FounderProfileComponent, title: 'Profile - Investly' }
       ]
    },
    

@@ -7,7 +7,7 @@ import { City } from '../../../../_models/city';
 import { GovernrateService } from '../../../../_services/governorate.service';
 import { CategoryService } from '../../../../_services/category.service';
 import { ToastrService } from 'ngx-toastr';
-import { AddIdeaService } from '../../../_services/add-idea-service';
+import { AddIdeaService } from '../../../_services/add-idea.service';
 import { Category } from '../../../../_models/category';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { InvestingStages,DesiredInvestmentType } from '../../../../_shared/enums';

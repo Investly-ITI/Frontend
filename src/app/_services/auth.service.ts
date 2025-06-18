@@ -15,7 +15,6 @@ export interface DecodedToken {
   name: string,
   status:number,
   profilePicPath:string,
-  notificationCountUnread:number
 }
 @Injectable({
   providedIn: 'root'
@@ -92,7 +91,6 @@ export class AuthService {
       userType: Number(decoded?.userType),
       status:Number(decoded?.status),
       profilePicPath:decoded?.profilePicPath,
-      notificationCountUnread:Number(decoded?.notificationCountUnread)
     }
     return data;
   }

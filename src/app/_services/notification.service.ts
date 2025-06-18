@@ -1,36 +1,37 @@
 import { Injectable } from '@angular/core';
-import * as signalR from '@microsoft/signalr';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { Response } from '../_models/response';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
-export class NotificationSignalRService {
-  private hubConnection!: signalR.HubConnection;
-  private _notifationCount$ = new BehaviorSubject<number>(0);
-  private ApiUrl = environment.apiUrl;
+export class NotificationService {
+ private unreadCount$=new BehaviorSubject<number>(0);
+ private ApiUrl=environment.apiUrl;
 
-  public notificationCount$ = this._notifationCount$.asObservable();
+  constructor(private http:HttpClient) { }
 
-  constructor() { }
-
-  public startConnection(token: string) {
-
-    this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`${this.ApiUrl}/notificationHub`, {
-        accessTokenFactory: () => token
-      })
-      .withAutomaticReconnect()
-      .build();
-
-
-    this.hubConnection.start().catch(err => console.error("error hub",err));
-    this.hubConnection.on('RecieveNotificationCount', (count: number) => {
-      this._notifationCount$.next(count);
-    })
+  fetchUnreadCount(): void {
+    this.http
+      .get<Response<number>>(`${environment.apiUrl}/api/auth/notification-unread-num`)
+      .subscribe({
+        next: (res) => {
+          if (res.isSuccess) {
+            this.unreadCount$.next(res.data);
+          }
+        },
+        error: () => {
+          this.unreadCount$.next(0);
+        },
+      });
   }
-  public stopConnection() {
-    this.hubConnection?.stop();
+
+  getUnreadCount$(): Observable<number> {
+    return this.unreadCount$.asObservable();
+  }
+   updateCountFromSignalR(count: number): void {
+    this.unreadCount$.next(count);
   }
 }

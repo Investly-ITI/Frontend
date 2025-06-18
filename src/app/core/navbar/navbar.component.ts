@@ -6,7 +6,7 @@ import { LoggedInUser } from '../../_models/user';
 import { UserType,Status } from '../../_shared/enums';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { NotificationSignalRService } from '../../_services/notification.service';
+import { NotificationService } from '../../_services/notification.service';
 
 @Component({
   selector: 'app-navbar',
@@ -32,7 +32,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private notificationService:NotificationSignalRService
+    private notificationService:NotificationService
   ) {}
 
   ngOnInit() {
@@ -45,11 +45,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
    
     );
      this.showProfileAlert=this.currentUser?.status!=Status.Active?true:false;
-     this.notifcationCount=this.currentUser?.notificationCountUnread??0;
-     this.notificationService.startConnection(this.authService.getToken()??"");
-     var subNoti=this.notificationService.notificationCount$.subscribe(count=>{
-       this.notifcationCount= count==0? this.currentUser?.notificationCountUnread??0:count;
-      })
+     const subNoti= this.notificationService.getUnreadCount$().subscribe((count)=>{
+      this.notifcationCount=count;
+     })
       
     console.log(this.notifcationCount);
     this.subscriptions.push(subNoti);
@@ -60,7 +58,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     // Clean up subscriptions
     this.subscriptions.forEach(sub => sub.unsubscribe());
-    this.notificationService.stopConnection();
   }
 
   @HostListener('document:click', ['$event'])
