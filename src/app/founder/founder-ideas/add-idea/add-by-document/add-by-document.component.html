@@ -7,63 +7,76 @@
     <p class="form-description">Upload your business plan, presentation, or other documents</p>
   </div>
 
-  <form class="document-form" (ngSubmit)="onSubmit()">
+  <form class="document-form" [formGroup]="formData" (ngSubmit)="onSubmit()">
     <!-- Common Fields -->
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label" for="title">Title:</label>
+        <label class="form-label" for="Title">Title:</label>
         <input 
-          type="text" 
-          id="title" 
+          type="text"
+          id="Title"
           class="form-control"
-          [(ngModel)]="title"
-          name="title"
-          placeholder="Enter your idea/business title"
+          formControlName="Title"
+          placeholder="Enter your business title"
           required
         >
+        <div *ngIf="formData.get('Title')?.invalid && (formData.get('Title')?.touched || formData.get('Title')?.dirty)" class="error">
+          <span *ngIf="formData.get('Title')?.errors?.['required']">Title is required.</span>
+        </div>
       </div>
       <div class="form-group">
-        <label class="form-label" for="category">Category:</label>
+        <label class="form-label" for="Category">Category:</label>
         <select 
-          id="category" 
+          id="Category" 
           class="form-control"
-          [(ngModel)]="category"
-          name="category"
+          formControlName="CategoryId"
           required
         >
           <option value="">Select Category</option>
-          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
         </select>
+        <div *ngIf="formData.get('CategoryId')?.invalid && (formData.get('CategoryId')?.touched || formData.get('CategoryId')?.dirty)" class="error">
+          <span *ngIf="formData.get('CategoryId')?.errors?.['required']">Category is required.</span>
+        </div>
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label" for="stage">Stage:</label>
+        <label class="form-label" for="Stage">Stage:</label>
         <select 
-          id="stage" 
+          id="Stage" 
           class="form-control"
-          [(ngModel)]="stage"
-          name="stage"
+          formControlName="Stage"
           required
         >
           <option value="">Select Stage</option>
-          <option *ngFor="let stg of stages" [value]="stg">{{ stg }}</option>
+          <option [value]="investingStages.ideation">Ideation</option>
+          <option [value]="investingStages.startup">Startup</option>
+          <option [value]="investingStages.intermediate">Intermediate</option>
+          <option [value]="investingStages.advanced">Advanced</option>
         </select>
+        <div *ngIf="formData.get('Stage')?.invalid && (formData.get('Stage')?.touched || formData.get('Stage')?.dirty)" class="error">
+          <span *ngIf="formData.get('Stage')?.errors?.['required']">Stage is required.</span>
+        </div>
       </div>
       <div class="form-group">
-        <label class="form-label" for="investmentType">Desired Investment Type:</label>
+        <label class="form-label" for="DesiredInvestmentType">Desired Investment Type:</label>
         <select 
           id="investmentType" 
           class="form-control"
-          [(ngModel)]="investmentType"
-          (ngModelChange)="onInvestmentTypeChange()"
-          name="investmentType"
+          formControlName="DesiredInvestmentType"
           required
         >
           <option value="">Select Investment Type</option>
-          <option *ngFor="let type of investmentTypes" [value]="type">{{ type }}</option>
+          <option [value]="desiredInvestmentTypes.IndustrialExperience">IndustrialExperience</option>
+          <option [value]="desiredInvestmentTypes.Funding">Funding</option>
+          <option [value]="desiredInvestmentTypes.Both">Both</option>
+         
         </select>
+        <div *ngIf="formData.get('DesiredInvestmentType')?.invalid && (formData.get('DesiredInvestmentType')?.touched || formData.get('DesiredInvestmentType')?.dirty)" class="error">
+          <span *ngIf="formData.get('DesiredInvestmentType')?.errors?.['required']">Investment type is required.</span>
+        </div>
       </div>
     </div>
 
@@ -73,45 +86,66 @@
         <select 
           id="government" 
           class="form-control"
-          [(ngModel)]="governmentId"
+          formControlName="GovernmentId"
           (change)="onGovernorateChange($any($event.target).value)"
-          name="government"
           required
         >
           <option value="">Select Government</option>
           <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
         </select>
+        <div *ngIf="formData.get('GovernmentId')?.invalid && (formData.get('GovernmentId')?.touched || formData.get('GovernmentId')?.dirty)" class="error">
+          <span *ngIf="formData.get('GovernmentId')?.errors?.['required']">Government is required.</span>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label" for="city">City:</label>
         <select 
           id="city" 
           class="form-control"
-          [(ngModel)]="cityId"
-          [disabled]="!selectedGovernorate"
-          name="city"
+          formControlName="CityId"
+          [disabled]="!formData.get('GovernmentId')?.value"
           required
         >
-          <option value="">{{ selectedGovernorate ? 'Select City' : 'Select Government First' }}</option>
+          <option value="">{{ formData.get('GovernmentId')?.value ? 'Select City' : 'Select Government First' }}</option>
           <option *ngFor="let city of citiesByGovernorate" [value]="city.id">{{ city.nameEn }}</option>
         </select>
+        <div *ngIf="formData.get('CityId')?.invalid && (formData.get('CityId')?.touched || formData.get('CityId')?.dirty)" class="error">
+          <span *ngIf="formData.get('CityId')?.errors?.['required']">City is required.</span>
+        </div>
       </div>
     </div>
 
-    <div class="form-row" *ngIf="isFundingRequired()">
+    <div class="form-row" *ngIf="showFundingGoal">
       <div class="form-group">
         <label class="form-label" for="fundingGoal">Funding Goal (EGP):</label>
         <input 
           type="number" 
           id="fundingGoal" 
           class="form-control"
-          [(ngModel)]="fundingGoal"
-          name="fundingGoal"
+          formControlName="Capital"
           placeholder="Enter funding amount in EGP (minimum 5,000)"
           min="5000"
-          [required]="isFundingRequired()"
+          [required]="showFundingGoal"
         >
+        <div *ngIf="formData.get('Capital')?.invalid && (formData.get('Capital')?.touched || formData.get('Capital')?.dirty)" class="error">
+          <span *ngIf="formData.get('Capital')?.errors?.['required']">Funding goal is required.</span>
+          <span *ngIf="formData.get('Capital')?.errors?.['min']">Funding goal must be at least 5,000.</span>
+        </div>
       </div>
+    </div>
+
+     <div class="form-group">
+          <label class="form-label" for="title">Location:</label>
+          <input 
+            class="form-control mb-3"
+            id="Location" 
+            class="form-control"
+           formControlName="Location"
+            name="Location"
+            placeholder="Enter your business location"
+            required 
+>
+   
     </div>
 
     <!-- File Upload Section -->
@@ -131,7 +165,10 @@
           <small>Supported formats: PDF, DOC, PPT (Max 10MB)</small>
         </label>
       </div>
-
+      <!-- File error message -->
+      <div *ngIf="fileError" class="error">
+        {{ fileError }}
+      </div>
       <!-- Uploaded File -->
       <div class="uploaded-files" *ngIf="uploadedFile">
         <h5>Uploaded File:</h5>
@@ -173,7 +210,7 @@
           <i class='bx bx-save'></i>
           Save as Draft
         </button>
-        
+
         <button 
           type="submit" 
           class="btn btn-primary"
@@ -183,11 +220,14 @@
           Submit Business Idea
         </button>
       </div>
-      
-      <div class="form-hint" *ngIf="!isFormValid()">
+      <div class="form-hint" *ngIf="formData.invalid && (formData.touched || formData.dirty)">
         <i class='bx bx-info-circle'></i>
         <span>Please fill in all required fields and upload a document to submit or save as draft.</span>
       </div>
+      <div class="form-hint" *ngIf="!uploadedFile">
+        <i class='bx bx-info-circle'></i>
+        <span>Please upload a document to submit or save as draft.</span>
+      </div>
     </div>
   </form>
-</div> 
+</div>

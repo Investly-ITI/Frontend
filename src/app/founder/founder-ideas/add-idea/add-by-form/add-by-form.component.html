@@ -6,151 +6,188 @@
     <h4 class="form-title">Submit Business Form</h4>
     <p class="form-description">Fill out detailed information about your business idea</p>
   </div>
+  <form [formGroup]="formData" class="business-form" (ngSubmit)="onSubmit()">
 
-  <form class="business-form" (ngSubmit)="onSubmit()">
     <!-- Common Fields Section -->
     <div class="form-section">
       <h5 class="section-title">Basic Information</h5>
+      <div class="form-group">
+          <label class="form-label" for="title">Idea:</label>
+          <textarea 
+            class="form-control mb-3"
+            id="Description" 
+            class="form-control"
+           formControlName="Description"
+            name="Description"
+            placeholder="Enter your business idea"
+            required
       
+      rows="3"
+>
+    </textarea>
+        </div>
       <div class="form-row">
+         
+     
         <div class="form-group">
           <label class="form-label" for="title">Title:</label>
           <input 
             type="text" 
             id="title" 
             class="form-control"
-            [(ngModel)]="formData.title"
+           formControlName="Title"
             name="title"
-            placeholder="Enter your idea/business title"
+            placeholder="Enter your business title"
             required
           >
         </div>
         <div class="form-group">
-          <label class="form-label" for="category">Category:</label>
-          <select 
-            id="category" 
-            class="form-control"
-            [(ngModel)]="formData.category"
-            (ngModelChange)="onCategoryChange()"
-            name="category"
-            required
-          >
-            <option value="">Select Category</option>
-            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" for="stage">Stage:</label>
-          <select 
-            id="stage" 
-            class="form-control"
-            [(ngModel)]="formData.stage"
-            name="stage"
-            required
-          >
-            <option value="">Select Stage</option>
-            <option *ngFor="let stg of stages" [value]="stg">{{ stg }}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="investmentType">Desired Investment Type:</label>
-          <select 
-            id="investmentType" 
-            class="form-control"
-            [(ngModel)]="formData.investmentType"
-            (ngModelChange)="onInvestmentTypeChange()"
-            name="investmentType"
-            required
-          >
-            <option value="">Select Investment Type</option>
-            <option *ngFor="let type of investmentTypes" [value]="type">{{ type }}</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" for="government">Government:</label>
-          <select 
-            id="government" 
-            class="form-control"
-            [(ngModel)]="formData.governmentId"
-            (change)="onGovernorateChange($any($event.target).value)"
-            name="government"
-            required
-          >
-            <option value="">Select Government</option>
-            <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="city">City:</label>
-          <select 
-            id="city" 
-            class="form-control"
-            [(ngModel)]="formData.cityId"
-            [disabled]="!selectedGovernorate"
-            name="city"
-            required
-          >
-            <option value="">{{ selectedGovernorate ? 'Select City' : 'Select Government First' }}</option>
-            <option *ngFor="let city of citiesByGovernorate" [value]="city.id">{{ city.nameEn }}</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row" *ngIf="isFundingRequired()">
-        <div class="form-group">
-          <label class="form-label" for="fundingGoal">Funding Goal (EGP):</label>
-          <input 
-            type="number" 
-            id="fundingGoal" 
-            class="form-control"
-            [(ngModel)]="formData['fundingGoal']"
-            name="fundingGoal"
-            placeholder="Enter funding amount in EGP (minimum 5,000)"
-            min="5000"
-            [required]="isFundingRequired()"
-          >
+        <label class="form-label" for="Category">Category:</label>
+        <select 
+          id="Category" 
+          class="form-control"
+          formControlName="CategoryId"
+          required
+          (change)="onCategoryChange()"
+        >
+          <option value="">Select Category</option>
+          <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+        </select>
+        <div *ngIf="formData.get('CategoryId')?.invalid && (formData.get('CategoryId')?.touched || formData.get('CategoryId')?.dirty)" class="error">
+          <span *ngIf="formData.get('CategoryId')?.errors?.['required']">Category is required.</span>
         </div>
       </div>
     </div>
 
-    <!-- Category-Specific Questions -->
-    <div class="form-section" *ngIf="formData.category && getCurrentCategoryQuestions().length > 0">
-      <h5 class="section-title">{{ formData.category }} Specific Questions</h5>
-      
-      <div class="category-questions">
-        <div class="form-group" *ngFor="let question of getCurrentCategoryQuestions()">
-          <label class="form-label" [for]="question.key">{{ question.label }}:</label>
-          
-          <input 
-            *ngIf="question.type === 'text'"
-            type="text" 
-            [id]="question.key"
-            class="form-control"
-            [(ngModel)]="formData[question.key]"
-            [name]="question.key"
-            [placeholder]="question.placeholder"
-            required
-          >
-          
-          <textarea 
-            *ngIf="question.type === 'textarea'"
-            [id]="question.key"
-            class="form-control textarea"
-            [(ngModel)]="formData[question.key]"
-            [name]="question.key"
-            [placeholder]="question.placeholder"
-            rows="4"
-            required
-          ></textarea>
+      <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="Stage">Stage:</label>
+        <select 
+          id="Stage" 
+          class="form-control"
+          formControlName="Stage"
+          required
+        >
+          <option value="">Select Stage</option>
+          <option [value]="investingStages.ideation">Ideation</option>
+          <option [value]="investingStages.startup">Startup</option>
+          <option [value]="investingStages.intermediate">Intermediate</option>
+          <option [value]="investingStages.advanced">Advanced</option>
+        </select>
+        <div *ngIf="formData.get('Stage')?.invalid && (formData.get('Stage')?.touched || formData.get('Stage')?.dirty)" class="error">
+          <span *ngIf="formData.get('Stage')?.errors?.['required']">Stage is required.</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="DesiredInvestmentType">Desired Investment Type:</label>
+        <select 
+          id="investmentType" 
+          class="form-control"
+          formControlName="DesiredInvestmentType"
+          required
+        >
+          <option value="">Select Investment Type</option>
+          <option [value]="desiredInvestmentTypes.IndustrialExperience">IndustrialExperience</option>
+          <option [value]="desiredInvestmentTypes.Funding">Funding</option>
+          <option [value]="desiredInvestmentTypes.Both">Both</option>
+         
+        </select>
+        <div *ngIf="formData.get('DesiredInvestmentType')?.invalid && (formData.get('DesiredInvestmentType')?.touched || formData.get('DesiredInvestmentType')?.dirty)" class="error">
+          <span *ngIf="formData.get('DesiredInvestmentType')?.errors?.['required']">Investment type is required.</span>
         </div>
       </div>
     </div>
+
+
+      <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="government">Government:</label>
+        <select 
+          id="government" 
+          class="form-control"
+          formControlName="GovernmentId"
+          (change)="onGovernorateChange($any($event.target).value)"
+          required
+        >
+          <option value="">Select Government</option>
+          <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
+        </select>
+        <div *ngIf="formData.get('GovernmentId')?.invalid && (formData.get('GovernmentId')?.touched || formData.get('GovernmentId')?.dirty)" class="error">
+          <span *ngIf="formData.get('GovernmentId')?.errors?.['required']">Government is required.</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="city">City:</label>
+        <select 
+          id="city" 
+          class="form-control"
+          formControlName="CityId"
+          [disabled]="!formData.get('GovernmentId')?.value"
+          required
+        >
+          <option value="">{{ formData.get('GovernmentId')?.value ? 'Select City' : 'Select Government First' }}</option>
+          <option *ngFor="let city of citiesByGovernorate" [value]="city.id">{{ city.nameEn }}</option>
+        </select>
+        <div *ngIf="formData.get('CityId')?.invalid && (formData.get('CityId')?.touched || formData.get('CityId')?.dirty)" class="error">
+          <span *ngIf="formData.get('CityId')?.errors?.['required']">City is required.</span>
+        </div>
+      </div>
+    </div>
+
+   <div class="form-row" *ngIf="showFundingGoal">
+      <div class="form-group">
+        <label class="form-label" for="fundingGoal">Funding Goal (EGP):</label>
+        <input 
+          type="number" 
+          id="fundingGoal" 
+          class="form-control"
+          formControlName="Capital"
+          placeholder="Enter funding amount in EGP (minimum 5,000)"
+          min="5000"
+          [required]="showFundingGoal"
+        >
+        <div *ngIf="formData.get('Capital')?.invalid && (formData.get('Capital')?.touched || formData.get('Capital')?.dirty)" class="error">
+          <span *ngIf="formData.get('Capital')?.errors?.['required']">Funding goal is required.</span>
+          <span *ngIf="formData.get('Capital')?.errors?.['min']">Funding goal must be at least 5,000.</span>
+        </div>
+      </div>
+    </div>
+ 
+      <div class="form-group">
+          <label class="form-label" for="title">Location:</label>
+          <input 
+            class="form-control mb-3"
+            id="Location" 
+            class="form-control"
+           formControlName="Location"
+            name="Location"
+            placeholder="Enter your business location"
+            required 
+>
+   
+    </div>
+
+
+<div *ngIf="standards && standards.length > 0" class="standards-section">
+  <h5 class="mb-3">Standards & Questions</h5>
+  <div *ngFor="let std of standards; let i = index" class="standard-question">
+    <div class="standard-name mb-3"><b>{{ std.formQuestion }}</b></div>
+
+    <textarea 
+      class="form-control mb-3"
+      [class.is-invalid]="(!std.Answer || std.Answer.trim() === '') && std.touched"
+      [value]="std.Answer || ''"
+      (input)="onStandardAnswerChange(i, $event)"
+      (blur)="std.touched = true"
+      placeholder="Your answer..."
+      rows="3"
+      required>
+    </textarea>
+    <div class="invalid-feedback" *ngIf="(!std.Answer || std.Answer.trim() === '') && std.touched">
+      This answer is required
+    </div>
+  </div>
+</div>
 
     <!-- Warning Notice -->
     <div class="warning-notice">
@@ -170,7 +207,6 @@
           type="button" 
           class="btn btn-secondary"
           (click)="onSaveAsDraft()"
-          [disabled]="!isFormValid()"
         >
           <i class='bx bx-save'></i>
           Save as Draft
@@ -191,5 +227,6 @@
         <span>Please fill in all required fields to submit or save as draft.</span>
       </div>
     </div>
+    </div>
   </form>
-</div> 
+</div>

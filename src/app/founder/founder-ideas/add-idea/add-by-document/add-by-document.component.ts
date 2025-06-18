@@ -1,59 +1,102 @@
 import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { Governorate } from '../../../../_models/governorate';
 import { City } from '../../../../_models/city';
 import { GovernrateService } from '../../../../_services/governorate.service';
+import { CategoryService } from '../../../../_services/category.service';
+import { ToastrService } from 'ngx-toastr';
+import { AddIdeaService } from '../../../_services/add-idea-service';
+import { Category } from '../../../../_models/category';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { InvestingStages,DesiredInvestmentType } from '../../../../_shared/enums';
 
 @Component({
   selector: 'app-add-by-document',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,ReactiveFormsModule],
   templateUrl: './add-by-document.component.html',
   styleUrl: './add-by-document.component.css'
 })
-export class AddByDocumentComponent implements OnInit, OnDestroy {
+export class AddByDocumentComponent implements OnInit {
   @Output() submissionStarted = new EventEmitter<void>();
   
   private unsubscribe: Subscription[] = [];
   
-  title = '';
-  category = '';
-  stage = '';
-  governmentId = '';
+ 
   cityId = '';
-  investmentType = '';
-  fundingGoal = '';
-  uploadedFile: File | null = null;
+  
+ 
+  modalMode: 'add' | 'view' = 'view';
+ ;
 
-  categories = [
-    'Technology', 'Healthcare', 'Finance', 'Education', 'E-commerce',
-    'Food & Beverage', 'Real Estate', 'Entertainment', 'Transportation', 'Other'
-  ];
+  
 
-  stages = [
-    'Ideation', 'Startup', 'Intermediate', 'Advanced'
-  ];
-
-  investmentTypes = [
-    'Industrial Experience',
-    'Funding',
-    'Both'
-  ];
 
   // Replace static governments with dynamic data
   governorates: Governorate[] = [];
   citiesByGovernorate: City[] = [];
   selectedGovernorate: boolean = false;
+  categories:Category[] = [];
 
-  constructor(private governorateService: GovernrateService) { }
+  formData!: FormGroup;
+  showFundingGoal: boolean = false;
+  fileError: string | null = null;
+  uploadedFile: File | null = null;
+
+  investingStages = InvestingStages;
+  desiredInvestmentTypes = DesiredInvestmentType;
+
+  constructor(private fb: FormBuilder, private governorateService: GovernrateService, private categoryService: CategoryService,private toasterService:ToastrService,private AddIdeaService:AddIdeaService) { 
+   
+  }
 
   ngOnInit(): void {
     this.loadGovernorates();
+    this.loadCategories();
+    this.initializeForm();
+   
   }
 
-  ngOnDestroy(): void {
-    this.unsubscribe.forEach(sub => sub.unsubscribe());
+ 
+
+  initializeForm(): void {
+       this.formData = this.fb.group({
+      Title: ['', Validators.required],
+      CategoryId: [null, Validators.required],
+      Stage: [null, Validators.required],
+      DesiredInvestmentType: [null, Validators.required],
+      GovernmentId: [null, Validators.required],
+      CityId: [null, Validators.required],
+      Capital: [null, [Validators.min(5000)]], 
+      Location: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(100)]],
+ 
+      
+    });
+   
+    // Listen for investmentType changes
+    this.formData.get('DesiredInvestmentType')?.valueChanges.subscribe(() => {
+      
+      this.updateFundingGoalVisibility();
+    });
+  }
+
+  updateFundingGoalVisibility() {
+  const investmentType =+ this.formData.get('DesiredInvestmentType')?.value;
+  
+  if (investmentType === this.desiredInvestmentTypes.Both|| 
+      investmentType ===this.desiredInvestmentTypes.Funding) {
+    this.showFundingGoal = true;
+    this.formData.get('Capital')?.setValidators([Validators.required, Validators.min(5000)]);
+    this.formData.get('Capital')?.updateValueAndValidity();
+  } else {
+  
+    this.showFundingGoal = false;
+    this.formData.get('Capital')?.clearValidators();
+    this.formData.get('Capital')?.setValue(null);
+    this.formData.get('Capital')?.updateValueAndValidity();
+      console.log('Final showFundingGoal:', this.showFundingGoal);
+  }
   }
 
   public loadGovernorates() {
@@ -69,7 +112,23 @@ export class AddByDocumentComponent implements OnInit, OnDestroy {
     });
     this.unsubscribe.push(subGov);
   }
-
+public loadCategories()
+{
+  const subCat = this.categoryService.GetAllCategories().subscribe({
+    next: (response) => {
+      if (response.isSuccess) {
+        this.categories = response.data;
+      } else {
+        this.toasterService.error('Failed to load categories', 'Error');
+      }
+    },
+    error: (err) => {
+      console.log("Error loading categories:", err);
+      this.toasterService.error('Failed to load categories', 'Error');
+    }
+  });
+  this.unsubscribe.push(subCat);
+}
   // Handle governorate selection change
   onGovernorateChange(governorateId: number) {
     const subcity = this.governorateService.getCitiesByGovernrateId(governorateId).subscribe({
@@ -88,89 +147,160 @@ export class AddByDocumentComponent implements OnInit, OnDestroy {
     this.unsubscribe.push(subcity);
   }
 
-  onFileSelected(event: any): void {
-    const file = event.target.files[0] as File;
-    if (file) {
-      // Check file size (10MB = 10 * 1024 * 1024 bytes)
-      const maxSize = 10 * 1024 * 1024;
-      if (file.size > maxSize) {
-        alert('File size exceeds 10MB limit. Please select a smaller file.');
-        event.target.value = '';
-        return;
-      }
-      this.uploadedFile = file;
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) {
+      this.fileError = 'Please select a file.';
+      this.uploadedFile = null;
+      return;
     }
-    // Clear the input so the same file can be selected again
-    event.target.value = '';
+    // Validate file type
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      this.fileError = 'Unsupported file type.';
+      this.uploadedFile = null;
+      return;
+    }
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      this.fileError = 'File size exceeds 10MB.';
+      this.uploadedFile = null;
+      return;
+    }
+    this.uploadedFile = file;
+    this.fileError = null;
   }
 
-  removeFile(): void {
+  removeFile() {
     this.uploadedFile = null;
-  }
-
-  onInvestmentTypeChange(): void {
-    // Clear funding goal when investment type doesn't require funding
-    if (this.investmentType === 'Industrial Experience') {
-      this.fundingGoal = '';
-    }
-  }
-
-  isFundingRequired(): boolean {
-    return this.investmentType === 'Funding' || this.investmentType === 'Both';
+    this.fileError = null;
   }
 
   isFormValid(): boolean {
-    const basicValid = !!(this.title && this.category && this.stage && 
-                         this.governmentId && this.cityId && this.investmentType && this.uploadedFile);
-    
-    // Funding goal is only required if investment type requires funding
-    const fundingGoalValid = !this.isFundingRequired() || !!this.fundingGoal;
-    
-    return basicValid && fundingGoalValid;
+    return this.formData.valid && !!this.uploadedFile && !this.fileError;
   }
 
   onSubmit(): void {
     if (!this.isFormValid()) {
-      console.error('Form is invalid');
+      // Mark all controls as touched to show errors
+      this.formData.markAllAsTouched();
+      if (!this.uploadedFile) {
+        this.fileError = 'Please upload a document.';
+      }
       return;
-    }
+    } 
+    else {
+     
+       const rawData = this.formData.value;
+      const formPayload = new FormData();
+      for (const key in rawData) {
+          const value = rawData[key];
+          if (value !== null && value !== undefined && value !== '') {
+            formPayload.append(key, value);
+          }
+        }
+      
+   
+      if (this.uploadedFile) {
+        
+        formPayload.append('IdeaFile', this.uploadedFile);
+
+       
+
+      } else {
+       
+        this.fileError = 'Please upload a document.';
+        return;
+      }
+    formPayload.append('IsDrafted', 'false');
+ 
+    console.log('Form Payload:', this.formData.value);
+        var res = this.AddIdeaService.AddIdea(formPayload).subscribe({
+          next: (response) => {
+            if (response.isSuccess) {
+              this.toasterService.success(response.message, 'Success');
+              
+              
+
+            } else {
+              this.toasterService.error(response.message, "Error");
+
+            }
+          }, error: (err) => {
+            const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
+            this.toasterService.error(errorMsg, 'Error');
+          }
+        })
+        this.unsubscribe.push(res);
+
+        //edit
+      } 
     
-    // Emit submission started event
-    this.submissionStarted.emit();
     
-    const formData = {
-      title: this.title,
-      category: this.category,
-      stage: this.stage,
-      governmentId: this.governmentId,
-      cityId: this.cityId,
-      investmentType: this.investmentType,
-      fundingGoal: this.fundingGoal,
-      file: this.uploadedFile
-    };
-    
-    console.log('Submitting document-based idea:', formData);
-    // Submit to backend with status 'submitted'
+   
+   
   }
 
   onSaveAsDraft(): void {
-    if (!this.isFormValid()) {
-      console.error('All fields are required for draft');
-      return;
-    }
+   if (!this.formData.valid) {
+      this.formData.markAllAsTouched();
+    } 
+ 
+    else {
+       const rawData = this.formData.value;
+      const formPayload = new FormData();
+      for (const key in rawData) {
+          const value = rawData[key];
+          if (value !== null && value !== undefined && value !== '') {
+            formPayload.append(key, value);
+          }
+        }
+      
+   
+     
+      if (this.uploadedFile) {
+      
+        formPayload.append('IdeaFile', this.uploadedFile);
 
-    const formData = {
-      title: this.title,
-      category: this.category,
-      stage: this.stage,
-      governmentId: this.governmentId,
-      cityId: this.cityId,
-      investmentType: this.investmentType,
-      fundingGoal: this.fundingGoal,
-      file: this.uploadedFile
-    };
+      
+      } else {
+        // handle error: file is required
+        this.fileError = 'Please upload a document.';
+        return;
+      }
     
-    console.log('Saving document-based idea as draft:', formData);
-    // Save to backend with status 'draft'
+    formPayload.append('IsDrafted', 'true');
+    
+        var res = this.AddIdeaService.AddIdea(formPayload).subscribe({
+          next: (response) => {
+            if (response.isSuccess) {
+              this.toasterService.success("Idea Saved To Drafts", 'Success');
+              
+             
+
+            } else {
+              this.toasterService.error(response.message, "Error");
+
+            }
+          }, error: (err) => {
+            const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
+            this.toasterService.error(errorMsg, 'Error');
+          }
+        })
+        this.unsubscribe.push(res);
+
+        
+      } 
+    
+
   }
-} 
+   ngOnDestroy(): void {
+    this.unsubscribe.forEach(sub => sub.unsubscribe());
+  }
+}

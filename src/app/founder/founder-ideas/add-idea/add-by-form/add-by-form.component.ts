@@ -1,35 +1,21 @@
 import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { Governorate } from '../../../../_models/governorate';
 import { City } from '../../../../_models/city';
 import { GovernrateService } from '../../../../_services/governorate.service';
-
-interface BusinessFormData {
-  // Common fields
-  title: string;
-  category: string;
-  stage: string;
-  governmentId: string;
-  cityId: string;
-  investmentType: string;
-  fundingGoal: string;
-  
-  // Category-specific fields (dynamic)
-  [key: string]: any;
-}
-
-interface QuestionConfig {
-  key: string;
-  label: string;
-  type: 'text' | 'textarea';
-  placeholder: string;
-}
+import { InvestingStages,DesiredInvestmentType } from '../../../../_shared/enums';
+import { Category } from '../../../../_models/category';
+import { CategoryService } from '../../../../_services/category.service';
+import { ToastrService } from 'ngx-toastr';
+import { AddIdeaService } from '../../../_services/add-idea-service';
+import { StandardService } from '../../../_services/Stamdards.service';
+import { StandardAnswers } from '../../../../_models/standardanswers';
 
 @Component({
   selector: 'app-add-by-form',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,ReactiveFormsModule],
   templateUrl: './add-by-form.component.html',
   styleUrl: './add-by-form.component.css'
 })
@@ -38,92 +24,85 @@ export class AddByFormComponent implements OnInit, OnDestroy {
   
   private unsubscribe: Subscription[] = [];
   
-  formData: BusinessFormData = {
-    title: '',
-    category: '',
-    stage: '',
-    governmentId: '',
-    cityId: '',
-    investmentType: '',
-    fundingGoal: ''
-  };
+ formData!: FormGroup;
+  showFundingGoal: boolean = false;
+    investingStages = InvestingStages;
+  desiredInvestmentTypes = DesiredInvestmentType;
 
-  categories: string[] = [
-    'Technology', 'Healthcare', 'Finance', 'Education', 'E-commerce',
-    'Food & Beverage', 'Real Estate', 'Entertainment', 'Transportation', 'Other'
-  ];
-
-  stages: string[] = [
-    'Ideation', 'Startup', 'Intermediate', 'Advanced'
-  ];
-
-  investmentTypes: string[] = [
-    'Industrial Experience',
-    'Funding',
-    'Both'
-  ];
-
-  // Replace static governments with dynamic data
   governorates: Governorate[] = [];
-  citiesByGovernorate: City[] = [];
-  selectedGovernorate: boolean = false;
+    citiesByGovernorate: City[] = [];
+    selectedGovernorate: boolean = false;
+    categories:Category[] = [];
+      cityId = '';
 
-  // Category-specific questions
-  categoryQuestions: { [key: string]: QuestionConfig[] } = {
-    'Technology': [
-      { key: 'techStack', label: 'Technology Stack', type: 'text', placeholder: 'e.g., React, Node.js, MongoDB' },
-      { key: 'targetMarket', label: 'Target Market', type: 'text', placeholder: 'e.g., Small businesses, Enterprise' },
-      { key: 'problemSolving', label: 'What problem does it solve?', type: 'textarea', placeholder: 'Describe the problem your technology addresses' },
-      { key: 'competitiveAdvantage', label: 'Competitive Advantage', type: 'textarea', placeholder: 'What makes your solution unique?' },
-      { key: 'scalability', label: 'Scalability Plan', type: 'textarea', placeholder: 'How do you plan to scale your technology?' }
-    ],
-    'Healthcare': [
-      { key: 'medicalSpecialty', label: 'Medical Specialty', type: 'text', placeholder: 'e.g., Cardiology, Mental Health' },
-      { key: 'targetPatients', label: 'Target Patient Group', type: 'text', placeholder: 'e.g., Elderly, Children, Chronic patients' },
-      { key: 'regulatoryCompliance', label: 'Regulatory Compliance', type: 'textarea', placeholder: 'How will you ensure medical regulations compliance?' },
-      { key: 'clinicalValidation', label: 'Clinical Validation Plan', type: 'textarea', placeholder: 'Describe your clinical testing approach' },
-      { key: 'healthcarePartners', label: 'Healthcare Partners', type: 'text', placeholder: 'Potential hospital/clinic partnerships' }
-    ],
-    'Finance': [
-      { key: 'financialServices', label: 'Financial Services Offered', type: 'text', placeholder: 'e.g., Lending, Investment, Insurance' },
-      { key: 'targetCustomers', label: 'Target Customers', type: 'text', placeholder: 'e.g., Individuals, SMEs, Corporations' },
-      { key: 'complianceStrategy', label: 'Regulatory Compliance Strategy', type: 'textarea', placeholder: 'How will you handle financial regulations?' },
-      { key: 'securityMeasures', label: 'Security Measures', type: 'textarea', placeholder: 'Describe your security and data protection plan' },
-      { key: 'revenueModel', label: 'Revenue Model', type: 'textarea', placeholder: 'How will you generate revenue?' }
-    ],
-    'Education': [
-      { key: 'educationLevel', label: 'Education Level', type: 'text', placeholder: 'e.g., K-12, University, Professional' },
-      { key: 'subjectArea', label: 'Subject Area', type: 'text', placeholder: 'e.g., STEM, Languages, Arts' },
-      { key: 'learningMethod', label: 'Learning Method', type: 'textarea', placeholder: 'Describe your teaching/learning approach' },
-      { key: 'assessmentStrategy', label: 'Assessment Strategy', type: 'textarea', placeholder: 'How will you measure learning outcomes?' },
-      { key: 'institutionPartnerships', label: 'Institution Partnerships', type: 'text', placeholder: 'Potential school/university partnerships' }
-    ],
-    'E-commerce': [
-      { key: 'productCategory', label: 'Product Category', type: 'text', placeholder: 'e.g., Fashion, Electronics, Home goods' },
-      { key: 'targetAudience', label: 'Target Audience', type: 'text', placeholder: 'e.g., Young professionals, Families' },
-      { key: 'logisticsStrategy', label: 'Logistics Strategy', type: 'textarea', placeholder: 'How will you handle shipping and delivery?' },
-      { key: 'paymentMethods', label: 'Payment Methods', type: 'text', placeholder: 'e.g., Credit cards, Digital wallets, COD' },
-      { key: 'marketingStrategy', label: 'Marketing Strategy', type: 'textarea', placeholder: 'How will you acquire customers?' }
-    ],
-    'Food & Beverage': [
-      { key: 'cuisineType', label: 'Cuisine/Product Type', type: 'text', placeholder: 'e.g., Italian, Healthy snacks, Beverages' },
-      { key: 'targetMarket', label: 'Target Market', type: 'text', placeholder: 'e.g., Health-conscious, Families, Young adults' },
-      { key: 'foodSafety', label: 'Food Safety Measures', type: 'textarea', placeholder: 'Describe your food safety and quality control' },
-      { key: 'supplyChain', label: 'Supply Chain Strategy', type: 'textarea', placeholder: 'How will you source ingredients/materials?' },
-      { key: 'distributionChannels', label: 'Distribution Channels', type: 'text', placeholder: 'e.g., Restaurants, Retail, Online' }
-    ]
-  };
+  standards: any[] = [];
 
-  constructor(private governorateService: GovernrateService) { }
+  
+
+  constructor(private fb: FormBuilder,private governorateService: GovernrateService,private categoryService: CategoryService,private toastrservice:ToastrService,private AddIdeaService:AddIdeaService,private StandardService:StandardService) { }
 
   ngOnInit(): void {
-    this.loadGovernorates();
+     this.initializeForm();
+   this.loadGovernorates();
+    this.loadCategories();
+   
   }
 
-  ngOnDestroy(): void {
-    this.unsubscribe.forEach(sub => sub.unsubscribe());
-  }
 
+   initializeForm(): void {
+       this.formData = this.fb.group({
+      Description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
+      Title: ['', Validators.required],
+      CategoryId: [null, Validators.required],
+      Stage: [null, Validators.required],
+      DesiredInvestmentType: [null, Validators.required],
+      GovernmentId: [null, Validators.required],
+      CityId: [null, Validators.required],
+      Capital: [null, [Validators.min(5000)]], 
+      Location: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(100)]],
+ 
+      
+    });
+    
+
+  this.formData.get('DesiredInvestmentType')?.valueChanges.subscribe(() => {
+    this.updateFundingGoalVisibility();
+  });
+    this.formData.get('CategoryId')?.valueChanges.subscribe(categoryId => {
+      if (categoryId) {
+        this.loadStandards(categoryId);
+      } else {
+        this.standards = [];
+      }
+    });
+  }
+  
+ 
+
+initializeStandards(): void {
+ 
+  this.standards.forEach(std => {
+    std.Answer = std.Answer || '';
+    std.touched = false; 
+  });
+}
+   updateFundingGoalVisibility() {
+  const investmentType =+ this.formData.get('DesiredInvestmentType')?.value;
+  
+  if (investmentType === this.desiredInvestmentTypes.Both|| 
+      investmentType ===this.desiredInvestmentTypes.Funding) {
+    this.showFundingGoal = true;
+    this.formData.get('Capital')?.setValidators([Validators.required, Validators.min(5000)]);
+    this.formData.get('Capital')?.updateValueAndValidity();
+  } else {
+  
+    this.showFundingGoal = false;
+    this.formData.get('Capital')?.clearValidators();
+    this.formData.get('Capital')?.setValue(null);
+    this.formData.get('Capital')?.updateValueAndValidity();
+      console.log('Final showFundingGoal:', this.showFundingGoal);
+  }
+  }
   public loadGovernorates() {
     const subGov = this.governorateService.getGovernrates().subscribe({
       next: (response) => {
@@ -138,15 +117,33 @@ export class AddByFormComponent implements OnInit, OnDestroy {
     this.unsubscribe.push(subGov);
   }
 
-  // Handle governorate selection change
+  public loadCategories()
+{
+  const subCat = this.categoryService.GetAllCategories().subscribe({
+    next: (response) => {
+      if (response.isSuccess) {
+        this.categories = response.data;
+      } else {
+        this.toastrservice.error('Failed to load categories', 'Error');
+      }
+    },
+    error: (err) => {
+      console.log("Error loading categories:", err);
+      this.toastrservice.error('Failed to load categories', 'Error');
+    }
+  });
+  this.unsubscribe.push(subCat);
+}
+
+ 
   onGovernorateChange(governorateId: number) {
     const subcity = this.governorateService.getCitiesByGovernrateId(governorateId).subscribe({
       next: (response) => {
         if (response.isSuccess) {
           this.citiesByGovernorate = response.data;
           this.selectedGovernorate = true;
-          // Reset city selection when governorate changes
-          this.formData.cityId = '';
+         
+          this.cityId = '';
         }
       }, 
       error: (err) => {
@@ -156,85 +153,147 @@ export class AddByFormComponent implements OnInit, OnDestroy {
     this.unsubscribe.push(subcity);
   }
 
-  getCurrentCategoryQuestions(): QuestionConfig[] {
-    return this.categoryQuestions[this.formData.category] || [];
-  }
-
   onCategoryChange(): void {
-    // Reset category-specific fields when category changes
-    const categoryQuestions = this.getCurrentCategoryQuestions();
-    
-    // Remove old category-specific fields
-    Object.keys(this.formData).forEach(key => {
-      if (!['title', 'category', 'stage', 'governmentId', 'cityId', 'investmentType', 'fundingGoal'].includes(key)) {
-        delete this.formData[key];
+    const categoryId = this.formData.get('CategoryId')?.value;
+    if (categoryId) {
+      this.loadStandards(categoryId);
+    } else {
+      this.standards = [];
+    }
+  }
+  loadStandards(categoryId: number) {
+    this.StandardService.GetStandardsByCategory(categoryId).subscribe({
+      next: (response) => {
+        if (response.isSuccess && response.data) {
+          this.standards = response.data;
+           this.initializeStandards();
+        } else {
+          this.standards = [];
+        }
+      },
+      error: () => {
+        this.standards = [];
       }
     });
-
-    // Initialize new category-specific fields
-    categoryQuestions.forEach(question => {
-      this.formData[question.key] = '';
-    });
   }
 
-  onInvestmentTypeChange(): void {
-    // Clear funding goal when investment type doesn't require funding
-    if (this.formData.investmentType === 'Industrial Experience') {
-      this.formData.fundingGoal = '';
-    }
+ onStandardAnswerChange(index: number, event: any): void {
+  const value = event.target.value;
+  this.standards[index].Answer = value;
+  
+ 
+  this.standards[index].touched = true;
+}
+   isFormValid(): boolean {
+    const areStandardsValid = this.standards.every(std => 
+    std.Answer && std.Answer.trim().length > 0
+  );
+   const isFormControlsValid = this.formData.valid;
+   
+  return isFormControlsValid && areStandardsValid;
   }
 
-  isFundingRequired(): boolean {
-    return this.formData.investmentType === 'Funding' || this.formData.investmentType === 'Both';
-  }
-
-  onSubmit(): void {
+onSubmit(): void {
     if (!this.isFormValid()) {
-      console.error('Form is invalid');
+      this.formData.markAllAsTouched();
       return;
     }
-    
-    // Emit submission started event
-    this.submissionStarted.emit();
-    
-    console.log('Submitting form-based idea:', this.formData);
-    // Submit to backend with status 'submitted'
+
+   const rawData = this.formData.value;
+  const formPayload = new FormData();
+  
+  for (const key in rawData) {
+    const value = rawData[key];
+    if (value !== null && value !== undefined && value !== '') {
+      formPayload.append(key, value);
+    }
+  }
+
+
+  formPayload.append('IsDrafted', 'false');
+  
+  
+ const standardAnswers = this.standards
+    .filter(std => std.Answer && std.Answer.trim().length > 0)
+    .map(std => new StandardAnswers(std.id, std.Answer.trim()));
+  
+  standardAnswers.forEach((standard, index) => {
+    formPayload.append(`BusinessStandardAnswers[${index}].StandardId`, standard.StandardId.toString());
+    formPayload.append(`BusinessStandardAnswers[${index}].Answer`, standard.Answer);
+  });
+
+
+
+  console.log("Form Data:", this.formData.value);
+  console.log("Standard Answers:", standardAnswers);
+
+console.log("Standards structure:", this.standards);
+
+  console.log("Raw form data:", formPayload);
+
+    this.AddIdeaService.AddIdea(formPayload).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          this.toastrservice.success(response.message, 'Success');
+        } else {
+          this.toastrservice.error(response.message, "Error");
+        }
+      },
+      error: (err) => {
+        const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
+        this.toastrservice.error(errorMsg, 'Error');
+      }
+    });
   }
 
   onSaveAsDraft(): void {
     if (!this.isFormValid()) {
-      console.error('All fields are required for draft');
+      this.formData.markAllAsTouched();
       return;
     }
-    
-    console.log('Saving form-based idea as draft:', this.formData);
-    // Save to backend with status 'draft'
+
+   const rawData = this.formData.value;
+  const formPayload = new FormData();
+  
+
+  for (const key in rawData) {
+    const value = rawData[key];
+    if (value !== null && value !== undefined && value !== '') {
+      formPayload.append(key, value);
+    }
   }
 
-  isFormValid(): boolean {
-    const commonFieldsValid = !!(this.formData.title && this.formData.category && 
-                               this.formData.stage && this.formData.governmentId && 
-                               this.formData.cityId && this.formData.investmentType);
-    
-    // Funding goal is only required if investment type requires funding
-    const fundingGoalValid = !this.isFundingRequired() || !!this.formData.fundingGoal;
-    
-    const categoryQuestions = this.getCurrentCategoryQuestions();
-    const categoryFieldsValid = categoryQuestions.every(question => {
-      return !!this.formData[question.key];
+  
+  formPayload.append('IsDrafted', 'true');
+  
+
+ const standardAnswers = this.standards
+    .filter(std => std.Answer && std.Answer.trim().length > 0)
+    .map(std => new StandardAnswers(std.id, std.Answer.trim()));
+  
+  standardAnswers.forEach((standard, index) => {
+    formPayload.append(`BusinessStandardAnswers[${index}].StandardId`, standard.StandardId.toString());
+    formPayload.append(`BusinessStandardAnswers[${index}].Answer`, standard.Answer);
+  });
+
+
+    this.AddIdeaService.AddIdea(formPayload).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          this.toastrservice.success("Idea Saved To Drafts", 'Success');
+        } else {
+          this.toastrservice.error(response.message, "Error");
+        }
+      },
+      error: (err) => {
+        const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
+        this.toastrservice.error(errorMsg, 'Error');
+      }
     });
-
-    return commonFieldsValid && fundingGoalValid && categoryFieldsValid;
   }
 
-  isBasicInfoValid(): boolean {
-    const basicValid = !!(this.formData.title && this.formData.category && 
-                         this.formData.stage && this.formData.governmentId && 
-                         this.formData.cityId && this.formData.investmentType);
-    
-    // Funding goal is only required if investment type requires funding
-    const fundingGoalValid = !this.isFundingRequired() || !!this.formData.fundingGoal;
-    
-    return basicValid && fundingGoalValid;
+  
+   ngOnDestroy(): void {
+    this.unsubscribe.forEach(sub => sub.unsubscribe());
   }
-} 
+}

@@ -44,3 +44,9 @@ export enum NotificationsStatus {
     Active = 1,
     Deleted = 2,
 }
+ export enum DesiredInvestmentType
+ {
+     IndustrialExperience=1,
+     Funding=2,
+     Both=3
+ }
