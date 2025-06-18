@@ -320,7 +320,7 @@ export class SignupComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.toastr.success(response.message,"Success");
           setTimeout(() => {
-              //this.router.navigate(['admin/investor']);
+              this.router.navigate(['/login']);
             }, 1500);
           }else{
             this.toastr.error(response.message,"Error");

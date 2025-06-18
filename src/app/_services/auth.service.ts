@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { LoggedInUser, UserLogin } from '../_models/user';
+import { LoggedInUser, User, UserLogin } from '../_models/user';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Response } from '../_models/response';
 import { jwtDecode } from 'jwt-decode';
@@ -14,18 +14,21 @@ export interface DecodedToken {
   userType: number,
   name: string,
   status:number,
-  profilePicPath:string
+  profilePicPath:string,
+  notificationCountUnread:number
 }
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private baseUrl=`${environment.apiUrl}/api/auth`;
+
   private tokenKey = 'token';
   private authStatus = new BehaviorSubject<boolean>(this.hasToken());
   private UserLoggedIn = new BehaviorSubject<LoggedInUser | null>(this.getUserData())
   public isAuthenticated$ = this.authStatus.asObservable();
   public CurrentUser$ = this.UserLoggedIn.asObservable();
-  constructor() { }
+  constructor(private httpClient:HttpClient) { }
 
 
   login(token: string): void {
@@ -42,9 +45,15 @@ export class AuthService {
     this.authStatus.next(false);
   }
 
+  
+
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
+
+
+
+
 
   private saveToken(token: string) {
     localStorage.setItem(this.tokenKey, token);
@@ -82,7 +91,8 @@ export class AuthService {
       name: decoded?.name,
       userType: Number(decoded?.userType),
       status:Number(decoded?.status),
-      profilePicPath:decoded?.profilePicPath
+      profilePicPath:decoded?.profilePicPath,
+      notificationCountUnread:Number(decoded?.notificationCountUnread)
     }
     return data;
   }

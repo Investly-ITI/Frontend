@@ -43,7 +43,8 @@ export class LoggedInUser{
         public email:string,
         public userType:UserType,
         public status:Status,
-        public profilePicPath:string
+        public profilePicPath:string,
+        public notificationCountUnread:number
     ){}
 }
 

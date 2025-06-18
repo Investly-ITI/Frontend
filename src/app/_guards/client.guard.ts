@@ -5,7 +5,7 @@ import { map } from 'rxjs';
 import { UserType } from '../_shared/enums';
 
 export const clientGuard: CanActivateFn = (route, state) => {
-    const authService = inject(AuthService);
+  const authService = inject(AuthService);
   const router = inject(Router);
    return authService.CurrentUser$.pipe(map(user => {
      if (user && (user.userType == UserType.Investor || user.userType==UserType.Founder)) {
