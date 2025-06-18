@@ -89,8 +89,8 @@
           <!-- Notification Bell Icon -->
           <div class="notification-bell" (click)="navigateToNotifications()" title="View Notifications">
             <i class='bx bx-bell'></i>
-            <div class="notification-badge" *ngIf="getTotalNotificationsCount() > 0">
-              {{ getTotalNotificationsCount() }}
+            <div class="notification-badge" *ngIf="notifcationCount > 0">
+              {{ notifcationCount }}
             </div>
           </div>
           

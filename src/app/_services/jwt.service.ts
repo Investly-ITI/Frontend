@@ -33,6 +33,11 @@ export class JwtService {
     return result;
   }
 
+   refreshToken(): Observable<Response<string>> {
+    var result = this.httpClient.get<Response<string>>(`${this.baseUrl}/refresh-token`);
+    return result;
+  }
+
 
 
 }

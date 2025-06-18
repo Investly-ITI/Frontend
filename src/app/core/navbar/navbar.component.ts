@@ -6,6 +6,7 @@ import { LoggedInUser } from '../../_models/user';
 import { UserType,Status } from '../../_shared/enums';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { NotificationSignalRService } from '../../_services/notification.service';
 
 @Component({
   selector: 'app-navbar',
@@ -19,16 +20,19 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
   currentUser: LoggedInUser | null = null;
   UserType = UserType; 
-  Status=Status
+  Status=Status;
+  notifcationCount=0;
   
-  // Profile notification indicator
   showProfileAlert = true; // Set to true to show red exclamation mark
+
+
   
   private subscriptions: Subscription[] = [];
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private notificationService:NotificationSignalRService
   ) {}
 
   ngOnInit() {
@@ -38,7 +42,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
     
     const userSub = this.authService.CurrentUser$.subscribe(
       user => this.currentUser = user
+   
     );
+     this.showProfileAlert=this.currentUser?.status!=Status.Active?true:false;
+     this.notifcationCount=this.currentUser?.notificationCountUnread??0;
+     this.notificationService.startConnection(this.authService.getToken()??"");
+     var subNoti=this.notificationService.notificationCount$.subscribe(count=>{
+       this.notifcationCount= count==0? this.currentUser?.notificationCountUnread??0:count;
+      })
+      
+    console.log(this.notifcationCount);
+    this.subscriptions.push(subNoti);
     
     this.subscriptions.push(authSub, userSub);
   }
@@ -46,6 +60,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     // Clean up subscriptions
     this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.notificationService.stopConnection();
   }
 
   @HostListener('document:click', ['$event'])
@@ -141,19 +156,5 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.isMobileMenuOpen = false;
   }
 
-  // Get total notifications count (mock data for now)
-  getTotalNotificationsCount(): number {
-    // Check if user is currently viewing notifications section
-    const currentUrl = this.router.url;
-    const isOnNotificationsSection = currentUrl.includes('/profile') && currentUrl.includes('section=notifications');
-    
-    // If viewing notifications, return 0 since all notifications are marked as read
-    if (isOnNotificationsSection) {
-      return 0;
-    }
-    
-    // TODO: Replace with actual notification service call
-    // For now, return unread notifications count (mock: 2 unread out of 4 total)
-    return 2; // Mock unread notification count
-  }
+ 
 }

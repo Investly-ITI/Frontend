@@ -7,6 +7,7 @@ import { JwtService } from '../../_services/jwt.service';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../_services/auth.service';
 import { Subscription } from 'rxjs';
+import { NotificationSignalRService } from '../../_services/notification.service';
 
 @Component({
   selector: 'app-login',
