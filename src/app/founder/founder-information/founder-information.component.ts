@@ -9,7 +9,7 @@ interface PersonalInfo {
   dateOfBirth: string;
   countryCode: string;
   phoneNumber: string;
-  street: string;
+  address: string;
   government: string;
   city: string;
   nationalId: string;

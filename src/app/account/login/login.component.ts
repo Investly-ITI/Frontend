@@ -7,7 +7,9 @@ import { JwtService } from '../../_services/jwt.service';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../_services/auth.service';
 import { Subscription } from 'rxjs';
-import { NotificationSignalRService } from '../../_services/notification.service';
+import { NotificationService } from '../../_services/notification.service';
+import { NotificationHubService } from '../../_services/notificationHub.service';
+// import { NotificationService } from '../../_services/notificationHub.service';
 
 @Component({
   selector: 'app-login',
@@ -41,6 +43,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     , private toastr: ToastrService
     , private router: Router
     , private auth: AuthService
+    , private notificationService:NotificationService
+    , private notificationHubService:NotificationHubService
   ) { }
 
   ngOnInit(): void {
@@ -130,6 +134,8 @@ export class LoginComponent implements OnInit, OnDestroy {
             console.log(response);
             this.toastr.success(response.message, "Success");
             this.auth.login(response.data);
+            this.notificationService.fetchUnreadCount();
+            this.notificationHubService.startConnection();
             setTimeout(() => {
               this.router.navigate(['/']);
             }, 1500);

@@ -1,4 +1,6 @@
 import { BusinessIdeaStatus, InvestingStages } from "../_shared/enums"; 
+import { StandardAnswers } from "./standardanswers";
+import { Standard } from "./standards";
 
 export class BusinessDto {
     constructor(
@@ -16,7 +18,12 @@ export class BusinessDto {
         public rejectedReason?: string,
         public createdAt?: string, 
         public categoryName?: string,
-        public founderName?: string
+        public founderName?: string,
+        public GovernmentId?: number,
+        public CityId?: number,
+        public Description?: string,
+        public BusinessStandardAnswers:StandardAnswers[]=[]
+       
     ) { }
 }
 

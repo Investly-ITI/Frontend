@@ -1,4 +1,6 @@
 import {  Status, UserType } from "../_shared/enums";
+import { City } from "./city";
+import { Governorate } from "./governorate";
 
 export class User {
     constructor(
@@ -22,7 +24,9 @@ export class User {
         public createdAt:Date,
         public createdBy:number,
         public updatedAt:Date,
-        public updatedBy:number
+        public updatedBy:number,
+        public government:Governorate,
+        public city:City
 
 
     ){}
@@ -43,8 +47,7 @@ export class LoggedInUser{
         public email:string,
         public userType:UserType,
         public status:Status,
-        public profilePicPath:string,
-        public notificationCountUnread:number
+        public profilePicPath:string
     ){}
 }
 

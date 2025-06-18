@@ -5,6 +5,8 @@ import { FounderInformationComponent } from './founder-information/founder-infor
 import { FounderSecurityComponent } from './founder-security/founder-security.component';
 import { FounderIdeasComponent } from './founder-ideas/founder-ideas.component';
 import { FounderNotificationsComponent } from './founder-notifications/founder-notifications.component';
+import { ProfileService } from './_services/profile.service';
+import { environment } from '../../environments/environment';
 
 interface ProfileData {
   personalInfo: {
@@ -14,7 +16,7 @@ interface ProfileData {
     dateOfBirth: string;
     countryCode: string;
     phoneNumber: string;
-    street: string;
+    address: string;
     government: string;
     city: string;
     nationalId: string;
@@ -64,18 +66,18 @@ export class FounderComponent implements OnInit {
   
   profileData: ProfileData = {
     personalInfo: {
-      firstName: 'Abdulrhman',
-      lastName: 'Ahmed',
-      email: 'abdulrhman.ahmed@example.com',
-      dateOfBirth: '1990-03-22',
+      firstName: '',
+      lastName: '',
+      email: '',
+      dateOfBirth: '',
       countryCode: '+20',
-      phoneNumber: '1012345678',
-      street: '15 Ahmed Shawqi Street, Roushdy',
-      government: 'Dakahlia',
-      city: 'Mansoura',
-      nationalId: '28803221234567',
-      gender: 'male',
-      profilePicture: 'Me.jpg',
+      phoneNumber: '',
+      address: '',
+      government: '',
+      city: '',
+      nationalId: '',
+      gender: '',
+      profilePicture: 'Me.png',
     },
     securitySettings: {
       twoFactorEnabled: true,
@@ -123,11 +125,14 @@ export class FounderComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private profileService:ProfileService
+
   ) {}
 
   ngOnInit(): void {
     // Handle query parameters to set active section and tab
+    this.getProfileData();
     this.activatedRoute.queryParams.subscribe(params => {
       if (params['section']) {
         this.activeSection = params['section'];
@@ -144,6 +149,39 @@ export class FounderComponent implements OnInit {
       }
     });
   }
+
+getProfileData():void{ 
+const sub = this.profileService.getProfileData().subscribe({
+    next: (res) => {
+      if (res.isSuccess && res.data) {
+        const user = res.data.user;
+        console.log(user);
+          this.profileData.personalInfo = {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          dateOfBirth: new Date(user.dateOfBirth).toISOString().split('T')[0] ,
+          countryCode: '+20', 
+          phoneNumber: user.phoneNumber,
+          address: user.address,
+          government: user.government.nameEn, 
+          city: user.city.nameEn, 
+          nationalId: user.nationalId,
+          gender: user.gender,
+          profilePicture:user.profilePicPath ? `${environment.apiUrl}/${user.profilePicPath}` : "Me.png"
+        };
+      } else {
+        console.error('Failed to fetch profile data', res.message);
+      }
+    },
+    error: (err) => {
+      console.error('Error fetching profile data', err);
+    }
+  });
+
+
+ }
+
 
   setActiveSection(section: 'information' | 'security' | 'ideas' | 'notifications'): void {
     this.activeSection = section;
