@@ -1702,3 +1702,76 @@ input:checked + .slider:before {
     font-size: 0.9em;
     /* Inherit background/color from global status classes */
 }
+
+/* Tabs styling */
+.tabs {
+    display: flex;
+    border-bottom: 1px solid var(--grey);
+    margin-bottom: 15px;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--dark-grey); /* Adjust as per your theme */
+    transition: color 0.3s ease;
+}
+
+.tab-button:hover {
+    color: var(--dark); /* Adjust as per your theme */
+}
+
+.tab-button.active {
+    border-bottom: 2px solid var(--blue); /* Highlight active tab */
+    color: var(--blue); /* Active tab text color */
+}
+
+.tab-content {
+    padding: 10px 0;
+}
+
+/* Documentation specific styles */
+.download-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background-color: var(--blue); /* Or any color you prefer */
+    color: var(--light);
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.download-link:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+.download-link i {
+    font-size: 1.1em;
+}
+
+.standard-answer-item {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--grey);
+}
+
+.standard-answer-item:last-child {
+    border-bottom: none;
+}
+
+.question-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 3px;
+    color: var(--dark); /* Adjust as per your theme */
+}
+
+.answer-value {
+    color: var(--dark-grey); /* Adjust as per your theme */
+}

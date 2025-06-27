@@ -295,4 +295,8 @@
             </div>
         </div>
     </div>
+
+    <div *ngIf="isLoading && !feedbacks.length" class="loading-indicator" style="text-align: center; padding: 20px;">
+        <ngx-skeleton-loader count="5" appearance="line" [theme]="{ 'height': '30px', 'margin-bottom': '10px', 'background-color': isDarkMode ? '#333' : '#e0e0e0' }"></ngx-skeleton-loader>
+    </div>
 </div>
