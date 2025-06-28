@@ -23,7 +23,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { ChangePassword, Founder, UpdateFounder } from '../../_models/founder';
+import { ChangePassword, Founder, UpdateFounder, UpdateNationalIdRequest, UpdateProfilePictureRequest } from '../../_models/founder';
 import { Observable } from 'rxjs';
 import { Response } from '../../_models/response';
 
@@ -53,4 +53,35 @@ export class ProfileService {
       passwordData
     );
   }
+
+  updateProfilePicture(request: UpdateProfilePictureRequest): Observable<Response<string>> {
+    const formData = new FormData();
+    formData.append('Email', request.email);
+    formData.append('PicFile', request.profilePic);
+
+    return this.http.patch<Response<string>>(
+      `${this.ApiUrl}/api/founder/profile-picture`,
+      formData
+    );
+  }
+
+  updateNationalIdImages(request: UpdateNationalIdRequest): Observable<Response<string>> {
+    const formData = new FormData();
+    formData.append('Email', request.email);
+    
+    if (request.frontIdFile) {
+      formData.append('FrontIdFile', request.frontIdFile);
+    }
+    
+    if (request.backIdFile) {
+      formData.append('BackIdFile', request.backIdFile);
+    }
+
+    return this.http.patch<Response<string>>(
+      `${this.ApiUrl}/api/founder/Profile/national-id`,
+      formData
+    );
+  }
+
+
 }

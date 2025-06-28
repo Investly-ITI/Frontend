@@ -153,28 +153,6 @@ export class FounderSecurityComponent implements OnInit {
     });
   }
 
-  // private handleApiError(response: Response<string>): void {
-  //   switch (response.statusCode) {
-  //     case 400:
-  //       this.handleValidationErrors(response);
-  //       break;
-  //     case 401:
-  //       this.passwordError = 'Current password is incorrect';
-  //       this.toastr.error('Current password is incorrect. Please check and try again.', 'Authentication Error');
-  //       break;
-  //     case 404:
-  //       this.passwordError = 'User not found';
-  //       this.toastr.error('User account not found. Please contact support.', 'Account Error');
-  //       break;
-  //     case 500:
-  //       this.passwordError = 'Server error occurred. Please try again later.';
-  //       this.toastr.error('Server error occurred. Please try again later.', 'Server Error');
-  //       break;
-  //     default:
-  //       this.passwordError = response.message || 'An unexpected error occurred';
-  //       this.toastr.error(response.message || 'An unexpected error occurred', 'Error');
-  //   }
-  // }
   private handleApiError(response: Response<string>): void {
   switch (response.statusCode) {
     case 400:
@@ -214,40 +192,6 @@ export class FounderSecurityComponent implements OnInit {
     }
   }
 
-  // private handleHttpError(error: any): void {
-  //   if (!error.status) {
-  //     this.passwordError = 'An unexpected error occurred. Please try again.';
-  //     this.toastr.error('An unexpected error occurred. Please try again.', 'Error');
-  //     return;
-  //   }
-
-  //   switch (error.status) {
-  //     case 400:
-  //       const errorMessage = error.error?.message || 'Invalid request data';
-  //       this.passwordError = errorMessage;
-  //       this.toastr.error(errorMessage, 'Validation Error');
-  //       break;
-  //     case 401:
-  //       this.passwordError = 'Current password is incorrect';
-  //       this.toastr.error('Current password is incorrect. Please check and try again.', 'Authentication Error');
-  //       break;
-  //     case 404:
-  //       this.passwordError = 'User not found';
-  //       this.toastr.error('User account not found. Please contact support.', 'Account Error');
-  //       break;
-  //     case 500:
-  //       this.passwordError = 'Server error occurred. Please try again later.';
-  //       this.toastr.error('Server error occurred. Please try again later.', 'Server Error');
-  //       break;
-  //     case 0:
-  //       this.passwordError = 'Unable to connect to server. Please check your internet connection.';
-  //       this.toastr.error('Unable to connect to server. Please check your internet connection.', 'Connection Error');
-  //       break;
-  //     default:
-  //       this.passwordError = 'Network error occurred. Please check your connection and try again.';
-  //       this.toastr.error('Network error occurred. Please check your connection and try again.', 'Connection Error');
-  //   }
-  // }
 
   private handleHttpError(error: any): void {
   if (!error.status) {

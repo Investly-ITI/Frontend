@@ -57,4 +57,13 @@ export class UpdateFounder {
     }
 }
 
+export interface UpdateProfilePictureRequest {
+  email: string;
+  profilePic: File;
+}
 
+export interface UpdateNationalIdRequest {
+  email: string;
+  frontIdFile?: File;
+  backIdFile?: File;
+}

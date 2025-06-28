@@ -1,6 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ProfileService } from '../_services/profile.service';
+import { UpdateNationalIdRequest } from '../../_models/founder';
+import { ToastrService } from 'ngx-toastr';
 
 interface PersonalInfo {
   firstName: string;
@@ -22,7 +25,21 @@ interface PersonalInfo {
   templateUrl: './founder-information.component.html',
   styleUrl: './founder-information.component.css'
 })
-export class FounderInformationComponent {
+export class FounderInformationComponent implements OnInit {
+
+  constructor(private profileService: ProfileService,
+      private toastr: ToastrService
+  ) {}
+  ngOnInit(): void {
+    this.toastr.toastrConfig.positionClass = 'toast-top-right';
+    this.toastr.toastrConfig.timeOut = 5000;
+    this.toastr.toastrConfig.closeButton = true;
+    this.toastr.toastrConfig.progressBar = true;
+  }
+  invalidFileMessage: string = '';
+  allowedExtensions = ['.jpg', '.jpeg', '.png'];
+
+
   @Input() personalInfo!: PersonalInfo;
   @Output() personalInfoChange = new EventEmitter<PersonalInfo>();
 
@@ -42,25 +59,54 @@ export class FounderInformationComponent {
     this.activeTab = tab;
   }
 
+  frontIdFile?: File;
+  backIdFile?: File;
+
   onFrontIdFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      const extension = file.name.split('.').pop()?.toLowerCase();
+      if (!this.allowedExtensions.includes(`.${extension}`)) {
+        this.invalidFileMessage = `Only ${this.allowedExtensions.join(', ')} files are allowed`;
+        this.toastr.error(this.invalidFileMessage);
+        this.frontIdFile = undefined;
+        this.frontIdImageUrl = null;
+        return;
+      }
+      
+      this.invalidFileMessage = '';
+      this.frontIdFile = file;
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.frontIdImageUrl = e.target.result;
       };
       reader.readAsDataURL(file);
+    } else {
+      this.frontIdFile = undefined;
     }
   }
 
   onBackIdFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      const extension = file.name.split('.').pop()?.toLowerCase();
+      if (!this.allowedExtensions.includes(`.${extension}`)) {
+        this.invalidFileMessage = `Only ${this.allowedExtensions.join(', ')} files are allowed`;
+        this.toastr.error(this.invalidFileMessage);
+        this.backIdFile = undefined;
+        this.backIdImageUrl = null;
+        return;
+      }
+      
+      this.invalidFileMessage = '';
+      this.backIdFile = file;
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.backIdImageUrl = e.target.result;
       };
       reader.readAsDataURL(file);
+    } else {
+      this.backIdFile = undefined;
     }
   }
 
@@ -75,53 +121,68 @@ export class FounderInformationComponent {
   }
 
   hasDocumentationToSave(): boolean {
-    return this.frontIdImageUrl !== null && this.backIdImageUrl !== null;
+    return !!this.frontIdFile || !!this.backIdFile;
   }
 
+  hasValidDocumentationToSave(): boolean {
+    return (!!this.frontIdFile || !!this.backIdFile) && !this.invalidFileMessage;
+  }
+  
   async onSaveDocumentation(): Promise<void> {
-    if (!this.hasDocumentationToSave()) {
-      this.saveMessage = 'Please upload both front and back ID pictures before saving.';
+    if (!this.hasValidDocumentationToSave()) {
+      const message = this.invalidFileMessage || 'Please upload at least one ID picture before saving.';
+      this.toastr.error(message);
       return;
     }
 
     this.isSaving = true;
-    this.saveMessage = '';
 
     try {
-      // Prepare documentation data for backend
-      const documentationData = {
-        frontIdImage: this.frontIdImageUrl,
-        backIdImage: this.backIdImageUrl
-      };
-      
-      await this.saveDocumentationData(documentationData);
-      
-      this.saveMessage = 'Documentation uploaded successfully!';
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        this.saveMessage = '';
-      }, 3000);
+      await this.saveDocumentationData();
     } catch (error) {
+      // Error handling is already done in saveDocumentationData
       console.error('Error saving documentation:', error);
-      this.saveMessage = 'Failed to save documentation. Please try again.';
     } finally {
       this.isSaving = false;
     }
   }
 
-  private async saveDocumentationData(documentationData: any): Promise<void> {
-    // Simulate API call delay
+  private async saveDocumentationData(): Promise<void> {
+    if (!this.personalInfo?.email) {
+      this.toastr.error('User email is required');
+      throw new Error('User email is required');
+    }
+
+    const request: UpdateNationalIdRequest = {
+      email: this.personalInfo.email,
+      frontIdFile: this.frontIdFile, 
+      backIdFile: this.backIdFile    
+    };
+
     return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Simulate random success/failure for demo
-        if (Math.random() > 0.1) { // 90% success rate
-          console.log('Documentation saved:', documentationData);
+      this.profileService.updateNationalIdImages(request).subscribe({
+        next: (response) => {
+          const message = response.message || 'National ID images updated successfully';
+          this.toastr.success(message);
           resolve();
-        } else {
-          reject(new Error('Failed to save documentation'));
+        },
+        error: (err) => {
+          let errorMessage = 'Failed to save documentation. Please try again.';
+          
+          if (err.error?.message) {
+            errorMessage = err.error.message;
+          } else if (err.status === 404) {
+            errorMessage = 'User not found. Please refresh the page and try again.';
+          } else if (err.status === 400) {
+            errorMessage = 'Invalid file format or missing required fields.';
+          } else if (err.status === 500) {
+            errorMessage = 'Server error occurred. Please try again later.';
+          }
+          
+          this.toastr.error(errorMessage);
+          reject(err);
         }
-      }, 1500);
+      });
     });
   }
 
@@ -215,4 +276,6 @@ export class FounderInformationComponent {
       }, 1500);
     });
   }
+
+ 
 } 
