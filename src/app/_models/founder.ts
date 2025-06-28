@@ -21,5 +21,40 @@ export class FounderSearch
         public status: number
 
     ) {}
-
 }
+
+export class ChangePassword {
+    constructor(
+        public email: string,
+        public currentPassword: string,
+        public newPassword: string,
+        public confirmNewPassword: string
+    ) {}
+}
+export class UpdateFounder {
+    constructor(
+        public firstName: string,
+        public lastName: string,
+        public phoneNumber: string | null,
+        public gender: string | null,
+        public governmentId: number | null,
+        public cityId: number | null,
+        public address: string | null,
+        public dateOfBirth: Date | null
+    ) {}
+
+    equals(other: UpdateFounder | null): boolean {
+        if (!other) return false;
+
+        return this.firstName === other.firstName &&
+               this.lastName === other.lastName &&
+               this.phoneNumber === other.phoneNumber &&
+               this.gender === other.gender &&
+               this.governmentId === other.governmentId &&
+               this.cityId === other.cityId &&
+               this.address === other.address &&
+               this.dateOfBirth === other.dateOfBirth;
+    }
+}
+
+
