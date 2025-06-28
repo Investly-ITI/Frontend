@@ -60,7 +60,7 @@ export class ProfileService {
     formData.append('PicFile', request.profilePic);
 
     return this.http.patch<Response<string>>(
-      `${this.ApiUrl}/api/founder/profile-picture`,
+      `${this.ApiUrl}/api/founder/Profile/profile-picture`,
       formData
     );
   }

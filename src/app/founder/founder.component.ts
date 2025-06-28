@@ -7,6 +7,7 @@ import { FounderIdeasComponent } from './founder-ideas/founder-ideas.component';
 import { FounderNotificationsComponent } from './founder-notifications/founder-notifications.component';
 import { ProfileService } from './_services/profile.service';
 import { environment } from '../../environments/environment';
+import { ToastrService } from 'ngx-toastr';
 
 interface ProfileData {
   personalInfo: {
@@ -126,8 +127,8 @@ export class FounderComponent implements OnInit {
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private profileService:ProfileService
-
+    private profileService: ProfileService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -150,38 +151,37 @@ export class FounderComponent implements OnInit {
     });
   }
 
-getProfileData():void{ 
-const sub = this.profileService.getProfileData().subscribe({
-    next: (res) => {
-      if (res.isSuccess && res.data) {
-        const user = res.data.user;
-        console.log(user);
+  getProfileData(): void { 
+    const sub = this.profileService.getProfileData().subscribe({
+      next: (res) => {
+        if (res.isSuccess && res.data) {
+          const user = res.data.user;
+          console.log(user);
           this.profileData.personalInfo = {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          dateOfBirth: new Date(user.dateOfBirth).toISOString().split('T')[0] ,
-          countryCode: '+20', 
-          phoneNumber: user.phoneNumber,
-          address: user.address,
-          government: user.government.nameEn, 
-          city: user.city.nameEn, 
-          nationalId: user.nationalId,
-          gender: user.gender,
-          profilePicture:user.profilePicPath ? `${environment.apiUrl}/${user.profilePicPath}` : "Me.png"
-        };
-      } else {
-        console.error('Failed to fetch profile data', res.message);
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            dateOfBirth: new Date(user.dateOfBirth).toISOString().split('T')[0],
+            countryCode: '+20', 
+            phoneNumber: user.phoneNumber,
+            address: user.address,
+            government: user.government?.nameEn || '', 
+            city: user.city?.nameEn || '', 
+            nationalId: user.nationalId,
+            gender: user.gender,
+            profilePicture: user.profilePicPath 
+              ? `${environment.apiUrl}/${user.profilePicPath}?${new Date().getTime()}` 
+              : "assets/images/default-profile.png"
+          };
+        } else {
+          console.error('Failed to fetch profile data', res.message);
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching profile data', err);
       }
-    },
-    error: (err) => {
-      console.error('Error fetching profile data', err);
-    }
-  });
-
-
- }
-
+    });
+  }
 
   setActiveSection(section: 'information' | 'security' | 'ideas' | 'notifications'): void {
     this.activeSection = section;
@@ -203,51 +203,71 @@ const sub = this.profileService.getProfileData().subscribe({
     const file = target.files?.[0];
     
     if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        alert('Please select an image file.');
-        return;
-      }
-      
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB.');
-        return;
-      }
-      
       // Create a file reader to preview the image
       const reader = new FileReader();
       reader.onload = (e) => {
         const imageUrl = e.target?.result as string;
-        // Update the profile picture URL
+        // Temporarily update the profile picture URL for preview
         this.profileData.personalInfo.profilePicture = imageUrl;
         
-        // Here you would typically upload the file to your server
+        // Upload the file to server
         this.uploadProfilePicture(file);
       };
       reader.readAsDataURL(file);
+      
+      // Reset the file input
+      target.value = '';
     }
   }
 
   private async uploadProfilePicture(file: File): Promise<void> {
     try {
-      // Simulate API call to upload profile picture
-      console.log('Uploading profile picture:', file.name);
-      
-      // In a real application, you would send the file to your backend
-      const formData = new FormData();
-      formData.append('profilePicture', file);
-      
-      // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      console.log('Profile picture uploaded successfully');
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        this.toastr.error('Only JPG and PNG files are allowed');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.toastr.error('File size must be less than 5MB');
+        return;
+      }
+
+      const request = {
+        email: this.profileData.personalInfo.email,
+        profilePic: file
+      };
+
+      this.profileService.updateProfilePicture(request).subscribe({
+        next: (response) => {
+          if (response.isSuccess) {
+            this.toastr.success('Profile picture updated successfully');
+            
+            // Refresh user data to get the updated profile picture path
+            this.getProfileData();
+          } else {
+            this.toastr.error(response.message || 'Failed to update profile picture');
+            // Revert to previous image if upload failed
+            this.getProfileData();
+          }
+        },
+        error: (err) => {
+          const errorMessage = err.error?.message || 
+            'An error occurred while updating profile picture';
+          this.toastr.error(errorMessage);
+          // Revert to previous image on error
+          this.getProfileData();
+        }
+      });
+
     } catch (error) {
       console.error('Error uploading profile picture:', error);
-      alert('Failed to upload profile picture. Please try again.');
+      this.toastr.error('Failed to upload profile picture');
+      this.getProfileData();
     }
   }
-
   // Event handlers for child component data changes
   onPersonalInfoChange(personalInfo: any): void {
     this.profileData.personalInfo = personalInfo;
