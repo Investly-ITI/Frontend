@@ -584,4 +584,17 @@
   .documentation-section {
     padding: 15px;
   }
-} 
+}
+
+  .error-message {
+    color: #f44336;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .error-message i {
+    font-size: 1.2rem;
+  }
