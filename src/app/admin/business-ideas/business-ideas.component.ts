@@ -1,7 +1,7 @@
 import { Component, OnInit ,HostListener, OnDestroy} from '@angular/core';
-import { CommonModule } from '@angular/common'; 
-import { FormsModule } from '@angular/forms'; 
-import { BusinessService } from '../_services/businesses.service'; 
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { BusinessService } from '../_services/businesses.service';
 import { BusinessDto, BusinessListDto, BusinessSearchDto } from '../../_models/businesses';
 import { Response } from '../../_models/response';
 import { getBusinessIdeaStatusLabel, getStageLabel } from '../../_shared/utils/enum.utils';
@@ -10,6 +10,9 @@ import { BusinessIdeaStatus, InvestingStages } from '../../_shared/enums';
 import { Observable, catchError, of, Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { DarkModeService } from '../_services/dark-mode.service';
+import { environment } from '../../../environments/environment';
+import { CategoryService } from '../../_services/category.service';
+import { Category } from '../../_models/category';
 
 @Component({
   selector: 'app-business-ideas',
@@ -32,7 +35,8 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
   searchParams: BusinessSearchDto = new BusinessSearchDto();
 
   stages: InvestingStages[] = Object.values(InvestingStages).filter(value => typeof value === 'number') as InvestingStages[];
-  businessStatuses: BusinessIdeaStatus[] = Object.values(BusinessIdeaStatus).filter(value => typeof value === 'number') as BusinessIdeaStatus[];
+  businessStatuses: BusinessIdeaStatus[] = Object.values(BusinessIdeaStatus)
+  .filter(value => typeof value === 'number' && value !== BusinessIdeaStatus.Deleted) as BusinessIdeaStatus[];
 
   isStatusUpdateModalOpen: boolean = false;
   selectedBusinessId: number | null = null;
@@ -46,10 +50,10 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
 
   isAdvancedSearchOpen: boolean = false;
 
-  public BusinessIdeaStatus = BusinessIdeaStatus; 
-  public Stage = InvestingStages;                           
+  public BusinessIdeaStatus = BusinessIdeaStatus;
+  public Stage = InvestingStages;
 
-    entityNamePlural: string = 'Business Idea';
+  entityNamePlural: string = 'Business Idea';
 
   displayActiveCount: number = 0;
   displayInactiveCount: number = 0;
@@ -64,16 +68,23 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
   isDarkMode: boolean = false;
   private darkModeSubscription: Subscription = new Subscription();
 
+  activeTab: 'details' | 'documentation' = 'details'; 
+
+  categories: Category[] = [];
+  tempCategoryFilter: number | null = null;
+  tempStatusFilter: number | null = null;
+
   constructor(
     private businessService: BusinessService,
     private toastr: ToastrService,
-    private darkModeService: DarkModeService // Inject DarkModeService
+    private darkModeService: DarkModeService,
+    private categoryService: CategoryService
   ) { }
 
   ngOnInit(): void {
     this.loadBusinessIdeas();
     this.loadIdeasCount();
-    // Subscribe to dark mode changes
+    this.loadCategories();
     this.darkModeSubscription = this.darkModeService.darkMode$.subscribe((isDark) => {
       this.isDarkMode = isDark;
     });
@@ -105,6 +116,19 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
         }
         this.isLoading = false;
       });
+  }
+
+  loadCategories(): void {
+    this.categoryService.GetAllCategories().subscribe({
+      next: (res) => {
+        if (res.isSuccess && res.data) {
+          this.categories = res.data;
+        }
+      },
+      error: (err) => {
+        this.toastr.error('Failed to load categories.');
+      }
+    });
   }
 
   onSearch(): void {
@@ -165,7 +189,7 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
           next: (res) => {
             if (res.isSuccess) {
               this.toastr.success('Business idea has been deleted.', 'Deleted!');
-              this.loadBusinessIdeas(); 
+              this.loadBusinessIdeas();
               this.closeSoftDeleteModal();
               this.loadIdeasCount();
             } else {
@@ -226,7 +250,7 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
               this.toastr.success('Business idea status has been updated.', 'Updated!');
               this.closeStatusUpdateModal();
               this.loadBusinessIdeas();
-              this.loadIdeasCount(); 
+              this.loadIdeasCount();
             } else {
               this.toastr.error(res.message || 'Failed to update status.', 'Error!');
               if (res.message && res.message.toLowerCase().includes('rejected status requires a reason')) {
@@ -250,39 +274,75 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
   }
 
   toggleAdvancedSearch(event: Event): void {
-    event.stopPropagation(); 
+    event.stopPropagation();
     this.isAdvancedSearchOpen = !this.isAdvancedSearchOpen;
+    this.tempCategoryFilter = this.searchParams.categoryId ?? null;
+    this.tempStatusFilter = this.searchParams.status ?? null;
+    this.dropdownStates = this.dropdownStates.map(() => false);
   }
 
+  clearAdvancedSearch(): void {
+    this.tempCategoryFilter = null;
+    this.tempStatusFilter = null;
+  }
 
   applyAdvancedSearch(): void {
-    this.onSearch(); 
-    this.isAdvancedSearchOpen = false; 
+    this.searchParams.categoryId = this.tempCategoryFilter === null ? undefined : this.tempCategoryFilter;
+    this.searchParams.status = this.tempStatusFilter === null ? undefined : this.tempStatusFilter;
+    this.searchParams.stage = this.searchParams.stage === undefined ? undefined : this.searchParams.stage;
+    this.onSearch();
+    this.isAdvancedSearchOpen = false;
+    this.dropdownStates = this.dropdownStates.map(() => false);
   }
-openViewDetailsModal(idea: BusinessDto): void {
-        this.selectedIdeaForDetails = idea;
-        this.isViewDetailsModalOpen = true;
-        this.dropdownStates = this.dropdownStates.map(() => false);
-    }
 
-    closeViewDetailsModal(): void {
-        this.isViewDetailsModalOpen = false;
-        this.selectedIdeaForDetails = null;
-    }
-    getDigitsArray(number: number): string[] {
+  openViewDetailsModal(idea: BusinessDto): void {
+    this.selectedIdeaForDetails = idea;
+    this.isViewDetailsModalOpen = true;
+    this.dropdownStates = this.dropdownStates.map(() => false);
+    this.activeTab = 'details';
+  }
+
+  closeViewDetailsModal(): void {
+    this.isViewDetailsModalOpen = false;
+    this.selectedIdeaForDetails = null;
+    this.activeTab = 'details'; 
+  }
+
+  getDigitsArray(number: number): string[] {
     return number.toString().split('');
   }
-loadIdeasCount(){
-  var sum= this.businessService.GetBusinessIdeasCounts().subscribe({
-    next:(response)=>{
-      this.displayActiveCount=response.data.totalActive;
-      this.displayInactiveCount=response.data.totalInactive
-      this.displayPendingCount=response.data.totalPending
-      this.displayRejectedCount=response.data.totalRejected
-    },error:(err)=>{
-       console.log(err);
-    }
-  })
+
+  loadIdeasCount() {
+    var sum = this.businessService.GetBusinessIdeasCounts().subscribe({
+      next: (response) => {
+        this.displayActiveCount = response.data.totalActive;
+        this.displayInactiveCount = response.data.totalInactive
+        this.displayPendingCount = response.data.totalPending
+        this.displayRejectedCount = response.data.totalRejected
+      }, error: (err) => {
+        console.log(err);
+      }
+    })
+  }
+
+ getFileDownloadUrl(filePath: string): string {
+  const cleanFilePath = filePath.startsWith('/') ? filePath.substring(1) : filePath;
+  return `${environment.apiUrl}/${cleanFilePath}`;
+}
+
+get filteredBusinessIdeas(): BusinessDto[] {
+  if (!this.businessIdeas) return [];
+  let filtered = this.businessIdeas;
+  if (this.searchParams.status != null && this.searchParams.status !== undefined) {
+    filtered = filtered.filter(idea => idea.status === this.searchParams.status);
+  }
+  if (this.searchParams.categoryId != null && this.searchParams.categoryId !== undefined) {
+    filtered = filtered.filter(idea => idea.categoryId === this.searchParams.categoryId);
+  }
+  if (this.searchParams.stage != null && this.searchParams.stage !== undefined) {
+    filtered = filtered.filter(idea => idea.stage === this.searchParams.stage);
+  }
+  return filtered;
 }
 
 }

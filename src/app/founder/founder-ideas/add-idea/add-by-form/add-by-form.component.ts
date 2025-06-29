@@ -219,7 +219,7 @@ onSubmit(): void {
   
   standardAnswers.forEach((standard, index) => {
     formPayload.append(`BusinessStandardAnswers[${index}].StandardId`, standard.StandardId.toString());
-    formPayload.append(`BusinessStandardAnswers[${index}].Answer`, standard.Answer);
+    formPayload.append(`BusinessStandardAnswers[${index}].Answer`, standard.answer);
   });
 
 
@@ -273,7 +273,7 @@ console.log("Standards structure:", this.standards);
   
   standardAnswers.forEach((standard, index) => {
     formPayload.append(`BusinessStandardAnswers[${index}].StandardId`, standard.StandardId.toString());
-    formPayload.append(`BusinessStandardAnswers[${index}].Answer`, standard.Answer);
+    formPayload.append(`BusinessStandardAnswers[${index}].Answer`, standard.answer);
   });
 
 
