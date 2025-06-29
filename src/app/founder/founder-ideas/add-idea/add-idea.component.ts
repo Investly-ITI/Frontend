@@ -379,7 +379,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
     
     standardAnswers.forEach((standard, index) => {
       formPayload.append(`BusinessStandardAnswers[${index}].StandardId`, standard.StandardId.toString());
-      formPayload.append(`BusinessStandardAnswers[${index}].Answer`, standard.Answer);
+      formPayload.append(`BusinessStandardAnswers[${index}].Answer`, standard.answer);
     });
 
     // Add document if selected

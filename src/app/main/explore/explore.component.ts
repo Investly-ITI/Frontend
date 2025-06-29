@@ -115,20 +115,31 @@ export class ExploreComponent implements OnInit {
   // Generate sample data for demo
   generateSampleData() {
     // Extended BusinessDto to include imageUrl as a dynamic property
-    this.businesses = [
-      Object.assign(new BusinessDto(1, 1, 1, 'AI-Powered Health Monitoring App', 85, InvestingStages.startup, 'Cairo', 150000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-15', 'Technology', 'Ahmed Hassan', 1, 1, 'Revolutionary healthcare app that uses AI to monitor vital signs and predict health issues before they become serious.'), { imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop' }),
-      Object.assign(new BusinessDto(2, 2, 2, 'Sustainable Urban Farming', 92, InvestingStages.intermediate, 'Alexandria', 300000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-20', 'Agriculture', 'Fatima Al-Rashid', 2, 2, 'Vertical farming solution for urban areas using hydroponics and renewable energy sources.'), { imageUrl: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop' }),
-      Object.assign(new BusinessDto(3, 3, 1, 'Blockchain Supply Chain Platform', 78, InvestingStages.advanced, 'Giza', 500000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-10', 'Technology', 'Mohamed Ali', 3, 3, 'Complete transparency in supply chain management using blockchain technology and IoT sensors.'), { imageUrl: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=300&fit=crop' }),
-      Object.assign(new BusinessDto(4, 4, 3, 'Virtual Reality Education Platform', 88, InvestingStages.startup, 'Luxor', 200000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-25', 'Education', 'Sara Mohamed', 4, 4, 'Immersive VR learning experiences for students of all ages with interactive 3D environments.'), { imageUrl: 'https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?w=400&h=300&fit=crop' }),
-      Object.assign(new BusinessDto(5, 5, 2, 'Solar-Powered Water Purification', 95, InvestingStages.ideation, 'Aswan', 100000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-02-01', 'Clean Energy', 'Omar Farouk', 5, 5, 'Portable solar-powered water purification systems for rural and emergency use.'), { imageUrl: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=400&h=300&fit=crop' }),
-      Object.assign(new BusinessDto(6, 6, 4, 'Smart Home Automation Hub', 82, InvestingStages.intermediate, 'Cairo', 250000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-30', 'Smart Home', 'Layla Ibrahim', 1, 1, 'All-in-one smart home solution with AI-powered automation and energy optimization.'), { imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop' }),
-      Object.assign(new BusinessDto(7, 7, 1, 'Telemedicine Platform for Rural Areas', 90, InvestingStages.advanced, 'Minya', 400000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-18', 'Healthcare', 'Youssef Ahmed', 6, 6, 'Connecting rural patients with healthcare professionals through advanced telemedicine technology.'), { imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=300&fit=crop' }),
-      Object.assign(new BusinessDto(8, 8, 3, 'Eco-Friendly Packaging Solutions', 87, InvestingStages.startup, 'Port Said', 180000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-02-05', 'Environmental', 'Nour El-Din', 7, 7, 'Biodegradable packaging materials made from agricultural waste and natural fibers.'), { imageUrl: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=400&h=300&fit=crop' }),
-      Object.assign(new BusinessDto(9, 9, 2, 'AI-Driven Financial Advisory', 91, InvestingStages.intermediate, 'Suez', 350000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-22', 'Fintech', 'Hania Mahmoud', 8, 8, 'Personal finance management with AI-powered investment recommendations and risk assessment.'), { imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop' }),
-      Object.assign(new BusinessDto(10, 10, 4, 'Digital Marketplace for Artisans', 84, InvestingStages.ideation, 'Ismailia', 120000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-02-08', 'E-commerce', 'Amr Mostafa', 9, 9, 'Online platform connecting traditional artisans with global customers and providing business tools.'), { imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop' }),
-      Object.assign(new BusinessDto(11, 11, 1, 'Autonomous Delivery Drones', 89, InvestingStages.advanced, 'Sharm El Sheikh', 600000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-12', 'Logistics', 'Rana Salah', 10, 10, 'Last-mile delivery solution using AI-powered drones for efficient and cost-effective shipping.'), { imageUrl: 'https://images.unsplash.com/photo-1508614999368-9260051292e5?w=400&h=300&fit=crop' }),
-      Object.assign(new BusinessDto(12, 12, 3, 'Mental Health Support App', 86, InvestingStages.startup, 'Hurghada', 140000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-02-03', 'Healthcare', 'Karim El-Sayed', 11, 11, 'AI-powered mental health support with personalized therapy sessions and crisis intervention.'), { imageUrl: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=300&fit=crop' })
-    ];
+this.businesses = [
+  Object.assign(new BusinessDto(1, 1, 'Ahmed Hassan', 1, 'Technology', 'AI-Powered Health Monitoring App', 85, InvestingStages.startup, 'Cairo', 150000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-15', undefined, undefined, undefined, undefined, 1, 1, 'Revolutionary healthcare app that uses AI to monitor vital signs and predict health issues before they become serious.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop' }),
+
+  Object.assign(new BusinessDto(2, 2, 'Fatima Al-Rashid', 2, 'Agriculture', 'Sustainable Urban Farming', 92, InvestingStages.intermediate, 'Alexandria', 300000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-20', undefined, undefined, undefined, undefined, 2, 2, 'Vertical farming solution for urban areas using hydroponics and renewable energy sources.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop' }),
+
+  Object.assign(new BusinessDto(3, 3, 'Mohamed Ali', 1, 'Technology', 'Blockchain Supply Chain Platform', 78, InvestingStages.advanced, 'Giza', 500000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-10', undefined, undefined, undefined, undefined, 3, 3, 'Complete transparency in supply chain management using blockchain technology and IoT sensors.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=300&fit=crop' }),
+
+  Object.assign(new BusinessDto(4, 4, 'Sara Mohamed', 3, 'Education', 'Virtual Reality Education Platform', 88, InvestingStages.startup, 'Luxor', 200000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-25', undefined, undefined, undefined, undefined, 4, 4, 'Immersive VR learning experiences for students of all ages with interactive 3D environments.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?w=400&h=300&fit=crop' }),
+
+  Object.assign(new BusinessDto(5, 5, 'Omar Farouk', 2, 'Clean Energy', 'Solar-Powered Water Purification', 95, InvestingStages.ideation, 'Aswan', 100000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-02-01', undefined, undefined, undefined, undefined, 5, 5, 'Portable solar-powered water purification systems for rural and emergency use.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=400&h=300&fit=crop' }),
+
+  Object.assign(new BusinessDto(6, 6, 'Layla Ibrahim', 4, 'Smart Home', 'Smart Home Automation Hub', 82, InvestingStages.intermediate, 'Cairo', 250000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-30', undefined, undefined, undefined, undefined, 1, 1, 'All-in-one smart home solution with AI-powered automation and energy optimization.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop' }),
+
+  Object.assign(new BusinessDto(7, 7, 'Youssef Ahmed', 1, 'Healthcare', 'Telemedicine Platform for Rural Areas', 90, InvestingStages.advanced, 'Minya', 400000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-18', undefined, undefined, undefined, undefined, 6, 6, 'Connecting rural patients with healthcare professionals through advanced telemedicine technology.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=300&fit=crop' }),
+
+  Object.assign(new BusinessDto(8, 8, 'Nour El-Din', 3, 'Environmental', 'Eco-Friendly Packaging Solutions', 87, InvestingStages.startup, 'Port Said', 180000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-02-05', undefined, undefined, undefined, undefined, 7, 7, 'Biodegradable packaging materials made from agricultural waste and natural fibers.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=400&h=300&fit=crop' }),
+
+  Object.assign(new BusinessDto(9, 9, 'Hania Mahmoud', 2, 'Fintech', 'AI-Driven Financial Advisory', 91, InvestingStages.intermediate, 'Suez', 350000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-22', undefined, undefined, undefined, undefined, 8, 8, 'Personal finance management with AI-powered investment recommendations and risk assessment.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop' }),
+
+  Object.assign(new BusinessDto(10, 10, 'Amr Mostafa', 4, 'E-commerce', 'Digital Marketplace for Artisans', 84, InvestingStages.ideation, 'Ismailia', 120000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-02-08', undefined, undefined, undefined, undefined, 9, 9, 'Online platform connecting traditional artisans with global customers and providing business tools.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop' }),
+
+  Object.assign(new BusinessDto(11, 11, 'Rana Salah', 1, 'Logistics', 'Autonomous Delivery Drones', 89, InvestingStages.advanced, 'Sharm El Sheikh', 600000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-12', undefined, undefined, undefined, undefined, 10, 10, 'Last-mile delivery solution using AI-powered drones for efficient and cost-effective shipping.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1508614999368-9260051292e5?w=400&h=300&fit=crop' }),
+
+  Object.assign(new BusinessDto(12, 12, 'Karim El-Sayed', 3, 'Healthcare', 'Mental Health Support App', 86, InvestingStages.startup, 'Hurghada', 140000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-02-03', undefined, undefined, undefined, undefined, 11, 11, 'AI-powered mental health support with personalized therapy sessions and crisis intervention.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=300&fit=crop' })
+];
 
     this.filteredBusinesses = [...this.businesses];
     this.totalItems = this.businesses.length;
@@ -143,8 +154,8 @@ export class ExploreComponent implements OnInit {
       if (formValues.searchInput) {
         const searchLower = formValues.searchInput.toLowerCase();
         const matchesSearch = 
-          business.title.toLowerCase().includes(searchLower) ||
-          business.Description?.toLowerCase().includes(searchLower) ||
+          business.title?.toLowerCase().includes(searchLower) ||
+          business.description?.toLowerCase().includes(searchLower) ||
           business.founderName?.toLowerCase().includes(searchLower) ||
           business.categoryName?.toLowerCase().includes(searchLower);
         if (!matchesSearch) return false;
@@ -161,7 +172,7 @@ export class ExploreComponent implements OnInit {
       }
 
       // Governorate filter
-      if (formValues.governorateId && business.GovernmentId !== formValues.governorateId) {
+      if (formValues.governorateId && business.governmentId !== formValues.governorateId) {
         return false;
       }
 
