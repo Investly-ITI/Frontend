@@ -95,46 +95,47 @@
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group editable">
-              <label class="form-label" for="countryCode">Country Code</label>
-              <select 
-                id="countryCode" 
-                class="form-control" 
-                [(ngModel)]="personalInfo.countryCode"
-                (ngModelChange)="onFieldChange()"
-                name="countryCode"
-                [disabled]="isSaving"
-              >
-                <option value="+20">+20 (Egypt)</option>
-                <option value="+1">+1 (United States)</option>
-                <option value="+44">+44 (United Kingdom)</option>
-                <option value="+49">+49 (Germany)</option>
-                <option value="+33">+33 (France)</option>
-                <option value="+39">+39 (Italy)</option>
-                <option value="+34">+34 (Spain)</option>
-                <option value="+86">+86 (China)</option>
-                <option value="+81">+81 (Japan)</option>
-                <option value="+91">+91 (India)</option>
-              </select>
-            </div>
-            <div class="form-group editable">
-              <label class="form-label" for="phoneNumber">Phone Number</label>
-              <input 
-                type="tel" 
-                id="phoneNumber" 
-                class="form-control" 
-                [class.invalid]="!isPhoneNumberValid()"
-                [(ngModel)]="personalInfo.phoneNumber"
-                (ngModelChange)="onFieldChange()"
-                name="phoneNumber"
-                [disabled]="isSaving"
-              >
-              <div class="error-message" *ngIf="!isPhoneNumberValid()">
-                {{ getFieldErrorMessage('phoneNumber') }}
+            <div class="form-row">
+              <div class="form-group editable">
+                <label class="form-label" for="countryCode">Country Code</label>
+                <select 
+                  id="countryCode" 
+                  class="form-control" 
+                  [(ngModel)]="personalInfo.countryCode"
+                  (ngModelChange)="onFieldChange()"
+                  name="countryCode"
+                  [disabled]="isSaving"
+                >
+                  <option value="+20">+20 (Egypt)</option>
+                  <option value="+1">+1 (United States)</option>
+                  <option value="+44">+44 (United Kingdom)</option>
+                  <option value="+49">+49 (Germany)</option>
+                  <option value="+33">+33 (France)</option>
+                  <option value="+39">+39 (Italy)</option>
+                  <option value="+34">+34 (Spain)</option>
+                  <option value="+86">+86 (China)</option>
+                  <option value="+81">+81 (Japan)</option>
+                  <option value="+91">+91 (India)</option>
+                </select>
+              </div>
+              <div class="form-group editable">
+                <label class="form-label" for="phoneNumber">Phone Number</label>
+                <input 
+                  type="tel" 
+                  id="phoneNumber" 
+                  class="form-control" 
+                  [class.invalid]="!isPhoneNumberValid()"
+                  [(ngModel)]="personalInfo.phoneNumber"
+                  (ngModelChange)="onFieldChange()"
+                  name="phoneNumber"
+                  [disabled]="isSaving"
+                  placeholder="e.g. 1289253802"
+                >
+                <div class="error-message" *ngIf="!isPhoneNumberValid()">
+                  {{ getFieldErrorMessage('phoneNumber') }}
+                </div>
               </div>
             </div>
-          </div>
 
           <div class="form-group editable">
             <label class="form-label" for="street">Street Address</label>

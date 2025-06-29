@@ -72,6 +72,24 @@ export class FounderInformationComponent implements OnInit, OnChanges {
           const founder = response.data;
           const user = founder.user;
           
+          // Parse phone number into country code and number
+          let countryCode = '+20'; // default to Egypt
+          let phoneNumber = user.phoneNumber || '';
+          
+          // Check if phone number starts with a country code
+          if (phoneNumber) {
+            // Common country codes we support
+            const countryCodes = ['+20', '+1', '+44', '+49', '+33', '+39', '+34', '+86', '+81', '+91'];
+            
+            // Find if phone number starts with any known country code
+            const matchedCode = countryCodes.find(code => phoneNumber.startsWith(code));
+            
+            if (matchedCode) {
+              countryCode = matchedCode;
+              phoneNumber = phoneNumber.substring(matchedCode.length);
+            }
+          }
+
           // Update the personalInfo with the fetched data
           this.personalInfo = {
             ...this.personalInfo,
@@ -79,7 +97,8 @@ export class FounderInformationComponent implements OnInit, OnChanges {
             lastName: user.lastName,
             email: user.email,
             dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
-            phoneNumber: user.phoneNumber,
+            countryCode: countryCode,
+            phoneNumber: phoneNumber,
             nationalId: user.nationalId,
             gender: user.gender,
             government: user.government?.nameEn || '',
@@ -342,15 +361,38 @@ export class FounderInformationComponent implements OnInit, OnChanges {
 
   isPhoneNumberValid(): boolean {
     const phoneNumber = this.personalInfo.phoneNumber?.trim() || '';
-    if (!phoneNumber) return false; // Empty phone number is invalid
-    const phoneRegex = /^\d{10}$/;
-    return phoneRegex.test(phoneNumber);
+    if (!phoneNumber) return false;
+    
+    // Remove any non-digit characters
+    const digitsOnly = phoneNumber.replace(/\D/g, '');
+    
+    // Validate based on country code
+    switch (this.personalInfo.countryCode) {
+      case '+20': // Egypt
+        return digitsOnly.length === 10 && digitsOnly.startsWith('1');
+      case '+1': // US/Canada
+        return digitsOnly.length === 10;
+      case '+44': // UK
+      case '+49': // Germany
+      case '+33': // France
+      case '+39': // Italy
+      case '+34': // Spain
+        return digitsOnly.length >= 9 && digitsOnly.length <= 11;
+      default:
+        return digitsOnly.length >= 5;
+    }
   }
 
 
 
   getFieldErrorMessage(field: string): string {
       switch (field) {
+          case 'phoneNumber':
+            if (!this.personalInfo.phoneNumber) return 'Phone number is required';
+            if (this.personalInfo.countryCode === '+20' && !/^1\d{9}$/.test(this.personalInfo.phoneNumber)) {
+              return 'Egyptian phone number must be 10 digits starting with 1';
+            }
+            return 'Please enter a valid phone number';
           case 'firstName':
               return !this.personalInfo.firstName ? 'First name is required' : '';
           case 'lastName':
@@ -379,7 +421,7 @@ export class FounderInformationComponent implements OnInit, OnChanges {
           const updateData = new UpdateFounder(
               this.personalInfo.firstName,
               this.personalInfo.lastName,
-              this.personalInfo.countryCode + this.personalInfo.phoneNumber,
+              this.personalInfo.countryCode + this.personalInfo.phoneNumber, // Combine them here
               this.personalInfo.gender || null,
               this.personalInfo.governmentId || null,
               this.personalInfo.cityId || null,
