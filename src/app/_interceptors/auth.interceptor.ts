@@ -1,7 +1,7 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn, HttpResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 
-import { catchError, throwError } from 'rxjs';
+import { catchError, tap, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from '../_services/auth.service';
 import {  JwtService } from '../_services/jwt.service';
@@ -19,6 +19,28 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     });
   }
   return next(authReq).pipe(
+    tap({
+      next:(event)=>{
+        if(event instanceof HttpResponse){
+          const body = event.body as { refreshTokenRequired?: boolean };
+          if(body?.refreshTokenRequired) {
+            jwtService.refreshToken().subscribe({
+              next:(res)=>{
+                if (res.data) {
+                  authService.login(res.data);
+                  location.reload();
+                }
+              },
+              error:(err)=>{
+                 authService.logout();
+                location.reload();
+              }
+            });
+          }
+        }
+      }
+
+    }) ,
     catchError(err=>{
       if(err.status===403||err.status===401){
         authService.logout();
