@@ -39,8 +39,8 @@ export class FeedbackService {
   }
 
 
-   updateFeedbackStatus(id: number, actionType: string): Observable<Response<object>> {
-    const params = new HttpParams().set('actionType', actionType);
+   updateFeedbackStatus(id: number, actionType: number): Observable<Response<object>> {
+    const params = new HttpParams().set('actionType', actionType.toString());
     return this.http.put<Response<object>>(`${this.baseUrl}/${id}/status-update`, {}, { params });
   }
 

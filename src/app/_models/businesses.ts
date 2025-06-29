@@ -58,10 +58,10 @@ export class BusinessSearchDto {
     constructor(
         public pageSize: number = 10,
         public pageNumber: number = 1,
-        public searchInput?: string,
+        public search?: string,
         public categoryId?: number,
         public founderId?: number,
         public stage?: InvestingStages,
-        public status?: BusinessIdeaStatus // Added for status filtering
+        public status?: BusinessIdeaStatus
     ) { }
 }
