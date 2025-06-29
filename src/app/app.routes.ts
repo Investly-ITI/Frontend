@@ -5,6 +5,7 @@ import { LoginComponent } from './account/login/login.component';
 import { LoginStaffComponent } from './account/login-staff/login-staff.component';
 import { SignupComponent } from './account/signup/signup.component';
 import { LandingPageComponent } from './main/landing-page/landing-page.component';
+import { ExploreComponent } from './main/explore/explore.component';
 import { MainLayoutComponent } from './_shared/components/main-layout.component';
 import { adminGuard } from './_guards/admin.guard';
 import { BusinessIdeasComponent } from './admin/business-ideas/business-ideas.component';
@@ -15,6 +16,7 @@ import { NotificationsComponent } from './admin/notifications/notifications.comp
 import { ContactRequestComponent } from './admin/contact-request/contact-request.component';
 import { NoAuthGuard } from './_guards/no-auth.guard';
 import { clientGuard } from './_guards/client.guard';
+import { FeedbacksComponent } from './admin/feedback/feedback.component';
 
 export const routes: Routes = [
    // Authentication routes (no layout - full screen)
@@ -30,7 +32,7 @@ export const routes: Routes = [
          { path: '', component: LandingPageComponent, title: 'Investly - Home' },
          { path: 'founder/profile',canActivate:[clientGuard], component: FounderProfileComponent, title: 'Profile - Investly' },
          { path: 'investor/profile',canActivate:[clientGuard], component: InvestorProfileComponent, title: 'Profile - Investly' },
-      
+         { path: 'explore', component: ExploreComponent, title: 'Explore Ideas - Investly' },
      
       ]
    },
@@ -44,6 +46,7 @@ export const routes: Routes = [
       {path:'',redirectTo:'investor',pathMatch:'full'},
       {path:'founder',component:FounderComponent, title: 'Founder Management'},
        {path:'notification',component:NotificationsComponent, title: 'Notifcation Management'},
+       {path:'feedbacks',component:FeedbacksComponent, title: 'Feedbacks Management'},
       
       {path:'Contact-Request',component:ContactRequestComponent, title: 'Investor Contact Request'},
      

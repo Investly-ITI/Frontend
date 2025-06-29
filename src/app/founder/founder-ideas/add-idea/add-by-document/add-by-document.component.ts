@@ -205,8 +205,7 @@ public loadCategories()
             formPayload.append(key, value);
           }
         }
-      
-   
+        
       if (this.uploadedFile) {
         
         formPayload.append('IdeaFile', this.uploadedFile);

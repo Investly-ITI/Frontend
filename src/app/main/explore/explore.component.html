@@ -1,0 +1,408 @@
+<!-- ========================================
+     EXPLORE PAGE CONTAINER
+======================================== -->
+<div class="explore-page">
+  
+  <!-- ========================================
+       HERO SECTION WITH SEARCH
+  ======================================== -->
+  <section class="explore-hero">
+    <div class="hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title">Explore Investment Opportunities</h1>
+        <p class="hero-description">Discover innovative business ideas and connect with promising entrepreneurs</p>
+        
+        <!-- Quick Search Bar -->
+        <div class="quick-search">
+          <form [formGroup]="searchForm">
+            <div class="search-input-container">
+              <i class='bx bx-search'></i>
+              <input 
+                type="text" 
+                placeholder="Search ideas, founders, or categories..."
+                formControlName="searchInput"
+                class="search-input">
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       FILTERS AND CONTROLS SECTION
+  ======================================== -->
+  <section class="filters-section">
+    <div class="filters-container">
+      
+      <!-- Filter Header -->
+      <div class="filters-header">
+        <div class="results-info">
+          <span class="results-count">{{ totalItems }}</span>
+          <span class="results-label">investment opportunities found</span>
+        </div>
+        
+        <div class="header-controls">
+          <!-- Filters Toggle Button -->
+          <button 
+            class="filters-toggle-btn"
+            (click)="toggleFilters()"
+            title="Toggle Filters">
+            <i class='bx bx-filter-alt'></i>
+            <span>Filters</span>
+            <i class='bx' [class.bx-chevron-down]="!isFiltersExpanded" [class.bx-chevron-up]="isFiltersExpanded"></i>
+          </button>
+          
+          <!-- View Toggle Buttons -->
+          <div class="view-controls">
+            <button 
+              class="view-btn" 
+              [class.active]="isGridView"
+              (click)="toggleView('grid')"
+              title="Grid View">
+              <i class='bx bx-grid-alt'></i>
+            </button>
+            <button 
+              class="view-btn" 
+              [class.active]="isCarouselView"
+              (click)="toggleView('carousel')"
+              title="Carousel View">
+              <i class='bx bx-carousel'></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced Filters (Accordion) -->
+      <div class="filters-accordion" [class.expanded]="isFiltersExpanded">
+        <form [formGroup]="searchForm" class="filters-form">
+        <div class="filters-grid">
+          
+          <!-- Category Filter -->
+          <div class="filter-group">
+            <label for="category">Category</label>
+            <select id="category" formControlName="categoryId" class="filter-select">
+              <option value="">All Categories</option>
+              <option *ngFor="let category of categories" [value]="category.id">
+                {{ category.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Stage Filter -->
+          <div class="filter-group">
+            <label for="stage">Business Stage</label>
+            <select id="stage" formControlName="stage" class="filter-select">
+              <option value="">All Stages</option>
+              <option *ngFor="let stage of stageOptions" [value]="stage.value">
+                {{ stage.label }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Location Filter -->
+          <div class="filter-group">
+            <label for="location">Location</label>
+            <select id="location" formControlName="governorateId" class="filter-select">
+              <option value="">All Locations</option>
+              <option *ngFor="let gov of governorates" [value]="gov.id">
+                {{ gov.nameEn }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Funding Range -->
+          <div *ngIf="shouldShowFunding()" class="filter-group funding-range">
+            <label>Funding Needed</label>
+            <div class="range-inputs">
+              <input 
+                type="number" 
+                placeholder="Min ($)"
+                formControlName="minFunding"
+                class="range-input">
+              <span class="range-separator">-</span>
+              <input 
+                type="number" 
+                placeholder="Max ($)"
+                formControlName="maxFunding"
+                class="range-input">
+            </div>
+          </div>
+
+          <!-- AI Rating Filter -->
+          <div class="filter-group">
+            <label for="aiRate">Min AI Rating</label>
+            <select id="aiRate" formControlName="minAiRate" class="filter-select">
+              <option value="">Any Rating</option>
+              <option value="70">70+ Excellent</option>
+              <option value="80">80+ Outstanding</option>
+              <option value="90">90+ Exceptional</option>
+            </select>
+          </div>
+
+          <!-- Investment Type Filter -->
+          <div class="filter-group">
+            <label for="investmentType">Investment Type</label>
+            <select id="investmentType" formControlName="investmentType" class="filter-select">
+              <option value="">All Types</option>
+              <option *ngFor="let type of investmentTypeOptions" [value]="type.value">
+                {{ type.label }}
+              </option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Filter Actions -->
+        <div class="filter-actions">
+          <button type="button" class="btn btn-secondary" (click)="clearFilters()">
+            <i class='bx bx-refresh'></i>
+            <span>Clear Filters</span>
+          </button>
+        </div>
+      </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================
+       BUSINESS CARDS SECTION
+  ======================================== -->
+  <section class="businesses-section">
+    <div class="businesses-container">
+      
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading investment opportunities...</p>
+      </div>
+
+      <!-- Grid View -->
+      <div *ngIf="!isLoading && isGridView" class="businesses-grid">
+        <div 
+          *ngFor="let business of getPaginatedBusinesses()" 
+          class="business-card"
+          [attr.data-aos]="'fade-up'">
+          
+          <!-- Card Header -->
+          <div class="card-header">
+            <div class="business-stage">
+              <span class="stage-badge" [attr.data-stage]="getStageLabel(business.stage || 1).toLowerCase()">
+                {{ getStageLabel(business.stage || 1) }}
+              </span>
+            </div>
+            <div class="ai-rating">
+              <i class='bx bx-brain'></i>
+              <span>{{ business.airate }}%</span>
+            </div>
+          </div>
+
+          <!-- Card Image -->
+          <div class="card-image">
+            <img 
+              [src]="getBusinessImage(business)" 
+              [alt]="business.title" 
+              class="business-image"
+              loading="lazy">
+          </div>
+
+          <!-- Card Content -->
+          <div class="card-content">
+            <h3 class="business-title">{{ business.title }}</h3>
+            <p class="business-description">{{ business.description }}</p>
+            
+            <!-- Business Details -->
+            <div class="business-details">
+              <div class="detail-item">
+                <i class='bx bx-category'></i>
+                <span>{{ business.categoryName }}</span>
+              </div>
+              <div class="detail-item">
+                <i class='bx bx-map'></i>
+                <span>{{ business.location }}</span>
+              </div>
+              <div class="detail-item">
+                <i class='bx bx-user'></i>
+                <span>{{ business.founderName }}</span>
+              </div>
+            </div>
+
+            <!-- Funding Information -->
+            <div *ngIf="shouldShowFunding()" class="funding-info">
+              <div class="funding-amount">
+                <span class="amount">{{ business.capital || 0 }} EGP</span>
+                <span class="label">Funding Needed</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Footer (Hidden, shows on hover) -->
+          <div class="card-footer">
+            <button class="btn btn-primary btn-small">
+              <i class='bx bx-info-circle'></i>
+              <span>View Details</span>
+            </button>
+            <button class="btn btn-secondary btn-small">
+              <i class='bx bx-envelope'></i>
+              <span>Contact</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Carousel View -->
+      <div *ngIf="!isLoading && isCarouselView" class="businesses-carousel">
+        <div class="carousel-header">
+          <h3>Browse Investment Opportunities</h3>
+          <div class="carousel-controls">
+            <button 
+              class="carousel-btn carousel-prev"
+              [disabled]="!canGoPrev()"
+              (click)="prevCarousel()">
+              <i class='bx bx-chevron-left'></i>
+            </button>
+            <span class="carousel-counter">
+              {{ currentCarouselIndex + 1 }} - {{ Math.min(currentCarouselIndex + carouselItemsPerView, filteredBusinesses.length) }} 
+              of {{ filteredBusinesses.length }}
+            </span>
+            <button 
+              class="carousel-btn carousel-next"
+              [disabled]="!canGoNext()"
+              (click)="nextCarousel()">
+              <i class='bx bx-chevron-right'></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="carousel-content">
+          <div class="carousel-viewport">
+            <div class="carousel-track" [style.transform]="getCarouselTransform()">
+              <div 
+                *ngFor="let business of getCarouselBusinesses(); let i = index" 
+                class="carousel-item">
+              
+              <!-- Carousel Card -->
+              <div class="business-card carousel-card">
+                <div class="card-header">
+                  <div class="business-stage">
+                    <span class="stage-badge" [attr.data-stage]="getStageLabel(business.stage || 1).toLowerCase()">
+                      {{ getStageLabel(business.stage || 1) }}
+                    </span>
+                  </div>
+                  <div class="ai-rating">
+                    <i class='bx bx-brain'></i>
+                    <span>{{ business.airate }}%</span>
+                  </div>
+                </div>
+
+                <div class="card-image">
+                  <img 
+                    [src]="getBusinessImage(business)" 
+                    [alt]="business.title" 
+                    class="business-image"
+                    loading="lazy">
+                </div>
+
+                <div class="card-content">
+                  <h3 class="business-title">{{ business.title }}</h3>
+                  <p class="business-description">{{ business.description }}</p>
+                  
+                  <div class="business-details">
+                    <div class="detail-item">
+                      <i class='bx bx-category'></i>
+                      <span>{{ business.categoryName }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <i class='bx bx-map'></i>
+                      <span>{{ business.location }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <i class='bx bx-user'></i>
+                      <span>{{ business.founderName }}</span>
+                    </div>
+                  </div>
+
+                  <div *ngIf="shouldShowFunding()" class="funding-info">
+                    <div class="funding-amount">
+                      <span class="amount">{{ business.capital || 0 }} EGP</span>
+                      <span class="label">Funding Needed</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card-footer">
+                  <button class="btn btn-primary btn-small">
+                    <i class='bx bx-info-circle'></i>
+                    <span>View Details</span>
+                  </button>
+                  <button class="btn btn-secondary btn-small">
+                    <i class='bx bx-envelope'></i>
+                    <span>Contact</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && filteredBusinesses.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class='bx bx-search-alt'></i>
+        </div>
+        <h3>No results found</h3>
+        <p>Try adjusting your search criteria or clearing some filters</p>
+        <button class="btn btn-primary" (click)="clearFilters()">
+          <i class='bx bx-refresh'></i>
+          <span>Clear All Filters</span>
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================
+       PAGINATION SECTION
+  ======================================== -->
+  <section *ngIf="totalPages > 1" class="pagination-section">
+    <div class="pagination-container">
+      <nav class="pagination">
+        
+        <!-- Previous Button -->
+        <button 
+          class="page-btn page-prev" 
+          [disabled]="currentPage === 1"
+          (click)="changePage(currentPage - 1)">
+          <i class='bx bx-chevron-left'></i>
+          <span>Previous</span>
+        </button>
+
+        <!-- Page Numbers -->
+        <div class="page-numbers">
+          <button 
+            *ngFor="let page of getPageNumbers()"
+            class="page-btn page-number"
+            [class.active]="page === currentPage"
+            (click)="changePage(page)">
+            {{ page }}
+          </button>
+        </div>
+
+        <!-- Next Button -->
+        <button 
+          class="page-btn page-next"
+          [disabled]="currentPage === totalPages"
+          (click)="changePage(currentPage + 1)">
+          <span>Next</span>
+          <i class='bx bx-chevron-right'></i>
+        </button>
+
+      </nav>
+    </div>
+  </section>
+
+</div> 
