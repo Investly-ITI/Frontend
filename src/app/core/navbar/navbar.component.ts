@@ -7,6 +7,7 @@ import { UserType,Status } from '../../_shared/enums';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { NotificationService } from '../../_services/notification.service';
+import { FounderNotificationService } from '../../founder/_services/founder-notification.service';
 
 @Component({
   selector: 'app-navbar',
@@ -22,9 +23,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
   UserType = UserType; 
   Status=Status;
   notifcationCount=0;
-  
-  showProfileAlert = true; // Set to true to show red exclamation mark
+  private founderUnreadCountSub?: Subscription;
 
+  showProfileAlert = true; // Set to true to show red exclamation mark
 
   
   private subscriptions: Subscription[] = [];
@@ -32,30 +33,35 @@ export class NavbarComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private notificationService:NotificationService
+    private notificationService: NotificationService,
+    private founderNotificationService: FounderNotificationService
   ) {}
 
   ngOnInit() {
     const authSub = this.authService.isAuthenticated$.subscribe(
       isAuth => this.isAuthenticated = isAuth
     );
-    
     const userSub = this.authService.CurrentUser$.subscribe(
       user => this.currentUser = user
-   
     );
-     this.showProfileAlert=this.currentUser?.status!=Status.Active?true:false;
-     const subNoti= this.notificationService.getUnreadCount$().subscribe((count)=>{
-      this.notifcationCount=count;
-     })
-      
-    console.log(this.notifcationCount);
-    this.subscriptions.push(subNoti);
-    
+    this.showProfileAlert = this.currentUser?.status != Status.Active ? true : false;
+    // Use founder notification count for founders
+    if (this.currentUser?.userType === UserType.Founder) {
+      this.founderUnreadCountSub = this.founderNotificationService.unreadCount$.subscribe(count => {
+        this.notifcationCount = count;
+      });
+      this.founderNotificationService.refreshUnreadCount();
+    } else {
+      const subNoti = this.notificationService.getUnreadCount$().subscribe((count) => {
+        this.notifcationCount = count;
+      });
+      this.subscriptions.push(subNoti);
+    }
     this.subscriptions.push(authSub, userSub);
   }
 
   ngOnDestroy() {
+    this.founderUnreadCountSub?.unsubscribe();
     // Clean up subscriptions
     this.subscriptions.forEach(sub => sub.unsubscribe());
   }

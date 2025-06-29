@@ -6,7 +6,9 @@ import { FounderSecurityComponent } from './founder-security/founder-security.co
 import { FounderIdeasComponent } from './founder-ideas/founder-ideas.component';
 import { FounderNotificationsComponent } from './founder-notifications/founder-notifications.component';
 import { ProfileService } from './_services/profile.service';
+import { FounderNotificationService } from './_services/founder-notification.service';
 import { environment } from '../../environments/environment';
+import { Subscription } from 'rxjs';
 
 interface ProfileData {
   personalInfo: {
@@ -123,11 +125,14 @@ export class FounderComponent implements OnInit {
     ]
   };
 
+  unreadCount: number = 0;
+  private unreadCountSub?: Subscription;
+
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private profileService:ProfileService
-
+    private profileService: ProfileService,
+    private founderNotificationService: FounderNotificationService
   ) {}
 
   ngOnInit(): void {
@@ -148,9 +153,15 @@ export class FounderComponent implements OnInit {
         }, 0);
       }
     });
+    // Subscribe to shared unread count observable
+    this.unreadCountSub = this.founderNotificationService.unreadCount$.subscribe(count => {
+      this.unreadCount = count;
+    });
+    // Initial fetch
+    this.founderNotificationService.refreshUnreadCount();
   }
 
-getProfileData():void{ 
+  getProfileData():void{ 
 const sub = this.profileService.getProfileData().subscribe({
     next: (res) => {
       if (res.isSuccess && res.data) {
@@ -182,13 +193,19 @@ const sub = this.profileService.getProfileData().subscribe({
 
  }
 
-
   setActiveSection(section: 'information' | 'security' | 'ideas' | 'notifications'): void {
     this.activeSection = section;
+    if (section === 'notifications') {
+      this.founderNotificationService.setUnreadCount(0);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.unreadCountSub?.unsubscribe();
   }
 
   getUnreadNotificationsCount(): number {
-    return this.profileData.notifications.filter(n => !n.read).length;
+    return this.unreadCount;
   }
 
   // Profile picture upload functionality
@@ -264,4 +281,4 @@ const sub = this.profileService.getProfileData().subscribe({
   onNotificationsChange(notifications: any[]): void {
     this.profileData.notifications = notifications;
   }
-} 
+}
