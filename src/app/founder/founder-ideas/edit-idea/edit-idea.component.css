@@ -1,19 +1,19 @@
 /* ========================================
-   ADD IDEA COMPONENT STYLES
+   EDIT IDEA COMPONENT STYLES
 ======================================== */
 
-.add-idea-container {
+.edit-idea-container {
   padding: 1.5rem;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.add-idea-header {
+.edit-idea-header {
   margin-bottom: 2.5rem;
   text-align: center;
 }
 
-.add-idea-title {
+.edit-idea-title {
   font-size: 2rem;
   font-weight: 600;
   color: var(--dark);
@@ -21,18 +21,18 @@
   margin-bottom: 0.5rem;
 }
 
-:host-context(.dark) .add-idea-title {
+:host-context(.dark) .edit-idea-title {
   color: var(--light);
 }
 
-.add-idea-description {
+.edit-idea-description {
   color: var(--dark-grey);
   font-family: var(--poppins);
   font-size: 1.1rem;
   margin: 0;
 }
 
-:host-context(.dark) .add-idea-description {
+:host-context(.dark) .edit-idea-description {
   color: var(--grey);
 }
 
@@ -686,6 +686,83 @@
 }
 
 /* ========================================
+   EXISTING FILES DISPLAY
+======================================== */
+.subsection-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #344767;
+  margin-bottom: 1rem;
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+:host-context(.dark) .subsection-title {
+  color: var(--light);
+}
+
+.subsection-title::before {
+  content: '';
+  width: 3px;
+  height: 16px;
+  background: var(--light);
+  border-radius: 2px;
+}
+
+.image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  height: 120px;
+  color: #6c757d;
+  transition: all 0.3s ease;
+}
+
+:host-context(.dark) .image-placeholder {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--dark-grey);
+  color: var(--grey);
+}
+
+.image-placeholder:hover {
+  border-color: var(--light);
+  background: rgba(48, 172, 170, 0.05);
+}
+
+.image-placeholder i {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.7;
+}
+
+.image-placeholder span {
+  font-size: 0.8rem;
+  text-align: center;
+  word-break: break-word;
+  padding: 0 0.5rem;
+  max-width: 100%;
+  line-height: 1.3;
+}
+
+.file-status {
+  color: #28a745;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+:host-context(.dark) .file-status {
+  color: #68d68f;
+}
+
+/* ========================================
    WARNING NOTICE
 ======================================== */
 .warning-notice {
@@ -1099,7 +1176,7 @@
    RESPONSIVE DESIGN
 ======================================== */
 @media screen and (max-width: 1024px) {
-  .add-idea-container {
+  .edit-idea-container {
     padding: 1rem;
   }
   
@@ -1109,11 +1186,11 @@
 }
 
 @media screen and (max-width: 768px) {
-  .add-idea-container {
+  .edit-idea-container {
     padding: 0.5rem;
   }
 
-  .add-idea-title {
+  .edit-idea-title {
     font-size: 1.5rem;
   }
 
@@ -1163,6 +1240,11 @@
   .modal-actions {
     padding: 1.5rem;
   }
+
+  .subsection-title {
+    font-size: 0.9rem;
+    margin-top: 1.25rem;
+  }
 }
 
 @media screen and (max-width: 480px) {
@@ -1199,5 +1281,23 @@
 
   .image-preview {
     height: 80px;
+  }
+
+  .subsection-title {
+    font-size: 0.85rem;
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .image-placeholder {
+    height: 80px;
+  }
+
+  .image-placeholder i {
+    font-size: 1.5rem;
+  }
+
+  .image-placeholder span {
+    font-size: 0.75rem;
   }
 } 
