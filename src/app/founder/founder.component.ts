@@ -8,6 +8,8 @@ import { FounderNotificationsComponent } from './founder-notifications/founder-n
 import { ProfileService } from './_services/profile.service';
 import { environment } from '../../environments/environment';
 import { ToastrService } from 'ngx-toastr';
+import { getStatusLabel } from '../_shared/utils/enum.utils';
+import { Status } from '../_shared/enums';
 
 interface ProfileData {
   personalInfo: {
@@ -30,7 +32,7 @@ interface ProfileData {
     smsNotifications: boolean;
     loginAlerts: boolean;
     lastPasswordChange: string;
-    accountStatus: 'active' | 'suspended' | 'pending';
+    accountStatus:string;
   };
 
   notifications: Array<{
@@ -46,10 +48,10 @@ interface ProfileData {
 @Component({
   selector: 'app-founder',
   imports: [
-    CommonModule, 
-    FounderInformationComponent, 
-    FounderSecurityComponent, 
-    FounderIdeasComponent, 
+    CommonModule,
+    FounderInformationComponent,
+    FounderSecurityComponent,
+    FounderIdeasComponent,
     FounderNotificationsComponent
   ],
   templateUrl: './founder.component.html',
@@ -61,10 +63,11 @@ export class FounderComponent implements OnInit {
 
   activeSection: 'information' | 'security' | 'ideas' | 'notifications' = 'information';
   ideasCount: number = 0;
-  
+
+
   // Security alert indicator
-  showSecurityAlert = true; // Set to true to show red exclamation mark next to Security
-  
+  showSecurityAlert = false;
+
   profileData: ProfileData = {
     personalInfo: {
       firstName: '',
@@ -86,7 +89,7 @@ export class FounderComponent implements OnInit {
       smsNotifications: false,
       loginAlerts: true,
       lastPasswordChange: '2024-01-15',
-      accountStatus: 'active'
+      accountStatus: "active"
     },
     notifications: [
       {
@@ -129,7 +132,7 @@ export class FounderComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private profileService: ProfileService,
     private toastr: ToastrService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Handle query parameters to set active section and tab
@@ -138,7 +141,7 @@ export class FounderComponent implements OnInit {
       if (params['section']) {
         this.activeSection = params['section'];
       }
-      
+
       // If we're on ideas section and there's a tab parameter, pass it to the ideas component
       if (this.activeSection === 'ideas' && params['tab'] && this.founderIdeasComponent) {
         // Set the active tab in the ideas component
@@ -151,7 +154,7 @@ export class FounderComponent implements OnInit {
     });
   }
 
-  getProfileData(): void { 
+  getProfileData(): void {
     const sub = this.profileService.getProfileData().subscribe({
       next: (res) => {
         if (res.isSuccess && res.data) {
@@ -162,17 +165,27 @@ export class FounderComponent implements OnInit {
             lastName: user.lastName,
             email: user.email,
             dateOfBirth: new Date(user.dateOfBirth).toISOString().split('T')[0],
-            countryCode: '+20', 
+            countryCode: '+20',
             phoneNumber: user.phoneNumber,
             address: user.address,
-            government: user.government?.nameEn || '', 
-            city: user.city?.nameEn || '', 
+            government: user.government?.nameEn || '',
+            city: user.city?.nameEn || '',
             nationalId: user.nationalId,
             gender: user.gender,
-            profilePicture: user.profilePicPath 
-              ? `${environment.apiUrl}/${user.profilePicPath}?${new Date().getTime()}` 
+            profilePicture: user.profilePicPath
+              ? `${environment.apiUrl}/${user.profilePicPath}?${new Date().getTime()}`
               : "assets/images/default-profile.png"
           };
+
+          this.profileData.securitySettings = {
+            twoFactorEnabled: false,
+            emailNotifications: false,
+            smsNotifications: false,
+            loginAlerts: false,
+            lastPasswordChange: "1-1-2000",
+            accountStatus: getStatusLabel(user.status)
+          }
+          this.showSecurityAlert=user.status!=Status.Active
         } else {
           console.error('Failed to fetch profile data', res.message);
         }
@@ -201,7 +214,7 @@ export class FounderComponent implements OnInit {
   onProfilePictureChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
-    
+
     if (file) {
       // Create a file reader to preview the image
       const reader = new FileReader();
@@ -209,12 +222,12 @@ export class FounderComponent implements OnInit {
         const imageUrl = e.target?.result as string;
         // Temporarily update the profile picture URL for preview
         this.profileData.personalInfo.profilePicture = imageUrl;
-        
+
         // Upload the file to server
         this.uploadProfilePicture(file);
       };
       reader.readAsDataURL(file);
-      
+
       // Reset the file input
       target.value = '';
     }
@@ -244,7 +257,7 @@ export class FounderComponent implements OnInit {
         next: (response) => {
           if (response.isSuccess) {
             this.toastr.success('Profile picture updated successfully');
-            
+
             // Refresh user data to get the updated profile picture path
             this.getProfileData();
           } else {
@@ -254,7 +267,7 @@ export class FounderComponent implements OnInit {
           }
         },
         error: (err) => {
-          const errorMessage = err.error?.message || 
+          const errorMessage = err.error?.message ||
             'An error occurred while updating profile picture';
           this.toastr.error(errorMessage);
           // Revert to previous image on error

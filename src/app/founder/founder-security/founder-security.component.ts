@@ -12,7 +12,7 @@ interface SecuritySettings {
   smsNotifications: boolean;
   loginAlerts: boolean;
   lastPasswordChange: string;
-  accountStatus: 'active' | 'suspended' | 'pending';
+  accountStatus: string;
 }
 
 class ChangePassword {

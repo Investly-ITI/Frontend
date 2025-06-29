@@ -133,6 +133,12 @@
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
+.status-pending {
+  background: rgba(255, 193, 7, 0.15);  
+  color: var(--warning);
+  border: 1px solid rgba(206, 240, 72, 0.3);
+}
+
 /* Password Form */
 .password-form {
   max-width: 500px;

@@ -18,7 +18,12 @@
     <div class="security-card">
       <div class="card-header">
         <h3 class="card-title">Account Status</h3>
-        <span class="status-badge status-success">{{ securitySettings.accountStatus | titlecase }}</span>
+<span class="status-badge" [ngClass]="{
+    'status-success': securitySettings.accountStatus =='Active',
+    'status-pending': securitySettings.accountStatus =='Pending'
+}">
+  {{ securitySettings.accountStatus | titlecase }}
+</span>
       </div>
       <div class="card-content">
         <p>Your account is currently active and in good standing.</p>
