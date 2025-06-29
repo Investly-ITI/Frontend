@@ -40,7 +40,7 @@ export class UpdateFounder {
         public governmentId: number | null,
         public cityId: number | null,
         public address: string | null,
-        public dateOfBirth: Date | null
+        public dateOfBirth: string | null  // Changed from Date | null to string | null
     ) {}
 
     equals(other: UpdateFounder | null): boolean {
@@ -66,4 +66,9 @@ export interface UpdateNationalIdRequest {
   email: string;
   frontIdFile?: File;
   backIdFile?: File;
+}
+
+export interface UpdateNationalIdResponse {
+  frontIdPicPath?: string;
+  backIdPicPath?: string;
 }

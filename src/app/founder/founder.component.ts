@@ -23,6 +23,8 @@ interface ProfileData {
     government: string;
     city: string;
     nationalId: string;
+    cityId: number | null;
+    governmentId: number | null;
     gender: string;
     profilePicture: string;
   };
@@ -82,6 +84,8 @@ export class FounderComponent implements OnInit {
       nationalId: '',
       gender: '',
       profilePicture: 'Me.png',
+      cityId : null,
+      governmentId: null
     },
     securitySettings: {
       twoFactorEnabled: true,
@@ -171,6 +175,8 @@ export class FounderComponent implements OnInit {
             government: user.government?.nameEn || '',
             city: user.city?.nameEn || '',
             nationalId: user.nationalId,
+            cityId: user.cityId,
+            governmentId: user.governmentId ,
             gender: user.gender,
             profilePicture: user.profilePicPath
               ? `${environment.apiUrl}/${user.profilePicPath}?${new Date().getTime()}`
