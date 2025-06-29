@@ -5,6 +5,7 @@ import { LoginComponent } from './account/login/login.component';
 import { LoginStaffComponent } from './account/login-staff/login-staff.component';
 import { SignupComponent } from './account/signup/signup.component';
 import { LandingPageComponent } from './main/landing-page/landing-page.component';
+import { ExploreComponent } from './main/explore/explore.component';
 import { MainLayoutComponent } from './_shared/components/main-layout.component';
 import { adminGuard } from './_guards/admin.guard';
 import { BusinessIdeasComponent } from './admin/business-ideas/business-ideas.component';
@@ -27,6 +28,7 @@ export const routes: Routes = [
       component: MainLayoutComponent,
       children: [
          { path: '', component: LandingPageComponent, title: 'Investly - Home' },
+         { path: 'explore', component: ExploreComponent, title: 'Explore Ideas - Investly' },
          { path: 'profile',canActivate:[clientGuard], component: FounderProfileComponent, title: 'Profile - Investly' }
       ]
    },

@@ -4,40 +4,396 @@
 <div class="add-idea-container">
   <div class="add-idea-header">
     <h3 class="add-idea-title">Add New Business Idea</h3>
-    <p class="add-idea-description">Submit your business idea through document upload or detailed form</p>
+    <p class="add-idea-description">Submit your business idea through our 3-step process</p>
   </div>
 
-  <!-- Tab Navigation -->
-  <div class="tab-navigation">
-    <button 
-      class="tab-button" 
-      [class.active]="activeTab === 'form'"
-      (click)="switchTab('form')"
-    >
-      <i class='bx bx-form'></i>
-      <span>Add By Form</span>
-    </button>
-    <button 
-      class="tab-button" 
-      [class.active]="activeTab === 'document'"
-      (click)="switchTab('document')"
-    >
-      <i class='bx bx-file'></i>
-      <span>Add By Document</span>
-    </button>
+  <!-- Progress Bar -->
+  <div class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="getProgressPercentage()"></div>
+    </div>
+    <div class="progress-steps">
+      <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
+        <div class="step-number">1</div>
+        <div class="step-label">Basic Information</div>
+      </div>
+      <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
+        <div class="step-number">2</div>
+        <div class="step-label">Category Questions</div>
+      </div>
+      <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
+        <div class="step-number">3</div>
+        <div class="step-label">Files & Upload</div>
+      </div>
+    </div>
   </div>
 
-  <!-- Tab Content -->
-  <div class="tab-content">
-    <app-add-by-form 
-      *ngIf="activeTab === 'form'"
-      (submissionStarted)="startAIReview()"
-    ></app-add-by-form>
-    <app-add-by-document 
-      *ngIf="activeTab === 'document'"
-      (submissionStarted)="startAIReview()"
-    ></app-add-by-document>
-  </div>
+  <!-- Form Container -->
+  <form [formGroup]="formData" class="business-form" (ngSubmit)="onSubmit()">
+    
+    <!-- Step 1: Basic Information -->
+    <div class="step-content" *ngIf="currentStep === 1" [@fadeInOut]>
+      <div class="step-header">
+        <h4 class="step-title">Step 1: Basic Information</h4>
+        <p class="step-description">Tell us about your business idea and its basic details</p>
+      </div>
+
+      <div class="form-section">
+        <!-- Business Idea Description -->
+        <div class="form-group">
+          <label class="form-label" for="description">Business Idea <span class="required">*</span></label>
+          <textarea 
+            id="description" 
+            class="form-control"
+            formControlName="Description"
+            placeholder="Describe your business idea in detail..."
+            rows="4"
+            maxlength="500">
+          </textarea>
+          <div class="char-count">{{ formData.get('Description')?.value?.length || 0 }}/500</div>
+          <div *ngIf="formData.get('Description')?.invalid && (formData.get('Description')?.touched || formData.get('Description')?.dirty)" class="error">
+            <span *ngIf="formData.get('Description')?.errors?.['required']">Business idea description is required.</span>
+            <span *ngIf="formData.get('Description')?.errors?.['minlength']">Description must be at least 10 characters.</span>
+            <span *ngIf="formData.get('Description')?.errors?.['maxlength']">Description cannot exceed 500 characters.</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <!-- Title -->
+          <div class="form-group">
+            <label class="form-label" for="title">Business Title <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="title" 
+              class="form-control"
+              formControlName="Title"
+              placeholder="Enter your business title">
+            <div *ngIf="formData.get('Title')?.invalid && (formData.get('Title')?.touched || formData.get('Title')?.dirty)" class="error">
+              <span *ngIf="formData.get('Title')?.errors?.['required']">Business title is required.</span>
+            </div>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label class="form-label" for="category">Category <span class="required">*</span></label>
+            <select 
+              id="category" 
+              class="form-control"
+              formControlName="CategoryId">
+              <option value="">Select Category</option>
+              <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+            </select>
+            <div *ngIf="formData.get('CategoryId')?.invalid && (formData.get('CategoryId')?.touched || formData.get('CategoryId')?.dirty)" class="error">
+              <span *ngIf="formData.get('CategoryId')?.errors?.['required']">Category is required.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <!-- Stage -->
+          <div class="form-group">
+            <label class="form-label" for="stage">Business Stage <span class="required">*</span></label>
+            <select 
+              id="stage" 
+              class="form-control"
+              formControlName="Stage">
+              <option value="">Select Stage</option>
+              <option [value]="investingStages.ideation">Ideation</option>
+              <option [value]="investingStages.startup">Startup</option>
+              <option [value]="investingStages.intermediate">Intermediate</option>
+              <option [value]="investingStages.advanced">Advanced</option>
+            </select>
+            <div *ngIf="formData.get('Stage')?.invalid && (formData.get('Stage')?.touched || formData.get('Stage')?.dirty)" class="error">
+              <span *ngIf="formData.get('Stage')?.errors?.['required']">Business stage is required.</span>
+            </div>
+          </div>
+
+          <!-- Investment Type -->
+          <div class="form-group">
+            <label class="form-label" for="investmentType">Desired Investment Type <span class="required">*</span></label>
+            <select 
+              id="investmentType" 
+              class="form-control"
+              formControlName="DesiredInvestmentType">
+              <option value="">Select Investment Type</option>
+              <option [value]="desiredInvestmentTypes.IndustrialExperience">Industrial Experience</option>
+              <option [value]="desiredInvestmentTypes.Funding">Funding</option>
+              <option [value]="desiredInvestmentTypes.Both">Both</option>
+            </select>
+            <div *ngIf="formData.get('DesiredInvestmentType')?.invalid && (formData.get('DesiredInvestmentType')?.touched || formData.get('DesiredInvestmentType')?.dirty)" class="error">
+              <span *ngIf="formData.get('DesiredInvestmentType')?.errors?.['required']">Investment type is required.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Funding Goal (conditional) -->
+        <div class="form-row" *ngIf="showFundingGoal">
+          <div class="form-group">
+            <label class="form-label" for="fundingGoal">Funding Goal (EGP) <span class="required">*</span></label>
+            <input 
+              type="number" 
+              id="fundingGoal" 
+              class="form-control"
+              formControlName="Capital"
+              placeholder="Enter funding amount in EGP (minimum 5,000)"
+              min="5000">
+            <div *ngIf="formData.get('Capital')?.invalid && (formData.get('Capital')?.touched || formData.get('Capital')?.dirty)" class="error">
+              <span *ngIf="formData.get('Capital')?.errors?.['required']">Funding goal is required.</span>
+              <span *ngIf="formData.get('Capital')?.errors?.['min']">Funding goal must be at least 5,000 EGP.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <!-- Government -->
+          <div class="form-group">
+            <label class="form-label" for="government">Governorate <span class="required">*</span></label>
+            <select 
+              id="government" 
+              class="form-control"
+              formControlName="GovernmentId"
+              (change)="onGovernorateChange($any($event.target).value)">
+              <option value="">Select Governorate</option>
+              <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
+            </select>
+            <div *ngIf="formData.get('GovernmentId')?.invalid && (formData.get('GovernmentId')?.touched || formData.get('GovernmentId')?.dirty)" class="error">
+              <span *ngIf="formData.get('GovernmentId')?.errors?.['required']">Governorate is required.</span>
+            </div>
+          </div>
+
+          <!-- City -->
+          <div class="form-group">
+            <label class="form-label" for="city">City <span class="required">*</span></label>
+            <select 
+              id="city" 
+              class="form-control"
+              formControlName="CityId"
+              [disabled]="!formData.get('GovernmentId')?.value">
+              <option value="">{{ formData.get('GovernmentId')?.value ? 'Select City' : 'Select Governorate First' }}</option>
+              <option *ngFor="let city of citiesByGovernorate" [value]="city.id">{{ city.nameEn }}</option>
+            </select>
+            <div *ngIf="formData.get('CityId')?.invalid && (formData.get('CityId')?.touched || formData.get('CityId')?.dirty)" class="error">
+              <span *ngIf="formData.get('CityId')?.errors?.['required']">City is required.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="form-group">
+          <label class="form-label" for="location">Specific Location <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="location" 
+            class="form-control"
+            formControlName="Location"
+            placeholder="Enter the specific location/address">
+          <div *ngIf="formData.get('Location')?.invalid && (formData.get('Location')?.touched || formData.get('Location')?.dirty)" class="error">
+            <span *ngIf="formData.get('Location')?.errors?.['required']">Location is required.</span>
+            <span *ngIf="formData.get('Location')?.errors?.['minlength']">Location must be at least 5 characters.</span>
+            <span *ngIf="formData.get('Location')?.errors?.['maxlength']">Location cannot exceed 100 characters.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Category Questions -->
+    <div class="step-content" *ngIf="currentStep === 2" [@fadeInOut]>
+      <div class="step-header">
+        <h4 class="step-title">Step 2: Category Questions</h4>
+        <p class="step-description">Answer specific questions related to your business category</p>
+      </div>
+
+      <div class="form-section" *ngIf="standards && standards.length > 0">
+        <div *ngFor="let std of standards; let i = index" class="question-card">
+          <div class="question-header">
+            <h5 class="question-title">Question {{ i + 1 }}</h5>
+            <span class="required-badge">Required</span>
+          </div>
+          <div class="question-text">{{ std.formQuestion }}</div>
+          <textarea 
+            class="form-control"
+            [class.is-invalid]="(!std.Answer || std.Answer.trim() === '') && std.touched"
+            [value]="std.Answer || ''"
+            (input)="onStandardAnswerChange(i, $event)"
+            (blur)="std.touched = true"
+            placeholder="Provide a detailed answer..."
+            rows="4">
+          </textarea>
+          <div class="invalid-feedback" *ngIf="(!std.Answer || std.Answer.trim() === '') && std.touched">
+            This answer is required to proceed to the next step.
+          </div>
+        </div>
+      </div>
+
+      <div class="no-questions-message" *ngIf="!standards || standards.length === 0">
+        <div class="message-icon">
+          <i class='bx bx-info-circle'></i>
+        </div>
+        <h5>No Category Selected</h5>
+        <p>Please go back to Step 1 and select a category to see relevant questions.</p>
+      </div>
+    </div>
+
+    <!-- Step 3: File Upload -->
+    <div class="step-content" *ngIf="currentStep === 3" [@fadeInOut]>
+      <div class="step-header">
+        <h4 class="step-title">Step 3: Files & Documentation</h4>
+        <p class="step-description">Upload supporting documents and images for your business idea</p>
+      </div>
+
+      <div class="form-section">
+        <!-- Document Upload (Optional) -->
+        <div class="upload-section">
+          <h5 class="upload-title">
+            <i class='bx bx-file'></i>
+            Business Document (Optional)
+          </h5>
+          <p class="upload-description">Upload a supporting document (PDF, Word, or PowerPoint - Max 10MB)</p>
+          
+          <div class="file-upload-area" *ngIf="!selectedDocument">
+            <input 
+              type="file" 
+              id="documentUpload" 
+              class="file-input"
+              accept=".pdf,.doc,.docx,.ppt,.pptx"
+              (change)="onDocumentSelected($event)">
+            <label for="documentUpload" class="file-upload-label">
+              <i class='bx bx-cloud-upload'></i>
+              <span>Click to upload document</span>
+              <small>PDF, Word, PowerPoint (Max 10MB)</small>
+            </label>
+          </div>
+
+          <div class="uploaded-file" *ngIf="selectedDocument">
+            <div class="file-info">
+              <i class='bx bx-file'></i>
+              <div class="file-details">
+                <span class="file-name">{{ selectedDocument.name }}</span>
+                <span class="file-size">{{ (selectedDocument.size / (1024*1024)).toFixed(2) }} MB</span>
+              </div>
+            </div>
+            <button type="button" class="remove-file-btn" (click)="removeDocument()">
+              <i class='bx bx-x'></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Images Upload (Required) -->
+        <div class="upload-section">
+          <h5 class="upload-title">
+            <i class='bx bx-image'></i>
+            Business Images <span class="required">*</span>
+          </h5>
+          <p class="upload-description">Upload up to 5 images of your business idea (At least 1 image is required)</p>
+          
+          <div class="file-upload-area" *ngIf="selectedImages.length < maxImages">
+            <input 
+              type="file" 
+              id="imagesUpload" 
+              class="file-input"
+              accept="image/*"
+              multiple
+              (change)="onImagesSelected($event)">
+            <label for="imagesUpload" class="file-upload-label">
+              <i class='bx bx-image-add'></i>
+              <span>Click to upload images</span>
+              <small>Images only (Max 10MB each, {{ maxImages - selectedImages.length }} remaining)</small>
+            </label>
+          </div>
+
+          <div class="uploaded-images" *ngIf="selectedImages.length > 0">
+            <div class="images-grid">
+              <div *ngFor="let image of selectedImages; let i = index" class="image-card">
+                <div class="image-preview">
+                  <img [src]="getImagePreview(image)" alt="Business Image">
+                </div>
+                <div class="image-info">
+                  <span class="image-name">{{ image.name }}</span>
+                  <span class="image-size">{{ (image.size / (1024*1024)).toFixed(2) }} MB</span>
+                </div>
+                <button type="button" class="remove-image-btn" (click)="removeImage(i)">
+                  <i class='bx bx-x'></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="upload-requirements" [class.fulfilled]="selectedImages.length >= 1">
+            <i class='bx' [class.bx-check-circle]="selectedImages.length >= 1" [class.bx-info-circle]="selectedImages.length < 1"></i>
+            <span>{{ selectedImages.length >= 1 ? 'Image requirement fulfilled' : 'At least 1 image is required to submit' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Important Notice (appears on all steps) -->
+    <div class="warning-notice">
+      <div class="warning-icon">
+        <i class='bx bx-info-circle'></i>
+      </div>
+      <div class="warning-content">
+        <h6>Important Notice</h6>
+        <p>Once submitted, your idea will be reviewed and cannot be edited unless it's saved as draft or gets rejected by AI system or declined by our team.</p>
+      </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="form-navigation">
+      <div class="nav-buttons">
+        <!-- Previous Button -->
+        <button 
+          type="button" 
+          class="btn btn-secondary"
+          *ngIf="currentStep > 1"
+          (click)="previousStep()">
+          <i class='bx bx-chevron-left'></i>
+          Previous
+        </button>
+
+        <!-- Save as Draft Button -->
+        <button 
+          type="button" 
+          class="btn btn-outline"
+          *ngIf="isStep1Valid()"
+          (click)="onSaveAsDraft()">
+          <i class='bx bx-save'></i>
+          Save as Draft
+        </button>
+
+        <!-- Next Button -->
+        <button 
+          type="button" 
+          class="btn btn-primary"
+          *ngIf="currentStep < totalSteps"
+          [disabled]="!canProceedToNextStep()"
+          (click)="nextStep()">
+          Next
+          <i class='bx bx-chevron-right'></i>
+        </button>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          class="btn btn-success"
+          *ngIf="currentStep === totalSteps"
+          [disabled]="!isFormCompletelyValid()">
+          <i class='bx bx-check-circle'></i>
+          Submit Business Idea
+        </button>
+      </div>
+      
+      <!-- Validation Hint -->
+      <div class="validation-hint" *ngIf="currentStep < totalSteps && !canProceedToNextStep()">
+        <i class='bx bx-info-circle'></i>
+        <span>Please complete all required fields to continue to the next step.</span>
+      </div>
+      
+      <div class="validation-hint" *ngIf="currentStep === totalSteps && !isFormCompletelyValid()">
+        <i class='bx bx-info-circle'></i>
+        <span>Please complete all required fields and upload at least one image to submit.</span>
+      </div>
+    </div>
+  </form>
 
   <!-- Loading Overlay -->
   <div class="loading-overlay" *ngIf="isLoading" [@fadeInOut]>
@@ -84,8 +440,7 @@
         <button 
           class="btn btn-secondary" 
           (click)="closeModal()"
-          *ngIf="reviewResult?.isAccepted"
-        >
+          *ngIf="reviewResult?.isAccepted">
           <i class='bx bx-check'></i>
           Close
         </button>
@@ -93,15 +448,13 @@
         <div class="button-group" *ngIf="!reviewResult?.isAccepted">
           <button 
             class="btn btn-secondary" 
-            (click)="saveAsDraft()"
-          >
+            (click)="saveAsDraft()">
             <i class='bx bx-save'></i>
             Save as Draft
           </button>
           <button 
             class="btn btn-outline" 
-            (click)="closeModal()"
-          >
+            (click)="closeModal()">
             <i class='bx bx-x'></i>
             Close
           </button>
