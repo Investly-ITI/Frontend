@@ -23,8 +23,8 @@ export class BusinessService {
     if (searchDto.pageNumber !== undefined && searchDto.pageNumber !== null) {
       params = params.set('pageNumber', searchDto.pageNumber.toString());
     }
-    if (searchDto.searchInput) {
-      params = params.set('searchInput', searchDto.searchInput);
+    if (searchDto.search) {
+      params = params.set('searchInput', searchDto.search);
     }
     if (searchDto.categoryId !== undefined && searchDto.categoryId !== null && searchDto.categoryId > 0) {
       params = params.set('categoryId', searchDto.categoryId.toString());
@@ -34,6 +34,9 @@ export class BusinessService {
     }
     if (searchDto.stage !== undefined && searchDto.stage !== null && searchDto.stage > 0) {
       params = params.set('stage', searchDto.stage.toString());
+    }
+    if (searchDto.status !== undefined && searchDto.status !== null) {
+      params = params.set('status', searchDto.status.toString());
     }
 
     return this.http.get<Response<BusinessListDto>>(`${this.baseUrl}/All`, { params });
