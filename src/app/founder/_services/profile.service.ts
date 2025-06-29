@@ -23,7 +23,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { ChangePassword, Founder, UpdateFounder, UpdateNationalIdRequest, UpdateProfilePictureRequest } from '../../_models/founder';
+import { ChangePassword, Founder, UpdateFounder, UpdateNationalIdRequest, UpdateNationalIdResponse, UpdateProfilePictureRequest } from '../../_models/founder';
 import { Observable } from 'rxjs';
 import { Response } from '../../_models/response';
 
@@ -65,7 +65,7 @@ export class ProfileService {
     );
   }
 
-  updateNationalIdImages(request: UpdateNationalIdRequest): Observable<Response<string>> {
+  updateNationalIdImages(request: UpdateNationalIdRequest): Observable<Response<UpdateNationalIdResponse>> {
     const formData = new FormData();
     formData.append('Email', request.email);
     
@@ -77,7 +77,7 @@ export class ProfileService {
       formData.append('BackIdFile', request.backIdFile);
     }
 
-    return this.http.patch<Response<string>>(
+    return this.http.patch<Response<UpdateNationalIdResponse>>(
       `${this.ApiUrl}/api/founder/Profile/national-id`,
       formData
     );
