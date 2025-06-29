@@ -44,6 +44,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       user => this.currentUser = user
    
     );
+     console.log(this.currentUser);
      this.showProfileAlert=this.currentUser?.status!=Status.Active?true:false;
      const subNoti= this.notificationService.getUnreadCount$().subscribe((count)=>{
       this.notifcationCount=count;
@@ -115,12 +116,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   // Navigate to founder/profile when profile picture is clicked
   onProfilePictureClick() {
-    if (this.currentUser?.userType === UserType.Founder) {
-      this.router.navigate(['/profile']);
-    } else {
-      // For other user types, you can implement different navigation logic
-      this.router.navigate(['/profile']);
-    }
+    console.log(this.currentUser?.userType);
+    if (this.currentUser?.userType == UserType.Founder) {
+      this.router.navigate(['/founder/profile']);
+        // For other user types, you can implement different navigation logic
+    } else if (this.currentUser?.userType == UserType.Investor) {
+    this.router.navigate(['/investor/profile']);
+  }
+    
     this.closeDropdowns();
     this.isMobileMenuOpen = false;
   }

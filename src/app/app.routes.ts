@@ -10,6 +10,7 @@ import { adminGuard } from './_guards/admin.guard';
 import { BusinessIdeasComponent } from './admin/business-ideas/business-ideas.component';
 import { FounderComponent } from './admin/founder/founder.component';
 import { FounderComponent as FounderProfileComponent } from './founder/founder.component';
+import { InvestorComponent as InvestorProfileComponent } from './investor/investor.component';
 import { NotificationsComponent } from './admin/notifications/notifications.component';
 import { ContactRequestComponent } from './admin/contact-request/contact-request.component';
 import { NoAuthGuard } from './_guards/no-auth.guard';
@@ -27,7 +28,10 @@ export const routes: Routes = [
       component: MainLayoutComponent,
       children: [
          { path: '', component: LandingPageComponent, title: 'Investly - Home' },
-         { path: 'profile',canActivate:[clientGuard], component: FounderProfileComponent, title: 'Profile - Investly' }
+         { path: 'founder/profile',canActivate:[clientGuard], component: FounderProfileComponent, title: 'Profile - Investly' },
+         { path: 'investor/profile',canActivate:[clientGuard], component: InvestorProfileComponent, title: 'Profile - Investly' },
+      
+     
       ]
    },
    
