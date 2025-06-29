@@ -1,0 +1,302 @@
+<div class="parent3" [ngClass]="{'dark': isDarkMode}">
+    <section id="content">
+        <main>
+            <div class="head-title">
+                <div class="left">
+                    <ul class="breadcrumb">
+                        <li><a>Dashboard</a></li>
+                        <li><i class='bx bx-chevron-right'></i></li>
+                        <li><a class="active">{{ entityNamePlural }}</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="box-info">
+                <li>
+                    <i class='bx bxs-message-square-check' style="font-size: 2.5em;"></i>
+                    <span class="text">
+                        <h3 class="animated-number">
+                            <span class="digit-container" *ngFor="let digit of getDigitsArray(feedbackCounts.totalActive); let i = index">
+                                <span class="digit" [style.animation-delay]="(i * 0.1) + 's'" [ngClass]="{'animate': animationComplete}">{{ digit }}</span>
+                            </span>
+                        </h3>
+                        <p>Active {{ entityNamePlural }}</p>
+                    </span>
+                </li>
+                <li>
+                    <i class='bx bxs-message-square-x' style="font-size: 2.5em;"></i>
+                    <span class="text">
+                        <h3 class="animated-number">
+                            <span class="digit-container" *ngFor="let digit of getDigitsArray(feedbackCounts.totalInactive); let i = index">
+                                <span class="digit" [style.animation-delay]="(i * 0.1) + 's'" [ngClass]="{'animate': animationComplete}">{{ digit }}</span>
+                            </span>
+                        </h3>
+                        <p>Inactive {{ entityNamePlural }}</p>
+                    </span>
+                </li>
+            </div>
+
+            <div class="table-data">
+                <div class="order">
+                    <div class="table-header">
+                        <div class="table-header-left">
+                            <h2>{{ entityNamePlural }}</h2>
+                        </div>
+                        <div class="table-header-right">
+                            <div class="items-per-page">
+                                <label>
+                                    <b>Items:</b>
+                                    <select [(ngModel)]="searchParams.pageSize" name="itemsPerPage" (change)="onPageSizeChange()">
+                                        <option [ngValue]="5">5</option>
+                                        <option [ngValue]="10">10</option>
+                                        <option [ngValue]="25">25</option>
+                                        <option [ngValue]="50">50</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <form (submit)="onSearch(); $event.preventDefault();">
+                                <div class="form-input">
+                                    <input type="search" [(ngModel)]="searchParams.searchInput" name="searchQuery" placeholder="Search by description or user name...">
+                                    <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
+                                    <div id="search-btns">
+                                        <button type="button" style="border: none; background-color: var(--light);" title="Advanced Search" (click)="toggleAdvancedSearch($event)">
+                                            <i class='bx bx-filter' style="color: var(--dark); margin-left: 0.7em; font-size: 1.3em;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="advanced-search-dropdown">
+                                    <div class="advanced-search-menu" [ngClass]="{'show': isAdvancedSearchOpen}">
+                                        <div class="advanced-search-content">
+                                            <h4>Search Filters</h4>
+                                            <div class="filter-group">
+                                                <label for="userTypeFrom">User Type From:</label>
+                                                <select id="userTypeFrom" [(ngModel)]="tempUserTypeFromFilter" name="userTypeFromFilter">
+                                                    <option [ngValue]="null">All Users</option>
+                                                    <option *ngFor="let userType of userTypes" [ngValue]="userType">{{ getUserTypeLabel(userType) }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="filter-group">
+                                                <label for="userTypeTo">User Type To:</label>
+                                                <select id="userTypeTo" [(ngModel)]="tempUserTypeToFilter" name="userTypeToFilter">
+                                                    <option [ngValue]="null">All Users</option>
+                                                    <option *ngFor="let userType of userTypes" [ngValue]="userType">{{ getUserTypeLabel(userType) }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="filter-group">
+                                                <label for="status">Status:</label>
+                                                <select id="status" [(ngModel)]="tempStatusFilter" name="statusFilter">
+                                                    <option [ngValue]="null">All Status</option>
+                                                    <option *ngFor="let status of statuses" [ngValue]="status">{{ getStatusLabel(status) }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="advanced-search-actions">
+                                                <button type="button" class="clear-btn" (click)="clearAdvancedSearch()">
+                                                    <i class='bx bx-x'></i>
+                                                    Clear
+                                                </button>
+                                                <button type="button" class="apply-btn" (click)="applyAdvancedSearch()">
+                                                    <i class='bx bx-search'></i>
+                                                    Apply
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <table style="border-spacing: 15px; border-collapse: separate;">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>From Type</th>
+                                <th>To Type</th>
+                                <th>From User</th>
+                                <th>To User</th>
+                                <th style="cursor: pointer" (click)="sortByCreatedAt()">
+                                    Created At
+                                    <i class="bx bx-sort"></i>
+                                </th>
+                                <th>Status
+                                </th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngIf="!isLoading && filteredFeedbacks.length === 0">
+                                <td colspan="7" style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
+                                    No {{ entityNamePlural }} Found
+                                </td>
+                            </tr>
+                            <tr *ngIf="isLoading">
+                                <td colspan="7" style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
+                                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;" id="spinner">
+                                        <mat-spinner style="color: white;" class="mat-spinner"></mat-spinner>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr *ngFor="let feedback of filteredFeedbacks; let i = index">
+                                <td><p>{{ feedback.description || 'N/A' }}</p></td>
+                                <td>{{ feedback.userTypeFrom ? getUserTypeLabel(feedback.userTypeFrom) : 'N/A' }}</td>
+                                <td>{{ feedback.userTypeTo ? getUserTypeLabel(feedback.userTypeTo) : 'N/A' }}</td>
+                                <td>{{ feedback.userFromName || 'N/A' }}</td>
+                                <td>{{ feedback.userToName || 'N/A' }}</td>
+                                <td>{{ feedback.createdAt ? (feedback.createdAt | date) : 'N/A' }}</td>
+                                <td>
+                                    <span class="status process"
+                                        [ngStyle]="{color: feedback.status === Status.Active ? '#2ed134' : '#e6382f'}"
+                                        style="min-width: 100px; display: inline-block; text-align: center; padding: 10px 0px;">
+                                        {{ feedback.status === Status.Active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                                
+                                <td>
+                                    <div class="action-dropdown" [ngClass]="{'active': dropdownStates[i]}">
+                                        <button class="action-btn" type="button" (click)="toggleDropdown(i, $event)">
+                                            <i class='bx bx-dots-vertical-rounded'></i>
+                                        </button>
+                                        <div class="action-menu">
+                                            <button class="action-item view" type="button" (click)="openDetailsModal(feedback)">
+                                                <i class='bx bx-show'></i> Details
+                                            </button>
+                                            <button class="action-item" type="button" (click)="toggleActiveInactive(feedback)">
+                                                <i class='bx' [ngClass]="feedback.status === Status.Active ? 'bx-minus-circle' : 'bx-check-circle'"></i>
+                                                {{ feedback.status === Status.Active ? 'Deactivate' : 'Activate' }}
+                                            </button>
+                                            <button class="action-item delete" type="button" (click)="openHardDeleteModal(feedback)">
+                                                <i class='bx bx-trash'></i> Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="pagination-controls">
+                        <button (click)="prevPage()" [disabled]="searchParams.pageNumber === 1">
+                            <i class='bx bx-chevron-left' style="font-size: 1.7em;"></i>
+                        </button>
+                        <button (click)="nextPage()" [disabled]="!feedbackList || searchParams.pageNumber * searchParams.pageSize >= feedbackList.totalCount">
+                            <i class='bx bx-chevron-right' style="font-size: 1.7em;"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <div class="modal-overlay" [ngClass]="{ 'show': isSoftDeleteModalOpen }" (click)="closeSoftDeleteModal()">
+        <div class="modal-container activate-deactivate-modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Delete Feedback</h3>
+                <button type="button" class="close-btn" (click)="closeSoftDeleteModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="activate-deactivate-confirmation">
+                    <div class="action-icon">
+                        <i class="bx bx-trash" style="color: var(--danger);"></i>
+                    </div>
+                    <p class="confirmation-text danger-text">
+                        Are you sure you want to delete <span class="highlight-text">{{ selectedFeedbackDescription }}</span>?
+                        This action will mark the feedback as deleted and it will no longer be visible.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer activate-deactivate-modal-footer">
+                <button type="button" class="cancel-btn" (click)="closeSoftDeleteModal()">Cancel</button>
+                <button type="button" class="confirm-btn delete" (click)="performHardDelete()">
+                    <i class='bx bx-trash'></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Details Modal -->
+    <div class="modal-overlay" [ngClass]="{ 'show': isDetailsModalOpen }" (click)="closeDetailsModal()">
+        <div class="modal-container view-details-modal" (click)="$event.stopPropagation()" *ngIf="selectedFeedbackForDetails">
+            <div class="modal-header">
+                <h3>Feedback Details: {{ selectedFeedbackForDetails.description || 'N/A' }}</h3>
+                <button type="button" class="close-btn" (click)="closeDetailsModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="details-content">
+                    <div class="detail-row">
+                        <strong class="detail-label">ID:</strong>
+                        <span class="detail-value">{{ selectedFeedbackForDetails.id }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">Description:</strong>
+                        <span class="detail-value">{{ selectedFeedbackForDetails.description }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">From Type:</strong>
+                        <span class="detail-value">{{ selectedFeedbackForDetails && selectedFeedbackForDetails.userTypeFrom !== undefined ? getUserTypeLabel(selectedFeedbackForDetails.userTypeFrom!) : 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">To Type:</strong>
+                        <span class="detail-value">{{ selectedFeedbackForDetails && selectedFeedbackForDetails.userTypeTo !== undefined ? getUserTypeLabel(selectedFeedbackForDetails.userTypeTo!) : 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">From User:</strong>
+                        <span class="detail-value">{{ selectedFeedbackForDetails.userFromName || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">To User:</strong>
+                        <span class="detail-value">{{ selectedFeedbackForDetails.userToName || 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">Status:</strong>
+                        <span class="detail-value status">{{ selectedFeedbackForDetails && selectedFeedbackForDetails.status !== undefined ? getStatusLabel(selectedFeedbackForDetails.status!) : 'N/A' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="detail-label">Created At:</strong>
+                        <span class="detail-value">{{ selectedFeedbackForDetails.createdAt ? (selectedFeedbackForDetails.createdAt | date:'medium') : 'N/A' }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel-btn" (click)="closeDetailsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hard Delete Confirmation Modal -->
+    <div class="modal-overlay" [ngClass]="{ 'show': isHardDeleteModalOpen }" (click)="closeHardDeleteModal()">
+        <div class="modal-container activate-deactivate-modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Delete Feedback</h3>
+                <button type="button" class="close-btn" (click)="closeHardDeleteModal()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="activate-deactivate-confirmation">
+                    <div class="action-icon">
+                        <i class="bx bx-trash" style="color: var(--danger);"></i>
+                    </div>
+                    <p class="confirmation-text danger-text">
+                        Are you sure you want to <b>permanently delete</b>
+                        <span class="highlight-text">{{ selectedFeedbackForHardDelete?.description }}</span>?
+                        This action <b>cannot be undone</b> and the feedback will be removed from the system.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer activate-deactivate-modal-footer">
+                <button type="button" class="cancel-btn" (click)="closeHardDeleteModal()">Cancel</button>
+                <button type="button" class="confirm-btn delete" style="background-color: red; color: #fff;" (click)="performHardDelete()">
+                    <i class='bx bx-trash'></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="isLoading && !feedbacks.length" class="loading-indicator" style="text-align: center; padding: 20px;">
+        <ngx-skeleton-loader count="5" appearance="line" [theme]="{ 'height': '30px', 'margin-bottom': '10px', 'background-color': isDarkMode ? '#333' : '#e0e0e0' }"></ngx-skeleton-loader>
+    </div>
+</div>

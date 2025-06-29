@@ -14,6 +14,7 @@ import { NotificationsComponent } from './admin/notifications/notifications.comp
 import { ContactRequestComponent } from './admin/contact-request/contact-request.component';
 import { NoAuthGuard } from './_guards/no-auth.guard';
 import { clientGuard } from './_guards/client.guard';
+import { FeedbacksComponent } from './admin/feedback/feedback.component';
 
 export const routes: Routes = [
    // Authentication routes (no layout - full screen)
@@ -40,6 +41,7 @@ export const routes: Routes = [
       {path:'',redirectTo:'investor',pathMatch:'full'},
       {path:'founder',component:FounderComponent, title: 'Founder Management'},
        {path:'notification',component:NotificationsComponent, title: 'Notifcation Management'},
+       {path:'feedbacks',component:FeedbacksComponent, title: 'Feedbacks Management'},
       
       {path:'Contact-Request',component:ContactRequestComponent, title: 'Investor Contact Request'},
      
