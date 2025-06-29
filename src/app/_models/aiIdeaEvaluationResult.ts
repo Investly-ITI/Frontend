@@ -1,0 +1,16 @@
+export class AiIdeaEvaluationResult{
+    constructor(
+     public totalWeightedScore:number,
+     public standards:StandardAiResult[]|null
+    ){}
+}
+
+export class StandardAiResult{
+    constructor(
+     public name:string,
+     public weight:number,
+     public achievementScore:number,
+     public weightedContribution:number,
+     public feedback:string
+    ){}
+}

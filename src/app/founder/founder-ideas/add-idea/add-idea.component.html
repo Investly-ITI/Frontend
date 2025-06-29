@@ -9,19 +9,11 @@
 
   <!-- Tab Navigation -->
   <div class="tab-navigation">
-    <button 
-      class="tab-button" 
-      [class.active]="activeTab === 'form'"
-      (click)="switchTab('form')"
-    >
+    <button class="tab-button" [class.active]="activeTab === 'form'" (click)="switchTab('form')">
       <i class='bx bx-form'></i>
       <span>Add By Form</span>
     </button>
-    <button 
-      class="tab-button" 
-      [class.active]="activeTab === 'document'"
-      (click)="switchTab('document')"
-    >
+    <button class="tab-button" [class.active]="activeTab === 'document'" (click)="switchTab('document')">
       <i class='bx bx-file'></i>
       <span>Add By Document</span>
     </button>
@@ -29,14 +21,9 @@
 
   <!-- Tab Content -->
   <div class="tab-content">
-    <app-add-by-form 
-      *ngIf="activeTab === 'form'"
-      (submissionStarted)="startAIReview()"
-    ></app-add-by-form>
-    <app-add-by-document 
-      *ngIf="activeTab === 'document'"
-      (submissionStarted)="startAIReview()"
-    ></app-add-by-document>
+    <app-add-by-form *ngIf="activeTab === 'form'" (submissionStarted)="startAIReview($event)"></app-add-by-form>
+    <app-add-by-document *ngIf="activeTab === 'document'"
+      (submissionStarted)="startAIReview($event)"></app-add-by-document>
   </div>
 
   <!-- Loading Overlay -->
@@ -65,43 +52,38 @@
           <i class='bx' [ngClass]="reviewResult?.isAccepted ? 'bx-check-circle' : 'bx-x-circle'"></i>
         </div>
         <h3>{{ reviewResult?.isAccepted ? 'Idea Accepted!' : 'Idea Needs Improvement' }}</h3>
+        <h4> Total Ai Score: {{ reviewResult?.totalWeightScore }} %</h4>
       </div>
-      
+
       <div class="modal-body">
         <p class="modal-description">{{ reviewResult?.message }}</p>
-        
-        <div class="standards-list" *ngIf="!reviewResult?.isAccepted && reviewResult?.standards">
+
+        <div class="standards-list" *ngIf=" reviewResult?.rejectedStandards">
           <h4>Standards Not Met:</h4>
           <ul>
-            <li *ngFor="let standard of reviewResult?.standards; let i = index">
-              <strong>{{ i + 1 }}.</strong> {{ standard }}
+            <li *ngFor="let standard of reviewResult?.rejectedStandards; let i = index">
+              <strong>{{ i + 1 }}.</strong> {{ standard.standard }}
             </li>
           </ul>
         </div>
       </div>
-      
+
       <div class="modal-actions">
-        <button 
-          class="btn btn-secondary" 
-          (click)="closeModal()"
-          *ngIf="reviewResult?.isAccepted"
-        >
+        <button class="btn btn-secondary" (click)="closeModal()" *ngIf="reviewResult?.isAccepted">
           <i class='bx bx-check'></i>
           Close
         </button>
-        
+        <button class="btn btn-secondary" *ngIf="reviewResult?.isAccepted" (click)="saveAsDraft()">
+            <i class='bx bx-save'></i>
+            submit
+          </button>
+
         <div class="button-group" *ngIf="!reviewResult?.isAccepted">
-          <button 
-            class="btn btn-secondary" 
-            (click)="saveAsDraft()"
-          >
+          <button class="btn btn-secondary" (click)="saveAsDraft()">
             <i class='bx bx-save'></i>
             Save as Draft
           </button>
-          <button 
-            class="btn btn-outline" 
-            (click)="closeModal()"
-          >
+          <button class="btn btn-outline" (click)="closeModal()">
             <i class='bx bx-x'></i>
             Close
           </button>
@@ -109,4 +91,4 @@
       </div>
     </div>
   </div>
-</div> 
+</div>

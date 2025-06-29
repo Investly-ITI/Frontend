@@ -7,37 +7,37 @@ import { City } from '../../../../_models/city';
 import { GovernrateService } from '../../../../_services/governorate.service';
 import { CategoryService } from '../../../../_services/category.service';
 import { ToastrService } from 'ngx-toastr';
-import { AddIdeaService } from '../../../_services/add-idea.service';
+import { IdeaService } from '../../../_services/idea.service';
 import { Category } from '../../../../_models/category';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { InvestingStages,DesiredInvestmentType } from '../../../../_shared/enums';
+import { InvestingStages, DesiredInvestmentType } from '../../../../_shared/enums';
 
 @Component({
   selector: 'app-add-by-document',
-  imports: [CommonModule, FormsModule,ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './add-by-document.component.html',
   styleUrl: './add-by-document.component.css'
 })
 export class AddByDocumentComponent implements OnInit {
-  @Output() submissionStarted = new EventEmitter<void>();
-  
-  private unsubscribe: Subscription[] = [];
-  
- 
-  cityId = '';
-  
- 
-  modalMode: 'add' | 'view' = 'view';
- ;
+  @Output() submissionStarted = new EventEmitter<FormData>();
 
-  
+  private unsubscribe: Subscription[] = [];
+
+
+  cityId = '';
+
+
+  modalMode: 'add' | 'view' = 'view';
+  ;
+
+
 
 
   // Replace static governments with dynamic data
   governorates: Governorate[] = [];
   citiesByGovernorate: City[] = [];
   selectedGovernorate: boolean = false;
-  categories:Category[] = [];
+  categories: Category[] = [];
 
   formData!: FormGroup;
   showFundingGoal: boolean = false;
@@ -47,56 +47,56 @@ export class AddByDocumentComponent implements OnInit {
   investingStages = InvestingStages;
   desiredInvestmentTypes = DesiredInvestmentType;
 
-  constructor(private fb: FormBuilder, private governorateService: GovernrateService, private categoryService: CategoryService,private toasterService:ToastrService,private AddIdeaService:AddIdeaService) { 
-   
+  constructor(private fb: FormBuilder, private governorateService: GovernrateService, private categoryService: CategoryService, private toasterService: ToastrService, private AddIdeaService: IdeaService) {
+
   }
 
   ngOnInit(): void {
     this.loadGovernorates();
     this.loadCategories();
     this.initializeForm();
-   
+
   }
 
- 
+
 
   initializeForm(): void {
-       this.formData = this.fb.group({
+    this.formData = this.fb.group({
       Title: ['', Validators.required],
       CategoryId: [null, Validators.required],
       Stage: [null, Validators.required],
       DesiredInvestmentType: [null, Validators.required],
       GovernmentId: [null, Validators.required],
       CityId: [null, Validators.required],
-      Capital: [null, [Validators.min(5000)]], 
+      Capital: [null, [Validators.min(5000)]],
       Location: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(100)]],
- 
-      
+
+
     });
-   
+
     // Listen for investmentType changes
     this.formData.get('DesiredInvestmentType')?.valueChanges.subscribe(() => {
-      
+
       this.updateFundingGoalVisibility();
     });
   }
 
   updateFundingGoalVisibility() {
-  const investmentType =+ this.formData.get('DesiredInvestmentType')?.value;
-  
-  if (investmentType === this.desiredInvestmentTypes.Both|| 
-      investmentType ===this.desiredInvestmentTypes.Funding) {
-    this.showFundingGoal = true;
-    this.formData.get('Capital')?.setValidators([Validators.required, Validators.min(5000)]);
-    this.formData.get('Capital')?.updateValueAndValidity();
-  } else {
-  
-    this.showFundingGoal = false;
-    this.formData.get('Capital')?.clearValidators();
-    this.formData.get('Capital')?.setValue(null);
-    this.formData.get('Capital')?.updateValueAndValidity();
+    const investmentType = + this.formData.get('DesiredInvestmentType')?.value;
+
+    if (investmentType === this.desiredInvestmentTypes.Both ||
+      investmentType === this.desiredInvestmentTypes.Funding) {
+      this.showFundingGoal = true;
+      this.formData.get('Capital')?.setValidators([Validators.required, Validators.min(5000)]);
+      this.formData.get('Capital')?.updateValueAndValidity();
+    } else {
+
+      this.showFundingGoal = false;
+      this.formData.get('Capital')?.clearValidators();
+      this.formData.get('Capital')?.setValue(null);
+      this.formData.get('Capital')?.updateValueAndValidity();
       console.log('Final showFundingGoal:', this.showFundingGoal);
-  }
+    }
   }
 
   public loadGovernorates() {
@@ -112,23 +112,22 @@ export class AddByDocumentComponent implements OnInit {
     });
     this.unsubscribe.push(subGov);
   }
-public loadCategories()
-{
-  const subCat = this.categoryService.GetAllCategories().subscribe({
-    next: (response) => {
-      if (response.isSuccess) {
-        this.categories = response.data;
-      } else {
+  public loadCategories() {
+    const subCat = this.categoryService.GetAllCategories().subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          this.categories = response.data;
+        } else {
+          this.toasterService.error('Failed to load categories', 'Error');
+        }
+      },
+      error: (err) => {
+        console.log("Error loading categories:", err);
         this.toasterService.error('Failed to load categories', 'Error');
       }
-    },
-    error: (err) => {
-      console.log("Error loading categories:", err);
-      this.toasterService.error('Failed to load categories', 'Error');
-    }
-  });
-  this.unsubscribe.push(subCat);
-}
+    });
+    this.unsubscribe.push(subCat);
+  }
   // Handle governorate selection change
   onGovernorateChange(governorateId: number) {
     const subcity = this.governorateService.getCitiesByGovernrateId(governorateId).subscribe({
@@ -139,7 +138,7 @@ public loadCategories()
           // Reset city selection when governorate changes
           this.cityId = '';
         }
-      }, 
+      },
       error: (err) => {
         console.log("Error loading cities:", err);
       }
@@ -158,6 +157,7 @@ public loadCategories()
     const allowedTypes = [
       'application/pdf',
       'application/msword',
+      'text/plain',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/vnd.ms-powerpoint',
       'application/vnd.openxmlformats-officedocument.presentationml.presentation'
@@ -186,121 +186,88 @@ public loadCategories()
     return this.formData.valid && !!this.uploadedFile && !this.fileError;
   }
 
+
   onSubmit(): void {
     if (!this.isFormValid()) {
-      // Mark all controls as touched to show errors
       this.formData.markAllAsTouched();
       if (!this.uploadedFile) {
         this.fileError = 'Please upload a document.';
       }
       return;
-    } 
+    }
     else {
-     
-       const rawData = this.formData.value;
+
+      const rawData = this.formData.value;
       const formPayload = new FormData();
       for (const key in rawData) {
-          const value = rawData[key];
-          if (value !== null && value !== undefined && value !== '') {
-            formPayload.append(key, value);
-          }
+        const value = rawData[key];
+        if (value !== null && value !== undefined && value !== '') {
+          formPayload.append(key, value);
         }
-      
-   
+      }
       if (this.uploadedFile) {
-        
         formPayload.append('IdeaFile', this.uploadedFile);
-
-       
-
       } else {
-       
+
         this.fileError = 'Please upload a document.';
         return;
       }
-    formPayload.append('IsDrafted', 'false');
- 
-    console.log('Form Payload:', this.formData.value);
-        var res = this.AddIdeaService.AddIdea(formPayload).subscribe({
-          next: (response) => {
-            if (response.isSuccess) {
-              this.toasterService.success(response.message, 'Success');
-              
-              
 
-            } else {
-              this.toasterService.error(response.message, "Error");
-
-            }
-          }, error: (err) => {
-            const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
-            this.toasterService.error(errorMsg, 'Error');
-          }
-        })
-        this.unsubscribe.push(res);
-
-        //edit
-      } 
-    
-    
-   
-   
+      this.submissionStarted.emit(formPayload);
+    }
   }
 
   onSaveAsDraft(): void {
-   if (!this.formData.valid) {
+    if (!this.formData.valid) {
       this.formData.markAllAsTouched();
-    } 
- 
+    }
+
     else {
-       const rawData = this.formData.value;
+      const rawData = this.formData.value;
       const formPayload = new FormData();
       for (const key in rawData) {
-          const value = rawData[key];
-          if (value !== null && value !== undefined && value !== '') {
-            formPayload.append(key, value);
-          }
+        const value = rawData[key];
+        if (value !== null && value !== undefined && value !== '') {
+          formPayload.append(key, value);
         }
-      
-   
-     
+      }
+
+
+
       if (this.uploadedFile) {
-      
+
         formPayload.append('IdeaFile', this.uploadedFile);
 
-      
+
       } else {
         // handle error: file is required
         this.fileError = 'Please upload a document.';
         return;
       }
-    
-    formPayload.append('IsDrafted', 'true');
-    
-        var res = this.AddIdeaService.AddIdea(formPayload).subscribe({
-          next: (response) => {
-            if (response.isSuccess) {
-              this.toasterService.success("Idea Saved To Drafts", 'Success');
-              
-             
 
-            } else {
-              this.toasterService.error(response.message, "Error");
+      formPayload.append('IsDrafted', 'true');
+      var res = this.AddIdeaService.AddIdea(formPayload).subscribe({
+        next: (response) => {
+          if (response.isSuccess) {
+            this.toasterService.success("Idea Saved To Drafts", 'Success');
 
-            }
-          }, error: (err) => {
-            const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
-            this.toasterService.error(errorMsg, 'Error');
+          } else {
+            this.toasterService.error(response.message, "Error");
+
           }
-        })
-        this.unsubscribe.push(res);
+        }, error: (err) => {
+          const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
+          this.toasterService.error(errorMsg, 'Error');
+        }
+      })
+      this.unsubscribe.push(res);
 
-        
-      } 
-    
+
+    }
+
 
   }
-   ngOnDestroy(): void {
+  ngOnDestroy(): void {
     this.unsubscribe.forEach(sub => sub.unsubscribe());
   }
 }

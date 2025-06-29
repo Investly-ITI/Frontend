@@ -3,11 +3,24 @@ import { CommonModule } from '@angular/common';
 import { AddByDocumentComponent } from './add-by-document/add-by-document.component';
 import { AddByFormComponent } from './add-by-form/add-by-form.component';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { ToastrService } from 'ngx-toastr';
+import { Subscription } from 'rxjs';
+import { IdeaService } from '../../_services/idea.service';
+import { AiIdeaEvaluationResult } from '../../../_models/aiIdeaEvaluationResult';
 
 interface ReviewResult {
   isAccepted: boolean;
   message: string;
-  standards?: string[];
+  totalWeightScore: number;
+  allStandards?: StandardReview[];
+  rejectedStandards?: StandardReview[];
+}
+interface StandardReview {
+  standard: string;
+  weight: number;
+  achievmentScore: number;
+  weightContribuation: number;
+  feedback: string;
 }
 
 @Component({
@@ -34,12 +47,14 @@ interface ReviewResult {
   ]
 })
 export class AddIdeaComponent {
+
+  constructor(private AddIdeaService: IdeaService, private ToastrService: ToastrService) { }
   activeTab: 'document' | 'form' = 'form';
-  
+
   // Loading overlay properties
   isLoading = false;
   loadingMessage = 'Analyzing your business idea...';
-  
+
   // Result modal properties
   showResultModal = false;
   reviewResult: ReviewResult | null = null;
@@ -54,66 +69,90 @@ export class AddIdeaComponent {
     'Finalizing AI review...'
   ];
 
+
+  private unsubscribe: Subscription[] = [];
   switchTab(tab: 'document' | 'form'): void {
     this.activeTab = tab;
   }
 
-  startAIReview(): void {
+  startAIReview(formPayload: any): void {
     this.isLoading = true;
     this.showResultModal = false;
-    let messageIndex = 0;
-    
+    //let messageIndex = 0;
+
     // Cycle through loading messages
-    const messageInterval = setInterval(() => {
-      messageIndex = (messageIndex + 1) % this.loadingMessages.length;
-      this.loadingMessage = this.loadingMessages[messageIndex];
-    }, 2000);
+    // const messageInterval = setInterval(() => {
+    //   messageIndex = (messageIndex + 1) % this.loadingMessages.length;
+    //   this.loadingMessage = this.loadingMessages[messageIndex];
+    // }, 2000);
 
-    // Simulate AI review process (3-6 seconds)
-    const reviewTime = Math.random() * 3000 + 3000; // 3-6 seconds
-    
-    setTimeout(() => {
-      clearInterval(messageInterval);
-      this.isLoading = false;
-      this.simulateAIReview();
-    }, reviewTime);
+
+
+    var res = this.AddIdeaService.Evaluate(formPayload).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          // this.ToastrService.success(response.message, 'Success');
+          this.isLoading = false;
+          this.AIReview(response.data);
+
+
+        } else {
+          this.ToastrService.error(response.message, "Error");
+
+        }
+      }, error: (err) => {
+        const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
+        this.ToastrService.error(errorMsg, 'Error');
+        this.isLoading = false;
+      }
+    })
+    this.unsubscribe.push(res);
   }
 
-  private simulateAIReview(): void {
-    // 50% chance of acceptance, 50% chance of rejection for simulation
-    const isAccepted = Math.random() > 0.5;
-    
-    if (isAccepted) {
-      this.reviewResult = {
-        isAccepted: true,
-        message: 'Congratulations! Your business idea meets our standards and has been submitted for review by our investment team. You will receive updates on the evaluation progress.'
-      };
-    } else {
-      // Random rejection reasons
-      const rejectionStandards = [
-        'Market research lacks sufficient depth and competitor analysis',
-        'Financial projections are unrealistic or missing key assumptions',
-        'Business model does not demonstrate clear revenue streams',
-        'Innovation factor is insufficient compared to existing solutions',
-        'Target market size is too narrow for sustainable growth',
-        'Technical feasibility concerns regarding implementation',
-        'Risk assessment and mitigation strategies are inadequate'
-      ];
-      
-      // Select 2-4 random standards that weren't met
-      const selectedStandards = rejectionStandards
-        .sort(() => 0.5 - Math.random())
-        .slice(0, Math.floor(Math.random() * 3) + 2);
-      
-      this.reviewResult = {
-        isAccepted: false,
-        message: 'Our AI System has reviewed your business idea and found that it doesn\'t meet the required standards for submission. Please review the feedback below and consider improving your proposal.',
-        standards: selectedStandards
-      };
-    }
-    
+  private AIReview(aiResponse: AiIdeaEvaluationResult): void {
+    const result = this.ParseStandaredFromAiResponse(aiResponse);
+    this.reviewResult = result;
     this.showResultModal = true;
+    console.log(this.reviewResult);
   }
+
+
+  private getAiTotalRate(response: AiIdeaEvaluationResult): number {
+   return response.totalWeightedScore;
+
+  }
+
+  private ParseStandaredFromAiResponse(response: AiIdeaEvaluationResult): ReviewResult {
+    var standards: StandardReview[] = [];
+    var result: ReviewResult | null = null;
+   
+    var totalWeightScore = this.getAiTotalRate(response);
+    response.standards?.map(s=>{
+      standards.push({
+        standard:s.name,
+        weight:s.weight,
+        weightContribuation:s.weightedContribution,
+        feedback:s.feedback,
+        achievmentScore:s.achievementScore
+      })
+    })
+
+    result = {
+      isAccepted: totalWeightScore > 50,
+      totalWeightScore: totalWeightScore,
+      allStandards: standards,
+      rejectedStandards: standards.filter(s => s.weightContribuation < (s.weight * .5)),
+      message: totalWeightScore>50  ? "Congratulations! Your business idea meets our standards":
+        "Our AI System has reviewed your business idea and found that it doesn\'t meet the required standards for submission. Please review the feedback below and consider improving your proposal."
+    };
+
+    return result;
+
+  }
+
+
+
+
 
   closeModal(): void {
     this.showResultModal = false;
@@ -125,5 +164,9 @@ export class AddIdeaComponent {
     console.log('Saving idea as draft...');
     this.closeModal();
     // Here you would typically call a service to save the draft
+  }
+
+  ngOnDestroy() {
+    this.unsubscribe.forEach((sb) => sb.unsubscribe());
   }
 } 
