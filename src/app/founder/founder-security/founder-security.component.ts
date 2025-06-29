@@ -24,6 +24,9 @@ class ChangePassword {
   ) {}
 }
 
+
+
+
 class Response<T> {
   constructor(
     public data: T,
@@ -66,6 +69,25 @@ export class FounderSecurityComponent implements OnInit {
       this.toastr.error('Could not retrieve user email', 'Authentication Error');
     }
   }
+
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
+
+  togglePasswordVisibility(field: 'current' | 'new' | 'confirm'): void {
+  switch (field) {
+    case 'current':
+      this.showCurrentPassword = !this.showCurrentPassword;
+      break;
+    case 'new':
+      this.showNewPassword = !this.showNewPassword;
+      break;
+    case 'confirm':
+      this.showConfirmPassword = !this.showConfirmPassword;
+      break;
+  }
+  }
+
 
   isPasswordFormValid(): boolean {
     return !!(

@@ -69,9 +69,34 @@ export class FounderInformationComponent implements OnInit, OnChanges {
     const sub = this.profileService.getProfileData().subscribe({
       next: (response) => {
         if (response.isSuccess && response.data) {
+          const founder = response.data;
+          const user = founder.user;
+          
           // Update the personalInfo with the fetched data
-          this.personalInfo.frontIdPicPath = response.data.user.frontIdPicPath;
-          this.personalInfo.backIdPicPath = response.data.user.backIdPicPath;
+          this.personalInfo = {
+            ...this.personalInfo,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
+            phoneNumber: user.phoneNumber,
+            nationalId: user.nationalId,
+            gender: user.gender,
+            government: user.government?.nameEn || '',
+            governmentId: user.governmentId,
+            city: user.city?.nameEn || '',
+            cityId: user.cityId,
+            address: user.address,
+            frontIdPicPath: user.frontIdPicPath,
+            backIdPicPath: user.backIdPicPath
+          };
+
+          // Load governorates and then set the city
+          this.loadGovernorates().then(() => {
+            if (user.governmentId) {
+              this.onGovernorateChange(user.governmentId);
+            }
+          });
           
           // Load images if we're on the documentation tab
           if (this.activeTab === 'documentation') {
@@ -107,19 +132,25 @@ export class FounderInformationComponent implements OnInit, OnChanges {
   }
 
 
-  public loadGovernorates() {
-    const subGov = this.governorateService.getGovernrates().subscribe({
-      next: (response) => {
-        if (response.isSuccess == true) {
-          this.governorates = response.data;
+  public loadGovernorates(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const subGov = this.governorateService.getGovernrates().subscribe({
+        next: (response) => {
+          if (response.isSuccess == true) {
+            this.governorates = response.data;
+            resolve();
+          } else {
+            reject('Failed to load governorates');
+          }
+        },
+        error: (err) => {
+          console.log("Error loading governorates", err);
+          this.toastr.error('Failed to load governorates');
+          reject(err);
         }
-      },
-      error: (err) => {
-        console.log("Error loading governorates", err);
-        this.toastr.error('Failed to load governorates');
-      }
+      });
+      this.unsubscribe.push(subGov);
     });
-    this.unsubscribe.push(subGov);
   }
 
 
@@ -420,8 +451,15 @@ export class FounderInformationComponent implements OnInit, OnChanges {
           this.citiesByGovernorate = response.data;
           this.selectedGovernorate = true;
           
-          // If there's only one city, select it automatically
-          if (this.citiesByGovernorate.length === 1) {
+          // If we have a cityId from the profile data, select it
+          if (this.personalInfo.cityId) {
+            const selectedCity = this.citiesByGovernorate.find(c => c.id === this.personalInfo.cityId);
+            if (selectedCity) {
+              this.personalInfo.city = selectedCity.nameEn;
+            }
+          }
+          // Otherwise, if there's only one city, select it automatically
+          else if (this.citiesByGovernorate.length === 1) {
             this.onCityChange(this.citiesByGovernorate[0].id);
           }
         }
@@ -443,6 +481,12 @@ export class FounderInformationComponent implements OnInit, OnChanges {
   }
 
   onCityChange(cityId: number | null) {
+    if (!cityId) {
+      this.personalInfo.city = '';
+      this.personalInfo.cityId = null;
+      return;
+    }
+
     const selectedCity = this.citiesByGovernorate.find(c => c.id === cityId);
     if (selectedCity) {
       this.personalInfo.city = selectedCity.nameEn;
