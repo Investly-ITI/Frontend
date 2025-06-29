@@ -28,7 +28,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               next:(res)=>{
                 if (res.data) {
                   authService.login(res.data);
-                  location.reload();
+                  setTimeout(()=>location.reload(),1500)
                 }
               },
               error:(err)=>{

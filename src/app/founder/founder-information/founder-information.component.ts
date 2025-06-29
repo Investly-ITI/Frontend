@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs';
 import { Governorate } from '../../_models/governorate';
 import { City } from '../../_models/city';
 import { GovernrateService } from '../../_services/governorate.service';
+import { environment } from '../../../environments/environment';
 
 interface PersonalInfo {
     firstName: string;
@@ -101,7 +102,7 @@ export class FounderInformationComponent implements OnInit, OnChanges {
   }
 
   private getImageUrl(imagePath: string): string {
-      const baseUrl = 'F:\\Graducation Project\\Backend\\Investly.PL\\wwwroot\\'; 
+      const baseUrl =environment.apiUrl+'/'; 
       return baseUrl + imagePath;
   }
 
