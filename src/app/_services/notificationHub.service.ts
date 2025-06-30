@@ -28,7 +28,7 @@ export class NotificationHubService {
 
     this.hubConnection.start().catch(err => console.error("error hub",err));
     this.hubConnection.on('RecieveNotificationCount', (count: number) => {
-      this.notificationService.updateCountFromSignalR(count);
+    this.notificationService.updateCountFromSignalR(count);
     })
   }
   public stopConnection() {

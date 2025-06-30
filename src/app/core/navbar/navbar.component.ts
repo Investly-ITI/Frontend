@@ -22,17 +22,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
   UserType = UserType; 
   Status=Status;
   notifcationCount=0;
-  
+
   showProfileAlert = true; // Set to true to show red exclamation mark
 
-
-  
   private subscriptions: Subscription[] = [];
 
   constructor(
     private router: Router,
     private authService: AuthService,
-    private notificationService:NotificationService
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -49,12 +47,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
      const subNoti= this.notificationService.getUnreadCount$().subscribe((count)=>{
       this.notifcationCount=count;
      })
-      
-    console.log(this.notifcationCount);
+    console.log(this.notifcationCount) ;
     this.subscriptions.push(subNoti);
-    
     this.subscriptions.push(authSub, userSub);
   }
+
 
   ngOnDestroy() {
     // Clean up subscriptions

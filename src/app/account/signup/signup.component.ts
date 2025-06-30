@@ -323,11 +323,13 @@ export class SignupComponent implements OnInit, OnDestroy {
               this.router.navigate(['/login']);
             }, 1500);
           }else{
+             this.isLoading = false;
             this.toastr.error(response.message,"Error");
           }
          
         },
         error: (err) => {
+           this.isLoading = false;
           this.toastr.error("something went wrong","Error");
         }
       })
