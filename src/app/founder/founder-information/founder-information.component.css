@@ -598,3 +598,31 @@
   .error-message i {
     font-size: 1.2rem;
   }
+
+
+
+  .save-message {
+    padding: 12px 16px;
+    margin: 16px 0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .save-message.success {
+    background-color: #e6f7ee;
+    color: #28a745;
+    border: 1px solid #c3e6cb;
+  }
+
+  .save-message.error {
+    background-color: #f8e1e1;
+    color: #dc3545;
+    border: 1px solid #f5c6cb;
+  }
+
+  .save-message i {
+    font-size: 18px;
+  }

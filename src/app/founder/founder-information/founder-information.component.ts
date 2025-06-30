@@ -40,6 +40,7 @@ export class FounderInformationComponent implements OnInit, OnChanges {
   governorates: Governorate[] = [];
   citiesByGovernorate: City[] = [];
   selectedGovernorate: boolean = false;
+  documentationMessage = '';
 
   constructor(
     private profileService: ProfileService,
@@ -272,17 +273,18 @@ export class FounderInformationComponent implements OnInit, OnChanges {
   
   async onSaveDocumentation(): Promise<void> {
     if (!this.hasValidDocumentationToSave()) {
-      const message = this.invalidFileMessage || 'Please upload at least one ID picture before saving.';
-      this.toastr.error(message);
+      this.documentationMessage = 'Please upload at least one ID picture before saving.';
       return;
     }
 
     this.isSaving = true;
+    this.documentationMessage = '';
 
     try {
       await this.saveDocumentationData();
     } catch (error) {
       console.error('Error saving documentation:', error);
+      this.documentationMessage = 'Failed to save documentation. Please try again.';
     } finally {
       this.isSaving = false;
     }
@@ -290,7 +292,7 @@ export class FounderInformationComponent implements OnInit, OnChanges {
 
   private async saveDocumentationData(): Promise<void> {
     if (!this.personalInfo?.email) {
-      this.toastr.error('User email is required');
+      this.documentationMessage = 'User email is required';
       throw new Error('User email is required');
     }
 
@@ -304,7 +306,7 @@ export class FounderInformationComponent implements OnInit, OnChanges {
       this.profileService.updateNationalIdImages(request).subscribe({
         next: (response) => {
           const message = response.message || 'National ID images updated successfully';
-          this.toastr.success(message);
+          this.documentationMessage = message;
           
           // Update the personalInfo with new image paths from response
           if (response.data) {
@@ -338,12 +340,13 @@ export class FounderInformationComponent implements OnInit, OnChanges {
             errorMessage = 'Server error occurred. Please try again later.';
           }
           
-          this.toastr.error(errorMessage);
+          this.documentationMessage = errorMessage;
           reject(err);
         }
       });
     });
   }
+
 
   isFormValid(): boolean {
       return this.isEmailValid() &&
@@ -404,70 +407,71 @@ export class FounderInformationComponent implements OnInit, OnChanges {
   }
 
   async onSave(): Promise<void> {
-      if (!this.isFormValid()) {
-          this.toastr.error('Please fix all validation errors before saving.');
-          return;
+    if (!this.isFormValid()) {
+      this.saveMessage = 'Please fix all validation errors before saving.';
+      return;
+    }
+
+    this.isSaving = true;
+    this.saveMessage = '';
+
+    try {
+      // Create UpdateFounder instance with the form data
+      let date = new Date();
+      if (this.personalInfo.dateOfBirth) {
+        date = new Date(this.personalInfo.dateOfBirth);
       }
 
-      this.isSaving = true;
+      const updateData = new UpdateFounder(
+        this.personalInfo.firstName,
+        this.personalInfo.lastName,
+        this.personalInfo.countryCode + this.personalInfo.phoneNumber,
+        this.personalInfo.gender || null,
+        this.personalInfo.governmentId || null,
+        this.personalInfo.cityId || null,
+        this.personalInfo.address || null,
+        date.toISOString().split('T')[0]
+      );
 
-      try {
-          // Create UpdateFounder instance with the form data
-          let date = new Date();
-          if (this.personalInfo.dateOfBirth) {
-              date = new Date(this.personalInfo.dateOfBirth);
+      this.profileService.updateFounder(this.personalInfo.email, updateData).subscribe({
+        next: (response) => {
+          if (response.isSuccess) {
+            this.saveMessage = response.statusCode === 200 
+              ? 'Profile updated successfully' 
+              : 'No changes detected';
+            this.personalInfoChange.emit(this.personalInfo);
+          } else {
+            this.saveMessage = response.message || 'Update failed';
           }
-
-          const updateData = new UpdateFounder(
-              this.personalInfo.firstName,
-              this.personalInfo.lastName,
-              this.personalInfo.countryCode + this.personalInfo.phoneNumber, // Combine them here
-              this.personalInfo.gender || null,
-              this.personalInfo.governmentId || null,
-              this.personalInfo.cityId || null,
-              this.personalInfo.address || null,
-              date.toISOString().split('T')[0]  // This will now match string | null
-          );
-          console.log(updateData);
-          this.profileService.updateFounder(this.personalInfo.email, updateData).subscribe({
-              next: (response) => {
-                  if (response.isSuccess) {
-                      const message = response.statusCode === 200 
-                          ? 'Profile updated successfully' 
-                          : 'No changes detected';
-                      this.toastr.success(message);
-                      this.personalInfoChange.emit(this.personalInfo);
-                  } else {
-                      this.toastr.error(response.message || 'Update failed');
-                  }
-              },
-              error: (error) => {
-                  this.handleUpdateError(error);
-              }
-          });
-      } catch (error) {
-          console.error('Error updating profile:', error);
-          this.toastr.error('An unexpected error occurred');
-      } finally {
-          this.isSaving = false;
-      }
+        },
+        error: (error) => {
+          this.handleUpdateError(error);
+        }
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      this.saveMessage = 'An unexpected error occurred';
+    } finally {
+      this.isSaving = false;
+    }
   }
 
   private handleUpdateError(error: any): void {
-      let errorMessage = 'Failed to update profile';
-      
-      if (error.error?.message) {
-          errorMessage = error.error.message;
-      } else if (error.status === 400) {
-          errorMessage = 'Phone number must be unique.';
-      } else if (error.status === 404) {
-          errorMessage = 'User not found';
-      } else if (error.status === 500) {
-          errorMessage = 'Server error occurred. Please try again later.';
-      }
-      
-      this.toastr.error(errorMessage);
+    let errorMessage = 'Failed to update profile';
+    
+    if (error.error?.message) {
+      errorMessage = error.error.message;
+    } else if (error.status === 400) {
+      errorMessage = 'Phone number must be unique.';
+    } else if (error.status === 404) {
+      errorMessage = 'User not found';
+    } else if (error.status === 500) {
+      errorMessage = 'Server error occurred. Please try again later.';
+    }
+    
+    this.saveMessage = errorMessage;
   }
+
 
 
 

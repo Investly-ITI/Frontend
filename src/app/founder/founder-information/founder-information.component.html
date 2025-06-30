@@ -293,6 +293,12 @@
             <span>{{ invalidFileMessage }}</span>
           </div>
 
+        <div class="save-message" *ngIf="documentationMessage" [ngClass]="{'success': documentationMessage.includes('successfully'), 'error': documentationMessage.includes('Failed') || documentationMessage.includes('fix') || documentationMessage.includes('required')}">
+          <i class='bx' [ngClass]="documentationMessage.includes('successfully') ? 'bx-check-circle' : 'bx-error-circle'"></i>
+          <span>{{ documentationMessage }}</span>
+        </div>
+
+
           <!-- Documentation Save Actions -->
           <button type="button" class="btn btn-primary" 
                   (click)="onSaveDocumentation()" 
