@@ -64,12 +64,6 @@
         <i class='bx' [ngClass]="getStatusIcon(idea.status)"></i>
         <span>{{ idea.status | titlecase }}</span>
         </div>
-
-        <!-- Submission Type Badge -->
-        <div class="submission-type-badge" [ngClass]="idea.submissionType">
-          <i class='bx' [ngClass]="idea.submissionType === 'form' ? 'bx-edit' : 'bx-file'"></i>
-          <span>{{ idea.submissionType === 'form' ? 'Form Submission' : 'Document Submission' }}</span>
-        </div>
       </div>
 
       <!-- Idea Content -->
@@ -319,23 +313,14 @@
     </div>
   </div>
 
-  <!-- Edit View - Form-based Ideas -->
-  <app-edit-idea-form
-    *ngIf="showEditView && editingIdea && editingIdea.submissionType === 'form'"
+  <!-- Edit View - Unified Edit Component -->
+  <app-edit-idea
+    *ngIf="showEditView && editingIdea"
     [idea]="editingIdea"
     (onClose)="onCloseEditView()"
     (onSave)="onSaveIdeaChanges($event)"
     (saveStarted)="onEditSaveStarted()"
-  ></app-edit-idea-form>
-
-  <!-- Edit View - Document-based Ideas -->
-  <app-edit-idea-document
-    *ngIf="showEditView && editingIdea && editingIdea.submissionType === 'document'"
-    [idea]="editingIdea"
-    (onClose)="onCloseEditView()"
-    (onSave)="onSaveIdeaChanges($event)"
-    (saveStarted)="onEditSaveStarted()"
-  ></app-edit-idea-document>
+  ></app-edit-idea>
 
   <!-- Loading Overlay -->
   <div class="loading-overlay" *ngIf="isLoading" [@fadeInOut]>

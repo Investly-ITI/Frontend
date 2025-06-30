@@ -82,7 +82,7 @@ export class AuthService {
   }
 
 
-  private getUserData(): LoggedInUser | null {
+ getUserData(): LoggedInUser | null {
     const decoded = this.getDecodedToken();
     if (!decoded) { return null }
     var data: LoggedInUser = {
