@@ -6,7 +6,9 @@ import { FounderSecurityComponent } from './founder-security/founder-security.co
 import { FounderIdeasComponent } from './founder-ideas/founder-ideas.component';
 import { FounderNotificationsComponent } from './founder-notifications/founder-notifications.component';
 import { ProfileService } from './_services/profile.service';
+import { NotificationService, PaginatedNotificationsDto } from '../_services/notification.service';
 import { environment } from '../../environments/environment';
+import { Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { getStatusLabel } from '../_shared/utils/enum.utils';
 import { Status } from '../_shared/enums';
@@ -131,13 +133,16 @@ export class FounderComponent implements OnInit {
     ]
   };
 
+  unreadCount: number = 0;
+  private unreadCountSub?: Subscription;
+
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private profileService: ProfileService,
+    private notificationService: NotificationService,
     private toastr: ToastrService
-  ) { }
-
+  ) {}
   ngOnInit(): void {
     // Handle query parameters to set active section and tab
     this.getProfileData();
@@ -156,6 +161,12 @@ export class FounderComponent implements OnInit {
         }, 0);
       }
     });
+    // Subscribe to shared unread count observable
+    this.unreadCountSub = this.notificationService.getUnreadCount$().subscribe(count => {
+      this.unreadCount = count;
+    });
+    // Initial fetch
+    this.notificationService.refreshUnreadCount();
   }
 
   getProfileData(): void {
@@ -204,10 +215,17 @@ export class FounderComponent implements OnInit {
 
   setActiveSection(section: 'information' | 'security' | 'ideas' | 'notifications'): void {
     this.activeSection = section;
+    if (section === 'notifications') {
+      this.notificationService.setUnreadCount(0);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.unreadCountSub?.unsubscribe();
   }
 
   getUnreadNotificationsCount(): number {
-    return this.profileData.notifications.filter(n => !n.read).length;
+    return this.unreadCount;
   }
 
   // Profile picture upload functionality
@@ -303,4 +321,4 @@ export class FounderComponent implements OnInit {
   onNotificationsChange(notifications: any[]): void {
     this.profileData.notifications = notifications;
   }
-} 
+}
