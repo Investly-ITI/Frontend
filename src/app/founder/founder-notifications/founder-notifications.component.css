@@ -113,6 +113,16 @@
   color: var(--error);
 }
 
+.notification-item .unread-icon {
+  background: #30acaa;
+  color: #fff;
+}
+
+.notification-item .read-icon {
+  background: #e0e0e0;
+  color: #30acaa;
+}
+
 .notification-content {
   flex: 1;
 }
@@ -222,4 +232,4 @@
   .notification-actions {
     align-self: flex-end;
   }
-} 
+}
