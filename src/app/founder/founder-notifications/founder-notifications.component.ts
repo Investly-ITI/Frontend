@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FounderNotificationService, PaginatedNotificationsDto } from '../_services/founder-notification.service';
+import { NotificationService, PaginatedNotificationsDto } from '../../_services/notification.service';
 import { notification, notificationSearch } from '../../_models/notification';
 
 @Component({
@@ -17,17 +17,17 @@ export class FounderNotificationsComponent implements OnInit {
   pageSize: number = 10;
   totalCount: number = 0;
 
-  constructor(private founderNotificationService: FounderNotificationService) {}
+  constructor(private notificationService: NotificationService) {}
 
   ngOnInit(): void {
     // Mark all as read before loading notifications
-    this.founderNotificationService.markAllAsRead().subscribe({
+    this.notificationService.markAllAsRead().subscribe({
       next: () => {
-        this.founderNotificationService.setUnreadCount(0);
+        this.notificationService.setUnreadCount(0);
         this.loadNotifications();
       },
       error: () => {
-        this.founderNotificationService.setUnreadCount(0);
+        this.notificationService.setUnreadCount(0);
         this.loadNotifications();
       }
     });
@@ -44,7 +44,7 @@ export class FounderNotificationsComponent implements OnInit {
       null, // isRead
       0 // Status
     );
-    this.founderNotificationService.getUserNotifications(search).subscribe({
+    this.notificationService.getUserNotifications(search).subscribe({
       next: (res) => {
         if (res.isSuccess && res.data && res.data.notifications) {
           this.notifications = res.data.notifications;
@@ -62,7 +62,7 @@ export class FounderNotificationsComponent implements OnInit {
   }
 
   deleteNotification(notificationId: number): void {
-    this.founderNotificationService.softDeleteNotification(notificationId).subscribe({
+    this.notificationService.softDeleteNotification(notificationId).subscribe({
       next: (res) => {
         if (res.isSuccess) {
           this.notifications = this.notifications.filter(n => n.id !== notificationId);

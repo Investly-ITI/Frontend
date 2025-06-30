@@ -7,7 +7,6 @@ import { UserType,Status } from '../../_shared/enums';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { NotificationService } from '../../_services/notification.service';
-import { FounderNotificationService } from '../../founder/_services/founder-notification.service';
 
 @Component({
   selector: 'app-navbar',
@@ -23,18 +22,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
   UserType = UserType; 
   Status=Status;
   notifcationCount=0;
-  private founderUnreadCountSub?: Subscription;
 
   showProfileAlert = true; // Set to true to show red exclamation mark
 
-  
   private subscriptions: Subscription[] = [];
 
   constructor(
     private router: Router,
     private authService: AuthService,
-    private notificationService: NotificationService,
-    private founderNotificationService: FounderNotificationService
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -57,7 +53,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
 
   ngOnDestroy() {
-    this.founderUnreadCountSub?.unsubscribe();
     // Clean up subscriptions
     this.subscriptions.forEach(sub => sub.unsubscribe());
   }

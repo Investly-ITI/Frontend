@@ -6,7 +6,7 @@ import { FounderSecurityComponent } from './founder-security/founder-security.co
 import { FounderIdeasComponent } from './founder-ideas/founder-ideas.component';
 import { FounderNotificationsComponent } from './founder-notifications/founder-notifications.component';
 import { ProfileService } from './_services/profile.service';
-import { FounderNotificationService } from './_services/founder-notification.service';
+import { NotificationService, PaginatedNotificationsDto } from '../_services/notification.service';
 import { environment } from '../../environments/environment';
 import { Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
@@ -140,7 +140,7 @@ export class FounderComponent implements OnInit {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private profileService: ProfileService,
-    private founderNotificationService: FounderNotificationService,
+    private notificationService: NotificationService,
     private toastr: ToastrService
   ) {}
   ngOnInit(): void {
@@ -162,11 +162,11 @@ export class FounderComponent implements OnInit {
       }
     });
     // Subscribe to shared unread count observable
-    this.unreadCountSub = this.founderNotificationService.unreadCount$.subscribe(count => {
+    this.unreadCountSub = this.notificationService.getUnreadCount$().subscribe(count => {
       this.unreadCount = count;
     });
     // Initial fetch
-    this.founderNotificationService.refreshUnreadCount();
+    this.notificationService.refreshUnreadCount();
   }
 
   getProfileData(): void {
@@ -216,7 +216,7 @@ export class FounderComponent implements OnInit {
   setActiveSection(section: 'information' | 'security' | 'ideas' | 'notifications'): void {
     this.activeSection = section;
     if (section === 'notifications') {
-      this.founderNotificationService.setUnreadCount(0);
+      this.notificationService.setUnreadCount(0);
     }
   }
 
