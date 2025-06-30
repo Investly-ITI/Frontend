@@ -21,5 +21,6 @@ export class IdeaService {
     var res= this.httpclient.post<Response<any>>(`${this.baseUrl}/evaluate`, formData);
     return res;
   }
+ // AddAiEvaluation()
 
 }

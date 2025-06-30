@@ -349,7 +349,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
       this.toastrService.error('Please complete all required fields', 'Form Incomplete');
       return;
     }
-   var formPayload=this.FormPayload(false);
+    var formPayload=this.FormPayload(false);
     this.startAIReview(formPayload);
   }
 
@@ -456,6 +456,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
   private AIReview(aiResponse: AiIdeaEvaluationResult): void {
     const result = this.ParseStandaredFromAiResponse(aiResponse);
     this.reviewResult = result;
+    console.log(this.reviewResult);
     this.showResultModal=true;
     // Simulate AI review process (3-6 seconds)
     //const reviewTime = Math.random() * 3000 + 3000;
