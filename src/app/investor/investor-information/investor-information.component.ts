@@ -189,7 +189,7 @@ setFundingValuesFromDatabase(): void {
    
 
     if (!hasFormChanged ) {
-      this.saveMessage = 'Failed To Update No changes detected.';
+      this.saveMessage = 'No changes detected.';
       this.isSaving = false;
       return;
     }
@@ -216,7 +216,7 @@ setFundingValuesFromDatabase(): void {
    if(res.isSuccess){
       this.isSaving = false;
       this.saveMessage = 'ID documentation updated successfully!' 
-      
+    
           setTimeout(() => {
             this.saveMessage = '';
             
@@ -244,7 +244,7 @@ submitDocumentation(): void {
     const hasNewImages = this.FrontIdImageFile || this.BackIdImageFile;
 
     if ( !hasNewImages) {
-      this.saveMessage = 'Failed To Update No changes detected.';
+   this.saveMessage = 'No changes detected.';
       this.isSaving = false;
       return;
     }

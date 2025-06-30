@@ -284,6 +284,11 @@
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: var(--error);
 }
+.save-message.warning {
+  background: rgba(255, 243, 205, 0.9);
+  border: 1px solid #ffe58f; 
+  color: var(--warning);
+}
 
 .save-message i {
   font-size: 1.2rem;

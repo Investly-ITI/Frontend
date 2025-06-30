@@ -37,6 +37,7 @@ export class InvestorComponent {
   showSecurityAlert = true; // Set to true to show red exclamation mark next to Security
     private subscriptions: Subscription[] = [];
  profileData: any; 
+ imageUrl:string| null = null;
  securitySettings: SecuritySettings={
       twoFactorEnabled: true,
       emailNotifications: true,
@@ -139,9 +140,9 @@ const sub = this.profileService.getProfileData().subscribe({
       // Create a file reader to preview the image
       const reader = new FileReader();
       reader.onload = (e) => {
-        const imageUrl = e.target?.result as string;
+        this.imageUrl = e.target?.result as string;
         // Update the profile picture URL
-        this.profileData.user.profilePicPath = imageUrl;
+        this.profileData.user.profilePicPath = this.imageUrl;
         
         // Here you would typically upload the file to your server
         this.uploadProfilePicture(file);
@@ -158,11 +159,13 @@ const sub = this.profileService.getProfileData().subscribe({
     this.profileService.updateProfilePicture(formData).subscribe({
       next: (response) => {
         if (response.isSuccess) {
+             this.getProfileData();
           this.toastr.success('Profile picture updated successfully');
-          this.getProfileData();
+       
         } else {
+            this.getProfileData();
+
           this.toastr.error(response.message || 'Failed to update profile picture');
-          this.getProfileData();
         }
       },
       error: (err) => {
@@ -173,8 +176,10 @@ const sub = this.profileService.getProfileData().subscribe({
     });
   } catch (error) {
     console.error('Error uploading profile picture:', error);
+            this.getProfileData();
+
     this.toastr.error('Failed to upload profile picture');
-    this.getProfileData();
+ 
   }
 }
 

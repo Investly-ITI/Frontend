@@ -500,6 +500,30 @@ gap: 8px;
 :host-context(.dark) .requirements-list li:not(.met) {
   color: var(--error-light);
 }
+/*eye icon*/
+.password-input-container {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #666;
+  font-size: 1.2rem;
+}
+
+.password-toggle:hover {
+  color: #333;
+}
+
+/* Adjust input padding to prevent text overlap */
+.form-control[type="password"],
+.form-control[type="text"] {
+  padding-right: 40px;
+}
 
 /* Responsive Adjustments */
 @media screen and (max-width: 768px) {

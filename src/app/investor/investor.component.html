@@ -8,7 +8,7 @@
   <div class="profile-header">
     <div class="header-content">
       <div class="profile-avatar">
-<img [src]="url + '/' + profileData.user.profilePicPath" [alt]="profileData.user.firstName + ' ' + profileData.user.lastName">
+<img [src]="imageUrl || (url + '/' + profileData.user.profilePicPath)" [alt]="profileData.user.firstName + ' ' + profileData.user.lastName">
         <div class="avatar-overlay" (click)="triggerFileInput()">
           <i class='bx bx-camera'></i>
         </div>

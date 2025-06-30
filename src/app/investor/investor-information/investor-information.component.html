@@ -5,10 +5,22 @@
   </div>
 
   <!-- Save Message -->
- <div class="save-message" *ngIf="saveMessage" [ngClass]="{'success': saveMessage.includes('successfully'), 'error': saveMessage.includes('Failed') || saveMessage.includes('fix')}">
-    <i class='bx' [ngClass]="saveMessage.includes('successfully') ? 'bx-check-circle' : 'bx-error-circle'"></i>
-    <span>{{ saveMessage }}</span>
-  </div>
+ <div class="save-message" *ngIf="saveMessage"
+     [ngClass]="{
+       'success': saveMessage.includes('successfully'),
+       'error': saveMessage.includes('Failed') || saveMessage.includes('fix'),
+       'warning': saveMessage.includes('No')
+     }">
+  <i class='bx' 
+     [ngClass]="
+       saveMessage.includes('successfully') ? 'bx-check-circle' :
+       saveMessage.includes('No') ? 'bx-error' :
+       'bx-error-circle'
+     ">
+  </i>
+  <span>{{ saveMessage }}</span>
+</div>
+
   <!-- Tab Navigation -->
   <div class="tab-navigation">
     <button class="tab-button" [class.active]="activeTab === 'personal'" (click)="switchTab('personal')">
@@ -34,14 +46,14 @@
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label" for="firstName">First Name</label>
-                <input id="firstName" class="form-control readonly" formControlName="firstName" type="text" />
+                <input id="firstName"   [(ngModel)]="personalInfo.user.firstName" class="form-control readonly" formControlName="firstName" type="text" />
                 <div *ngIf="formData.get('user.firstName')?.touched && formData.get('user.firstName')?.invalid" class="text-danger">
                   First name is required.
                 </div>
               </div>
               <div class="form-group">
                 <label class="form-label" for="lastName">Last Name</label>
-                <input id="lastName" class="form-control readonly" formControlName="lastName" type="text" />
+                <input id="lastName"  [(ngModel)]="personalInfo.user.lastName" class="form-control readonly" formControlName="lastName" type="text" />
                 <div *ngIf="formData.get('user.lastName')?.touched && formData.get('user.lastName')?.invalid" class="text-danger">
                   Last name is required.
                 </div>
@@ -103,7 +115,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label" for="government">Government</label>
-                <select id="government" class="form-control" formControlName="governmentId" (change)="loadCities($any($event.target).value)">
+                <select id="government" class="form-control"   formControlName="governmentId" (change)="loadCities($any($event.target).value)">
                   <option value="" disabled>Select Government</option>
                   <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
                 </select>
@@ -113,9 +125,9 @@
               </div>
               <div class="form-group">
                 <label class="form-label" for="city">City</label>
-                <select id="city" class="form-control" formControlName="cityId">
+                <select id="city" class="form-control"   formControlName="cityId">
                   <option value="" disabled>Select City</option>
-                  <option *ngFor="let city of Cities" [value]="city.id">{{ city.nameEn }}</option>
+                  <option  *ngFor="let city of Cities" [value]="city.id">{{ city.nameEn }}</option>
                 </select>
                 <div *ngIf="formData.get('user.cityId')?.touched && formData.get('user.cityId')?.invalid">
                   City is required.

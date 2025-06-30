@@ -48,6 +48,10 @@ export class InvestorSecurityComponent {
     confirmPassword: ''
   };
   passwordError = '';
+  showCurrentPassword = false;
+showNewPassword = false;
+showConfirmPassword = false;
+
 
   ngOnInit(): void {
     // Get email from AuthService when component initializes
@@ -176,7 +180,19 @@ export class InvestorSecurityComponent {
 
   
   }
-
+togglePasswordVisibility(field: 'current' | 'new' | 'confirm'): void {
+  switch (field) {
+    case 'current':
+      this.showCurrentPassword = !this.showCurrentPassword;
+      break;
+    case 'new':
+      this.showNewPassword = !this.showNewPassword;
+      break;
+    case 'confirm':
+      this.showConfirmPassword = !this.showConfirmPassword;
+      break;
+  }
+  }
 
   // Password requirement helper methods
   hasUpperCase(): boolean {
