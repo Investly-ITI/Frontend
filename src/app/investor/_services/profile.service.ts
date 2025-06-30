@@ -4,6 +4,7 @@ import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { Response } from '../../_models/response';
 import { Investor } from '../../_models/investor';
+import { ChangePassword } from '../../_models/founder';
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +21,22 @@ export class ProfileService {
       var result= this.http.put<Response<Investor>>(`${this.ApiUrl}/api/investor/profile`,data);
       return result;
     }
-  
+     updateNationalId(NationalIdPics: FormData): Observable<Response<string>> {
+
+var res=  this.http.patch<Response<string>>( `${this.ApiUrl}/api/investor/profile/nationalid`, NationalIdPics);
+return res;
+    }
+   updateProfilePicture(profielpic: FormData): Observable<Response<string>> {
+
+var res=  this.http.patch<Response<string>>( `${this.ApiUrl}/api/investor/profile`, profielpic);
+return res;
+    }
+    changePassword(passwordData: ChangePassword): Observable<Response<string>> {
+        return this.http.patch<Response<string>>(
+          `${this.ApiUrl}/api/investor/profile/changepassword`, passwordData
+        );
+      }
+    
+ 
 
 }

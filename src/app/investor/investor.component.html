@@ -63,7 +63,7 @@
               <span>Security</span>
               </div>
               <!-- Red exclamation mark notification indicator -->
-              <div class="security-alert-indicator" *ngIf="showSecurityAlert">
+                <div class="security-alert-indicator" *ngIf="showSecurityAlert">
                 <i class='bx bx-error'></i>
               </div>
             </button>
@@ -104,14 +104,14 @@
         [personalInfo]="profileData"
         (personalInfoChange)="onPersonalInfoChange($event)"
       ></app-investor-information>
-<!-- 
+
     
       <app-investor-security
         *ngIf="activeSection === 'security'"
-        [securitySettings]="profileData.securitySettings"
+        [securitySettings]="securitySettings"
         (securitySettingsChange)="onSecuritySettingsChange($event)"
       ></app-investor-security>
-
+<!-- 
    
       <app-investor-ideas-request
         #investorIdeasRequest

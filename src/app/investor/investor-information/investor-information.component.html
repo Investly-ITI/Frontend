@@ -5,11 +5,10 @@
   </div>
 
   <!-- Save Message -->
-  <div class="save-message" *ngIf="saveMessage" [ngClass]="{'success': saveMessage.includes('successfully'), 'error': saveMessage.includes('Failed') || saveMessage.includes('fix')}">
+ <div class="save-message" *ngIf="saveMessage" [ngClass]="{'success': saveMessage.includes('successfully'), 'error': saveMessage.includes('Failed') || saveMessage.includes('fix')}">
     <i class='bx' [ngClass]="saveMessage.includes('successfully') ? 'bx-check-circle' : 'bx-error-circle'"></i>
     <span>{{ saveMessage }}</span>
   </div>
-
   <!-- Tab Navigation -->
   <div class="tab-navigation">
     <button class="tab-button" [class.active]="activeTab === 'personal'" (click)="switchTab('personal')">
@@ -21,7 +20,7 @@
   </div>
 
   <!-- FORM -->
-  <form [formGroup]="formData" class="profile-form" (ngSubmit)="onSubmit()">
+  <form [formGroup]="formData" class="profile-form" >
     <div class="tab-content">
 
       <!-- PERSONAL TAB -->
@@ -204,7 +203,13 @@
               </div>
             </div>
           </div>
-
+  <!-- Submit Button -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" [disabled]="isSaving || !formData.valid "(click)="submitPersonalInfo()" >
+          <i class="bx" [ngClass]="isSaving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
+          {{ isSaving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
         </div> <!-- End of form-container -->
       </div> 
 
@@ -248,20 +253,20 @@
                 <label class="upload-label">Back Side</label>
               </div>
             </div>
-
+ <!-- Submit Button -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" [disabled]="isSaving || !formData.valid" (click)="submitDocumentation()">
+          <i class="bx" [ngClass]="isSaving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
+          {{ isSaving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
             <input type="file" id="frontIdInput" accept="image/*" (change)="onFrontIdFileSelected($event)" style="display: none;">
             <input type="file" id="backIdInput" accept="image/*" (change)="onBackIdFileSelected($event)" style="display: none;">
           </div>
         </div>
       </div>
 
-      <!-- Submit Button -->
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary" [disabled]="isSaving || !formData.valid">
-          <i class="bx" [ngClass]="isSaving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
-          {{ isSaving ? 'Saving...' : 'Save Changes' }}
-        </button>
-      </div>
+    
     </div>
   </form>
 </div>

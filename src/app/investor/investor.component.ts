@@ -8,8 +8,18 @@ import { InvestorSecurityComponent } from "./investor-security/investor-security
 import { InvestorNotificationsComponent } from "./investor-notifications/investor-notifications.component";
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { City } from '../_models/city';
+import { ToastrService } from 'ngx-toastr';
+import { getStatusLabel } from '../_shared/utils/enum.utils';
+import { Status } from '../_shared/enums';
 
+interface SecuritySettings {
+  twoFactorEnabled: boolean;
+  emailNotifications: boolean;
+  smsNotifications: boolean;
+  loginAlerts: boolean;
+  lastPasswordChange: string;
+  accountStatus: string;
+}
 @Component({
   selector: 'app-investor',
   imports: [CommonModule,InvestorInformationComponent, InvestorSecurityComponent, InvestorIdeasRequestComponent, InvestorNotificationsComponent],
@@ -27,10 +37,19 @@ export class InvestorComponent {
   showSecurityAlert = true; // Set to true to show red exclamation mark next to Security
     private subscriptions: Subscription[] = [];
  profileData: any; 
+ securitySettings: SecuritySettings={
+      twoFactorEnabled: true,
+      emailNotifications: true,
+      smsNotifications: false,
+      loginAlerts: true,
+      lastPasswordChange: '2024-01-15',
+      accountStatus: "active"
+    }
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private profileService:ProfileService
+    private profileService:ProfileService,
+    private toastr:ToastrService
 
   ) {}
 
@@ -62,6 +81,15 @@ const sub = this.profileService.getProfileData().subscribe({
         this.profileData = res.data;
         console.log(this.profileData);
         
+                  this.securitySettings = {
+                    twoFactorEnabled: false,
+                    emailNotifications: false,
+                    smsNotifications: false,
+                    loginAlerts: false,
+                    lastPasswordChange: "1-1-2000",
+                    accountStatus: getStatusLabel(this.profileData.user.status)
+                  }
+                  this.showSecurityAlert=this.profileData.user.status!=Status.Active
       } else {
         console.error('Failed to fetch profile data', res.message);
       }
@@ -113,7 +141,7 @@ const sub = this.profileService.getProfileData().subscribe({
       reader.onload = (e) => {
         const imageUrl = e.target?.result as string;
         // Update the profile picture URL
-        this.profileData.personalInfo.profilePicture = imageUrl;
+        this.profileData.user.profilePicPath = imageUrl;
         
         // Here you would typically upload the file to your server
         this.uploadProfilePicture(file);
@@ -122,28 +150,39 @@ const sub = this.profileService.getProfileData().subscribe({
     }
   }
 
-  private async uploadProfilePicture(file: File): Promise<void> {
-    try {
-      // Simulate API call to upload profile picture
-      console.log('Uploading profile picture:', file.name);
-      
-      // In a real application, you would send the file to your backend
-      const formData = new FormData();
-      formData.append('profilePicture', file);
-      
-      // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      console.log('Profile picture uploaded successfully');
-    } catch (error) {
-      console.error('Error uploading profile picture:', error);
-      alert('Failed to upload profile picture. Please try again.');
-    }
+   private async uploadProfilePicture(file: File): Promise<void> {
+  try {
+    const formData = new FormData();
+    formData.append('profilepic', file);
+
+    this.profileService.updateProfilePicture(formData).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          this.toastr.success('Profile picture updated successfully');
+          this.getProfileData();
+        } else {
+          this.toastr.error(response.message || 'Failed to update profile picture');
+          this.getProfileData();
+        }
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'An error occurred while updating profile picture';
+        this.toastr.error(errorMessage);
+       
+      }
+    });
+  } catch (error) {
+    console.error('Error uploading profile picture:', error);
+    this.toastr.error('Failed to upload profile picture');
+    this.getProfileData();
   }
+}
+
 
   // Event handlers for child component data changes
   onPersonalInfoChange(personalInfo: any): void {
-    this.profileData.personalInfo = personalInfo;
+    this.profileData.user = personalInfo;
+    this.getProfileData();
   }
 
   onSecuritySettingsChange(securitySettings: any): void {

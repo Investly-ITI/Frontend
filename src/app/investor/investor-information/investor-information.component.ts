@@ -172,13 +172,13 @@ setFundingValuesFromDatabase(): void {
     fileInput?.click();
   }
 
- onSubmit(): void {
-    if (!this.formData.valid) {
-      this.formData.markAllAsTouched();
-      this.saveMessage = 'Please fill all required fields.';
-      return;
-    }
-   
+  submitPersonalInfo(): void {
+  if (!this.formData.valid) {
+    this.formData.markAllAsTouched();
+    this.saveMessage = 'Please fill all required fields.';
+    return;
+  }
+ 
   
     this.isSaving = true;
     this.saveMessage = '';
@@ -186,84 +186,107 @@ setFundingValuesFromDatabase(): void {
     // Check if form has actually changed
     const currentFormValue = this.formData.getRawValue();
     const hasFormChanged = JSON.stringify(this.originalFormValue) !== JSON.stringify(currentFormValue);
-    const hasNewImages = this.FrontIdImageFile || this.BackIdImageFile;
+   
 
-    if (!hasFormChanged && !hasNewImages) {
-      this.saveMessage = 'No changes detected.';
+    if (!hasFormChanged ) {
+      this.saveMessage = 'Failed To Update No changes detected.';
       this.isSaving = false;
       return;
     }
 
-    // Build FormData 
-    const rawData = this.formData.value;
-    const formPayload = new FormData();
-   
+  const rawData = this.formData.value;
+  const formPayload = new FormData();
 
-    // Add main level properties
-    for (const key in rawData) {
-      if (key !== 'user') {
-        const value = rawData[key];
-        if (value !== null && value !== undefined && value !== '') {
-          formPayload.append(`${key}`, value);
-        }
-      }
+  for (const key in rawData) {
+    if (key !== 'user') {
+      formPayload.append(`${key}`, rawData[key]);
     }
-    
-    // Add user properties with 'user.' prefix
-    if (rawData.user) {
-      for (const key in rawData.user) {
-        const value = rawData.user[key];
-        if (value !== null && value !== undefined && value !== '') {
-          formPayload.append(`user.${key}`, value);
-        }
-      }
-    }
+  }
 
-    // Add files
-    if (this.FrontIdImageFile) {
-      formPayload.append('user.FrontIdPicFile', this.FrontIdImageFile);
-    }
-    if (this.BackIdImageFile) {
-      formPayload.append('user.BackIdPicFile', this.BackIdImageFile);
-    }
-   formPayload.append('minFunding', this.selectedFundingMin.toString());
+  for (const key in rawData.user) {
+    formPayload.append(`user.${key}`, rawData.user[key]);
+  }
+
+  formPayload.append('minFunding', this.selectedFundingMin.toString());
   formPayload.append('maxFunding', this.selectedFundingMax.toString());
-    
 
-    // Call the update service
-    const sub = this.ProfileService.update(formPayload).subscribe({
-      next: (response) => {
-        this.isSaving = false;
-        if (response.isSuccess) {
-          this.saveMessage = 'Profile updated successfully!';
-        
-          this.originalFormValue = currentFormValue; 
-          this.personalInfoChange.emit(this.formData.value);
-          
-         
-          this.FrontIdImageFile = null as any;
-          this.BackIdImageFile = null as any;
-          
-        
+  this.isSaving = true;
+  this.ProfileService.update(formPayload).subscribe({
+    next: (res) => {
+   if(res.isSuccess){
+      this.isSaving = false;
+      this.saveMessage = 'ID documentation updated successfully!' 
+      
           setTimeout(() => {
             this.saveMessage = '';
             
           }, 3000);
-        } else {
-          this.saveMessage = 'Update failed!';
-        
-        }
-      },
-      error: (err) => {
-        console.error('Update error:', err);
-        const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
-        this.saveMessage = 'An error occurred while saving.';
-      
-        this.isSaving = false;
-      }
-    });
-    this.unsubscribe.push(sub);
+       }
+       else
+       {
+         this.isSaving = false;
+            this.saveMessage = 'ID documentation Failed!' 
+       }
+    },
+    error: () => {
+      this.isSaving = false;
+      this.saveMessage = 'Failed while updating personal info.';
+    }
+  });
+}
+submitDocumentation(): void {
+  
+    this.isSaving = true;
+    this.saveMessage = '';
+
+    // Check if form has actually changed
+   
+    const hasNewImages = this.FrontIdImageFile || this.BackIdImageFile;
+
+    if ( !hasNewImages) {
+      this.saveMessage = 'Failed To Update No changes detected.';
+      this.isSaving = false;
+      return;
+    }
+  
+  const formData = new FormData();
+
+  if (this.FrontIdImageFile) {
+    formData.append('FrontIdPic', this.FrontIdImageFile);
   }
+
+  if (this.BackIdImageFile) {
+    formData.append('BackIdPic', this.BackIdImageFile);
+  }
+
+  this.ProfileService.updateNationalId(formData).subscribe({
+    next: (res) => {
+       if (res.isSuccess) {
+  
+   
+ //this.personalInfo = res.data;
+     // this.personalInfoChange.emit(res.data);
+         this.isSaving = false;
+      this.saveMessage = 'ID documentation updated successfully!' 
+          setTimeout(() => {
+            this.saveMessage = '';
+            
+          }, 3000);
+       }
+       else
+       {
+         this.isSaving = false;
+            this.saveMessage = 'ID documentation Failed!' 
+       }
+    },
+    error: (err) => {
+      this.isSaving = false;
+      this.saveMessage = err?.error?.message || 'Failed to update documentation.';
+    }
+  });
+}
+
+ 
   onInvestmentTypeChange(): void {
     const investmentType = this.formData.get('investingType')?.value;
     const fundingRangeControl = this.formData.get('fundingRange');
