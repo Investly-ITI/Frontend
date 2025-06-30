@@ -12,17 +12,17 @@
       <div 
         class="notification-item" 
         *ngFor="let notification of notifications"
-        [ngClass]="{ 'unread': !notification.read }"
-        [class]="'notification-' + notification.type"
+        [ngClass]="{ 'unread': notification.isRead === 0 }"
+        [class]="'notification-' + notification.status"
       >
-        <div class="notification-icon">
-          <i class='bx' [ngClass]="getNotificationIcon(notification.type)"></i>
+        <div class="notification-icon" [ngClass]="notification.isRead === 0 ? 'unread-icon' : 'read-icon'">
+          <i class='bx' [ngClass]="getNotificationIcon(notification.status)"></i>
         </div>
         
         <div class="notification-content">
           <h4 class="notification-title">{{ notification.title }}</h4>
-          <p class="notification-message">{{ notification.message }}</p>
-          <span class="notification-time">{{ notification.timestamp | date:'short' }}</span>
+          <p class="notification-message">{{ notification.body }}</p>
+          <span class="notification-time">{{ notification.createdAt | date:'short' }}</span>
         </div>
 
         <div class="notification-actions">
@@ -45,4 +45,4 @@
       </div>
     </div>
   </div>
-</div> 
+</div>
