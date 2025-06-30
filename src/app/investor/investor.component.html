@@ -118,14 +118,13 @@
         [style.display]="activeSection === 'ideas' ? 'block' : 'none'"
         (ideasCountChange)="onIdeasCountChange($event)"
       ></app-investor-ideas-request>
+          -->
 
     
       <app-investor-notifications 
         *ngIf="activeSection === 'notifications'"
-        [notifications]="profileData.notifications"
-        (notificationsChange)="onNotificationsChange($event)"
       ></app-investor-notifications>
-      -->
+  
     </div>
   </div>
 </div> 

@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
 import { getStatusLabel } from '../_shared/utils/enum.utils';
 import { Status } from '../_shared/enums';
+import { NotificationService } from '../_services/notification.service';
 
 interface SecuritySettings {
   twoFactorEnabled: boolean;
@@ -50,9 +51,12 @@ export class InvestorComponent {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private profileService:ProfileService,
-    private toastr:ToastrService
+    private toastr:ToastrService,
+     private notificationService: NotificationService,
 
   ) {}
+    unreadCount: number = 0;
+  private unreadCountSub?: Subscription;
 
   ngOnInit(): void {
     // Handle query parameters to set active section and tab
@@ -73,6 +77,12 @@ export class InvestorComponent {
         }, 0);
       }
     });
+     // Subscribe to shared unread count observable
+    this.unreadCountSub = this.notificationService.getUnreadCount$().subscribe(count => {
+      this.unreadCount = count;
+    });
+    // Initial fetch
+    this.notificationService.refreshUnreadCount();
   }
 
 getProfileData():void{ 
@@ -109,8 +119,7 @@ const sub = this.profileService.getProfileData().subscribe({
   }
 
   getUnreadNotificationsCount(): number {
-    //return this.profileData.notifications.filter(n => !n.read).length;
-    return 3
+   return this.unreadCount;
   }
 
   // Profile picture upload functionality
@@ -202,6 +211,6 @@ const sub = this.profileService.getProfileData().subscribe({
     this.profileData.notifications = notifications;
   }
   ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.unreadCountSub?.unsubscribe();
   }
 }
