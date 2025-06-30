@@ -41,24 +41,20 @@ export class NavbarComponent implements OnInit, OnDestroy {
     const authSub = this.authService.isAuthenticated$.subscribe(
       isAuth => this.isAuthenticated = isAuth
     );
+    
     const userSub = this.authService.CurrentUser$.subscribe(
       user => this.currentUser = user
+   
     );
-    this.showProfileAlert = this.currentUser?.status != Status.Active ? true : false;
-    // Use founder notification count for founders
-    if (this.currentUser?.userType === UserType.Founder) {
-      this.founderUnreadCountSub = this.founderNotificationService.unreadCount$.subscribe(count => {
-        this.notifcationCount = count;
-      });
-      this.founderNotificationService.refreshUnreadCount();
-    } else {
-      const subNoti = this.notificationService.getUnreadCount$().subscribe((count) => {
-        this.notifcationCount = count;
-      });
-      this.subscriptions.push(subNoti);
-    }
+     this.showProfileAlert=this.currentUser?.status!=Status.Active?true:false;
+     const subNoti= this.notificationService.getUnreadCount$().subscribe((count)=>{
+      this.notifcationCount=count;
+     })
+    console.log(this.notifcationCount) ;
+    this.subscriptions.push(subNoti);
     this.subscriptions.push(authSub, userSub);
   }
+
 
   ngOnDestroy() {
     this.founderUnreadCountSub?.unsubscribe();
