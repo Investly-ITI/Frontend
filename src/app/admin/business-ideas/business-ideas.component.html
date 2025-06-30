@@ -95,52 +95,47 @@
                                     </select>
                                 </label>
                             </div>
-
                             <form (submit)="onSearch(); $event.preventDefault();">
                                 <div class="form-input">
-                                    <input type="search" [(ngModel)]="searchParams.searchInput" name="searchQuery"
-                                        placeholder="Search by title, founder, category, location ..."
-                                        (keyup.enter)="onSearch()">
+                                    <input type="search" [(ngModel)]="searchInput" name="searchInput"
+                                        placeholder="Search by title, founder, or category..." (input)="onSearchInputChange()">
                                     <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
                                     <div id="search-btns">
                                         <button type="button" style="border: none; background-color: var(--light);"
                                             title="Advanced Search" (click)="toggleAdvancedSearch($event)">
-                                            <i class='bx bx-filter'
-                                                style="color: var(--dark); margin-left: 0.7em; font-size: 1.3em;"></i>
+                                            <i class='bx bx-filter' style="color: var(--dark); margin-left: 0.7em; font-size: 1.3em;"></i>
                                         </button>
                                     </div>
                                 </div>
-
                                 <div class="advanced-search-dropdown">
-                                    <div class="advanced-search-menu" [ngClass]="{'show': isAdvancedSearchOpen}"
-                                        (click)="$event.stopPropagation()">
+                                    <div class="advanced-search-menu" [ngClass]="{'show': isAdvancedSearchOpen}">
                                         <div class="advanced-search-content">
                                             <h4>Search Filters</h4>
                                             <div class="filter-group">
                                                 <label for="category">Category:</label>
-                                                <select id="category" [(ngModel)]="tempCategoryFilter" name="categoryFilter">
-                                                    <option [ngValue]="null">All Categories</option>
-                                                    <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
-                                                </select>
-                                            </div>
-                                          
-                                            <div class="filter-group">
-                                                <label for="stage">Stage:</label>
-                                                <select id="stage" [(ngModel)]="searchParams.stage" name="stage"
-                                                    (ngModelChange)="$event === null ? searchParams.stage = undefined : ''">
-                                                    <option [ngValue]="undefined">All Stages</option>
-                                                    <option *ngFor="let stage of stages" [ngValue]="stage">
-                                                        {{ getStageName(stage) }}
+                                                <select id="category" [(ngModel)]="tempCategoryFilter" name="tempCategoryFilter">
+                                                    <option [ngValue]="null">All</option>
+                                                    <option *ngFor="let cat of categories" [ngValue]="cat.id">{{cat.name}}
                                                     </option>
                                                 </select>
                                             </div>
+                                           
+                                            <div class="filter-group">
+                                                <label for="stage">Stage:</label>
+                                                <select id="stage" [(ngModel)]="tempStageFilter" name="tempStageFilter">
+                                                    <option [ngValue]="null">All</option>
+                                                    <option *ngFor="let stage of stages" [ngValue]="stage">
+                                                        {{ getStageName(stage) }}</option>
+                                                </select>
+                                            </div>
                                             <div class="advanced-search-actions">
-                                                <button type="button" class="clear-btn"
-                                                    (click)="clearAdvancedSearch()">
-                                                    <i class='bx bx-x'></i> Clear
+                                                <button type="button" class="clear-btn" (click)="clearAdvancedSearch()">
+                                                    <i class='bx bx-x'></i>
+                                                    Clear
                                                 </button>
                                                 <button type="button" class="apply-btn" (click)="applyAdvancedSearch()">
-                                                    <i class='bx bx-search'></i> Apply
+                                                    <i class='bx bx-search'></i>
+                                                    Apply
                                                 </button>
                                             </div>
                                         </div>
@@ -208,7 +203,8 @@
                                 </td>
                             </tr>
                             <tr *ngIf="!isLoading && !error && filteredBusinessIdeas.length === 0 && businessList && businessList.totalCount > 0">
-                                <td colspan="5" style="text-align: center; padding: 20px;">No business ideas match your filters.</td>
+                                <td colspan="5" style="text-align: center; padding: 20px;">No business ideas match your filters.
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -218,8 +214,6 @@
                         <button (click)="prevPage()" [disabled]="searchParams.pageNumber === 1">
                             <i class='bx bx-chevron-left' style="font-size: 1.7em;"></i>
                         </button>
-                        <span>Page {{ searchParams.pageNumber }} of
-                            {{ businessList.totalCount > 0 ? Math.ceil(businessList.totalCount / searchParams.pageSize) : 1 }}</span>
                         <button (click)="nextPage()"
                             [disabled]="!businessList || searchParams.pageNumber * searchParams.pageSize >= businessList.totalCount">
                             <i class='bx bx-chevron-right' style="font-size: 1.7em;"></i>
@@ -242,7 +236,8 @@
             <div class="modal-body">
                 <div class="tabs">
                     <button class="tab-button" [class.active]="activeTab === 'details'" (click)="activeTab = 'details'">Details</button>
-                    <button class="tab-button" [class.active]="activeTab === 'documentation'" (click)="activeTab = 'documentation'">Documentation</button>
+                    <button class="tab-button" [class.active]="activeTab === 'pdf'" (click)="activeTab = 'pdf'">File</button>
+                    <button class="tab-button" [class.active]="activeTab === 'standardAnswers'" (click)="activeTab = 'standardAnswers'">Standard Answers</button>
                 </div>
 
                 <div class="tab-content">
@@ -278,12 +273,8 @@
                         <div class="detail-row">
                             <strong class="detail-label">Status:</strong>
                             <span class="detail-value status" [ngClass]="{
-                                'status-active': selectedIdeaForDetails.status === BusinessIdeaStatus.Active,
-                                'status-pending': selectedIdeaForDetails.status === BusinessIdeaStatus.Pending,
-                                'status-rejected': selectedIdeaForDetails.status === BusinessIdeaStatus.Rejected,
                                 'status-inactive': selectedIdeaForDetails.status === BusinessIdeaStatus.Inactive
                             }">
-                                {{ selectedIdeaForDetails.status ? getBusinessIdeaStatusName(selectedIdeaForDetails.status) : 'N/A' }}
                             </span>
                         </div>
                         <div class="detail-row">
@@ -296,7 +287,6 @@
                         </div>
                         <div class="detail-row" *ngIf="selectedIdeaForDetails.rejectedReason">
                             <strong class="detail-label">Rejected Reason:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.rejectedReason }}</span>
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">Description:</strong>
@@ -316,26 +306,28 @@
                         </div>
                     </div>
 
-                    <div *ngIf="activeTab === 'documentation'" class="documentation-content">
-                        <h4>Associated Documents</h4>
+                    <div *ngIf="activeTab === 'pdf'" class="documentation-content">
+                        <h4>Associated File</h4>
                         <div *ngIf="selectedIdeaForDetails.filePath; else noFile">
-                            <a [href]="getFileDownloadUrl(selectedIdeaForDetails.filePath)" target="_blank" class="download-link">
-                                <i class='bx bx-download'></i> Download Idea File
+                            <a class="download-link" [href]="getFileDownloadUrl(selectedIdeaForDetails.filePath)" target="_blank">
+                                <i class="bx bx-download"></i> Download/View File
                             </a>
                         </div>
                         <ng-template #noFile>
-                            <p>No idea file available.</p>
+                            <span>No file available.</span>
                         </ng-template>
+                    </div>
 
-                        <h4 style="margin-top: 20px;">Standard Answers</h4>
+                    <div *ngIf="activeTab === 'standardAnswers'" class="documentation-content">
+                        <h4>Standard Answers</h4>
                         <div *ngIf="selectedIdeaForDetails.businessStandardAnswers && selectedIdeaForDetails.businessStandardAnswers.length > 0; else noAnswers">
                             <div *ngFor="let answer of selectedIdeaForDetails.businessStandardAnswers" class="standard-answer-item">
-                                <strong class="question-label">{{ answer.standardQuestion || 'Standard Question' }}:</strong>
-                                <span class="answer-value">{{ answer.answer }}</span>
+                                <span class="question-label"><strong>Q:</strong> {{ answer.standardQuestion }}</span><br>
+                                <span class="answer-value"><strong>A:</strong> {{ answer.answer }}</span>
                             </div>
                         </div>
                         <ng-template #noAnswers>
-                            <p>No standard answers available.</p>
+                            <span>No standard answers available.</span>
                         </ng-template>
                     </div>
                 </div>

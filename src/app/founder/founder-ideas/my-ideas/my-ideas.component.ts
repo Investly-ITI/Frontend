@@ -1,8 +1,7 @@
 import { Component, Input, OnInit, OnChanges, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { EditIdeaFormComponent } from '../edit-idea-form/edit-idea-form.component';
-import { EditIdeaDocumentComponent } from '../edit-idea-document/edit-idea-document.component';
+import { EditIdeaComponent } from '../edit-idea/edit-idea.component';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 interface ContactRequest {
@@ -43,7 +42,7 @@ interface ReviewResult {
 
 @Component({
   selector: 'app-my-ideas',
-  imports: [CommonModule, FormsModule, EditIdeaFormComponent, EditIdeaDocumentComponent],
+  imports: [CommonModule, FormsModule, EditIdeaComponent],
   templateUrl: './my-ideas.component.html',
   styleUrl: './my-ideas.component.css',
   animations: [

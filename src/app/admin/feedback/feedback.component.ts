@@ -85,6 +85,7 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.searchParams.pageSize = 5;
     this.loadFeedbacks();
     this.loadFeedbackStatisticsCounts();
     setTimeout(() => { this.animationComplete = true; }, 100);
@@ -124,6 +125,21 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
 
   onSearch(): void {
     this.searchParams.pageNumber = 1;
+    this.loadFeedbacks();
+  }
+
+  onSearchInputChange(): void {
+    if (!this.searchParams.searchInput) {
+      this.clearSearch();
+    }
+  }
+
+  clearSearch(): void {
+    this.searchParams = new FeedbackSearchDto();
+    this.searchParams.pageSize = 5;
+    this.tempStatusFilter = null;
+    this.tempUserTypeFromFilter = null;
+    this.tempUserTypeToFilter = null;
     this.loadFeedbacks();
   }
 
@@ -187,7 +203,7 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
 
   performHardDelete(): void {
     if (this.selectedFeedbackForHardDelete) {
-      this.feedbackService.updateFeedbackStatus(this.selectedFeedbackForHardDelete.id, 'deleted').subscribe({
+      this.feedbackService.updateFeedbackStatus(this.selectedFeedbackForHardDelete.id, Status.Deleted).subscribe({
         next: (res) => {
           if (res.isSuccess) {
             this.toastr.success('Feedback deleted.');
@@ -205,17 +221,21 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- New: Toggle Active/Inactive ---
   toggleActiveInactive(feedback: FeedbackDto): void {
-    const actionType = feedback.status === Status.Active ? 'inactive' : 'active';
+    let actionType: number;
+    if (feedback.status === Status.Active) {
+      actionType = Status.Inactive;
+    } else {
+      actionType = Status.Active;
+    }
     this.feedbackService.updateFeedbackStatus(feedback.id, actionType).subscribe({
       next: (res) => {
         if (res.isSuccess) {
-          this.toastr.success(`Feedback marked as ${actionType}.`);
+          this.toastr.success(`Feedback marked as ${this.getStatusLabel(actionType)}.`);
           this.loadFeedbacks();
           this.loadFeedbackStatisticsCounts();
         } else {
-          this.toastr.error(res.message || `Failed to mark feedback as ${actionType}.`);
+          this.toastr.error(res.message || `Failed to mark feedback as ${this.getStatusLabel(actionType)}.`);
         }
       },
       error: () => {
@@ -254,6 +274,8 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
     this.tempStatusFilter = null;
     this.tempUserTypeFromFilter = null;
     this.tempUserTypeToFilter = null;
+    this.clearSearch();
+    this.isAdvancedSearchOpen = false;
   }
 
   applyAdvancedSearch(): void {

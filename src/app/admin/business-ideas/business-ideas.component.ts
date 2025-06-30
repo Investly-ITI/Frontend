@@ -68,11 +68,12 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
   isDarkMode: boolean = false;
   private darkModeSubscription: Subscription = new Subscription();
 
-  activeTab: 'details' | 'documentation' = 'details'; 
+  activeTab: 'details' | 'pdf' | 'standardAnswers' = 'details'; 
 
   categories: Category[] = [];
   tempCategoryFilter: number | null = null;
-  tempStatusFilter: number | null = null;
+  searchInput: string = '';
+  tempStageFilter: number | null = null;
 
   constructor(
     private businessService: BusinessService,
@@ -82,6 +83,7 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    this.searchParams.pageSize = 5;
     this.loadBusinessIdeas();
     this.loadIdeasCount();
     this.loadCategories();
@@ -133,6 +135,22 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
 
   onSearch(): void {
     this.searchParams.pageNumber = 1;
+    this.searchParams.search = this.searchInput || undefined;
+    this.loadBusinessIdeas();
+  }
+
+  onSearchInputChange(): void {
+    if (!this.searchInput) {
+      this.clearSearch();
+    }
+  }
+
+  clearSearch(): void {
+    this.searchInput = '';
+    this.searchParams = new BusinessSearchDto();
+    this.searchParams.pageSize = 5;
+    this.tempCategoryFilter = null;
+    this.tempStageFilter = null;
     this.loadBusinessIdeas();
   }
 
@@ -277,19 +295,24 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     this.isAdvancedSearchOpen = !this.isAdvancedSearchOpen;
     this.tempCategoryFilter = this.searchParams.categoryId ?? null;
-    this.tempStatusFilter = this.searchParams.status ?? null;
+    this.tempStageFilter = this.searchParams.stage ?? null;
     this.dropdownStates = this.dropdownStates.map(() => false);
   }
 
   clearAdvancedSearch(): void {
     this.tempCategoryFilter = null;
-    this.tempStatusFilter = null;
+    this.tempStageFilter = null;
+    this.searchParams.categoryId = undefined;
+    this.searchParams.status = undefined;
+    this.searchParams.stage = undefined;
+    this.onSearch();
+    this.isAdvancedSearchOpen = false;
+    this.dropdownStates = this.dropdownStates.map(() => false);
   }
 
   applyAdvancedSearch(): void {
     this.searchParams.categoryId = this.tempCategoryFilter === null ? undefined : this.tempCategoryFilter;
-    this.searchParams.status = this.tempStatusFilter === null ? undefined : this.tempStatusFilter;
-    this.searchParams.stage = this.searchParams.stage === undefined ? undefined : this.searchParams.stage;
+    this.searchParams.stage = this.tempStageFilter === null ? undefined : this.tempStageFilter;
     this.onSearch();
     this.isAdvancedSearchOpen = false;
     this.dropdownStates = this.dropdownStates.map(() => false);
@@ -333,9 +356,7 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
 get filteredBusinessIdeas(): BusinessDto[] {
   if (!this.businessIdeas) return [];
   let filtered = this.businessIdeas;
-  if (this.searchParams.status != null && this.searchParams.status !== undefined) {
-    filtered = filtered.filter(idea => idea.status === this.searchParams.status);
-  }
+  
   if (this.searchParams.categoryId != null && this.searchParams.categoryId !== undefined) {
     filtered = filtered.filter(idea => idea.categoryId === this.searchParams.categoryId);
   }

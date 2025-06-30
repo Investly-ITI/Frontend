@@ -35,7 +35,11 @@ interface Idea {
 
 @Component({
   selector: 'app-founder-ideas',
-  imports: [CommonModule, MyIdeasComponent, AddIdeaComponent],
+  imports: [
+    CommonModule,
+    MyIdeasComponent,
+    AddIdeaComponent
+  ],
   templateUrl: './founder-ideas.component.html',
   styleUrl: './founder-ideas.component.css'
 })
@@ -86,6 +90,8 @@ export class FounderIdeasComponent implements OnInit {
         stage: 'Startup',
         investmentType: 'Both',
         fundingGoal: '500000',
+        location: 'Nasr City, Cairo',
+        images: ['smart-agriculture-demo.jpg', 'iot-sensors.jpg'],
         techStack: 'IoT sensors, React, Node.js',
         targetMarket: 'Small to medium farms',
         problemSolving: 'Optimizing water usage and monitoring crop conditions',
@@ -107,7 +113,9 @@ export class FounderIdeasComponent implements OnInit {
       submissionType: 'document',
       documentFiles: ['business-plan.pdf'],
       formData: {
-        investmentType: 'Funding'
+        investmentType: 'Funding',
+        location: 'Roushdy, Alexandria',
+        images: ['eco-delivery-fleet.jpg']
       }
     },
     {
@@ -129,6 +137,8 @@ export class FounderIdeasComponent implements OnInit {
         stage: 'Ideation',
         investmentType: 'Both',
         fundingGoal: '300000',
+        location: 'Dokki, Giza',
+        images: ['edtech-platform-ui.jpg', 'student-dashboard.jpg'],
         educationLevel: 'K-12',
         subjectArea: 'Mathematics and Science',
         learningMethod: 'AI-powered adaptive learning',
@@ -154,6 +164,8 @@ export class FounderIdeasComponent implements OnInit {
         stage: 'Startup',
         investmentType: 'Funding',
         fundingGoal: '800000',
+        location: 'New Cairo, Cairo',
+        images: ['fintech-app-mockup.jpg', 'dashboard-screenshot.jpg'],
         techStack: 'React Native, Node.js, PostgreSQL',
         targetMarket: 'Small and medium businesses',
         problemSolving: 'Simplifying financial management for businesses',
@@ -178,6 +190,8 @@ export class FounderIdeasComponent implements OnInit {
         category: 'Healthcare',
         stage: 'Ideation',
         investmentType: 'Industrial Experience',
+        location: 'Giza, Giza',
+        images: ['healthcare-network-diagram.jpg'],
         medicalSpecialty: 'General Healthcare Innovation',
         targetPatients: 'Healthcare startups and entrepreneurs',
         regulatoryCompliance: 'Focus on mentorship and knowledge sharing, no direct patient care',
@@ -213,6 +227,8 @@ export class FounderIdeasComponent implements OnInit {
         stage: 'Startup',
         investmentType: 'Both',
         fundingGoal: '400000',
+        location: 'Maadi, Cairo',
+        images: ['analytics-dashboard.jpg', 'social-media-insights.jpg'],
         techStack: 'Python, React, MongoDB, TensorFlow',
         targetMarket: 'Small to medium marketing agencies',
         problemSolving: 'Providing insights from social media data for better marketing decisions',

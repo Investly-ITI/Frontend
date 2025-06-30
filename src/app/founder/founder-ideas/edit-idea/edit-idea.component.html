@@ -1,10 +1,10 @@
 <!-- ========================================
-     ADD IDEA MAIN CONTAINER
+     EDIT IDEA MAIN CONTAINER
 ======================================== -->
-<div class="add-idea-container">
-  <div class="add-idea-header">
-    <h3 class="add-idea-title">Add New Business Idea</h3>
-    <p class="add-idea-description">Submit your business idea through our 3-step process</p>
+<div class="edit-idea-container">
+  <div class="edit-idea-header">
+    <h3 class="edit-idea-title">Edit Business Idea</h3>
+    <p class="edit-idea-description">Update your business idea through our 3-step process</p>
   </div>
 
   <!-- Progress Bar -->
@@ -35,7 +35,7 @@
     <div class="step-content" *ngIf="currentStep === 1" [@fadeInOut]>
       <div class="step-header">
         <h4 class="step-title">Step 1: Basic Information</h4>
-        <p class="step-description">Tell us about your business idea and its basic details</p>
+        <p class="step-description">Update your business idea and its basic details</p>
       </div>
 
       <div class="form-section">
@@ -200,7 +200,7 @@
     <div class="step-content" *ngIf="currentStep === 2" [@fadeInOut]>
       <div class="step-header">
         <h4 class="step-title">Step 2: Category Questions</h4>
-        <p class="step-description">Answer specific questions related to your business category</p>
+        <p class="step-description">Update answers to specific questions related to your business category</p>
       </div>
 
       <div class="form-section" *ngIf="standards && standards.length > 0">
@@ -238,7 +238,7 @@
     <div class="step-content" *ngIf="currentStep === 3" [@fadeInOut]>
       <div class="step-header">
         <h4 class="step-title">Step 3: Files & Documentation</h4>
-        <p class="step-description">Upload supporting documents and images for your business idea</p>
+        <p class="step-description">Upload or update supporting documents and images for your business idea</p>
       </div>
 
       <div class="form-section">
@@ -250,7 +250,21 @@
           </h5>
           <p class="upload-description">Upload a supporting document (PDF, Word, or PowerPoint - Max 10MB)</p>
           
-          <div class="file-upload-area" *ngIf="!selectedDocument">
+          <!-- Existing Document -->
+          <div class="uploaded-file" *ngIf="existingDocument && !selectedDocument">
+            <div class="file-info">
+              <i class='bx bx-file'></i>
+              <div class="file-details">
+                <span class="file-name">{{ existingDocument }}</span>
+                <span class="file-status">Current Document</span>
+              </div>
+            </div>
+            <button type="button" class="remove-file-btn" (click)="removeExistingDocument()">
+              <i class='bx bx-x'></i>
+            </button>
+          </div>
+          
+          <div class="file-upload-area" *ngIf="!selectedDocument && !existingDocument">
             <input 
               type="file" 
               id="documentUpload" 
@@ -260,6 +274,20 @@
             <label for="documentUpload" class="file-upload-label">
               <i class='bx bx-cloud-upload'></i>
               <span>Click to upload document</span>
+              <small>PDF, Word, PowerPoint (Max 10MB)</small>
+            </label>
+          </div>
+
+          <div class="file-upload-area" *ngIf="!selectedDocument && existingDocument">
+            <input 
+              type="file" 
+              id="documentUpload" 
+              class="file-input"
+              accept=".pdf,.doc,.docx,.ppt,.pptx"
+              (change)="onDocumentSelected($event)">
+            <label for="documentUpload" class="file-upload-label">
+              <i class='bx bx-cloud-upload'></i>
+              <span>Click to replace document</span>
               <small>PDF, Word, PowerPoint (Max 10MB)</small>
             </label>
           </div>
@@ -286,7 +314,29 @@
           </h5>
           <p class="upload-description">Upload up to 5 images of your business idea (At least 1 image is required)</p>
           
-          <div class="file-upload-area" *ngIf="selectedImages.length < maxImages">
+          <!-- Existing Images -->
+          <div class="uploaded-images" *ngIf="existingImages.length > 0">
+            <h6 class="subsection-title">Current Images</h6>
+            <div class="images-grid">
+              <div *ngFor="let imageName of existingImages; let i = index" class="image-card">
+                <div class="image-preview">
+                  <div class="image-placeholder">
+                    <i class='bx bx-image'></i>
+                    <span>{{ imageName }}</span>
+                  </div>
+                </div>
+                <div class="image-info">
+                  <span class="image-name">{{ imageName }}</span>
+                  <span class="image-status">Current Image</span>
+                </div>
+                <button type="button" class="remove-image-btn" (click)="removeExistingImage(i)">
+                  <i class='bx bx-x'></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="file-upload-area" *ngIf="(selectedImages.length + existingImages.length) < maxImages">
             <input 
               type="file" 
               id="imagesUpload" 
@@ -296,12 +346,13 @@
               (change)="onImagesSelected($event)">
             <label for="imagesUpload" class="file-upload-label">
               <i class='bx bx-image-add'></i>
-              <span>Click to upload images</span>
-              <small>Images only (Max 10MB each, {{ maxImages - selectedImages.length }} remaining)</small>
+              <span>{{ existingImages.length > 0 ? 'Click to add more images' : 'Click to upload images' }}</span>
+              <small>Images only (Max 10MB each, {{ maxImages - selectedImages.length - existingImages.length }} remaining)</small>
             </label>
           </div>
 
           <div class="uploaded-images" *ngIf="selectedImages.length > 0">
+            <h6 class="subsection-title" *ngIf="existingImages.length > 0">New Images</h6>
             <div class="images-grid">
               <div *ngFor="let image of selectedImages; let i = index" class="image-card">
                 <div class="image-preview">
@@ -318,9 +369,9 @@
             </div>
           </div>
 
-          <div class="upload-requirements" [class.fulfilled]="selectedImages.length >= 1">
-            <i class='bx' [class.bx-check-circle]="selectedImages.length >= 1" [class.bx-info-circle]="selectedImages.length < 1"></i>
-            <span>{{ selectedImages.length >= 1 ? 'Image requirement fulfilled' : 'At least 1 image is required to submit' }}</span>
+          <div class="upload-requirements" [class.fulfilled]="(selectedImages.length + existingImages.length) >= 1">
+            <i class='bx' [class.bx-check-circle]="(selectedImages.length + existingImages.length) >= 1" [class.bx-info-circle]="(selectedImages.length + existingImages.length) < 1"></i>
+            <span>{{ (selectedImages.length + existingImages.length) >= 1 ? 'Image requirement fulfilled' : 'At least 1 image is required to submit' }} ({{ selectedImages.length + existingImages.length }}/{{ maxImages }})</span>
           </div>
         </div>
       </div>
@@ -333,7 +384,7 @@
       </div>
       <div class="warning-content">
         <h6>Important Notice</h6>
-        <p>Once submitted, your idea will be reviewed and cannot be edited unless it's saved as draft or gets rejected by AI system or declined by our team.</p>
+        <p>Once updated and submitted, your changes will be reviewed and cannot be edited again unless the idea gets rejected by AI system or declined by our team.</p>
       </div>
     </div>
 
@@ -350,15 +401,7 @@
           Previous
         </button>
 
-        <!-- Save as Draft Button -->
-        <button 
-          type="button" 
-          class="btn btn-outline"
-          *ngIf="isStep1Valid()"
-          (click)="onSaveAsDraft()">
-          <i class='bx bx-save'></i>
-          Save as Draft
-        </button>
+
 
         <!-- Next Button -->
         <button 
@@ -378,7 +421,7 @@
           *ngIf="currentStep === totalSteps"
           [disabled]="!isFormCompletelyValid()">
           <i class='bx bx-check-circle'></i>
-          Submit Business Idea
+          Update Business Idea
         </button>
       </div>
       
@@ -421,22 +464,21 @@
           <i class='bx' [ngClass]="reviewResult?.isAccepted ? 'bx-check-circle' : 'bx-x-circle'"></i>
         </div>
         <h3>{{ reviewResult?.isAccepted ? 'Idea Accepted!' : 'Idea Needs Improvement' }}</h3>
-        <h4> Total Ai Score: {{ reviewResult?.totalWeightScore }} %</h4>
       </div>
-
+      
       <div class="modal-body">
         <p class="modal-description">{{ reviewResult?.message }}</p>
-
-        <div class="standards-list" *ngIf=" reviewResult?.rejectedStandards">
+        
+        <div class="standards-list" *ngIf="!reviewResult?.isAccepted && reviewResult?.standards">
           <h4>Standards Not Met:</h4>
           <ul>
-            <li *ngFor="let standard of reviewResult?.rejectedStandards; let i = index">
-              <strong>{{ i + 1 }}.</strong> {{ standard.standard }}
+            <li *ngFor="let standard of reviewResult?.standards; let i = index">
+              <strong>{{ i + 1 }}.</strong> {{ standard }}
             </li>
           </ul>
         </div>
       </div>
-
+      
       <div class="modal-actions">
         <button 
           class="btn btn-secondary" 
@@ -445,18 +487,8 @@
           <i class='bx bx-check'></i>
           Close
         </button>
-        <button class="btn btn-secondary" *ngIf="reviewResult?.isAccepted" (click)="saveAsDraft()">
-            <i class='bx bx-save'></i>
-            submit
-          </button>
-
+        
         <div class="button-group" *ngIf="!reviewResult?.isAccepted">
-          <button 
-            class="btn btn-secondary" 
-            (click)="saveAsDraft()">
-            <i class='bx bx-save'></i>
-            Save as Draft
-          </button>
           <button 
             class="btn btn-outline" 
             (click)="closeModal()">
@@ -467,4 +499,4 @@
       </div>
     </div>
   </div>
-</div>
+</div> 

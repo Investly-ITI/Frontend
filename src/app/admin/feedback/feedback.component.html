@@ -56,7 +56,7 @@
                             </div>
                             <form (submit)="onSearch(); $event.preventDefault();">
                                 <div class="form-input">
-                                    <input type="search" [(ngModel)]="searchParams.searchInput" name="searchQuery" placeholder="Search by description or user name...">
+                                    <input type="search" [(ngModel)]="searchParams.searchInput" name="searchQuery" placeholder="Search by description or user name..." (input)="onSearchInputChange()">
                                     <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
                                     <div id="search-btns">
                                         <button type="button" style="border: none; background-color: var(--light);" title="Advanced Search" (click)="toggleAdvancedSearch($event)">
