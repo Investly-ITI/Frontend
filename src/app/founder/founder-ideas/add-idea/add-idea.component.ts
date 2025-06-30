@@ -27,10 +27,11 @@ interface ReviewResult {
   rejectedStandards?: StandardReview[];
 }
 interface StandardReview {
+  standardCategoryId:number,
   standard: string;
   weight: number;
   achievmentScore: number;
-  weightContribuation: number;
+  weightContribution: number;
   feedback: string;
 }
 
@@ -348,8 +349,8 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
       this.toastrService.error('Please complete all required fields', 'Form Incomplete');
       return;
     }
-
-   // this.startAIReview();
+   var formPayload=this.FormPayload(false);
+    this.startAIReview(formPayload);
   }
 
   onSaveAsDraft(): void {
@@ -358,14 +359,14 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.submitForm(true);
+    //this.submitForm(true);
   }
 
   isFormCompletelyValid(): boolean {
     return this.isStep1Valid() && this.isStep2Valid() && this.isStep3Valid();
   }
 
-  submitForm(isDraft: boolean = false): void {
+  FormPayload(isDraft: boolean = false): FormData {
     const rawData = this.formData.value;
     const formPayload = new FormData();
     
@@ -399,22 +400,23 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
       formPayload.append(`Images`, image);
     });
 
-    this.addIdeaService.AddIdea(formPayload).subscribe({
-      next: (response) => {
-        if (response.isSuccess) {
-          this.toastrService.success(
-            isDraft ? 'Idea saved to drafts' : response.message, 
-            'Success'
-          );
-        } else {
-          this.toastrService.error(response.message, "Error");
-        }
-      },
-      error: (err) => {
-        const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
-        this.toastrService.error(errorMsg, 'Error');
-      }
-    });
+    // this.addIdeaService.AddIdea(formPayload).subscribe({
+    //   next: (response) => {
+    //     if (response.isSuccess) {
+    //       this.toastrService.success(
+    //         isDraft ? 'Idea saved to drafts' : response.message, 
+    //         'Success'
+    //       );
+    //     } else {
+    //       this.toastrService.error(response.message, "Error");
+    //     }
+    //   },
+    //   error: (err) => {
+    //     const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
+    //     this.toastrService.error(errorMsg, 'Error');
+    //   }
+    // });
+    return formPayload;
   }
 
   startAIReview(formPayload: any): void {
@@ -454,6 +456,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
   private AIReview(aiResponse: AiIdeaEvaluationResult): void {
     const result = this.ParseStandaredFromAiResponse(aiResponse);
     this.reviewResult = result;
+    this.showResultModal=true;
     // Simulate AI review process (3-6 seconds)
     //const reviewTime = Math.random() * 3000 + 3000;
     
@@ -517,8 +520,9 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
     response.standards?.map(s=>{
       standards.push({
         standard:s.name,
+        standardCategoryId:s.standardCategoryId,
         weight:s.weight,
-        weightContribuation:s.weightedContribution,
+        weightContribution:s.weightedContribution,
         feedback:s.feedback,
         achievmentScore:s.achievementScore
       })
@@ -528,7 +532,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
       isAccepted: totalWeightScore > 50,
       totalWeightScore: totalWeightScore,
       allStandards: standards,
-      rejectedStandards: standards.filter(s => s.weightContribuation < (s.weight * .5)),
+      rejectedStandards: standards.filter(s => s.weightContribution < (s.weight * .5)),
       message: totalWeightScore>50  ? "Congratulations! Your business idea meets our standards":
         "Our AI System has reviewed your business idea and found that it doesn\'t meet the required standards for submission. Please review the feedback below and consider improving your proposal."
     };
@@ -547,7 +551,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
   }
 
   saveAsDraft(): void {
-    this.submitForm(true);
+    //this.submitForm(true);
     this.closeModal();
   }
 

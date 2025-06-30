@@ -11,6 +11,7 @@ export class StandardAiResult{
      public weight:number,
      public achievementScore:number,
      public weightedContribution:number,
+     public standardCategoryId:number,
      public feedback:string
     ){}
 }
