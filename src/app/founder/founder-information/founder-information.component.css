@@ -626,3 +626,46 @@
   .save-message i {
     font-size: 18px;
   }
+
+
+  .btn-documentation {
+  width: fit-content;
+}
+
+
+
+.save-message {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  gap: 10px;
+}
+
+.save-message i {
+  font-size: 20px;
+}
+
+/* Success = Green */
+.save-message.success {
+  background-color: #e6f4ea;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+/* Warning = Yellow/Orange */
+.save-message.warning {
+  background-color: #fff8e1;
+  color: #ff8f00;
+  border: 1px solid #ffe082;
+}
+
+/* Error = Red */
+.save-message.error {
+  background-color: #fdecea;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}

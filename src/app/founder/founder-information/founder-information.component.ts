@@ -436,15 +436,16 @@ export class FounderInformationComponent implements OnInit, OnChanges {
       this.profileService.updateFounder(this.personalInfo.email, updateData).subscribe({
         next: (response) => {
           if (response.isSuccess) {
-            this.saveMessage = response.statusCode === 200 
-              ? 'Profile updated successfully' 
-              : 'No changes detected';
+            console.log(response)
+            this.saveMessage = response.message
             this.personalInfoChange.emit(this.personalInfo);
           } else {
             this.saveMessage = response.message || 'Update failed';
           }
         },
         error: (error) => {
+          console.log(error)
+
           this.handleUpdateError(error);
         }
       });
@@ -459,6 +460,8 @@ export class FounderInformationComponent implements OnInit, OnChanges {
   private handleUpdateError(error: any): void {
     let errorMessage = 'Failed to update profile';
     
+    console.log(error.status)
+
     if (error.error?.message) {
       errorMessage = error.error.message;
     } else if (error.status === 400) {

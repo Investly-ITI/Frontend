@@ -7,6 +7,12 @@
     <p class="section-description">Manage your account security and password</p>
   </div>
 
+<div class="save-message" *ngIf="displayMessage" [ngClass]="{'success': isSuccessMessage, 'error': !isSuccessMessage}">
+  <i class='bx' [ngClass]="isSuccessMessage ? 'bx-check-circle' : 'bx-error-circle'"></i>
+  <span>{{ displayMessage }}</span>
+  <i class='bx bx-x close-message' (click)="clearMessage()"></i>
+</div>
+
   <!-- Save Message -->
   <!-- <div class="save-message" *ngIf="saveMessage" [ngClass]="{'success': saveMessage.includes('successfully'), 'error': saveMessage.includes('Failed')}">
     <i class='bx' [ngClass]="saveMessage.includes('successfully') ? 'bx-check-circle' : 'bx-error-circle'"></i>

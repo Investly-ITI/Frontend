@@ -70,9 +70,34 @@ export class FounderSecurityComponent implements OnInit {
     }
   }
 
+  displayMessage = '';
+  isSuccessMessage = false;
+  messageTimeout: any;
+
+  clearMessage(): void {
+  this.displayMessage = '';
+  if (this.messageTimeout) {
+    clearTimeout(this.messageTimeout);
+    this.messageTimeout = null;
+  }
+  }
+
+  showMessage(message: string, isSuccess: boolean): void {
+  this.clearMessage(); // Clear any existing messages
+  this.displayMessage = message;
+  this.isSuccessMessage = isSuccess;
+  
+  // Auto-hide after 5 seconds
+  this.messageTimeout = setTimeout(() => {
+    this.clearMessage();
+  }, 5000);
+}
+
   showCurrentPassword = false;
   showNewPassword = false;
   showConfirmPassword = false;
+
+  
 
   togglePasswordVisibility(field: 'current' | 'new' | 'confirm'): void {
   switch (field) {
@@ -159,66 +184,61 @@ export class FounderSecurityComponent implements OnInit {
     return true;
   }
 
-  private handleSuccessResponse(response: Response<string>): void {
-    this.securitySettings.lastPasswordChange = new Date().toISOString();
-    this.securitySettingsChange.emit(this.securitySettings);
-    
-    this.passwordForm = {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    };
-    
-    this.toastr.success(response.message, 'Success', {
-      timeOut: 5000,
-      progressBar: true
-    });
-  }
+private handleSuccessResponse(response: Response<string>): void {
+  this.securitySettings.lastPasswordChange = new Date().toISOString();
+  this.securitySettingsChange.emit(this.securitySettings);
+  
+  this.passwordForm = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  };
+  
+  this.showMessage(response.message, true);
+}
 
   private handleApiError(response: Response<string>): void {
-  switch (response.statusCode) {
-    case 400:
-      // Handle both validation errors and incorrect password as 400
-      if (response.message.includes('Current password is incorrect')) {
-        this.passwordError = 'Current password is incorrect';
-        this.toastr.error('Current password is incorrect. Please check and try again.', 'Validation Error');
-      } else {
-        this.handleValidationErrors(response);
-      }
-      break;
-    case 404:
-      this.passwordError = 'User not found';
-      this.toastr.error('User account not found. Please contact support.', 'Account Error');
-      break;
-    case 500:
-      this.passwordError = 'Server error occurred. Please try again later.';
-      this.toastr.error('Server error occurred. Please try again later.', 'Server Error');
-      break;
-    default:
-      this.passwordError = response.message || 'An unexpected error occurred';
-      this.toastr.error(response.message || 'An unexpected error occurred', 'Error');
+    switch (response.statusCode) {
+      case 400:
+        // Handle both validation errors and incorrect password as 400
+        if (response.message.includes('Current password is incorrect')) {
+          this.passwordError = 'Current password is incorrect';
+          this.showMessage('Current password is incorrect. Please check and try again.', false);
+        } else {
+          this.handleValidationErrors(response);
+        }
+        break;
+      case 404:
+        this.passwordError = 'User not found';
+        this.showMessage('User account not found. Please contact support.', false);
+        break;
+      case 500:
+        this.passwordError = 'Server error occurred. Please try again later.';
+        this.showMessage('Server error occurred. Please try again later.', false);
+        break;
+      default:
+        this.passwordError = response.message || 'An unexpected error occurred';
+        this.showMessage(response.message || 'An unexpected error occurred', false);
     }
   }
-
 
   private handleValidationErrors(response: Response<string>): void {
     if (response.message.includes('Password must contain')) {
       this.passwordError = response.message;
-      this.toastr.error(response.message, 'Password Requirements Not Met');
+      this.showMessage(response.message, false);
     } else if (response.message.includes('Passwords do not match')) {
       this.passwordError = 'Passwords do not match';
-      this.toastr.error('Passwords do not match', 'Validation Error');
+      this.showMessage('Passwords do not match', false);
     } else {
       this.passwordError = response.message;
-      this.toastr.error(response.message, 'Validation Error');
+      this.showMessage(response.message, false);
     }
   }
 
-
-  private handleHttpError(error: any): void {
+private handleHttpError(error: any): void {
   if (!error.status) {
     this.passwordError = 'An unexpected error occurred. Please try again.';
-    this.toastr.error('An unexpected error occurred. Please try again.', 'Error');
+    this.showMessage('An unexpected error occurred. Please try again.', false);
     return;
   }
 
@@ -228,24 +248,24 @@ export class FounderSecurityComponent implements OnInit {
       case 400:
         if (error.error.message.includes('Current password is incorrect')) {
           this.passwordError = 'Current password is incorrect';
-          this.toastr.error('Current password is incorrect. Please check and try again.', 'Validation Error');
+          this.showMessage('Current password is incorrect. Please check and try again.', false);
         } else {
           const errorMessage = error.error?.message || 'Invalid request data';
           this.passwordError = errorMessage;
-          this.toastr.error(errorMessage, 'Validation Error');
+          this.showMessage(errorMessage, false);
         }
         break;
       case 404:
         this.passwordError = error.error.message || 'User not found';
-        this.toastr.error(error.error.message || 'User account not found. Please contact support.', 'Account Error');
+        this.showMessage(error.error.message || 'User account not found. Please contact support.', false);
         break;
       case 500:
         this.passwordError = error.error.message || 'Server error occurred. Please try again later.';
-        this.toastr.error(error.error.message || 'Server error occurred. Please try again later.', 'Server Error');
+        this.showMessage(error.error.message || 'Server error occurred. Please try again later.', false);
         break;
       default:
         this.passwordError = error.error.message || 'An unexpected error occurred';
-        this.toastr.error(error.error.message || 'An unexpected error occurred', 'Error');
+        this.showMessage(error.error.message || 'An unexpected error occurred', false);
     }
   } else {
     // Fallback to standard HTTP status code handling
@@ -253,26 +273,26 @@ export class FounderSecurityComponent implements OnInit {
       case 400:
         const errorMessage = error.error?.message || 'Invalid request data';
         this.passwordError = errorMessage;
-        this.toastr.error(errorMessage, 'Validation Error');
+        this.showMessage(errorMessage, false);
         break;
       case 404:
         this.passwordError = 'User not found';
-        this.toastr.error('User account not found. Please contact support.', 'Account Error');
+        this.showMessage('User account not found. Please contact support.', false);
         break;
       case 500:
         this.passwordError = 'Server error occurred. Please try again later.';
-        this.toastr.error('Server error occurred. Please try again later.', 'Server Error');
+        this.showMessage('Server error occurred. Please try again later.', false);
         break;
       case 0:
         this.passwordError = 'Unable to connect to server. Please check your internet connection.';
-        this.toastr.error('Unable to connect to server. Please check your internet connection.', 'Connection Error');
+        this.showMessage('Unable to connect to server. Please check your internet connection.', false);
         break;
       default:
         this.passwordError = 'Network error occurred. Please check your connection and try again.';
-        this.toastr.error('Network error occurred. Please check your connection and try again.', 'Connection Error');
-      }
+        this.showMessage('Network error occurred. Please check your connection and try again.', false);
     }
   }
+}
 
 
 

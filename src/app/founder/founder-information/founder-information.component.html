@@ -12,10 +12,22 @@
     <i class='bx' [ngClass]="saveMessage.includes('successfully') ? 'bx-check-circle' : 'bx-error-circle'"></i>
     <span>{{ saveMessage }}</span>
   </div> -->
-  <div class="save-message" *ngIf="saveMessage" [ngClass]="{'success': saveMessage.includes('successfully'), 'error': saveMessage.includes('Failed') || saveMessage.includes('fix') || saveMessage.includes('required')}">
-    <i class='bx' [ngClass]="saveMessage.includes('successfully') ? 'bx-check-circle' : 'bx-error-circle'"></i>
-    <span>{{ saveMessage }}</span>
-  </div>
+<div class="save-message" *ngIf="saveMessage" 
+     [ngClass]="{
+        'success': saveMessage.includes('Update successful'),
+        'warning': saveMessage.includes('No changes detected'),
+        'error': saveMessage.includes('Failed') || saveMessage.includes('fix') || saveMessage.includes('required')
+     }">
+  <i class='bx' 
+     [ngClass]="
+        saveMessage.includes('Update successful') ? 'bx-check-circle' :
+        saveMessage.includes('No changes detected') ? 'bx-info-circle' :
+        'bx-error-circle'
+     ">
+  </i>
+  <span>{{ saveMessage }}</span>
+</div>
+
 
   <!-- Tab Navigation -->
   <div class="tab-navigation">
@@ -300,7 +312,7 @@
 
 
           <!-- Documentation Save Actions -->
-          <button type="button" class="btn btn-primary" 
+          <button type="button" class="btn btn-primary btn-documentation" 
                   (click)="onSaveDocumentation()" 
                   [disabled]="isSaving || !hasValidDocumentationToSave()">
             <i class='bx' [ngClass]="isSaving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
