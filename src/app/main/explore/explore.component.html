@@ -183,7 +183,8 @@
         <div 
           *ngFor="let business of getPaginatedBusinesses()" 
           class="business-card"
-          [attr.data-aos]="'fade-up'">
+          [attr.data-aos]="'fade-up'"
+          (click)="onCardClick(business, $event)">
           
           <!-- Card Header -->
           <div class="card-header">
@@ -239,7 +240,7 @@
 
           <!-- Card Footer (Hidden, shows on hover) -->
           <div class="card-footer">
-            <button class="btn btn-primary btn-small">
+            <button class="btn btn-primary btn-small" (click)="navigateToIdeaDetails(business)">
               <i class='bx bx-info-circle'></i>
               <span>View Details</span>
             </button>
@@ -284,7 +285,7 @@
                 class="carousel-item">
               
               <!-- Carousel Card -->
-              <div class="business-card carousel-card">
+              <div class="business-card carousel-card" (click)="onCardClick(business, $event)">
                 <div class="card-header">
                   <div class="business-stage">
                     <span class="stage-badge" [attr.data-stage]="getStageLabel(business.stage || 1).toLowerCase()">
@@ -333,7 +334,7 @@
                 </div>
 
                 <div class="card-footer">
-                  <button class="btn btn-primary btn-small">
+                  <button class="btn btn-primary btn-small" (click)="navigateToIdeaDetails(business)">
                     <i class='bx bx-info-circle'></i>
                     <span>View Details</span>
                   </button>
