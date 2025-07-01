@@ -40,7 +40,8 @@ export class UpdateFounder {
         public governmentId: number | null,
         public cityId: number | null,
         public address: string | null,
-        public dateOfBirth: string | null  // Changed from Date | null to string | null
+        public dateOfBirth: string | null,
+        public countryCode: string | null
     ) {}
 
     equals(other: UpdateFounder | null): boolean {
@@ -53,7 +54,9 @@ export class UpdateFounder {
                this.governmentId === other.governmentId &&
                this.cityId === other.cityId &&
                this.address === other.address &&
-               this.dateOfBirth === other.dateOfBirth;
+               this.dateOfBirth === other.dateOfBirth &&
+               this.countryCode === other.countryCode;
+               
     }
 }
 
