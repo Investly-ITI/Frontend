@@ -1,5 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { BusinessDto, BusinessSearchDto } from '../../_models/businesses';
 import { Category } from '../../_models/category';
@@ -16,9 +17,6 @@ import { GovernrateService } from '../../_services/governorate.service';
   styleUrl: './explore.component.css'
 })
 export class ExploreComponent implements OnInit {
-  private fb = inject(FormBuilder);
-  private categoryService = inject(CategoryService);
-  private governorateService = inject(GovernrateService);
 
   // View states
   isGridView = true;
@@ -64,6 +62,13 @@ export class ExploreComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 12;
   totalItems = 0;
+
+  constructor(
+    private fb: FormBuilder,
+    private categoryService: CategoryService,
+    private governorateService: GovernrateService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
     this.initializeForm();
@@ -306,5 +311,19 @@ this.businesses = [
     const investmentType = this.searchForm.get('investmentType')?.value;
     // Handle both string and number values from form
     return investmentType != DesiredInvestmentType.IndustrialExperience && investmentType != '1';
+  }
+
+  // Navigation Methods
+  navigateToIdeaDetails(business: BusinessDto): void {
+    this.router.navigate(['/idea', business.id]);
+  }
+
+  onCardClick(business: BusinessDto, event: Event): void {
+    // Prevent navigation if clicking on buttons inside the card
+    const target = event.target as HTMLElement;
+    if (target.tagName === 'BUTTON' || target.closest('button')) {
+      return;
+    }
+    this.navigateToIdeaDetails(business);
   }
 } 
