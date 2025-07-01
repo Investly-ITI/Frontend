@@ -1,0 +1,130 @@
+<!-- ========================================
+     PROFILE CONTAINER
+======================================== -->
+<div class="profile-container">
+  <!-- ========================================
+       PROFILE HEADER
+  ======================================== -->
+  <div class="profile-header">
+    <div class="header-content">
+      <div class="profile-avatar">
+<img [src]="imageUrl || (url + '/' + profileData.user.profilePicPath)" [alt]="profileData.user.firstName + ' ' + profileData.user.lastName">
+        <div class="avatar-overlay" (click)="triggerFileInput()">
+          <i class='bx bx-camera'></i>
+        </div>
+        <!-- Hidden file input -->
+        <input 
+          #fileInput 
+          type="file" 
+          accept="image/*" 
+          (change)="onProfilePictureChange($event)"
+          style="display: none;"
+        >
+      </div>
+      <div class="profile-info">
+        <h1 class="profile-name">{{ profileData.user.firstName }} {{ profileData.user.lastName }}</h1>
+        <p class="profile-title">Investor</p>
+        <p class="profile-location">
+          <i class='bx bx-map'></i>
+          {{ profileData.user.city.nameEn }}, {{ profileData.user.government.nameEn }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PROFILE CONTENT
+  ======================================== -->
+  <div class="profile-content">
+    <!-- ========================================
+         SIDEBAR NAVIGATION
+    ======================================== -->
+    <div class="profile-sidebar">
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li class="nav-item">
+            <button 
+              class="nav-button" 
+              [class.active]="activeSection === 'information'"
+              (click)="setActiveSection('information')"
+            >
+              <i class='bx bx-user'></i>
+              <span>Information</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button 
+              class="nav-button" 
+              [class.active]="activeSection === 'security'"
+              (click)="setActiveSection('security')"
+            >
+              <div class="nav-button-content">
+              <i class='bx bx-shield'></i>
+              <span>Security</span>
+              </div>
+              <!-- Red exclamation mark notification indicator -->
+                <div class="security-alert-indicator" *ngIf="showSecurityAlert">
+                <i class='bx bx-error'></i>
+              </div>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button 
+              class="nav-button" 
+              [class.active]="activeSection === 'ideas'"
+              (click)="setActiveSection('ideas')"
+            >
+              <i class='bx bx-bulb'></i>
+              <span>Ideas</span>
+              <span class="badge">{{ ideasCount }}</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button 
+              class="nav-button" 
+              [class.active]="activeSection === 'notifications'"
+              (click)="setActiveSection('notifications')"
+            >
+              <i class='bx bx-bell'></i>
+              <span>Notifications</span>
+              <span class="badge" *ngIf="getUnreadNotificationsCount() > 0">{{ getUnreadNotificationsCount() }}</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- ========================================
+         MAIN CONTENT AREA
+    ======================================== -->
+    <div class="profile-main">
+      <!-- Information Section -->
+      <app-investor-information 
+        *ngIf="activeSection === 'information'"
+        [personalInfo]="profileData"
+        (personalInfoChange)="onPersonalInfoChange($event)"
+      ></app-investor-information>
+
+    
+      <app-investor-security
+        *ngIf="activeSection === 'security'"
+        [securitySettings]="securitySettings"
+        (securitySettingsChange)="onSecuritySettingsChange($event)"
+      ></app-investor-security>
+<!-- 
+   
+      <app-investor-ideas-request
+        #investorIdeasRequest
+        [style.display]="activeSection === 'ideas' ? 'block' : 'none'"
+        (ideasCountChange)="onIdeasCountChange($event)"
+      ></app-investor-ideas-request>
+          -->
+
+    
+      <app-investor-notifications 
+        *ngIf="activeSection === 'notifications'"
+      ></app-investor-notifications>
+  
+    </div>
+  </div>
+</div> 

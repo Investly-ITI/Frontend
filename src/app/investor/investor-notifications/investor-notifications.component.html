@@ -1,0 +1,48 @@
+<!-- ========================================
+     NOTIFICATIONS SECTION
+======================================== -->
+<div class="content-section">
+  <div class="section-header">
+    <h2 class="section-title">Notifications</h2>
+    <p class="section-description">Stay updated with your latest activities and updates</p>
+  </div>
+
+  <div class="notifications-container">
+    <div class="notifications-list" *ngIf="notifications.length > 0">
+      <div 
+        class="notification-item" 
+        *ngFor="let notification of notifications"
+        [ngClass]="{ 'unread': notification.isRead === 0 }"
+        [class]="'notification-' + notification.status"
+      >
+        <div class="notification-icon" [ngClass]="notification.isRead === 0 ? 'unread-icon' : 'read-icon'">
+          <i class='bx' [ngClass]="getNotificationIcon(notification.status)"></i>
+        </div>
+        
+        <div class="notification-content">
+          <h4 class="notification-title">{{ notification.title }}</h4>
+          <p class="notification-message">{{ notification.body }}</p>
+          <span class="notification-time">{{ notification.createdAt | date:'short' }}</span>
+        </div>
+
+        <div class="notification-actions">
+          <button 
+            class="action-btn delete-btn" 
+            (click)="deleteNotification(notification.id)"
+            title="Delete notification"
+          >
+            <i class='bx bx-x'></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="notifications-empty" *ngIf="notifications.length === 0">
+      <div class="empty-state">
+        <i class='bx bx-bell'></i>
+        <h3>No Notifications</h3>
+        <p>You're all caught up! No new notifications</p>
+      </div>
+    </div>
+  </div>
+</div>
