@@ -126,6 +126,7 @@ export class IdeaDetailsComponent implements OnInit, OnDestroy {
         nameAr: 'القاهرة',
         nameEn: 'Cairo'
       }
+      
     );
 
     // Add mock extended properties
