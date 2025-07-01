@@ -29,7 +29,7 @@
   </div>
 
   <!-- Form Container -->
-  <form [formGroup]="formData" class="business-form" (ngSubmit)="onSubmit()">
+  <form [formGroup]="formData" class="business-form" (ngSubmit)="onSubmitForAiReview()">
     
     <!-- Step 1: Basic Information -->
     <div class="step-content" *ngIf="currentStep === 1" [@fadeInOut]>
