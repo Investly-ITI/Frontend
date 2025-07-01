@@ -1,0 +1,533 @@
+/* ========================================
+   SECURITY COMPONENT STYLES
+======================================== */
+
+/* Section Headers */
+.section-header {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--dark);
+  font-family: var(--poppins);
+  margin-bottom: 0.5rem;
+}
+
+:host-context(.dark) .section-title {
+  color: var(--light);
+}
+
+.section-description {
+  font-size: 1rem;
+  color: var(--dark-grey);
+  font-family: var(--poppins);
+}
+
+/* Save Message */
+.save-message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  font-family: var(--poppins);
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+}
+
+.save-message.success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--success);
+}
+
+.save-message.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--error);
+}
+
+.save-message i {
+  font-size: 1.2rem;
+}
+
+/* Security Container */
+.security-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Security Cards */
+.security-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--grey);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+:host-context(.dark) .security-card {
+  background: var(--custom);
+  border-color: var(--grey);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--grey);
+  background: rgba(48, 172, 170, 0.05);
+}
+
+:host-context(.dark) .card-header {
+  background: rgba(48, 172, 170, 0.1);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--dark);
+  font-family: var(--poppins);
+  margin: 0;
+}
+
+:host-context(.dark) .card-title {
+  color: var(--light);
+}
+
+.card-content {
+  padding: 2rem;
+}
+
+.card-content p {
+  margin: 0 0 1rem 0;
+  color: var(--dark-grey);
+  font-family: var(--poppins);
+}
+
+.last-change {
+  font-size: 0.9rem;
+  color: var(--dark-grey);
+  margin-bottom: 0 !important;
+}
+
+/* Status Badge */
+.status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--poppins);
+}
+
+.status-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-pending {
+  background: rgba(255, 193, 7, 0.15);  
+  color: var(--warning);
+  border: 1px solid rgba(206, 240, 72, 0.3);
+}
+
+/* Password Form */
+.password-form {
+  max-width: 500px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: var(--dark);
+  margin-bottom: 0.5rem;
+  font-family: var(--poppins);
+  font-size: 0.95rem;
+}
+
+:host-context(.dark) .form-label {
+  color: var(--light);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--grey);
+  border-radius: 12px;
+  font-family: var(--poppins);
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: white;
+  color: var(--dark);
+  border-color: var(--light);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--light);
+  box-shadow: 0 0 0 3px rgba(48, 172, 170, 0.1);
+}
+
+.form-control:disabled {
+  background: var(--grey);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+:host-context(.dark) .form-control::placeholder {
+  color: var(--light);
+}
+
+:host-context(.dark) .form-control {
+  background: var(--grey);
+  border-color: var(--light);
+  color: var(--light);
+}
+
+:host-context(.dark) .form-control:disabled {
+  background: var(--custom);
+  opacity: 0.5;
+}
+
+/* Password Error */
+.password-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: var(--error);
+  font-family: var(--poppins);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.password-error i {
+  font-size: 1.1rem;
+}
+
+/* Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-family: var(--poppins);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn:disabled::before {
+  display: none;
+}
+
+.btn-primary {
+  background: var(--light);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--blue);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(48, 172, 170, 0.3);
+}
+
+.form-actions {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--grey);
+}
+
+/* Loading Animation */
+.bx-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .card-header {
+    padding: 1rem 1.5rem;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .card-content {
+    padding: 1.5rem;
+  }
+
+  .password-form {
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .card-header {
+    padding: 1rem;
+  }
+
+  .card-content {
+    padding: 1rem;
+  }
+}
+
+/* ========================================
+   FOUNDER SECURITY COMPONENT STYLES
+======================================== */
+
+/* Main Container */
+.content-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 70vh;
+  padding: 1rem;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+.password-hints {
+margin-top: 8px;
+font-size: 0.8rem;
+color: #666;
+}
+
+.password-hints p {
+margin: 2px 0;
+color: #f44336; 
+}
+
+.password-hints p.valid {
+color: #4caf50; 
+}
+
+.success-snackbar {
+background-color: #4caf50;
+color: white;
+}
+
+.error-snackbar {
+background-color: #f44336;
+color: white;
+}
+
+.form-actions button {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+
+
+
+
+
+
+
+
+
+/* Add these styles to your CSS file */
+
+/* Password Requirements Styling */
+.password-requirements {
+  margin-top: 0.75rem;
+  font-family: var(--poppins);
+}
+
+.requirement-text {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--dark-grey);
+  font-size: 0.85rem;
+}
+
+.requirements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.requirements-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--error);
+  transition: color 0.3s ease;
+}
+
+.requirements-list li.met {
+  color: var(--success);
+}
+
+.requirements-list li i {
+  font-size: 1rem;
+}
+
+.requirements-list li.met i.bx-check {
+  color: var(--success);
+}
+
+.requirements-list li:not(.met) i.bx-x {
+  color: var(--error);
+}
+
+/* Field Error Styling */
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  color: var(--error);
+  font-size: 0.85rem;
+  font-family: var(--poppins);
+  animation: fadeIn 0.3s ease;
+}
+
+.field-error i {
+  font-size: 1rem;
+}
+
+/* Password Error Styling */
+.password-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: var(--error);
+  font-family: var(--poppins);
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+.password-error i {
+  font-size: 1.1rem;
+}
+
+/* Dark Mode Adjustments */
+:host-context(.dark) .requirement-text {
+  color: var(--light-grey);
+}
+
+:host-context(.dark) .requirements-list li {
+  color: var(--light-grey);
+}
+
+:host-context(.dark) .requirements-list li.met {
+  color: var(--success);
+}
+
+:host-context(.dark) .requirements-list li:not(.met) {
+  color: var(--error-light);
+}
+/*eye icon*/
+.password-input-container {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #666;
+  font-size: 1.2rem;
+}
+
+.password-toggle:hover {
+  color: #333;
+}
+
+/* Adjust input padding to prevent text overlap */
+.form-control[type="password"],
+.form-control[type="text"] {
+  padding-right: 40px;
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 768px) {
+  .requirements-list {
+    grid-template-columns: 1fr;
+  }
+}

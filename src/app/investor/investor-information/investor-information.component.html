@@ -1,0 +1,285 @@
+<div class="content-section">
+  <div class="section-header">
+    <h2 class="section-title">Personal Information</h2>
+    <p class="section-description">Manage your personal details and profile information</p>
+  </div>
+
+  <!-- Save Message -->
+ <div class="save-message" *ngIf="saveMessage"
+     [ngClass]="{
+       'success': saveMessage.includes('successfully'),
+       'error': saveMessage.includes('Failed') || saveMessage.includes('fix'),
+       'warning': saveMessage.includes('No')
+     }">
+  <i class='bx' 
+     [ngClass]="
+       saveMessage.includes('successfully') ? 'bx-check-circle' :
+       saveMessage.includes('No') ? 'bx-error' :
+       'bx-error-circle'
+     ">
+  </i>
+  <span>{{ saveMessage }}</span>
+</div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button class="tab-button" [class.active]="activeTab === 'personal'" (click)="switchTab('personal')">
+      <i class='bx bx-user'></i><span>Personal Details</span>
+    </button>
+    <button class="tab-button" [class.active]="activeTab === 'documentation'" (click)="switchTab('documentation')">
+      <i class='bx bx-file'></i><span>Documentation</span>
+    </button>
+  </div>
+
+  <!-- FORM -->
+  <form [formGroup]="formData" class="profile-form" >
+    <div class="tab-content">
+
+      <!-- PERSONAL TAB -->
+      <div *ngIf="activeTab === 'personal'" class="tab-panel">
+        <div class="form-container">
+
+          <!-- User Group -->
+          <div formGroupName="user">
+
+            <!-- First & Last Name -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="firstName">First Name</label>
+                <input id="firstName"   [(ngModel)]="personalInfo.user.firstName" class="form-control readonly" formControlName="firstName" type="text" />
+                <div *ngIf="formData.get('user.firstName')?.touched && formData.get('user.firstName')?.invalid" class="text-danger">
+                  First name is required.
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="lastName">Last Name</label>
+                <input id="lastName"  [(ngModel)]="personalInfo.user.lastName" class="form-control readonly" formControlName="lastName" type="text" />
+                <div *ngIf="formData.get('user.lastName')?.touched && formData.get('user.lastName')?.invalid" class="text-danger">
+                  Last name is required.
+                </div>
+              </div>
+            </div>
+
+            <!-- Email & DOB -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input id="email" class="form-control readonly" formControlName="email" type="email" readonly />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="dateOfBirth">Date of Birth</label>
+                <input id="dateOfBirth" class="form-control readonly" formControlName="dateOfBirth" type="date" />
+                <div *ngIf="formData.get('user.dateOfBirth')?.touched && formData.get('user.dateOfBirth')?.invalid" class="text-danger">
+                  <span *ngIf="formData.get('user.dateOfBirth')?.errors?.['required']">Date of birth is required.</span>
+                  <span *ngIf="formData.get('user.dateOfBirth')?.errors?.['ageRestriction']">You must be 21 or older to register.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Country Code & Phone -->
+            <div class="form-row">
+              <div class="form-group editable">
+                <label class="form-label" for="countryCode">Country Code</label>
+                <select id="countryCode" class="form-control" formControlName="countryCode">
+                  <option value="+20">+20 (Egypt)</option>
+                  <option value="+1">+1 (United States)</option>
+                  <option value="+44">+44 (United Kingdom)</option>
+                  <option value="+49">+49 (Germany)</option>
+                  <option value="+33">+33 (France)</option>
+                  <option value="+39">+39 (Italy)</option>
+                  <option value="+34">+34 (Spain)</option>
+                  <option value="+86">+86 (China)</option>
+                  <option value="+81">+81 (Japan)</option>
+                  <option value="+91">+91 (India)</option>
+                </select>
+                <i class='bx bx-edit edit-icon'></i>
+              </div>
+              <div class="form-group editable">
+                <label class="form-label" for="phoneNumber">Phone Number</label>
+                <input id="phoneNumber" class="form-control" formControlName="phoneNumber" type="tel" />
+                <div *ngIf="formData.get('user.phoneNumber')?.touched && formData.get('user.phoneNumber')?.invalid" class="text-danger">
+                  <span *ngIf="formData.get('user.phoneNumber')?.errors?.['required']">PhoneNumber is required.</span>
+                  <span *ngIf="formData.get('user.phoneNumber')?.errors?.['pattern']">PhoneNumber Must Be 10 digits.</span>
+                </div>
+                <i class='bx bx-edit edit-icon'></i>
+              </div>
+            </div>
+
+            <!-- Address -->
+            <div class="form-group">
+              <label class="form-label" for="address">Street Address</label>
+              <input id="address" class="form-control readonly" formControlName="address" type="text" />
+            </div>
+
+            <!-- Government & City -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="government">Government</label>
+                <select id="government" class="form-control"   formControlName="governmentId" (change)="loadCities($any($event.target).value)">
+                  <option value="" disabled>Select Government</option>
+                  <option *ngFor="let gov of governorates" [value]="gov.id">{{ gov.nameEn }}</option>
+                </select>
+                <div *ngIf="formData.get('user.governmentId')?.touched && formData.get('user.governmentId')?.invalid">
+                  Government is required.
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="city">City</label>
+                <select id="city" class="form-control"   formControlName="cityId">
+                  <option value="" disabled>Select City</option>
+                  <option  *ngFor="let city of Cities" [value]="city.id">{{ city.nameEn }}</option>
+                </select>
+                <div *ngIf="formData.get('user.cityId')?.touched && formData.get('user.cityId')?.invalid">
+                  City is required.
+                </div>
+              </div>
+            </div>
+
+            <!-- National ID & Gender -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="nationalId">National ID</label>
+                <input id="nationalId" class="form-control readonly" formControlName="nationalId" type="text" readonly />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="gender">Gender</label>
+                <input id="gender" class="form-control readonly" formControlName="gender" type="text" readonly />
+              </div>
+            </div>
+
+          </div> <!-- End of formGroupName="user" -->
+
+          <!-- Investing Type (outside user group) -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="investingType">Investing Type</label>
+              <select id="investingType" formControlName="investingType" class="form-control" (change)="onInvestmentTypeChange()">
+                <option value="" disabled>Select investing type</option>
+                <option [value]="investingTypes.Money">Funding with money</option>
+                <option [value]="investingTypes.Experience">Experience</option>
+                <option [value]="investingTypes.Both">Both</option>
+              </select>
+              <div *ngIf="formData.get('investingType')?.invalid && formData.get('investingType')?.touched" class="text-danger">
+                Investing type is required.
+              </div>
+            </div>
+               <div class="form-group">
+              <label class="form-label" for="interestedBusinessStages">Investing Stages</label>
+              <select id="interestedBusinessStages" formControlName="interestedBusinessStages" class="form-control">
+                <option value="" disabled>Select investing type</option>
+                <option [value]="InvestingStages.ideation">Ideation</option>
+                <option [value]="InvestingStages.advanced">Advanced</option>
+                <option [value]="InvestingStages.intermediate">Intermediate</option>
+                <option [value]="InvestingStages.startup">Startup</option>
+              </select>
+              <div *ngIf="formData.get('interestedBusinessStages')?.invalid && formData.get('interestedBusinessStages')?.touched" class="text-danger">
+                Investing Stages  is required.
+              </div>
+            </div>
+          
+          </div>
+            
+          
+          
+
+          <!-- Funding Range -->
+          <div *ngIf="showFundingRange" class="preference-section">
+            <h3>What's your preferred funding range?</h3>
+            <div class="funding-range-slider">
+              <div class="range-values">
+                <span class="min-value">{{formatCurrency(selectedFundingMin)}}</span>
+                <span class="range-separator">-</span>
+                <span class="max-value">{{formatCurrency(selectedFundingMax)}}</span>
+              </div>
+              <div class="dual-range-container">
+                <div class="range-track">
+                  <div class="range-fill"
+                       [style.left.%]="((selectedFundingMin - minFunding) / (maxFunding - minFunding)) * 100"
+                       [style.width.%]="((selectedFundingMax - selectedFundingMin) / (maxFunding - minFunding)) * 100">
+                  </div>
+                </div>
+                <input type="range" class="range-slider range-min"
+                       [min]="minFunding" [max]="maxFunding"
+                       [value]="selectedFundingMin" (input)="onFundingMinChange(+$any($event.target).value)" step="500" />
+                <input type="range" class="range-slider range-max"
+                       [min]="minFunding" [max]="maxFunding"
+                       [value]="selectedFundingMax" (input)="onFundingMaxChange(+$any($event.target).value)" step="500" />
+              </div>
+              <div class="range-indicators">
+                <div *ngFor="let range of fundingRanges"
+                     class="range-indicator"
+                     [style.left.%]="getIndicatorPosition(range.value)">
+                  <div class="indicator-dot"></div>
+                  <span class="indicator-label">{{range.label}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+  <!-- Submit Button -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" [disabled]="isSaving || !formData.valid "(click)="submitPersonalInfo()" >
+          <i class="bx" [ngClass]="isSaving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
+          {{ isSaving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+        </div> <!-- End of form-container -->
+      </div> 
+
+      <!-- DOCUMENTATION TAB -->
+      <div *ngIf="activeTab === 'documentation'" class="tab-panel">
+        <div class="documentation-container">
+          <div class="documentation-section">
+            <h4 class="section-title">ID Documentation</h4>
+            <p class="section-description">Upload clear photos of both sides of your national ID</p>
+
+            <div class="id-upload-container">
+              <div class="id-upload-card">
+                <div class="id-upload-area" (click)="triggerFrontIdUpload()" (mouseenter)="showFrontIdOverlay = true" (mouseleave)="showFrontIdOverlay = false">
+                  <div *ngIf="!frontIdImageUrl" class="upload-placeholder">
+                    <i class='bx bx-plus'></i>
+                    <span>Front ID Picture</span>
+                  </div>
+                  <div *ngIf="frontIdImageUrl" class="id-image-container">
+                    <img [src]="frontIdImageUrl.startsWith('data:') ? frontIdImageUrl : url + '/' + frontIdImageUrl" alt="Front ID" class="id-image">
+                    <div class="id-overlay" [ngClass]="{'show': showFrontIdOverlay}">
+                      <i class='bx bx-edit-alt'></i>
+                    </div>
+                  </div>
+                </div>
+                <label class="upload-label">Front Side</label>
+              </div>
+
+              <div class="id-upload-card">
+                <div class="id-upload-area" (click)="triggerBackIdUpload()" (mouseenter)="showBackIdOverlay = true" (mouseleave)="showBackIdOverlay = false">
+                  <div *ngIf="!backIdImageUrl" class="upload-placeholder">
+                    <i class='bx bx-plus'></i>
+                    <span>Back ID Picture</span>
+                  </div>
+                  <div *ngIf="backIdImageUrl" class="id-image-container">
+                    <img [src]="backIdImageUrl.startsWith('data:') ? backIdImageUrl : url + '/' + backIdImageUrl" alt="Back ID" class="id-image">
+                    <div class="id-overlay" [ngClass]="{'show': showBackIdOverlay}">
+                      <i class='bx bx-edit-alt'></i>
+                    </div>
+                  </div>
+                </div>
+                <label class="upload-label">Back Side</label>
+              </div>
+            </div>
+ <!-- Submit Button -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" [disabled]="isSaving || !formData.valid" (click)="submitDocumentation()">
+          <i class="bx" [ngClass]="isSaving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
+          {{ isSaving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+            <input type="file" id="frontIdInput" accept="image/*" (change)="onFrontIdFileSelected($event)" style="display: none;">
+            <input type="file" id="backIdInput" accept="image/*" (change)="onBackIdFileSelected($event)" style="display: none;">
+          </div>
+        </div>
+      </div>
+
+    
+    </div>
+  </form>
+</div>
+

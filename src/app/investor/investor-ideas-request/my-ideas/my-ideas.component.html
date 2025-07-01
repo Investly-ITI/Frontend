@@ -1,0 +1,434 @@
+<!-- ========================================
+     MY IDEAS SECTION
+======================================== -->
+<div class="my-ideas-container">
+  <!-- Ideas List View -->
+  <div *ngIf="!showEditView" class="ideas-list-view">
+  <div class="ideas-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h3 class="ideas-title">My Ideas & Business Proposals</h3>
+        <p class="ideas-description">Manage your submitted ideas and track their status</p>
+      </div>
+      <div class="header-filter">
+        <div class="filter-wrapper">
+          <i class='bx bx-filter filter-icon'></i>
+          <div class="filter-select-container">
+            <select 
+              class="filter-select"
+              [(ngModel)]="selectedStatus" 
+              (ngModelChange)="onStatusFilterChange()"
+            >
+              <option 
+                *ngFor="let option of statusOptions" 
+                [value]="option.value"
+              >
+                {{ option.label }} ({{ getStatusCount(option.value) }})
+              </option>
+            </select>
+            <i class='bx bx-chevron-down filter-select-icon'></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ideas Grid -->
+  <div class="ideas-grid" *ngIf="filteredIdeas.length > 0; else noIdeas">
+    <div class="idea-card" *ngFor="let idea of filteredIdeas"
+         [class.dropdown-open]="isDropdownOpen(idea.id)">
+      <!-- Decline Alert Indicator for declined ideas -->
+      <div 
+        *ngIf="idea.status === 'declined'" 
+        class="decline-alert-indicator"
+        (click)="onShowDeclineReason(idea)"
+        title="View decline reason"
+      >
+        <i class='bx bx-error-circle'></i>
+      </div>
+
+      <!-- Rejection Alert Indicator for rejected-drafted ideas -->
+      <div 
+        *ngIf="idea.status === 'rejected-drafted'" 
+        class="rejection-alert-indicator"
+        (click)="onShowRejectionDetails(idea)"
+        title="View AI rejection details"
+      >
+        <i class='bx bx-error-circle'></i>
+      </div>
+
+      <!-- Badges Container -->
+      <div class="badges-container">
+      <!-- Status Badge -->
+      <div class="status-badge" [ngClass]="getStatusClass(idea.status)">
+        <i class='bx' [ngClass]="getStatusIcon(idea.status)"></i>
+        <span>{{ idea.status | titlecase }}</span>
+        </div>
+
+        <!-- Submission Type Badge -->
+        <div class="submission-type-badge" [ngClass]="idea.submissionType">
+          <i class='bx' [ngClass]="idea.submissionType === 'form' ? 'bx-edit' : 'bx-file'"></i>
+          <span>{{ idea.submissionType === 'form' ? 'Form Submission' : 'Document Submission' }}</span>
+        </div>
+      </div>
+
+      <!-- Idea Content -->
+      <div class="idea-content">
+        <h4 class="idea-title">{{ idea.title }}</h4>
+        <div class="idea-meta">
+          <div class="meta-item">
+            <i class='bx bx-category'></i>
+            <span>{{ idea.category }}</span>
+          </div>
+          <div class="meta-item">
+            <i class='bx bx-rocket'></i>
+            <span>{{ idea.stage }}</span>
+          </div>
+          <div class="meta-item">
+            <i class='bx bx-map'></i>
+            <span>{{ idea.city }}, {{ idea.government }}</span>
+          </div>
+          <div class="meta-item">
+            <i class='bx bx-calendar'></i>
+            <span>{{ idea.submittedDate | date:'MMM dd, yyyy' }}</span>
+          </div>
+          <div class="meta-item" *ngIf="idea.fundingGoal">
+            <i class='bx bx-money'></i>
+            <span>{{ idea.fundingGoal | number }} EGP</span>
+          </div>
+          <div class="meta-item" *ngIf="idea.formData?.investmentType === 'Industrial Experience'">
+            <i class='bx bx-briefcase'></i>
+            <span>Industrial&nbsp;Experience</span>
+          </div>
+        </div>
+        <p class="idea-description">{{ idea.description }}</p>
+      </div>
+
+      <!-- Actions Dropdown -->
+      <div class="idea-actions">
+        <div class="actions-dropdown" [class.open]="isDropdownOpen(idea.id)">
+          <button class="btn btn-primary btn-sm dropdown-toggle" 
+                  (click)="toggleDropdown(idea.id)">
+            Actions
+          </button>
+          <div class="dropdown-menu" *ngIf="isDropdownOpen(idea.id)">
+            <button class="dropdown-item primary" (click)="onViewDetails(idea); closeDropdown()">
+              <i class='bx bx-show'></i>
+              View Details
+            </button>
+            <button class="dropdown-item success" (click)="onSubmitIdea(idea); closeDropdown()"
+                    *ngIf="idea.status === 'draft'">
+              <i class='bx bx-paper-plane'></i>
+              Submit for Review
+            </button>
+            <button class="dropdown-item info" (click)="onShowContactRequests(idea); closeDropdown()"
+                    *ngIf="idea.status === 'approved' && getContactRequestsCount(idea) > 0">
+              <i class='bx bx-envelope'></i>
+              Contact Requests
+              <span class="contact-requests-badge">{{ getPendingContactRequestsCount(idea) }}</span>
+            </button>
+            <button class="dropdown-item secondary" (click)="onEditIdea(idea); closeDropdown()" 
+                    *ngIf="canEdit(idea)">
+              <i class='bx bx-edit'></i>
+              Edit Idea
+            </button>
+            <div class="dropdown-divider" *ngIf="canEdit(idea) || idea.status === 'draft' || (idea.status === 'approved' && getContactRequestsCount(idea) > 0)"></div>
+            <button class="dropdown-item danger" (click)="onDeleteIdea(idea); closeDropdown()">
+              <i class='bx bx-trash'></i>
+              Delete Idea
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Ideas State -->
+  <ng-template #noIdeas>
+    <div class="no-ideas">
+      <i class='bx bx-bulb'></i>
+      <h4 *ngIf="selectedStatus === 'all'; else filteredNoIdeas">No Ideas Yet</h4>
+      <ng-template #filteredNoIdeas>
+        <h4>No {{ getSelectedStatusLabel() }} Ideas</h4>
+      </ng-template>
+      <p *ngIf="selectedStatus === 'all'; else filteredMessage">You haven't submitted any business ideas or proposals yet.</p>
+      <ng-template #filteredMessage>
+        <p>You don't have any ideas with {{ getSelectedStatusLabel().toLowerCase() }} status.</p>
+      </ng-template>
+      <button class="btn btn-primary" *ngIf="selectedStatus === 'all'">
+        <i class='bx bx-plus'></i>
+        Add Your First Idea
+      </button>
+    </div>
+  </ng-template>
+
+  <!-- Decline Reason Modal -->
+  <div class="modal-overlay" *ngIf="showDeclineModal" [class.closing]="isClosingModal" (click)="onCloseDeclineModal()">
+    <div class="modal-content" [class.closing]="isClosingModal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class='bx bx-error-circle'></i>
+          Decline Reason
+        </h3>
+        <button class="modal-close" (click)="onCloseDeclineModal()">
+          <i class='bx bx-x'></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="decline-reason-content">
+          <div class="decline-reason-icon">
+            <i class='bx bx-info-circle'></i>
+          </div>
+          <div class="decline-reason-text">
+            <p>{{ selectedDeclineReason }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteModal" [class.closing]="isClosingDeleteModal" (click)="onCloseDeleteModal()">
+    <div class="modal-content delete-modal" [class.closing]="isClosingDeleteModal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class='bx bx-trash'></i>
+          Confirm Deletion
+        </h3>
+        <button class="modal-close" (click)="onCloseDeleteModal()">
+          <i class='bx bx-x'></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="delete-confirmation-content">
+          <div class="delete-warning-icon">
+            <i class='bx bx-error-circle'></i>
+          </div>
+          <div class="delete-confirmation-text">
+            <p class="delete-message">Are you sure you want to delete this idea?</p>
+            <div class="idea-preview" *ngIf="ideaToDelete">
+              <h4>{{ ideaToDelete.title }}</h4>
+              <p>{{ ideaToDelete.category }} • {{ ideaToDelete.stage }}</p>
+            </div>
+            <p class="delete-warning">This action cannot be undone.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" (click)="onConfirmDelete()">
+          <i class='bx bx-trash'></i>
+          Delete Idea
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showSubmitModal" [class.closing]="isClosingSubmitModal" (click)="onCloseSubmitModal()">
+    <div class="modal-content submit-modal" [class.closing]="isClosingSubmitModal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class='bx bx-paper-plane'></i>
+          Submit Idea for Review
+        </h3>
+        <button class="modal-close" (click)="onCloseSubmitModal()">
+          <i class='bx bx-x'></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="submit-confirmation-content">
+          <div class="submit-icon">
+            <i class='bx bx-check-circle'></i>
+          </div>
+          <div class="submit-confirmation-text">
+            <p class="submit-message">Ready to submit your idea for review?</p>
+            <div class="idea-preview" *ngIf="ideaToSubmit">
+              <h4>{{ ideaToSubmit.title }}</h4>
+              <p>{{ ideaToSubmit.category }} • {{ ideaToSubmit.stage }}</p>
+            </div>
+                         <p class="submit-info">Once submitted, your idea will be reviewed by our team and won't be editable unless it's rejected or declined.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" (click)="onConfirmSubmit()">
+          <i class='bx bx-paper-plane'></i>
+          Submit for Review
+        </button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- Contact Requests Modal -->
+  <div class="modal-overlay" *ngIf="showContactRequestsModal" [class.closing]="isClosingContactRequestsModal" (click)="onCloseContactRequestsModal()">
+    <div class="modal-content contact-requests-modal" [class.closing]="isClosingContactRequestsModal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class='bx bx-envelope'></i>
+          Contact Requests
+        </h3>
+        <button class="modal-close" (click)="onCloseContactRequestsModal()">
+          <i class='bx bx-x'></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="requests-header" *ngIf="selectedIdeaForContacts">
+          <h4>{{ selectedIdeaForContacts.title }}</h4>
+          <p class="requests-summary">
+            <span class="total-requests">{{ getContactRequestsCount(selectedIdeaForContacts) }} total requests</span>
+            <span class="pending-requests">{{ getPendingContactRequestsCount(selectedIdeaForContacts) }} pending</span>
+          </p>
+        </div>
+        
+                 <div class="contact-requests-list" *ngIf="selectedIdeaForContacts && selectedIdeaForContacts.contactRequests && selectedIdeaForContacts.contactRequests.length > 0">
+           <div class="contact-request-item" *ngFor="let request of selectedIdeaForContacts.contactRequests">
+            <div class="request-header">
+              <div class="investor-info">
+                <h5 class="investor-name">{{ request.investorName }}</h5>
+              </div>
+              <div class="request-status">
+                <span class="status-badge" [ngClass]="{
+                  'status-pending': request.status === 'pending',
+                  'status-accepted': request.status === 'accepted',
+                  'status-declined': request.status === 'declined'
+                }">
+                  {{ request.status | titlecase }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="request-details">
+              <div class="contact-info">
+                <div class="contact-item">
+                  <i class='bx bx-calendar'></i>
+                  <span>{{ request.requestDate | date:'MMM dd, yyyy' }}</span>
+                </div>
+              </div>
+              
+
+            </div>
+          </div>
+        </div>
+        
+        <div class="no-requests" *ngIf="!selectedIdeaForContacts?.contactRequests || (selectedIdeaForContacts && selectedIdeaForContacts.contactRequests && selectedIdeaForContacts.contactRequests.length === 0)">
+          <i class='bx bx-envelope-open'></i>
+          <p>No contact requests yet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading" [@fadeInOut]>
+    <div class="loading-content">
+      <div class="loading-animation">
+        <div class="ai-brain">
+          <i class='bx bx-brain'></i>
+        </div>
+        <div class="loading-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+      <h4>AI System Reviewing Your Idea</h4>
+      <p>{{ loadingMessage }}</p>
+    </div>
+  </div>
+
+  <!-- AI Result Modal -->
+  <div class="modal-overlay" *ngIf="showResultModal" [@fadeInOut]>
+    <div class="modal-content ai-result-modal" [@slideInOut]>
+      <div class="modal-header" [ngClass]="reviewResult?.isAccepted ? 'success' : 'error'">
+        <div class="modal-icon">
+          <i class='bx' [ngClass]="reviewResult?.isAccepted ? 'bx-check-circle' : 'bx-x-circle'"></i>
+        </div>
+        <h3>{{ reviewResult?.isAccepted ? 'Changes Accepted!' : 'Needs Improvement' }}</h3>
+      </div>
+      
+      <div class="modal-body">
+        <p class="modal-description">{{ reviewResult?.message }}</p>
+        
+        <div class="standards-list" *ngIf="!reviewResult?.isAccepted && reviewResult?.standards">
+          <h4>Standards Not Met:</h4>
+          <ul>
+            <li *ngFor="let standard of reviewResult?.standards; let i = index">
+              <strong>{{ i + 1 }}.</strong> {{ standard }}
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button 
+          class="btn btn-secondary" 
+          (click)="closeModal()"
+          *ngIf="reviewResult?.isAccepted"
+        >
+          <i class='bx bx-check'></i>
+          Close
+        </button>
+        
+        <!-- Buttons for new submission rejection -->
+        <div class="button-group" *ngIf="!reviewResult?.isAccepted && currentAction === 'submit'">
+          <button 
+            class="btn btn-secondary" 
+            (click)="saveAsDraft()"
+          >
+            <i class='bx bx-save'></i>
+            Save as Draft
+          </button>
+          <button 
+            class="btn btn-outline" 
+            (click)="closeModal()"
+          >
+            <i class='bx bx-x'></i>
+            Close
+          </button>
+        </div>
+
+        <!-- Buttons for draft submission rejection -->
+        <div class="button-group" *ngIf="!reviewResult?.isAccepted && currentAction === 'submit-draft'">
+          <button 
+            class="btn btn-outline" 
+            (click)="closeModal()"
+          >
+            <i class='bx bx-x'></i>
+            Close
+          </button>
+        </div>
+
+        <!-- Buttons for edit rejection -->
+        <div class="button-group" *ngIf="!reviewResult?.isAccepted && currentAction === 'edit'">
+          <button 
+            class="btn btn-secondary" 
+            (click)="continueEditing()"
+          >
+            <i class='bx bx-edit'></i>
+            Continue Editing
+          </button>
+          <button 
+            class="btn btn-outline" 
+            (click)="closeModal()"
+          >
+            <i class='bx bx-x'></i>
+            Discard Changes
+          </button>
+        </div>
+
+        <!-- Buttons for showing rejection details -->
+        <button 
+          class="btn btn-outline" 
+          (click)="closeModal()"
+          *ngIf="!reviewResult?.isAccepted && currentAction === 'show-rejection'"
+        >
+          <i class='bx bx-x'></i>
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 
