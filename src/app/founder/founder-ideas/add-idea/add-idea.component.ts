@@ -21,7 +21,7 @@ import { InvestingStages, DesiredInvestmentType } from '../../../_shared/enums';
 
 interface ReviewResult {
   isAccepted: boolean;
-  generalFeedback:string,
+  generalFeedback: string,
   message: string;
   totalWeightScore: number;
   allStandards?: StandardReview[];
@@ -416,26 +416,38 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
     //aiReviewForEachStandards
     var aiIdeaEvaluationResult: AiIdeaEvaluationResult = {
       businessId: 0,
-      generalFeedback: '',
-      totalWeightedScore: 0,
+      generalFeedback: this.reviewResult?.generalFeedback??'',
+      totalWeightedScore: this.reviewResult?.totalWeightScore??0,
       standards: []
     };
-    aiIdeaEvaluationResult.generalFeedback=this.reviewResult?.generalFeedback??"";
-    this.reviewResult?.allStandards?.forEach((s: any) => {
+    this.reviewResult?.allStandards?.forEach((s: StandardReview) => {
       aiIdeaEvaluationResult.standards?.push(
         new StandardAiResult(
-          s.standardCategoryId, 
-          s.standard,           
-          s.weight,             
-          s.achievmentScore,    
-          s.weightContribution, 
-          s.standardCategoryId, 
-          s.feedback            
+          s.standard,
+          s.weight,
+          s.achievmentScore,
+          s.weightContribution,
+          s.standardCategoryId,
+          s.feedback
         )
       );
     });
-    aiIdeaEvaluationResult.totalWeightedScore=this.reviewResult?.totalWeightScore??0;
-    formPayload.append('AiBusinessEvaluations', JSON.stringify(aiIdeaEvaluationResult));
+ 
+
+    // Add AiBusinessEvaluations fields directly to FormData
+    formPayload.append('AiBusinessEvaluations.BusinessId', aiIdeaEvaluationResult.businessId.toString());
+    formPayload.append('AiBusinessEvaluations.GeneralFeedback', aiIdeaEvaluationResult.generalFeedback);
+    formPayload.append('AiBusinessEvaluations.TotalWeightedScore', aiIdeaEvaluationResult.totalWeightedScore.toString());
+
+    // Add each standard in the list with proper bracket notation
+    aiIdeaEvaluationResult.standards?.forEach((standard, index) => {
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].Name`, standard.name);
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].Weight`, standard.weight.toString());
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].AchievementScore`, standard.achievementScore.toString());
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].WeightedContribution`, standard.weightedContribution.toString());
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].StandardCategoryId`, standard.standardCategoryId.toString());
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].Feedback`, standard.feedback);
+    });
     return formPayload;
   }
 
@@ -493,7 +505,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
 
     result = {
       isAccepted: totalWeightScore > 50,
-      generalFeedback:response.generalFeedback,
+      generalFeedback: response.generalFeedback,
       totalWeightScore: totalWeightScore,
       allStandards: standards,
       rejectedStandards: standards.filter(s => s.weightContribution < (s.weight * .5)),
@@ -515,7 +527,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
   }
 
   saveAsDraft(): void {
-    this.sumbitForm(this.FormPayload(),true);
+    this.sumbitForm(this.FormPayload(true), true);
     //this.closeModal();
   }
 
@@ -540,6 +552,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
             isDraft ? 'Idea saved to drafts' : response.message,
             'Success'
           );
+          this.showResultModal=false;
         } else {
           this.toastrService.error(response.message, "Error");
         }
