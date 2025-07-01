@@ -146,8 +146,7 @@ export class LoginComponent implements OnInit, OnDestroy {
             this.toastr.error(response.message, "Error");
           }
         }, error: (err) => {
-            const errorMsg =
-          err.status === 401 && err.error?.message
+            const errorMsg = err.error?.message
             ? err.error.message
             : "Something went wrong. Please try again.";
 

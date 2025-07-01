@@ -1,0 +1,267 @@
+<!-- ========================================
+     IDEA DETAILS PAGE CONTAINER
+======================================== -->
+<div class="idea-details-page">
+  
+  <!-- ========================================
+       HEADER SECTION WITH BACK BUTTON
+  ======================================== -->
+  <section class="details-header">
+    <div class="header-container">
+      <button class="back-btn" (click)="goBack()">
+        <i class='bx bx-arrow-back'></i>
+        <span>Back to Explore</span>
+      </button>
+      
+      <div class="header-actions">
+        <button class="action-btn share-btn" title="Share this idea" (click)="shareIdea()">
+          <i class='bx bx-share-alt'></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       MAIN CONTENT SECTION
+  ======================================== -->
+  <section class="main-content">
+    <div class="content-container">
+      
+      <!-- ========================================
+           LEFT COLUMN - IMAGES & BASIC INFO
+      ======================================== -->
+      <div class="left-column">
+        
+        <!-- Image Carousel -->
+        <div class="image-carousel">
+          <div class="carousel-container">
+            <div class="carousel-images" *ngIf="hasImages(); else noImages">
+              <div class="image-slide" *ngFor="let image of getImages(); let i = index" [class.active]="i === currentImageIndex">
+                <img [src]="image" [alt]="businessData?.title || 'Business Image'" />
+              </div>
+              
+              <!-- Carousel Controls -->
+              <button class="carousel-control prev" (click)="prevImage()" *ngIf="hasMultipleImages()">
+                <i class='bx bx-chevron-left'></i>
+              </button>
+              <button class="carousel-control next" (click)="nextImage()" *ngIf="hasMultipleImages()">
+                <i class='bx bx-chevron-right'></i>
+              </button>
+              
+              <!-- Carousel Indicators -->
+              <div class="carousel-indicators" *ngIf="hasMultipleImages()">
+                <button 
+                  *ngFor="let image of getImages(); let i = index"
+                  class="indicator"
+                  [class.active]="i === currentImageIndex"
+                  (click)="goToImage(i)">
+                </button>
+              </div>
+            </div>
+            
+            <ng-template #noImages>
+              <div class="no-image-placeholder">
+                <i class='bx bx-image'></i>
+                <span>No images available</span>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Quick Stats Cards -->
+        <div class="quick-stats">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class='bx bx-show'></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ businessData?.visits || 0 | number }}</span>
+              <span class="stat-label">Views</span>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class='bx bx-envelope'></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ businessData?.contactRequests || 0 | number }}</span>
+              <span class="stat-label">Contacts</span>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class='bx bx-brain'></i>
+            </div>
+            <div class="stat-content">
+              <span class="stat-number">{{ businessData?.airate || 0 }}%</span>
+              <span class="stat-label">AI Rating</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================
+           RIGHT COLUMN - DETAILS & TABS
+      ======================================== -->
+      <div class="right-column">
+        
+        <!-- Business Title & Status -->
+        <div class="business-header">
+          <div class="title-section">
+            <h1 class="business-title">{{ businessData?.title || 'Business Idea' }}</h1>
+            <div class="business-meta">
+              <span class="stage-badge" [attr.data-stage]="getStageLabel(businessData?.stage || 1).toLowerCase()">
+                {{ getStageLabel(businessData?.stage || 1) }}
+              </span>
+              <span class="category-tag" *ngIf="businessData?.categoryName">
+                <i class='bx bx-category'></i>
+                {{ businessData?.categoryName }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Funding Information -->
+        <div class="funding-section">
+          <div class="funding-card">
+            <div class="funding-header">
+              <h3>Investment Opportunity</h3>
+              <div class="funding-type">
+                {{ businessData?.desiredInvestmentTypeName || 'Investment' }}
+              </div>
+            </div>
+            <div class="funding-amount">
+              <span class="currency">EGP</span>
+              <span class="amount">{{ (businessData?.capital || 0) | number }}</span>
+              <span class="label">funding needed</span>
+            </div>
+            
+            <!-- Contact Request Button -->
+            <button class="contact-btn" (click)="sendContactRequest()" [disabled]="isRequestPending">
+              <i class='bx bx-envelope' *ngIf="!isRequestPending"></i>
+              <i class='bx bx-loader-alt bx-spin' *ngIf="isRequestPending"></i>
+              <span>{{ isRequestPending ? 'Sending...' : 'Request Contact' }}</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       FULL WIDTH TABS SECTION
+  ======================================== -->
+  <section class="tabs-section-full">
+    <div class="tabs-container">
+      <!-- Tabs Section -->
+      <div class="tabs-section">
+        <div class="tabs-header">
+          <button 
+            class="tab-btn"
+            [class.active]="activeTab === 'overview'"
+            (click)="setActiveTab('overview')">
+            <i class='bx bx-info-circle'></i>
+            <span>Overview</span>
+          </button>
+          <button 
+            class="tab-btn"
+            [class.active]="activeTab === 'details'"
+            (click)="setActiveTab('details')">
+            <i class='bx bx-detail'></i>
+            <span>Details</span>
+          </button>
+        </div>
+
+        <div class="tabs-content">
+          
+          <!-- Overview Tab -->
+          <div class="tab-pane" [class.active]="activeTab === 'overview'">
+            <div class="overview-content">
+              
+              <!-- Business Description -->
+              <div class="content-section">
+                <h4>Business Description</h4>
+                <p class="description" *ngIf="businessData?.description; else noDescription">
+                  {{ businessData?.description }}
+                </p>
+                <ng-template #noDescription>
+                  <p class="no-content">No description available for this business idea.</p>
+                </ng-template>
+              </div>
+
+              <!-- Founder Information -->
+              <div class="content-section">
+                <h4>Founder Information</h4>
+                <div class="founder-info">
+                  <div class="founder-avatar">
+                    <i class='bx bx-user'></i>
+                  </div>
+                  <div class="founder-details">
+                    <h5>{{ businessData?.founderName || 'Unknown Founder' }}</h5>
+                    <p>Business Founder</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Location & Category -->
+              <div class="content-section">
+                <h4>Location & Category</h4>
+                <div class="location-category">
+                  <div class="info-item">
+                    <i class='bx bx-map'></i>
+                    <div class="info-content">
+                      <span class="label">Location</span>
+                      <span class="value">{{ getLocationDisplay() }}</span>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <i class='bx bx-category'></i>
+                    <div class="info-content">
+                      <span class="label">Category</span>
+                      <span class="value">{{ businessData?.categoryName || 'Not specified' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Details Tab -->
+          <div class="tab-pane" [class.active]="activeTab === 'details'">
+            <div class="details-content">
+              
+              <!-- Q&A Section -->
+              <div class="content-section">
+                <h4>Questions & Answers</h4>
+                <div class="qa-container" *ngIf="hasQAData(); else noQA">
+                  <div class="qa-item" *ngFor="let answer of getBusinessStandardAnswers()">
+                    <div class="question">
+                      <i class='bx bx-help-circle'></i>
+                      <span>{{ answer.standardQuestion || 'Question not available' }}</span>
+                    </div>
+                    <div class="answer">
+                      <i class='bx bx-message-square-detail'></i>
+                      <span>{{ answer.answer || 'No answer provided' }}</span>
+                    </div>
+                  </div>
+                </div>
+                <ng-template #noQA>
+                  <p class="no-content">No questions and answers available for this business.</p>
+                </ng-template>
+              </div>
+
+
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>

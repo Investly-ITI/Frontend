@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { AiIdeaEvaluationResult, StandardAiResult } from '../../../_models/aiIdeaEvaluationResult';
 
 // Models and Services
 import { Governorate } from '../../../_models/governorate';
@@ -11,7 +12,7 @@ import { Category } from '../../../_models/category';
 import { StandardAnswers } from '../../../_models/standardanswers';
 import { GovernrateService } from '../../../_services/governorate.service';
 import { CategoryService } from '../../../_services/category.service';
-import { AddIdeaService } from '../../_services/add-idea.service';
+import { IdeaService } from '../../_services/idea.service';
 import { StandardService } from '../../_services/Standards.service';
 import { ToastrService } from 'ngx-toastr';
 
@@ -20,8 +21,19 @@ import { InvestingStages, DesiredInvestmentType } from '../../../_shared/enums';
 
 interface ReviewResult {
   isAccepted: boolean;
+  generalFeedback: string,
   message: string;
-  standards?: string[];
+  totalWeightScore: number;
+  allStandards?: StandardReview[];
+  rejectedStandards?: StandardReview[];
+}
+interface StandardReview {
+  standardCategoryId: number,
+  standard: string;
+  weight: number;
+  achievmentScore: number;
+  weightContribution: number;
+  feedback: string;
 }
 
 @Component({
@@ -51,38 +63,38 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
   // Step management
   currentStep = 1;
   totalSteps = 3;
-  
+
   // Form and data
   formData!: FormGroup;
   standards: any[] = [];
-  
+
   // Dropdown data
   governorates: Governorate[] = [];
   citiesByGovernorate: City[] = [];
   categories: Category[] = [];
   selectedGovernorate: boolean = false;
-  
+
   // Enums for templates
   investingStages = InvestingStages;
   desiredInvestmentTypes = DesiredInvestmentType;
-  
+
   // Form validation flags
   showFundingGoal: boolean = false;
-  
+
   // File upload properties
   selectedDocument: File | null = null;
   selectedImages: File[] = [];
   maxFileSize = 10 * 1024 * 1024; // 10MB
   maxImages = 5;
-  
+
   // Loading and result modal properties
   isLoading = false;
   loadingMessage = 'Analyzing your business idea...';
   showResultModal = false;
   reviewResult: ReviewResult | null = null;
-  
+
   private unsubscribe: Subscription[] = [];
-  
+
   // Loading messages to cycle through
   private loadingMessages = [
     'Analyzing your business idea...',
@@ -97,10 +109,10 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private governorateService: GovernrateService,
     private categoryService: CategoryService,
-    private addIdeaService: AddIdeaService,
+    private addIdeaService: IdeaService,
     private standardService: StandardService,
     private toastrService: ToastrService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initializeForm();
@@ -108,9 +120,6 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
     this.loadCategories();
   }
 
-  ngOnDestroy(): void {
-    this.unsubscribe.forEach(sub => sub.unsubscribe());
-  }
 
   initializeForm(): void {
     this.formData = this.fb.group({
@@ -121,14 +130,14 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
       DesiredInvestmentType: [null, Validators.required],
       GovernmentId: [null, Validators.required],
       CityId: [null, Validators.required],
-      Capital: [null, [Validators.min(5000)]], 
+      Capital: [null, [Validators.min(5000)]],
       Location: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(100)]],
     });
 
     this.formData.get('DesiredInvestmentType')?.valueChanges.subscribe(() => {
       this.updateFundingGoalVisibility();
     });
-    
+
     this.formData.get('CategoryId')?.valueChanges.subscribe(categoryId => {
       if (categoryId) {
         this.loadStandards(categoryId);
@@ -140,9 +149,9 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
 
   updateFundingGoalVisibility() {
     const investmentType = +this.formData.get('DesiredInvestmentType')?.value;
-    
-    if (investmentType === this.desiredInvestmentTypes.Both || 
-        investmentType === this.desiredInvestmentTypes.Funding) {
+
+    if (investmentType === this.desiredInvestmentTypes.Both ||
+      investmentType === this.desiredInvestmentTypes.Funding) {
       this.showFundingGoal = true;
       this.formData.get('Capital')?.setValidators([Validators.required, Validators.min(5000)]);
       this.formData.get('Capital')?.updateValueAndValidity();
@@ -193,7 +202,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
           this.selectedGovernorate = true;
           this.formData.get('CityId')?.setValue(null);
         }
-      }, 
+      },
       error: (err) => {
         console.log("Error loading cities:", err);
       }
@@ -220,7 +229,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
   initializeStandards(): void {
     this.standards.forEach(std => {
       std.Answer = std.Answer || '';
-      std.touched = false; 
+      std.touched = false;
     });
   }
 
@@ -296,18 +305,18 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
 
   onImagesSelected(event: any): void {
     const files = Array.from(event.target.files) as File[];
-    
+
     if (this.selectedImages.length + files.length > this.maxImages) {
       this.toastrService.error(`You can only upload up to ${this.maxImages} images`, 'Too Many Files');
       return;
     }
 
     const validFiles = files.filter(file => this.isValidImage(file));
-    
+
     if (validFiles.length !== files.length) {
       this.toastrService.warning('Some files were skipped. Only image files under 10MB are allowed', 'File Warning');
     }
-    
+
     this.selectedImages = [...this.selectedImages, ...validFiles];
   }
 
@@ -327,7 +336,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
       'application/vnd.ms-powerpoint',
       'application/vnd.openxmlformats-officedocument.presentationml.presentation'
     ];
-    
+
     return allowedTypes.includes(file.type) && file.size <= this.maxFileSize;
   }
 
@@ -335,14 +344,24 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
     return file.type.startsWith('image/') && file.size <= this.maxFileSize;
   }
 
+
+
+
+
+
+
+
+
+
+
   // Form submission methods
-  onSubmit(): void {
+  onSubmitForAiReview(): void {
     if (!this.isFormCompletelyValid()) {
       this.toastrService.error('Please complete all required fields', 'Form Incomplete');
       return;
     }
-
-    this.startAIReview();
+    var formPayload = this.FormPayload(false);
+    this.startAIReview(formPayload);
   }
 
   onSaveAsDraft(): void {
@@ -350,18 +369,20 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
       this.toastrService.error('Please complete basic information to save as draft', 'Incomplete Form');
       return;
     }
-
-    this.submitForm(true);
+    var formData = this.FormPayload(true);
+    this.sumbitForm(formData, true);
   }
 
   isFormCompletelyValid(): boolean {
     return this.isStep1Valid() && this.isStep2Valid() && this.isStep3Valid();
   }
 
-  submitForm(isDraft: boolean = false): void {
+
+
+  FormPayload(isDraft: boolean = false): FormData {
     const rawData = this.formData.value;
     const formPayload = new FormData();
-    
+
     // Add form data
     for (const key in rawData) {
       const value = rawData[key];
@@ -371,12 +392,12 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
     }
 
     formPayload.append('IsDrafted', isDraft.toString());
-    
+
     // Add standard answers
     const standardAnswers = this.standards
       .filter(std => std.Answer && std.Answer.trim().length > 0)
       .map(std => new StandardAnswers(std.id, std.Answer.trim()));
-    
+
     standardAnswers.forEach((standard, index) => {
       formPayload.append(`BusinessStandardAnswers[${index}].StandardId`, standard.StandardId.toString());
       formPayload.append(`BusinessStandardAnswers[${index}].Answer`, standard.answer);
@@ -384,90 +405,121 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
 
     // Add document if selected
     if (this.selectedDocument) {
-      formPayload.append('Document', this.selectedDocument);
+      formPayload.append('IdeaFile', this.selectedDocument);
     }
 
     // Add images
     this.selectedImages.forEach((image, index) => {
-      formPayload.append(`Images`, image);
+      formPayload.append(`Imagefiles`, image);
     });
 
-    this.addIdeaService.AddIdea(formPayload).subscribe({
-      next: (response) => {
-        if (response.isSuccess) {
-          this.toastrService.success(
-            isDraft ? 'Idea saved to drafts' : response.message, 
-            'Success'
-          );
-        } else {
-          this.toastrService.error(response.message, "Error");
-        }
-      },
-      error: (err) => {
-        const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
-        this.toastrService.error(errorMsg, 'Error');
-      }
+    //aiReviewForEachStandards
+    var aiIdeaEvaluationResult: AiIdeaEvaluationResult = {
+      businessId: 0,
+      generalFeedback: this.reviewResult?.generalFeedback??'',
+      totalWeightedScore: this.reviewResult?.totalWeightScore??0,
+      standards: []
+    };
+    this.reviewResult?.allStandards?.forEach((s: StandardReview) => {
+      aiIdeaEvaluationResult.standards?.push(
+        new StandardAiResult(
+          s.standard,
+          s.weight,
+          s.achievmentScore,
+          s.weightContribution,
+          s.standardCategoryId,
+          s.feedback
+        )
+      );
     });
+ 
+
+    // Add AiBusinessEvaluations fields directly to FormData
+    formPayload.append('AiBusinessEvaluations.BusinessId', aiIdeaEvaluationResult.businessId.toString());
+    formPayload.append('AiBusinessEvaluations.GeneralFeedback', aiIdeaEvaluationResult.generalFeedback);
+    formPayload.append('AiBusinessEvaluations.TotalWeightedScore', aiIdeaEvaluationResult.totalWeightedScore.toString());
+
+    // Add each standard in the list with proper bracket notation
+    aiIdeaEvaluationResult.standards?.forEach((standard, index) => {
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].Name`, standard.name);
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].Weight`, standard.weight.toString());
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].AchievementScore`, standard.achievementScore.toString());
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].WeightedContribution`, standard.weightedContribution.toString());
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].StandardCategoryId`, standard.standardCategoryId.toString());
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].Feedback`, standard.feedback);
+    });
+    return formPayload;
   }
 
-  startAIReview(): void {
+  startAIReview(formPayload: any): void {
     this.isLoading = true;
     this.showResultModal = false;
-    let messageIndex = 0;
-    
-    // Cycle through loading messages
-    const messageInterval = setInterval(() => {
-      messageIndex = (messageIndex + 1) % this.loadingMessages.length;
-      this.loadingMessage = this.loadingMessages[messageIndex];
-    }, 2000);
+    var res = this.addIdeaService.Evaluate(formPayload).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          // this.ToastrService.success(response.message, 'Success');
+          this.isLoading = false;
+          this.AIReview(response.data);
 
-    // Simulate AI review process (3-6 seconds)
-    const reviewTime = Math.random() * 3000 + 3000;
-    
-    setTimeout(() => {
-      clearInterval(messageInterval);
-      this.isLoading = false;
-      this.simulateAIReview();
-    }, reviewTime);
+
+        } else {
+          this.toastrService.error(response.message, "Error");
+
+        }
+      }, error: (err) => {
+        const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
+        this.toastrService.error(errorMsg, 'Error');
+        this.isLoading = false;
+      }
+    })
+    this.unsubscribe.push(res);
   }
 
-  private simulateAIReview(): void {
-    // 50% chance of acceptance, 50% chance of rejection for simulation
-    const isAccepted = Math.random() > 0.5;
-    
-    if (isAccepted) {
-      this.reviewResult = {
-        isAccepted: true,
-        message: 'Congratulations! Your business idea meets our standards and has been submitted for review by our investment team. You will receive updates on the evaluation progress.'
-      };
-      // If accepted, actually submit the form
-      this.submitForm(false);
-    } else {
-      // Random rejection reasons
-      const rejectionStandards = [
-        'Market research lacks sufficient depth and competitor analysis',
-        'Financial projections are unrealistic or missing key assumptions',
-        'Business model does not demonstrate clear revenue streams',
-        'Innovation factor is insufficient compared to existing solutions',
-        'Target market size is too narrow for sustainable growth',
-        'Technical feasibility concerns regarding implementation',
-        'Risk assessment and mitigation strategies are inadequate'
-      ];
-      
-      // Select 2-4 random standards that weren't met
-      const selectedStandards = rejectionStandards
-        .sort(() => 0.5 - Math.random())
-        .slice(0, Math.floor(Math.random() * 3) + 2);
-      
-      this.reviewResult = {
-        isAccepted: false,
-        message: 'Our AI System has reviewed your business idea and found that it doesn\'t meet the required standards for submission. Please review the feedback below and consider improving your proposal.',
-        standards: selectedStandards
-      };
-    }
-    
+  private AIReview(aiResponse: AiIdeaEvaluationResult): void {
+    const result = this.ParseStandaredFromAiResponse(aiResponse);
+    this.reviewResult = result;
     this.showResultModal = true;
   }
+
+
+  private getAiTotalRate(response: AiIdeaEvaluationResult): number {
+    return response.totalWeightedScore;
+
+  }
+
+  private ParseStandaredFromAiResponse(response: AiIdeaEvaluationResult): ReviewResult {
+    var standards: StandardReview[] = [];
+    var result: ReviewResult | null = null;
+
+    var totalWeightScore = this.getAiTotalRate(response);
+    response.standards?.map(s => {
+      standards.push({
+        standard: s.name,
+        standardCategoryId: s.standardCategoryId,
+        weight: s.weight,
+        weightContribution: s.weightedContribution,
+        feedback: s.feedback,
+        achievmentScore: s.achievementScore
+      })
+    })
+
+    result = {
+      isAccepted: totalWeightScore > 50,
+      generalFeedback: response.generalFeedback,
+      totalWeightScore: totalWeightScore,
+      allStandards: standards,
+      rejectedStandards: standards.filter(s => s.weightContribution < (s.weight * .5)),
+      message: totalWeightScore > 50 ? "Congratulations! Your business idea meets our standards" :
+        "Our AI System has reviewed your business idea and found that it doesn\'t meet the required standards for submission. Please review the feedback below and consider improving your proposal."
+    };
+
+    return result;
+
+  }
+
+
+
+
 
   closeModal(): void {
     this.showResultModal = false;
@@ -475,8 +527,8 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
   }
 
   saveAsDraft(): void {
-    this.submitForm(true);
-    this.closeModal();
+    this.sumbitForm(this.FormPayload(true), true);
+    //this.closeModal();
   }
 
   getProgressPercentage(): number {
@@ -486,4 +538,32 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
   getImagePreview(file: File): string {
     return URL.createObjectURL(file);
   }
+
+  ngOnDestroy() {
+    this.unsubscribe.forEach((sb) => sb.unsubscribe());
+  }
+
+
+  sumbitForm(formData: FormData, isDraft: boolean) {
+    var sub = this.addIdeaService.AddIdea(formData).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          this.toastrService.success(
+            isDraft ? 'Idea saved to drafts' : response.message,
+            'Success'
+          );
+          this.showResultModal=false;
+        } else {
+          this.toastrService.error(response.message, "Error");
+        }
+      },
+      error: (err) => {
+        const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
+        this.toastrService.error(errorMsg, 'Error');
+      }
+    });
+    this.unsubscribe.push(sub);
+
+  }
+
 } 

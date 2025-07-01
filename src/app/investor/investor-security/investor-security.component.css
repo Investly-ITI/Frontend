@@ -500,16 +500,7 @@ gap: 8px;
 :host-context(.dark) .requirements-list li:not(.met) {
   color: var(--error-light);
 }
-
-/* Responsive Adjustments */
-@media screen and (max-width: 768px) {
-  .requirements-list {
-    grid-template-columns: 1fr;
-  }
-}
-
-
-/* Add to your component's CSS file */
+/*eye icon*/
 .password-input-container {
   position: relative;
 }
@@ -534,74 +525,9 @@ gap: 8px;
   padding-right: 40px;
 }
 
-
-.save-message {
-  padding: 12px 16px;
-  border-radius: 4px;
-  margin: 16px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  animation: fadeIn 0.3s ease-in-out;
+/* Responsive Adjustments */
+@media screen and (max-width: 768px) {
+  .requirements-list {
+    grid-template-columns: 1fr;
+  }
 }
-
-.save-message.success {
-  background-color: #e6f7ee;
-  color: #0a7b3e;
-  border: 1px solid #0a7b3e;
-}
-
-.save-message.error {
-  background-color: #fde8e8;
-  color: #c91919;
-  border: 1px solid #c91919;
-}
-
-.save-message i.bx-check-circle,
-.save-message i.bx-error-circle {
-  font-size: 20px;
-}
-
-.close-message {
-  margin-left: auto;
-  cursor: pointer;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-
-.message-container {
-  padding: 12px 16px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-.message-container.success {
-  background-color: #e6f7ee;
-  color: #0a7b3e;
-  border: 1px solid #0a7b3e;
-}
-
-.message-container.error {
-  background-color: #fde8e8;
-  color: #c91919;
-  border: 1px solid #c91919;
-}
-
-.message-container i.bx-check-circle,
-.message-container i.bx-error-circle {
-  font-size: 20px;
-}
-
-.message-container .close-message {
-  margin-left: auto;
-  cursor: pointer;
-}
-
