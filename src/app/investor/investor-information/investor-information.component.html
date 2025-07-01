@@ -32,12 +32,12 @@
   </div>
 
   <!-- FORM -->
-  <form [formGroup]="formData" class="profile-form" >
-    <div class="tab-content">
+  <div class="tab-content">
 
-      <!-- PERSONAL TAB -->
-      <div *ngIf="activeTab === 'personal'" class="tab-panel">
-        <div class="form-container">
+    <!-- PERSONAL TAB -->
+    <div *ngIf="activeTab === 'personal'" class="tab-panel">
+      <div class="form-container profile-form">
+        <form [formGroup]="formData">
 
           <!-- User Group -->
           <div formGroupName="user">
@@ -216,55 +216,56 @@
             </div>
           </div>
   <!-- Submit Button -->
-      <div class="form-actions">
-        <button type="button" class="btn btn-primary" [disabled]="isSaving || !formData.valid "(click)="submitPersonalInfo()" >
-          <i class="bx" [ngClass]="isSaving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
-          {{ isSaving ? 'Saving...' : 'Save Changes' }}
-        </button>
-      </div>
-        </div> <!-- End of form-container -->
-      </div> 
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" [disabled]="isSaving || !formData.valid "(click)="submitPersonalInfo()" >
+            <i class="bx" [ngClass]="isSaving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
+            {{ isSaving ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+        </form>
+      </div> <!-- End of form-container -->
+    </div> 
 
-      <!-- DOCUMENTATION TAB -->
-      <div *ngIf="activeTab === 'documentation'" class="tab-panel">
-        <div class="documentation-container">
-          <div class="documentation-section">
-            <h4 class="section-title">ID Documentation</h4>
-            <p class="section-description">Upload clear photos of both sides of your national ID</p>
+    <!-- DOCUMENTATION TAB -->
+    <div *ngIf="activeTab === 'documentation'" class="tab-panel">
+      <div class="documentation-container">
+        <div class="documentation-section">
+          <h4 class="section-title">ID Documentation</h4>
+          <p class="section-description">Upload clear photos of both sides of your national ID</p>
 
-            <div class="id-upload-container">
-              <div class="id-upload-card">
-                <div class="id-upload-area" (click)="triggerFrontIdUpload()" (mouseenter)="showFrontIdOverlay = true" (mouseleave)="showFrontIdOverlay = false">
-                  <div *ngIf="!frontIdImageUrl" class="upload-placeholder">
-                    <i class='bx bx-plus'></i>
-                    <span>Front ID Picture</span>
-                  </div>
-                  <div *ngIf="frontIdImageUrl" class="id-image-container">
-                    <img [src]="frontIdImageUrl.startsWith('data:') ? frontIdImageUrl : url + '/' + frontIdImageUrl" alt="Front ID" class="id-image">
-                    <div class="id-overlay" [ngClass]="{'show': showFrontIdOverlay}">
-                      <i class='bx bx-edit-alt'></i>
-                    </div>
+          <div class="id-upload-container">
+            <div class="id-upload-card">
+              <div class="id-upload-area" (click)="triggerFrontIdUpload()" (mouseenter)="showFrontIdOverlay = true" (mouseleave)="showFrontIdOverlay = false">
+                <div *ngIf="!frontIdImageUrl" class="upload-placeholder">
+                  <i class='bx bx-plus'></i>
+                  <span>Front ID Picture</span>
+                </div>
+                <div *ngIf="frontIdImageUrl" class="id-image-container">
+                  <img [src]="frontIdImageUrl.startsWith('data:') ? frontIdImageUrl : url + '/' + frontIdImageUrl" alt="Front ID" class="id-image">
+                  <div class="id-overlay" [ngClass]="{'show': showFrontIdOverlay}">
+                    <i class='bx bx-edit-alt'></i>
                   </div>
                 </div>
-                <label class="upload-label">Front Side</label>
               </div>
-
-              <div class="id-upload-card">
-                <div class="id-upload-area" (click)="triggerBackIdUpload()" (mouseenter)="showBackIdOverlay = true" (mouseleave)="showBackIdOverlay = false">
-                  <div *ngIf="!backIdImageUrl" class="upload-placeholder">
-                    <i class='bx bx-plus'></i>
-                    <span>Back ID Picture</span>
-                  </div>
-                  <div *ngIf="backIdImageUrl" class="id-image-container">
-                    <img [src]="backIdImageUrl.startsWith('data:') ? backIdImageUrl : url + '/' + backIdImageUrl" alt="Back ID" class="id-image">
-                    <div class="id-overlay" [ngClass]="{'show': showBackIdOverlay}">
-                      <i class='bx bx-edit-alt'></i>
-                    </div>
-                  </div>
-                </div>
-                <label class="upload-label">Back Side</label>
-              </div>
+              <label class="upload-label">Front Side</label>
             </div>
+
+            <div class="id-upload-card">
+              <div class="id-upload-area" (click)="triggerBackIdUpload()" (mouseenter)="showBackIdOverlay = true" (mouseleave)="showBackIdOverlay = false">
+                <div *ngIf="!backIdImageUrl" class="upload-placeholder">
+                  <i class='bx bx-plus'></i>
+                  <span>Back ID Picture</span>
+                </div>
+                <div *ngIf="backIdImageUrl" class="id-image-container">
+                  <img [src]="backIdImageUrl.startsWith('data:') ? backIdImageUrl : url + '/' + backIdImageUrl" alt="Back ID" class="id-image">
+                  <div class="id-overlay" [ngClass]="{'show': showBackIdOverlay}">
+                    <i class='bx bx-edit-alt'></i>
+                  </div>
+                </div>
+              </div>
+              <label class="upload-label">Back Side</label>
+            </div>
+          </div>
  <!-- Submit Button -->
       <div class="form-actions">
         <button type="button" class="btn btn-primary" [disabled]="isSaving || !formData.valid" (click)="submitDocumentation()">
@@ -272,14 +273,13 @@
           {{ isSaving ? 'Saving...' : 'Save Changes' }}
         </button>
       </div>
-            <input type="file" id="frontIdInput" accept="image/*" (change)="onFrontIdFileSelected($event)" style="display: none;">
-            <input type="file" id="backIdInput" accept="image/*" (change)="onBackIdFileSelected($event)" style="display: none;">
-          </div>
+          <input type="file" id="frontIdInput" accept="image/*" (change)="onFrontIdFileSelected($event)" style="display: none;">
+          <input type="file" id="backIdInput" accept="image/*" (change)="onBackIdFileSelected($event)" style="display: none;">
         </div>
       </div>
-
-    
     </div>
-  </form>
+
+  
+  </div>
 </div>
 
