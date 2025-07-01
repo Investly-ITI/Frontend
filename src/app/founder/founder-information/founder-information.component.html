@@ -12,10 +12,22 @@
     <i class='bx' [ngClass]="saveMessage.includes('successfully') ? 'bx-check-circle' : 'bx-error-circle'"></i>
     <span>{{ saveMessage }}</span>
   </div> -->
-  <div class="save-message" *ngIf="saveMessage" [ngClass]="{'success': saveMessage.includes('successfully'), 'error': saveMessage.includes('Failed') || saveMessage.includes('fix') || saveMessage.includes('required')}">
-    <i class='bx' [ngClass]="saveMessage.includes('successfully') ? 'bx-check-circle' : 'bx-error-circle'"></i>
-    <span>{{ saveMessage }}</span>
-  </div>
+<div class="save-message" *ngIf="saveMessage" 
+     [ngClass]="{
+        'success': saveMessage.includes('Update successful'),
+        'warning': saveMessage.includes('No changes detected'),
+        'error': saveMessage.includes('Failed') || saveMessage.includes('fix') || saveMessage.includes('required')
+     }">
+  <i class='bx' 
+     [ngClass]="
+        saveMessage.includes('Update successful') ? 'bx-check-circle' :
+        saveMessage.includes('No changes detected') ? 'bx-info-circle' :
+        'bx-error-circle'
+     ">
+  </i>
+  <span>{{ saveMessage }}</span>
+</div>
+
 
   <!-- Tab Navigation -->
   <div class="tab-navigation">
@@ -95,46 +107,47 @@
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group editable">
-              <label class="form-label" for="countryCode">Country Code</label>
-              <select 
-                id="countryCode" 
-                class="form-control" 
-                [(ngModel)]="personalInfo.countryCode"
-                (ngModelChange)="onFieldChange()"
-                name="countryCode"
-                [disabled]="isSaving"
-              >
-                <option value="+20">+20 (Egypt)</option>
-                <option value="+1">+1 (United States)</option>
-                <option value="+44">+44 (United Kingdom)</option>
-                <option value="+49">+49 (Germany)</option>
-                <option value="+33">+33 (France)</option>
-                <option value="+39">+39 (Italy)</option>
-                <option value="+34">+34 (Spain)</option>
-                <option value="+86">+86 (China)</option>
-                <option value="+81">+81 (Japan)</option>
-                <option value="+91">+91 (India)</option>
-              </select>
-            </div>
-            <div class="form-group editable">
-              <label class="form-label" for="phoneNumber">Phone Number</label>
-              <input 
-                type="tel" 
-                id="phoneNumber" 
-                class="form-control" 
-                [class.invalid]="!isPhoneNumberValid()"
-                [(ngModel)]="personalInfo.phoneNumber"
-                (ngModelChange)="onFieldChange()"
-                name="phoneNumber"
-                [disabled]="isSaving"
-              >
-              <div class="error-message" *ngIf="!isPhoneNumberValid()">
-                {{ getFieldErrorMessage('phoneNumber') }}
+            <div class="form-row">
+              <div class="form-group editable">
+                <label class="form-label" for="countryCode">Country Code</label>
+                <select 
+                  id="countryCode" 
+                  class="form-control" 
+                  [(ngModel)]="personalInfo.countryCode"
+                  (ngModelChange)="onFieldChange()"
+                  name="countryCode"
+                  [disabled]="isSaving"
+                >
+                  <option value="+20">+20 (Egypt)</option>
+                  <option value="+1">+1 (United States)</option>
+                  <option value="+44">+44 (United Kingdom)</option>
+                  <option value="+49">+49 (Germany)</option>
+                  <option value="+33">+33 (France)</option>
+                  <option value="+39">+39 (Italy)</option>
+                  <option value="+34">+34 (Spain)</option>
+                  <option value="+86">+86 (China)</option>
+                  <option value="+81">+81 (Japan)</option>
+                  <option value="+91">+91 (India)</option>
+                </select>
+              </div>
+              <div class="form-group editable">
+                <label class="form-label" for="phoneNumber">Phone Number</label>
+                <input 
+                  type="tel" 
+                  id="phoneNumber" 
+                  class="form-control" 
+                  [class.invalid]="!isPhoneNumberValid()"
+                  [(ngModel)]="personalInfo.phoneNumber"
+                  (ngModelChange)="onFieldChange()"
+                  name="phoneNumber"
+                  [disabled]="isSaving"
+                  placeholder="e.g. 1289253802"
+                >
+                <div class="error-message" *ngIf="!isPhoneNumberValid()">
+                  {{ getFieldErrorMessage('phoneNumber') }}
+                </div>
               </div>
             </div>
-          </div>
 
           <div class="form-group editable">
             <label class="form-label" for="street">Street Address</label>
@@ -292,8 +305,14 @@
             <span>{{ invalidFileMessage }}</span>
           </div>
 
+        <div class="save-message" *ngIf="documentationMessage" [ngClass]="{'success': documentationMessage.includes('successfully'), 'error': documentationMessage.includes('Failed') || documentationMessage.includes('fix') || documentationMessage.includes('required')}">
+          <i class='bx' [ngClass]="documentationMessage.includes('successfully') ? 'bx-check-circle' : 'bx-error-circle'"></i>
+          <span>{{ documentationMessage }}</span>
+        </div>
+
+
           <!-- Documentation Save Actions -->
-          <button type="button" class="btn btn-primary" 
+          <button type="button" class="btn btn-primary btn-documentation" 
                   (click)="onSaveDocumentation()" 
                   [disabled]="isSaving || !hasValidDocumentationToSave()">
             <i class='bx' [ngClass]="isSaving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
