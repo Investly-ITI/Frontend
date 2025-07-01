@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { AiIdeaEvaluationResult } from '../../../_models/aiIdeaEvaluationResult';
+import { AiIdeaEvaluationResult, StandardAiResult } from '../../../_models/aiIdeaEvaluationResult';
 
 // Models and Services
 import { Governorate } from '../../../_models/governorate';
@@ -21,6 +21,7 @@ import { InvestingStages, DesiredInvestmentType } from '../../../_shared/enums';
 
 interface ReviewResult {
   isAccepted: boolean;
+  generalFeedback:string,
   message: string;
   totalWeightScore: number;
   allStandards?: StandardReview[];
@@ -404,14 +405,37 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
 
     // Add document if selected
     if (this.selectedDocument) {
-      formPayload.append('Document', this.selectedDocument);
+      formPayload.append('IdeaFile', this.selectedDocument);
     }
 
     // Add images
     this.selectedImages.forEach((image, index) => {
-      formPayload.append(`Images`, image);
+      formPayload.append(`Imagefiles`, image);
     });
 
+    //aiReviewForEachStandards
+    var aiIdeaEvaluationResult: AiIdeaEvaluationResult = {
+      businessId: 0,
+      generalFeedback: '',
+      totalWeightedScore: 0,
+      standards: []
+    };
+    aiIdeaEvaluationResult.generalFeedback=this.reviewResult?.generalFeedback??"";
+    this.reviewResult?.allStandards?.forEach((s: any) => {
+      aiIdeaEvaluationResult.standards?.push(
+        new StandardAiResult(
+          s.standardCategoryId, 
+          s.standard,           
+          s.weight,             
+          s.achievmentScore,    
+          s.weightContribution, 
+          s.standardCategoryId, 
+          s.feedback            
+        )
+      );
+    });
+    aiIdeaEvaluationResult.totalWeightedScore=this.reviewResult?.totalWeightScore??0;
+    formPayload.append('AiBusinessEvaluations', JSON.stringify(aiIdeaEvaluationResult));
     return formPayload;
   }
 
@@ -469,6 +493,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
 
     result = {
       isAccepted: totalWeightScore > 50,
+      generalFeedback:response.generalFeedback,
       totalWeightScore: totalWeightScore,
       allStandards: standards,
       rejectedStandards: standards.filter(s => s.weightContribution < (s.weight * .5)),
@@ -490,8 +515,8 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
   }
 
   saveAsDraft(): void {
-    //this.submitForm(true);
-    this.closeModal();
+    this.sumbitForm(this.FormPayload(),true);
+    //this.closeModal();
   }
 
   getProgressPercentage(): number {

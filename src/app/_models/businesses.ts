@@ -43,7 +43,9 @@ export class BusinessDto {
         public desiredInvestmentTypeName?: string,
         public businessStandardAnswers: StandardAnswers[] = [],
         public city?: CityDto,
-        public government?: GovernmentDto
+        public government?: GovernmentDto,
+        public images?:string[],
+        public imageFiles?:any
     ) { }
 }
 
