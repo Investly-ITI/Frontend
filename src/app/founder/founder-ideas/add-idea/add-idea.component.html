@@ -29,7 +29,7 @@
   </div>
 
   <!-- Form Container -->
-  <form [formGroup]="formData" class="business-form" (ngSubmit)="onSubmit()">
+  <form [formGroup]="formData" class="business-form" (ngSubmit)="onSubmitForAiReview()">
     
     <!-- Step 1: Basic Information -->
     <div class="step-content" *ngIf="currentStep === 1" [@fadeInOut]>
@@ -370,7 +370,7 @@
           Next
           <i class='bx bx-chevron-right'></i>
         </button>
-
+   
         <!-- Submit Button -->
         <button 
           type="submit" 
@@ -378,7 +378,7 @@
           *ngIf="currentStep === totalSteps"
           [disabled]="!isFormCompletelyValid()">
           <i class='bx bx-check-circle'></i>
-          Submit Business Idea
+          Submit Business Idea For AI Review
         </button>
       </div>
       
@@ -421,21 +421,22 @@
           <i class='bx' [ngClass]="reviewResult?.isAccepted ? 'bx-check-circle' : 'bx-x-circle'"></i>
         </div>
         <h3>{{ reviewResult?.isAccepted ? 'Idea Accepted!' : 'Idea Needs Improvement' }}</h3>
+        <h4> Total Ai Score: {{ reviewResult?.totalWeightScore }} %</h4>
       </div>
-      
+
       <div class="modal-body">
         <p class="modal-description">{{ reviewResult?.message }}</p>
-        
-        <div class="standards-list" *ngIf="!reviewResult?.isAccepted && reviewResult?.standards">
+
+        <div class="standards-list" *ngIf=" reviewResult?.rejectedStandards">
           <h4>Standards Not Met:</h4>
           <ul>
-            <li *ngFor="let standard of reviewResult?.standards; let i = index">
-              <strong>{{ i + 1 }}.</strong> {{ standard }}
+            <li *ngFor="let standard of reviewResult?.rejectedStandards; let i = index">
+              <strong>{{ i + 1 }}.</strong> {{ standard.standard }}
             </li>
           </ul>
         </div>
       </div>
-      
+
       <div class="modal-actions">
         <button 
           class="btn btn-secondary" 
@@ -444,7 +445,11 @@
           <i class='bx bx-check'></i>
           Close
         </button>
-        
+        <button class="btn btn-secondary" *ngIf="reviewResult?.isAccepted" (click)="saveAsDraft()">
+            <i class='bx bx-save'></i>
+            submit
+          </button>
+
         <div class="button-group" *ngIf="!reviewResult?.isAccepted">
           <button 
             class="btn btn-secondary" 
@@ -462,4 +467,4 @@
       </div>
     </div>
   </div>
-</div> 
+</div>
