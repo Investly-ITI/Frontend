@@ -598,3 +598,74 @@
   .error-message i {
     font-size: 1.2rem;
   }
+
+
+
+  .save-message {
+    padding: 12px 16px;
+    margin: 16px 0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .save-message.success {
+    background-color: #e6f7ee;
+    color: #28a745;
+    border: 1px solid #c3e6cb;
+  }
+
+  .save-message.error {
+    background-color: #f8e1e1;
+    color: #dc3545;
+    border: 1px solid #f5c6cb;
+  }
+
+  .save-message i {
+    font-size: 18px;
+  }
+
+
+  .btn-documentation {
+  width: fit-content;
+}
+
+
+
+.save-message {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  gap: 10px;
+}
+
+.save-message i {
+  font-size: 20px;
+}
+
+/* Success = Green */
+.save-message.success {
+  background-color: #e6f4ea;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+/* Warning = Yellow/Orange */
+.save-message.warning {
+  background-color: #fff8e1;
+  color: #ff8f00;
+  border: 1px solid #ffe082;
+}
+
+/* Error = Red */
+.save-message.error {
+  background-color: #fdecea;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
