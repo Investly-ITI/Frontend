@@ -80,7 +80,7 @@ export class IdeaDetailsComponent implements OnInit, OnDestroy {
       'Cairo, Egypt', // location
       500000, // capital
       false, // isDrafted
-      '', // filePath
+      'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', // filePath
       undefined, // status
       '', // rejectedReason
       new Date().toISOString(), // createdAt
@@ -319,6 +319,57 @@ export class IdeaDetailsComponent implements OnInit, OnDestroy {
 
   getStageClass(): string {
     return this.getStageLabel(this.businessData?.stage || InvestingStages.ideation).toLowerCase();
+  }
+
+  // ========================================
+  // FILE HANDLING METHODS
+  // ========================================
+
+  hasBusinessFile(): boolean {
+    return !!(this.businessData?.filePath || this.businessData?.ideaFile);
+  }
+
+  getFileName(): string {
+    if (this.businessData?.filePath) {
+      const path = this.businessData.filePath;
+      return path.split('/').pop() || path.split('\\').pop() || 'Business Document';
+    }
+    return 'Business Document';
+  }
+
+  getFileExtension(): string {
+    const fileName = this.getFileName();
+    const extension = fileName.split('.').pop()?.toLowerCase() || '';
+    return extension;
+  }
+
+  getFileType(): string {
+    const extension = this.getFileExtension();
+    
+    if (['pdf'].includes(extension)) {
+      return 'PDF Document';
+    } else if (['doc', 'docx'].includes(extension)) {
+      return 'Word Document';
+    } else if (['ppt', 'pptx'].includes(extension)) {
+      return 'PowerPoint Presentation';
+    } else if (['xls', 'xlsx'].includes(extension)) {
+      return 'Excel Spreadsheet';
+    } else if (['txt'].includes(extension)) {
+      return 'Text Document';
+    } else {
+      return 'Document';
+    }
+  }
+
+  viewBusinessFile(): void {
+    if (!this.hasBusinessFile()) {
+      this.toastr.error('No file available to view', 'View Error');
+      return;
+    }
+
+    if (this.businessData?.filePath) {
+      window.open(this.businessData.filePath, '_blank');
+    }
   }
 
   // ========================================

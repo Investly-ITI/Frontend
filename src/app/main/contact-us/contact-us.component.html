@@ -1,0 +1,369 @@
+<!-- ========================================
+     CONTACT US PAGE CONTAINER
+======================================== -->
+<div class="contact-us-container">
+  
+  <!-- ========================================
+       HERO SECTION
+  ======================================== -->
+  <section class="contact-hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>Get in Touch</h1>
+        <p>We're here to help and answer any questions you might have</p>
+        <p class="hero-subtitle">Share Your Experience! Give Feedback About Investors and Founders You've Worked With to Help Others Make Better Connections!</p>
+      </div>
+      
+      <!-- Hero Stats -->
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number">24hr</span>
+          <span class="stat-label">Response Time</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">500+</span>
+          <span class="stat-label">Happy Users</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">24/7</span>
+          <span class="stat-label">Support</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Floating Elements -->
+    <div class="floating-elements">
+      <div class="floating-icon"><i class='bx bx-envelope'></i></div>
+      <div class="floating-icon"><i class='bx bx-phone'></i></div>
+      <div class="floating-icon"><i class='bx bx-support'></i></div>
+      <div class="floating-icon"><i class='bx bx-message-dots'></i></div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       CONTACT FORM SECTION
+  ======================================== -->
+  <section class="contact-form-section">
+    <div class="form-container">
+      
+      <!-- Platform Stats & Benefits -->
+      <div class="platform-benefits">
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <i class='bx bx-trending-up'></i>
+          </div>
+          <div class="benefit-content">
+            <h3>500+</h3>
+            <p>Successful Investments</p>
+            <span class="benefit-desc">Connecting the right people</span>
+          </div>
+        </div>
+        
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <i class='bx bx-dollar-circle'></i>
+          </div>
+          <div class="benefit-content">
+            <h3>50M+ EGP</h3>
+            <p>Total Funds Raised</p>
+            <span class="benefit-desc">Fueling Egyptian startups</span>
+          </div>
+        </div>
+        
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <i class='bx bx-group'></i>
+          </div>
+          <div class="benefit-content">
+            <h3>1000+</h3>
+            <p>Active Community</p>
+            <span class="benefit-desc">Investors & founders united</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Form -->
+      <div class="contact-form-card">
+        <div class="form-header">
+          <h2>Send Us a Message</h2>
+          <p class="form-subtitle">We'll get back to you within 24 hours</p>
+        </div>
+
+        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
+          
+          <!-- Name Field -->
+          <div class="form-group">
+            <label for="name">Your Name</label>
+            <div class="input-container" [class.error]="hasError('name', 'required') || hasError('name', 'minlength') || hasError('name', 'maxlength')">
+              <i class='bx bx-user'></i>
+              <input 
+                type="text" 
+                id="name" 
+                class="form-input" 
+                formControlName="name"
+                placeholder="Enter your full name"
+              />
+            </div>
+            <div *ngIf="name?.touched && name?.errors" class="error-message">
+              {{ getErrorMessage('name') }}
+            </div>
+          </div>
+
+          <!-- Email Field -->
+          <div class="form-group">
+            <label for="email">Your Email</label>
+            <div class="input-container" [class.error]="hasError('email', 'required') || hasError('email', 'email')">
+              <i class='bx bx-envelope'></i>
+              <input 
+                type="email" 
+                id="email" 
+                class="form-input" 
+                formControlName="email"
+                placeholder="Enter your email address"
+              />
+            </div>
+            <div *ngIf="email?.touched && email?.errors" class="error-message">
+              {{ getErrorMessage('email') }}
+            </div>
+          </div>
+
+          <!-- Contact Type Field -->
+          <div class="form-group">
+            <label for="contactType">Type of Contact</label>
+            <div class="input-container">
+              <i class='bx bx-category'></i>
+              <select 
+                id="contactType" 
+                class="form-input" 
+                formControlName="contactType"
+              >
+                <option value="system_feedback">System Feedback</option>
+                <option value="investor_founder_feedback">Investor/Founder Feedback</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Target Person Selection (conditional) -->
+          <div class="form-group" *ngIf="contactType?.value === 'investor_founder_feedback'">
+            <label for="targetPersonId">Select Contact Person</label>
+            <div class="input-container" [class.error]="hasError('targetPersonId', 'required')">
+              <i class='bx bx-user-circle'></i>
+              <select 
+                id="targetPersonId" 
+                class="form-input" 
+                formControlName="targetPersonId"
+                [disabled]="isLoadingContacts"
+              >
+                <option value="">Select a person to contact</option>
+                <option 
+                  *ngFor="let contact of availableContacts" 
+                  [value]="contact.id"
+                >
+                  {{ contact.name }}
+                </option>
+              </select>
+              <div *ngIf="isLoadingContacts" class="loading-indicator">
+                <i class='bx bx-loader-alt'></i>
+              </div>
+            </div>
+            <div *ngIf="targetPersonId?.touched && targetPersonId?.errors" class="error-message">
+              {{ getErrorMessage('targetPersonId') }}
+            </div>
+          </div>
+
+          <!-- Subject Field -->
+          <div class="form-group">
+            <label for="subject">Subject</label>
+            <div class="input-container" [class.error]="hasError('subject', 'required') || hasError('subject', 'minlength') || hasError('subject', 'maxlength')">
+              <i class='bx bx-text'></i>
+              <input 
+                type="text" 
+                id="subject" 
+                class="form-input" 
+                formControlName="subject"
+                placeholder="Brief description of your message"
+              />
+            </div>
+            <div *ngIf="subject?.touched && subject?.errors" class="error-message">
+              {{ getErrorMessage('subject') }}
+            </div>
+          </div>
+
+          <!-- Message Field -->
+          <div class="form-group">
+            <label for="message">Your Message</label>
+            <div class="input-container textarea-container" [class.error]="hasError('message', 'required') || hasError('message', 'minlength') || hasError('message', 'maxlength')">
+              <i class='bx bx-message-detail'></i>
+              <textarea 
+                id="message" 
+                class="form-input form-textarea" 
+                formControlName="message"
+                placeholder="Tell us how we can help you..."
+                rows="5"
+              ></textarea>
+            </div>
+            <div *ngIf="message?.touched && message?.errors" class="error-message">
+              {{ getErrorMessage('message') }}
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button 
+            type="submit" 
+            class="submit-btn"
+            [disabled]="contactForm.invalid || isSubmitting"
+          >
+            <span *ngIf="!isSubmitting">
+              <i class='bx bx-send'></i>
+              Send Message
+            </span>
+            <span *ngIf="isSubmitting" class="loading-spinner">
+              <i class='bx bx-loader-alt'></i>
+              Sending...
+            </span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       TESTIMONIALS SECTION
+  ======================================== -->
+  <section class="testimonials">
+    <div class="testimonials-container">
+      <h2>What Our Clients Say</h2>
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="quote-icon">
+            <i class='bx bx-quote-alt-left'></i>
+          </div>
+          <p class="testimonial-text">
+            "Investly has transformed the way I connect with investors. The platform is intuitive and has helped me secure funding for my startup within just 3 months."
+          </p>
+          <div class="client-info">
+            <div class="client-avatar">
+              <img src="Me.jpg" alt="Sarah Ahmed">
+            </div>
+            <div class="client-details">
+              <h4>Abdulrhman Ahmed</h4>
+              <p>Founder, TechStart Egypt</p>
+              <div class="rating">
+                <i class='bx bxs-star'></i>
+                <i class='bx bxs-star'></i>
+                <i class='bx bxs-star'></i>
+                <i class='bx bxs-star'></i>
+                <i class='bx bxs-star'></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="quote-icon">
+            <i class='bx bx-quote-alt-left'></i>
+          </div>
+          <p class="testimonial-text">
+            "As an investor, Investly provides me with access to high-quality startup opportunities. The due diligence process is thorough and transparent."
+          </p>
+          <div class="client-info">
+            <div class="client-avatar">
+              <img src="Businessmen.jpg" alt="Mohamed Hassan">
+            </div>
+            <div class="client-details">
+              <h4>Mohamed Hassan</h4>
+              <p>Huge Investor</p>
+              <div class="rating">
+                <i class='bx bxs-star'></i>
+                <i class='bx bxs-star'></i>
+                <i class='bx bxs-star'></i>
+                <i class='bx bxs-star'></i>
+                <i class='bx bxs-star'></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="quote-icon">
+            <i class='bx bx-quote-alt-left'></i>
+          </div>
+          <p class="testimonial-text">
+            "The networking opportunities on Investly are incredible. I've connected with like-minded entrepreneurs and found my co-founder through this platform."
+          </p>
+          <div class="client-info">
+            <div class="client-avatar">
+              <img src="Cowork.jpg" alt="Fatma Ali">
+            </div>
+            <div class="client-details">
+              <h4>Fatma Ali</h4>
+              <p>Co-Founder, GreenTech Solutions</p>
+              <div class="rating">
+                <i class='bx bxs-star'></i>
+                <i class='bx bxs-star'></i>
+                <i class='bx bxs-star'></i>
+                <i class='bx bxs-star'></i>
+                <i class='bx bxs-star'></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       MAP SECTION
+  ======================================== -->
+  <section class="map-section">
+    <div class="map-container">
+      <div class="map-header">
+        <h2>Visit Our Office</h2>
+        <p>We're located at ITI Mansoura University, ready to meet and support you</p>
+      </div>
+      
+      <div class="map-wrapper">
+        <div class="map-overlay">
+          <div class="location-info">
+            <div class="location-icon">
+              <i class='bx bx-map'></i>
+            </div>
+            <div class="location-details">
+              <h3>Investly Office</h3>
+              <p>ITI Mansoura University</p>
+              <p>Mansoura, Dakahlia Governorate</p>
+              <p>Egypt</p>
+              <div class="contact-details">
+                <div class="contact-item">
+                  <i class='bx bx-phone'></i>
+                  <span>+20 50 123 4567</span>
+                </div>
+                                 <div class="contact-item">
+                   <i class='bx bx-envelope'></i>
+                   <span>office&#64;investly.com</span>
+                 </div>
+                <div class="contact-item">
+                  <i class='bx bx-time'></i>
+                  <span>Sun - Thu: 9:00 AM - 5:00 PM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="interactive-map">
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3411.8519999999997!2d31.378785!3d31.037775!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14f79db9670c4de5%3A0x17a2aee8098c5b8c!2sMansoura%20University!5e0!3m2!1sen!2seg!4v1690000000000!5m2!1sen!2seg&markers=color:red%7Clabel:I%7C31.037775,31.378785"
+            width="100%" 
+            height="400" 
+            style="border:0;" 
+            allowfullscreen="" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Investly Office Location - ITI Mansoura University">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+</div> 

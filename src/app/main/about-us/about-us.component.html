@@ -1,0 +1,202 @@
+<!-- ========================================
+     ABOUT US PAGE CONTAINER
+======================================== -->
+<div class="about-us-container">
+  
+  <!-- ========================================
+       HERO SECTION
+  ======================================== -->
+  <section class="about-hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>About Investly</h1>
+        <p class="hero-subtitle">Where Ideas Meet Capital</p>
+        <p class="hero-description">
+          We're on a mission to transform the Egyptian startup ecosystem by connecting visionary entrepreneurs 
+          with forward-thinking investors, creating opportunities that drive innovation and economic growth.
+        </p>
+        
+        <div class="hero-actions">
+          <button class="btn btn-primary" (click)="navigateToSignup()">
+            <i class='bx bx-user-plus'></i>
+            <span>Join Our Community</span>
+          </button>
+          <button class="btn btn-secondary" (click)="navigateToContact()">
+            <i class='bx bx-envelope'></i>
+            <span>Get in Touch</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Animated Statistics Highlight -->
+      <div class="hero-stat-highlight">
+        <div class="stat-highlight-card" [class.active]="true">
+          <div class="stat-icon">
+            <i [class]="getCurrentStat().icon"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{ getCurrentStat().number }}</h3>
+            <p>{{ getCurrentStat().label }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Floating Elements -->
+    <div class="floating-elements">
+      <div class="floating-icon"><i class='bx bx-bulb'></i></div>
+      <div class="floating-icon"><i class='bx bx-rocket'></i></div>
+      <div class="floating-icon"><i class='bx bx-trending-up'></i></div>
+      <div class="floating-icon"><i class='bx bx-dollar-circle'></i></div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       OUR STORY SECTION
+  ======================================== -->
+  <section class="our-story">
+    <div class="story-container">
+      <div class="story-content">
+        <div class="story-text">
+          <h2>Our Story</h2>
+          <p>
+            Founded in 2023 at ITI Mansoura University, Investly was born from a simple observation: 
+            Egypt has an abundance of innovative entrepreneurs and forward-thinking investors, but they often struggle to find each other.
+          </p>
+          <p>
+            Our founders, having experienced this challenge firsthand, decided to build a platform that would bridge this gap. 
+            What started as a university project has now grown into Egypt's premier investment platform, facilitating millions of EGP in funding 
+            and helping hundreds of startups get off the ground.
+          </p>
+          <p>
+            Today, we're proud to be headquartered at ITI Mansoura University, where we continue to innovate and 
+            support the next generation of Egyptian entrepreneurs.
+          </p>
+        </div>
+        
+        <div class="story-image">
+          <div class="image-card">
+            <img src="Handshake.jpg" alt="Our founding story">
+            <div class="image-overlay">
+              <div class="overlay-content">
+                <h4>The Beginning</h4>
+                <p>Where it all started - ITI Mansoura University</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       STATISTICS SECTION
+  ======================================== -->
+  <section class="statistics-section">
+    <div class="statistics-container">
+      <h2>Our Impact in Numbers</h2>
+      <div class="statistics-grid">
+        <div 
+          *ngFor="let stat of statistics; let i = index" 
+          class="stat-card"
+          [class.highlighted]="isCurrentStat(i)"
+        >
+          <div class="stat-icon">
+            <i [class]="stat.icon"></i>
+          </div>
+          <div class="stat-number">{{ stat.number }}</div>
+          <div class="stat-label">{{ stat.label }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       OUR VALUES SECTION
+  ======================================== -->
+  <section class="values-section">
+    <div class="values-container">
+      <h2>Our Values</h2>
+      <p class="values-subtitle">The principles that guide everything we do</p>
+      
+      <div class="values-grid">
+        <div *ngFor="let value of companyValues" class="value-card">
+          <div class="value-icon">
+            <i [class]="value.icon"></i>
+          </div>
+          <h3>{{ value.title }}</h3>
+          <p>{{ value.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       TEAM SECTION
+  ======================================== -->
+  <section class="team-section">
+    <div class="team-container">
+      <h2>Meet Our Team</h2>
+      <p class="team-subtitle">The passionate individuals behind Investly's success</p>
+      
+      <div class="team-grid">
+                 <div *ngFor="let member of teamMembers" class="team-card">
+           <div class="team-image">
+             <img [src]="member.image" [alt]="member.name">
+             <div class="team-overlay">
+               <div class="social-links">
+                 <a href="https://linkedin.com" target="_blank" class="social-link" title="LinkedIn">
+                   <i class='bx bxl-linkedin'></i>
+                 </a>
+                 <a href="https://twitter.com" target="_blank" class="social-link" title="Twitter">
+                   <i class='bx bxl-twitter'></i>
+                 </a>
+                 <a href="mailto:{{ member.name.toLowerCase().replace(' ', '.') }}@investly.com" class="social-link" title="Email">
+                   <i class='bx bx-envelope'></i>
+                 </a>
+               </div>
+             </div>
+           </div>
+          <div class="team-info">
+            <h3>{{ member.name }}</h3>
+            <p class="team-position">{{ member.position }}</p>
+            <p class="team-bio">{{ member.bio }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       CALL TO ACTION SECTION
+  ======================================== -->
+  <section class="cta-section">
+    <div class="cta-container">
+      <div class="cta-content">
+        <h2>Ready to Join the Future of Investment?</h2>
+        <p>
+          Whether you're an entrepreneur with the next big idea or an investor looking for promising opportunities, 
+          Investly is your gateway to success in the Egyptian startup ecosystem.
+        </p>
+        
+        <div class="cta-actions">
+          <button class="btn btn-primary cta-btn" (click)="navigateToSignup()">
+            <i class='bx bx-rocket'></i>
+            <span>Start Your Journey</span>
+          </button>
+          <button class="btn btn-secondary cta-btn" (click)="navigateToExplore()">
+            <i class='bx bx-search-alt'></i>
+            <span>Explore Opportunities</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Background decoration -->
+      <div class="cta-decoration">
+        <div class="decoration-circle"></div>
+        <div class="decoration-circle"></div>
+        <div class="decoration-circle"></div>
+      </div>
+    </div>
+  </section>
+</div> 
