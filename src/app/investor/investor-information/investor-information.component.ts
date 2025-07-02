@@ -57,6 +57,7 @@ private unsubscribe: Subscription[] = [];
   
   ) {}
    ngOnInit(): void {
+
     this.initializeForms();
     this.loadGovernments();
     this.setFundingValuesFromDatabase();
@@ -215,7 +216,7 @@ setFundingValuesFromDatabase(): void {
     next: (res) => {
    if(res.isSuccess){
       this.isSaving = false;
-      this.saveMessage = 'ID documentation updated successfully!' 
+      this.saveMessage = 'Profile updated successfully!' 
     
           setTimeout(() => {
             this.saveMessage = '';
@@ -225,7 +226,7 @@ setFundingValuesFromDatabase(): void {
        else
        {
          this.isSaving = false;
-            this.saveMessage = 'ID documentation Failed!' 
+            this.saveMessage = 'Profile update Failed!' 
        }
     },
     error: () => {
