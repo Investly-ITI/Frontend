@@ -26,8 +26,8 @@ export class User {
         public updatedAt:Date,
         public updatedBy:number,
         public government:Governorate,
-        public city:City
-
+        public city:City,
+        public countryCode:string
 
     ){}
 

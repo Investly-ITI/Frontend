@@ -11,7 +11,7 @@ import { Category } from '../../../_models/category';
 import { StandardAnswers } from '../../../_models/standardanswers';
 import { GovernrateService } from '../../../_services/governorate.service';
 import { CategoryService } from '../../../_services/category.service';
-import { AddIdeaService } from '../../_services/add-idea.service';
+import { IdeaService } from '../../_services/idea.service';
 import { StandardService } from '../../_services/Standards.service';
 import { ToastrService } from 'ngx-toastr';
 
@@ -136,7 +136,7 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private governorateService: GovernrateService,
     private categoryService: CategoryService,
-    private addIdeaService: AddIdeaService,
+    private addIdeaService: IdeaService,
     private standardService: StandardService,
     private toastrService: ToastrService
   ) {}

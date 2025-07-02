@@ -9,7 +9,7 @@ import { InvestingStages,DesiredInvestmentType } from '../../../../_shared/enums
 import { Category } from '../../../../_models/category';
 import { CategoryService } from '../../../../_services/category.service';
 import { ToastrService } from 'ngx-toastr';
-import { AddIdeaService } from '../../../_services/add-idea.service';
+import { IdeaService } from '../../../_services/idea.service';
 import { StandardService } from '../../../_services/Standards.service';
 import { StandardAnswers } from '../../../../_models/standardanswers';
 
@@ -39,7 +39,7 @@ export class AddByFormComponent implements OnInit, OnDestroy {
 
   
 
-  constructor(private fb: FormBuilder,private governorateService: GovernrateService,private categoryService: CategoryService,private toastrservice:ToastrService,private AddIdeaService:AddIdeaService,private StandardService:StandardService) { }
+  constructor(private fb: FormBuilder,private governorateService: GovernrateService,private categoryService: CategoryService,private toastrservice:ToastrService,private AddIdeaService:IdeaService,private StandardService:StandardService) { }
 
   ngOnInit(): void {
      this.initializeForm();
