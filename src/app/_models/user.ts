@@ -27,8 +27,7 @@ export class User {
         public updatedBy:number,
         public government:Governorate,
         public city:City,
-        public countryCode?:string
-
+        public countryCode:string
 
     ){}
 

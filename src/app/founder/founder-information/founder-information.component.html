@@ -122,21 +122,18 @@
                 </select>
               </div>
               <div class="form-group editable">
-                <label class="form-label" for="phoneNumber">Phone Number</label>
-                <input 
-                  type="tel" 
-                  id="phoneNumber" 
-                  class="form-control" 
-                  [class.invalid]="!isPhoneNumberValid()"
-                  [(ngModel)]="personalInfo.phoneNumber"
-                  (ngModelChange)="onFieldChange()"
-                  name="phoneNumber"
-                  [disabled]="isSaving"
-                  placeholder="e.g. 1289253802"
-                >
-                <div class="error-message" *ngIf="!isPhoneNumberValid()">
-                  {{ getFieldErrorMessage('phoneNumber') }}
-                </div>
+                  <label class="form-label" for="phoneNumber">Phone Number</label>
+                  <input 
+                      type="tel" 
+                      id="phoneNumber" 
+                      class="form-control" 
+                      [class.invalid]="!isPhoneNumberValid()"
+                      [(ngModel)]="personalInfo.phoneNumber"
+                      (ngModelChange)="onFieldChange()"
+                      name="phoneNumber"
+                      [disabled]="isSaving"
+                      placeholder="e.g. 1289253802"
+                  >
               </div>
             </div>
 
