@@ -8,9 +8,9 @@ export class Investor {
     public investingType:InvestorInvestingType,
     public userId:number,
     public user:User,
-    public interestedBusinessStages?: string[],
-    public minFunding?: number,
-    public maxFunding?: number
+    public minFunding: number,
+    public maxFunding: number,
+    public interestedBusinessStages: string[],
     ){}
 
     

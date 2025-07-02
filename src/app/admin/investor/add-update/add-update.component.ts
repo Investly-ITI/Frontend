@@ -156,9 +156,9 @@ export class AddUpdateComponent implements OnInit, OnChanges {
       id: [this.selectedEntity?.id || null],
       userId: [this.selectedEntity?.userId || null],
       investingType: [this.selectedEntity?.investingType || '', Validators.required],
-      InterestedBusinessStages: [stages],
-      minFunding: [this.selectedEntity?.minFunding || null, [Validators.min(501)]],
-      maxFunding: [this.selectedEntity?.maxFunding || null],
+      InterestedBusinessStages: [stages, Validators.required],
+      minFunding: [this.selectedEntity?.minFunding || null, [Validators.required, Validators.min(501)]],
+      maxFunding: [this.selectedEntity?.maxFunding || null, [Validators.required]],
       user: this.fb.group({
         id: [this.selectedEntity?.user?.id || 0],
         firstName: [this.selectedEntity?.user?.firstName || '', Validators.required],
@@ -172,7 +172,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         dateOfBirth: [this.selectedEntity?.user?.dateOfBirth || '',],
         status: [this.selectedEntity?.user?.status || Status.Active],
         governmentId: [this.selectedEntity?.user?.governmentId || null, Validators.required],
-        cityId: [this.selectedEntity?.user?.cityId || null],
+        cityId: [this.selectedEntity?.user?.cityId || null,Validators.required],
         address: [this.selectedEntity?.user?.address || ""]
       })
     }, { validators: this.minMaxFundingValidator() });
