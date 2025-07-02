@@ -370,74 +370,78 @@
     <!-- ========================================
          STATUS CHANGE CONFIRMATION MODAL
     ======================================== -->
-    <div class="modal-overlay" [ngClass]="{ 'show': isStatusChangeModalOpen }" (click)="closeStatusChangeModal()">
-        <div class="modal-container status-change-modal" (click)="$event.stopPropagation()" *ngIf="selectedRequest">
-            
-            <!-- Modal Header -->
-            <div class="modal-header">
-                <h3>
-                    {{ statusChangeAction === 'accept' ? 'Accept Contact Request' : 
-                    statusChangeAction === 'decline' ? 'Decline Contact Request' : 
-                    'Set Contact Request to Pending' }}
-                </h3>
-                <button type="button" class="close-btn" (click)="closeStatusChangeModal()">
-                    <i class='bx bx-x'></i>
-                </button>
-            </div>
+<div class="modal-overlay" [ngClass]="{ 'show': isStatusChangeModalOpen }" (click)="closeStatusChangeModal()">
+    <div class="modal-container status-change-modal" 
+         [class.accept-modal]="statusChangeAction === 'accept'"
+         (click)="$event.stopPropagation()" 
+         *ngIf="selectedRequest">
+        
+        <!-- Modal Header -->
+        <div class="modal-header">
+            <h3>
+                {{ statusChangeAction === 'accept' ? 'Accept Contact Request' : 
+                   statusChangeAction === 'decline' ? 'Decline Contact Request' : 
+                   'Set Contact Request to Pending' }}
+            </h3>
+            <button type="button" class="close-btn" (click)="closeStatusChangeModal()">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
 
-            <!-- Modal Body -->
-            <div class="modal-body">
-                <div class="status-change-confirmation">
-                    <div class="action-icon">
-                        <i class="bx"
-                            [ngClass]="{
-                                'bx-check-circle': statusChangeAction === 'accept',
-                                'bx-x-circle': statusChangeAction === 'decline'
-                            }"
-                            [style.color]="statusChangeAction === 'accept' ? 'var(--green)' : 'var(--red)'"
-                        ></i>
-                    </div>
+        <!-- Modal Body -->
+        <div class="modal-body" [class.accept-body-active]="statusChangeAction === 'accept'">
+            <div class="status-change-confirmation" >
+                <!-- Icon (Checkmark for Accept, X for Decline) -->
+                <div class="action-icon">
+                    <i class="bx"
+                       [ngClass]="{
+                           'bx-check-circle': statusChangeAction === 'accept',
+                           'bx-x-circle': statusChangeAction === 'decline'
+                       }"
+                       [style.color]="statusChangeAction === 'accept' ? 'var(--green)' : 'var(--red)'">
+                    </i>
+                </div>
 
-                    <p class="confirmation-text">
-                        Are you sure you want to {{ statusChangeAction }} this contact request from 
-                        <strong>{{ selectedRequest.investorName }}</strong> to 
-                        <strong>{{ selectedRequest.founderName }}</strong>?
-                    </p>
+                <!-- Confirmation Message -->
+                <p class="confirmation-text">
+                    Are you sure you want to {{ statusChangeAction }} this contact request from 
+                    <strong>{{ selectedRequest.investorName }}</strong> to 
+                    <strong>{{ selectedRequest.founderName }}</strong>?
+                </p>
 
-                    <!-- Decline Reason Input -->
-                    <div class="decline-reason-section" *ngIf="statusChangeAction === 'decline'">
-                        <label for="declineReason">Reason for declining (required):</label>
-                        <textarea id="declineReason" 
-                                [(ngModel)]="declineReason" 
-                                name="declineReason"
-                                placeholder="Please provide a reason for declining this request..."
-                                rows="4"
-                                required></textarea>
-                    </div>
+                <!-- Decline Reason (Only shown for Decline) -->
+                <div class="decline-reason-section" *ngIf="statusChangeAction === 'decline'">
+                    <label for="declineReason">Reason for declining (required):</label>
+                    <textarea id="declineReason" 
+                              [(ngModel)]="declineReason" 
+                              name="declineReason"
+                              placeholder="Please provide a reason for declining this request..."
+                              rows="4"
+                              required></textarea>
                 </div>
             </div>
+        </div>
 
-            <!-- Modal Footer -->
-            <div class="modal-footer status-change-modal-footer">
-                <button type="button" class="cancel-btn" (click)="closeStatusChangeModal()">Cancel</button>
-
-                <button type="button" 
-                        class="confirm-btn"
-                        [ngClass]="{
-                            'accept': statusChangeAction === 'accept',
-                            'decline': statusChangeAction === 'decline'
-                        }"
-                        [disabled]="statusChangeAction === 'decline' && !declineReason.trim()"
-                        (click)="confirmStatusChange()">
-                    <i class="bx"
-                        [ngClass]="{
-                            'bx-check-circle': statusChangeAction === 'accept',
-                            'bx-x-circle': statusChangeAction === 'decline'
-                        }">
-                    </i>
-                    {{ statusChangeAction === 'accept' ? 'Accept' : 'Decline' }}
-                </button>
-            </div>
+        <!-- Modal Footer (Buttons) -->
+        <div class="modal-footer status-change-modal-footer">
+            <button type="button" class="cancel-btn" (click)="closeStatusChangeModal()">Cancel</button>
+            <button type="button" 
+                    class="confirm-btn"
+                    [ngClass]="{
+                        'accept-btn': statusChangeAction === 'accept',
+                        'decline-btn': statusChangeAction === 'decline'
+                    }"
+                    [disabled]="statusChangeAction === 'decline' && !declineReason.trim()"
+                    (click)="confirmStatusChange()">
+                <i class="bx"
+                   [ngClass]="{
+                       'bx-check-circle': statusChangeAction === 'accept',
+                       'bx-x-circle': statusChangeAction === 'decline'
+                   }">
+                </i>
+                {{ statusChangeAction === 'accept' ? 'Accept' : 'Decline' }}
+            </button>
         </div>
     </div>
+</div>
 </div>
