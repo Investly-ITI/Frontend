@@ -1,6 +1,6 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { Investor } from '../../../_models/investor';
 import { Status } from '../../../_shared/enums';
 import { InvestorService } from '../../_services/investor.service';
@@ -10,7 +10,7 @@ import { identity, Subscription } from 'rxjs';
 import { Governorate } from '../../../_models/governorate';
 import { GovernrateService } from '../../../_services/governorate.service';
 import { City } from '../../../_models/city';
-import { InvestorInvestingType } from '../../../_shared/enums';
+import { InvestorInvestingType, InvestingStages } from '../../../_shared/enums';
 import { environment } from '../../../../environments/environment';
 import { CountryCodeService } from '../../../_services/country-code.service';
 
@@ -53,7 +53,13 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   showFrontIdOverlay: boolean = false;
   showBackIdOverlay: boolean = false;
   Cities: City[] = [];
-  investingTypes = InvestorInvestingType
+  investingTypes = InvestorInvestingType;
+  businessStages = [
+    { value: InvestingStages.ideation.toString(), label: 'Ideation' },
+    { value: InvestingStages.startup.toString(), label: 'Startup' },
+    { value: InvestingStages.intermediate.toString(), label: 'Intermediate' },
+    { value: InvestingStages.advanced.toString(), label: 'Advanced' }
+  ];
   private unsubscribe: Subscription[] = [];
 
   //files
@@ -70,6 +76,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
     , private toastrService: ToastrService
     , private governorateService: GovernrateService
     , private countryCodeService: CountryCodeService
+    // , private cdRef: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -117,18 +124,47 @@ export class AddUpdateComponent implements OnInit, OnChanges {
 
   }
 
+  // Custom validator for min/max funding
+  minMaxFundingValidator(): ValidatorFn {
+    return (group: AbstractControl): {[key: string]: any} | null => {
+      const min = group.get('minFunding')?.value;
+      const max = group.get('maxFunding')?.value;
+      if (min !== null && min !== undefined && min !== '' && Number(min) <= 500) {
+        return { minFundingTooLow: true };
+      }
+      if (
+        min !== null && min !== undefined && min !== '' &&
+        max !== null && max !== undefined && max !== '' &&
+        Number(max) <= Number(min)
+      ) {
+        return { maxFundingNotGreater: true };
+      }
+      return null;
+    };
+  }
 
   initializeForm(): void {
+    // Handle both InterestedBusinessStages and interestedBusinessStages
+    let stages: string[] = [];
+    const interestedStages: any = this.selectedEntity?.interestedBusinessStages ?? this.selectedEntity?.interestedBusinessStages;
+    if (typeof interestedStages === 'string') {
+      stages = interestedStages.split(',').map((s: string) => s.trim()).filter((s: string) => s);
+    } else if (Array.isArray(interestedStages)) {
+      stages = interestedStages.map((s: any) => String(s));
+    }
     this.formData = this.fb.group({
       id: [this.selectedEntity?.id || null],
       userId: [this.selectedEntity?.userId || null],
       investingType: [this.selectedEntity?.investingType || '', Validators.required],
+      InterestedBusinessStages: [stages],
+      minFunding: [this.selectedEntity?.minFunding || null, [Validators.min(501)]],
+      maxFunding: [this.selectedEntity?.maxFunding || null],
       user: this.fb.group({
         id: [this.selectedEntity?.user?.id || 0],
         firstName: [this.selectedEntity?.user?.firstName || '', Validators.required],
         lastName: [this.selectedEntity?.user?.lastName || '', Validators.required],
         email: [this.selectedEntity?.user?.email || '', [Validators.required, Validators.email]],
-        countryCode: [this.selectedEntity?.user?.countryCode || '' ],
+        countryCode: [this.selectedEntity?.user?.countryCode || ''],
         phoneNumber: [this.selectedEntity?.user?.phoneNumber || ''],
         userType: [this.selectedEntity?.user?.userType || 0],
         nationalId: [this.selectedEntity?.user?.nationalId || '', Validators.required],
@@ -139,10 +175,14 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         cityId: [this.selectedEntity?.user?.cityId || null],
         address: [this.selectedEntity?.user?.address || ""]
       })
-    });
-    if (!this.isEditMode) {
-      this.formData.disable()
+    }, { validators: this.minMaxFundingValidator() });
+    // Enable form in edit mode, disable only in view mode
+    if (this.modalMode === 'view' && !this.isEditMode) {
+      this.formData.disable();
+    } else {
+      this.formData.enable();
     }
+    // this.cdRef.detectChanges();
     const govId = this.formData.get('user.governmentId')?.value;
     if (govId) {
       this.loadCities(govId);
@@ -173,6 +213,9 @@ export class AddUpdateComponent implements OnInit, OnChanges {
     this.formData = this.fb.group({
       userId: [''],
       investingType: [''],
+      InterestedBusinessStages: [[]],
+      minFunding: [''],
+      maxFunding: [''],
       user: this.fb.group({
         firstName: [''],
         lastName: [''],
@@ -185,7 +228,8 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         status: [1],
         governmentId: [''],
         cityId: [''],
-        address:['']
+        address:[''],
+        
       })
     });
   }
@@ -211,7 +255,11 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         if (key !== 'user') {
           const value = rawData[key];
           if (value !== null && value !== undefined && value !== '') {
-            formPayload.append(`${key}`, value);
+            if (key === 'InterestedBusinessStages' && Array.isArray(value)) {
+              formPayload.append('InterestedBusinessStages', value.join(','));
+            } else {
+              formPayload.append(`${key}`, value);
+            }
           }
         }
       }
@@ -236,6 +284,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
               this.toastrService.success(response.message, 'Success');
               this.isEditMode = false;
               this.saveEntity.emit(this.formData.value);
+              this.resetForm();
 
             } else {
               this.toastrService.error(response.message, "Error");

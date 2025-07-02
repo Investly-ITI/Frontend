@@ -195,6 +195,35 @@
         </div>
     </div>
 </div>
+
+<div class="row">
+        <div class="col-4">
+          <label for="InterestedBusinessStages">Interested Business Stages</label>
+          <div class="input-container">
+            <select id="InterestedBusinessStages" class="form-input2" formControlName="InterestedBusinessStages" multiple>
+              <option *ngFor="let stage of businessStages" [value]="stage.value">{{ stage.label }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-4">
+          <label for="minFunding">Min Funding</label>
+          <div class="input-container">
+            <input type="number" id="minFunding" class="form-input2" formControlName="minFunding" min="0" />
+            <div *ngIf="formData.hasError('minFundingTooLow') && (formData.get('minFunding')?.touched || formData.get('minFunding')?.dirty)" class="text-danger">
+              Min funding must be greater than 500.
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <label for="maxFunding">Max Funding</label>
+          <div class="input-container">
+            <input type="number" id="maxFunding" class="form-input2" formControlName="maxFunding" min="0" />
+            <div *ngIf="formData.hasError('maxFundingNotGreater') && (formData.get('maxFunding')?.touched || formData.get('maxFunding')?.dirty)" class="text-danger">
+              Max funding must be greater than min funding.
+            </div>
+          </div>
+        </div>
+      </div>
       </form>
     </div>
 
