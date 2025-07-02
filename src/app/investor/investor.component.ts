@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProfileService } from '../investor/_services/profile.service';
 import { environment } from '../../environments/environment';
 import { InvestorInformationComponent } from "./investor-information/investor-information.component";
@@ -13,7 +13,7 @@ import { Status } from '../_shared/enums';
 import { NotificationService } from '../_services/notification.service';
 import { InvestorIdeaRequestsComponent } from "./investor-idea-requests/investor-idea-requests.component";
 import { ContactRequestCountsDto } from '../_models/contact-request';
-import { animate, style, transition, trigger } from '@angular/animations';
+
 
 interface SecuritySettings {
   twoFactorEnabled: boolean;
@@ -25,7 +25,7 @@ interface SecuritySettings {
 }
 @Component({
   selector: 'app-investor',
-  imports: [CommonModule, InvestorInformationComponent, InvestorSecurityComponent, InvestorNotificationsComponent, InvestorIdeaRequestsComponent],
+  imports: [CommonModule, InvestorInformationComponent, InvestorSecurityComponent, InvestorNotificationsComponent, InvestorIdeaRequestsComponent,RouterLink],
   templateUrl: './investor.component.html',
   styleUrl: './investor.component.css',
 })

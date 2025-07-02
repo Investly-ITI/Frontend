@@ -94,6 +94,7 @@
             <button 
               class="nav-button" 
               [class.active]="activeSection === 'feedback'"
+               [routerLink]="['/contact-us']"
               (click)="setActiveSection('feedback')"
             >
               <i class='bx bx-comment-add'></i>
