@@ -89,17 +89,21 @@
                 </div>
             </div>
         </div>
-
+        
         <div class="col-4">
-            <label for="nationalId">National ID</label>
+            <label for="countryCode">Country Code</label>
             <div class="input-container">
-                <input type="text" id="nationalId" class="form-input2" formControlName="nationalId" />
-                <div *ngIf="formData.get('user.nationalId')?.invalid && formData.get('user.nationalId')?.touched"
-                    class="text-danger">
-                    nationalId is required.
-                </div>
+              <select id="countryCode" class="form-input2" formControlName="countryCode">
+                <option [value]="''" selected>Select Country Code</option>
+                <option *ngFor="let code of countryCodes" [value]="code.code">
+                  {{ code.code }} - {{ code.country }}
+                </option>
+              </select>
             </div>
-        </div>
+            <div *ngIf="formData.get('user.countryCode')?.invalid && formData.get('user.countryCode')?.touched" class="text-danger">
+              Country code is required.
+            </div>
+          </div>
 
         <div class="col-4">
             <label for="phoneNumber">Phone Number</label>
@@ -114,6 +118,17 @@
     </div>
 
     <div class="row" [formGroupName]="'user'">
+        
+        <div class="col-4">
+            <label for="nationalId">National ID</label>
+            <div class="input-container">
+                <input type="text" id="nationalId" class="form-input2" formControlName="nationalId" />
+                <div *ngIf="formData.get('user.nationalId')?.invalid && formData.get('user.nationalId')?.touched"
+                    class="text-danger">
+                    nationalId is required.
+                </div>
+            </div>
+        </div>
         <div class="col-4">
             <label for="governmentId">Government</label>
             <div class="input-container">
@@ -147,54 +162,39 @@
             </div>
         </div>
 
-        <div class="col-4">
-            <label for="address">Address</label>
-            <div class="input-container">
-                <input type="text" id="address" class="form-input2" formControlName="address" />
-            </div>
-            <div *ngIf="formData.get('user.address')?.invalid && formData.get('user.address')?.touched"
-                class="text-danger">
-                address is required.
-            </div>
-        </div>
-    </div>
-
-    <div class="row" [formGroupName]="'user'">
-        <div class="col-4">
-            <label for="gender">Gender</label>
-            <div class="input-container">
-                <select formControlName="gender" class="form-input2">
-                    <option [value]="Gender.Male" selected>Male</option>
-                    <option [value]="Gender.Female"> Female</option>
-                </select>
-            </div>
-            <div *ngIf="formData.get('user.gender')?.invalid && formData.get('user.gender')?.touched"
-                class="text-danger">
-                gender is required.
-            </div>
-        </div>
-
     </div>
 
     <div class="row">
-        <div class="col-4">
-            <label for="investingType">Investing Type</label>
-            <div class="input-container">
-                <div class="input-container">
-                    <select formControlName="investingType" class="form-input2">
-                        <option [value]="investingTypes.Money" selected>funding with money</option>
-                        <option [value]="investingTypes.Experience">Experience</option>
-                        <option [value]="investingTypes.Both">Both</option>
-                    </select>
-                </div>
+    <div class="col-4" formGroupName="user">
+        <label for="address">Address</label>
+        <div class="input-container">
+            <input type="text" id="address" class="form-input2" formControlName="address" />
+        </div>
+    </div>
+    <div class="col-4" formGroupName="user">
+        <label for="gender">Gender</label>
+        <div class="input-container">
+            <select formControlName="gender" class="form-input2">
+                <option [value]="Gender.Male" selected>Male</option>
+                <option [value]="Gender.Female">Female</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-4">
+        <label for="investingType">Investing Type</label>
+        <div class="input-container">
+            <select formControlName="investingType" class="form-input2">
+                <option [value]="investingTypes.Money" selected>funding with money</option>
+                <option [value]="investingTypes.Experience">Experience</option>
+                <option [value]="investingTypes.Both">Both</option>
+            </select>
+            <div *ngIf="formData.get('investingType')?.invalid && formData.get('investingType')?.touched"
+                class="text-danger">
+                investingType is required.
             </div>
-
-                  <div *ngIf="formData.get('user.investingType')?.invalid && formData.get('user.investingType')?.touched"
-                      class="text-danger">
-                      investingType is required.
-                  </div>
-              </div>
-          </div>
+        </div>
+    </div>
+</div>
       </form>
     </div>
 

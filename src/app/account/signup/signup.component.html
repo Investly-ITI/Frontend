@@ -216,7 +216,11 @@
           <div class="form-group">
             <label for="phoneNumber">Phone Number:</label>
             <div class="phone-input-container">
-              <input class="country-code-select" formControlName="countryCode"  readonly/>
+              <select class="country-code-select" formControlName="countryCode">
+                <option *ngFor="let code of countryCodes" [value]="code.code">
+                  {{ code.code }} - {{ code.country }}
+                </option>
+              </select>
               <div class="input-container phone-input">
                 <i class='bx bx-phone'></i>
                 <input 
@@ -627,4 +631,4 @@
       <span class="switch-slider"></span>
     </label>
   </div>
-</div> 
+</div>

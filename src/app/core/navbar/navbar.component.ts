@@ -153,6 +153,4 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.closeDropdowns();
     this.isMobileMenuOpen = false;
   }
-
- 
 }

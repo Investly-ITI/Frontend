@@ -8,6 +8,7 @@ import { Governorate } from '../../_models/governorate';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 import { InvestorInvestingType,InvestingStages } from '../../_shared/enums';
+import { CountryCodeService } from '../../_services/country-code.service';
 @Component({
   selector: 'app-investor-information',
   imports: [CommonModule,FormsModule,ReactiveFormsModule],
@@ -48,15 +49,16 @@ private unsubscribe: Subscription[] = [];
   maxFunding = 1000000;    // 1M EGP  
   selectedFundingMin = 500;     // 5K EGP (initial minimum)
   selectedFundingMax = 100000;   // 100K EGP (initial maximum)
+  countryCodes: { code: string; country: string }[] = [];
 
    constructor(
     private fb: FormBuilder,
     private ProfileService: ProfileService,
     private governorateService:GovernrateService,
-    
-  
+    private countryCodeService: CountryCodeService
   ) {}
    ngOnInit(): void {
+    this.countryCodes = this.countryCodeService.getCountryCodes();
     this.initializeForms();
     this.loadGovernments();
     this.setFundingValuesFromDatabase();

@@ -12,6 +12,7 @@ import { GovernrateService } from '../../../_services/governorate.service';
 import { City } from '../../../_models/city';
 import { InvestorInvestingType } from '../../../_shared/enums';
 import { environment } from '../../../../environments/environment';
+import { CountryCodeService } from '../../../_services/country-code.service';
 
 @Component({
   selector: 'app-add-update',
@@ -61,17 +62,20 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   FrontIdImageFile!: File;
   BackIdImageFile!: File;
 
+  countryCodes: { code: string, country: string }[] = [];
+
 
   constructor(private fb: FormBuilder
     , private investorService: InvestorService
     , private toastrService: ToastrService
     , private governorateService: GovernrateService
-
+    , private countryCodeService: CountryCodeService
   ) { }
 
   ngOnInit(): void {
     this.isEditMode=false;
     this.initializeForm();
+    this.countryCodes = this.countryCodeService.getCountryCodes();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -124,6 +128,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         firstName: [this.selectedEntity?.user?.firstName || '', Validators.required],
         lastName: [this.selectedEntity?.user?.lastName || '', Validators.required],
         email: [this.selectedEntity?.user?.email || '', [Validators.required, Validators.email]],
+        countryCode: [this.selectedEntity?.user?.countryCode || '' ],
         phoneNumber: [this.selectedEntity?.user?.phoneNumber || ''],
         userType: [this.selectedEntity?.user?.userType || 0],
         nationalId: [this.selectedEntity?.user?.nationalId || '', Validators.required],

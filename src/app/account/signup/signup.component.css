@@ -701,10 +701,6 @@ select.form-input option {
   padding: 0.75rem;
 }
 
-.phone-input {
-  flex: 1;
-}
-
 /* Error Messages */
 .error-message {
   font-family: var(--lato);
@@ -1126,8 +1122,6 @@ select.form-input option {
   box-shadow: 0 4px 12px rgba(48, 172, 170, 0.4);
   transition: all 0.3s ease;
   pointer-events: auto;
-  position: relative;
-  z-index: 3;
 }
 
 .range-slider::-webkit-slider-thumb:hover {
@@ -2142,6 +2136,7 @@ select.form-input option {
 
   .signup-footer p {
     margin-bottom: 0;
+    font-size: 0.9rem;
   }
 
   /* Dark mode support for mobile sticky elements */
@@ -2156,24 +2151,6 @@ select.form-input option {
 
   :host-context(.dark) .signup-card::after {
     background: var(--light2);
-  }
-}
-
-/* ========================================
-   SMALL MOBILE SCREENS (376px to 425px)
-======================================== */
-@media screen and (max-width: 425px) and (min-width: 376px) {
-
-  .step-header h1 {
-    font-size: 1.4rem;
-  }
-
-  .signup-form-container {
-    max-height: calc(70vh - 160px);
-  }
-
-  .progress-container {
-    padding: 0.7rem 0;
   }
 }
 
@@ -2584,20 +2561,11 @@ select.form-input option {
     padding: 1.2rem 0;
   }
 
-  .progress-bar {
-    height: 6px;
-  }
-
-  .progress-text {
-    font-size: 0.8rem;
-  }
-
   .user-type-card,
   .investment-type-card,
   .stage-card,
   .funding-range-card {
     padding: 0.6rem;
-    border-radius: 8px;
   }
 
   .user-type-card .card-content {
@@ -2619,15 +2587,15 @@ select.form-input option {
   }
 
   .user-type-card .card-info h3 {
-    font-size: 1.1rem;
     text-align: center;
     margin-bottom: 0.5rem;
+    font-size: 1.1rem;
   }
 
   .user-type-card .card-info p {
-    font-size: 0.85rem;
     text-align: center;
     margin-bottom: 0.7rem;
+    font-size: 0.85rem;
   }
 
   .user-type-card .card-info ul {
@@ -2635,13 +2603,13 @@ select.form-input option {
   }
 
   .user-type-card .card-info li {
-    font-size: 0.8rem;
     display: flex;
     align-items: flex-start;
     gap: 0.3rem;
     padding-left: 0;
     margin-bottom: 0.3rem;
     font-family: var(--lato);
+    font-size: 0.8rem;
     color: var(--dark-grey);
   }
 
@@ -2658,11 +2626,7 @@ select.form-input option {
     padding: 1rem;
   }
 
-  .country-code-select {
-    min-width: 80px;
-    padding: 0.6rem;
-    font-size: 0.8rem;
-  }
+  
 
   .phone-input-container {
     gap: 0.25rem;
@@ -2705,7 +2669,7 @@ select.form-input option {
   }
 
   .range-indicators {
-    margin-left: 10px;
+       margin-left: 10px;
     padding: 0 3px;
     height: 40px;
     visibility: hidden;
@@ -2855,4 +2819,12 @@ select.form-input:disabled {
 :host-context(.dark) select.form-input:disabled {
   background: var(--custom);
   color: var(--dark-grey);
-} 
+}
+
+/* Ensure country code select matches the width of other form fields */
+.country-code-select {
+  width: 85%;
+  max-width: 90%;
+  min-width: 0;
+  box-sizing: border-box;
+}
