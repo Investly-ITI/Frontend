@@ -98,8 +98,8 @@ export class FounderInformationComponent implements OnInit, OnChanges {
             lastName: user.lastName,
             email: user.email,
             dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
-            countryCode: countryCode,
-            phoneNumber: phoneNumber,
+            countryCode: user.countryCode || '+20', // Default to Egypt if null
+            phoneNumber: user.phoneNumber || '',
             nationalId: user.nationalId,
             gender: user.gender,
             government: user.government?.nameEn || '',
@@ -363,27 +363,27 @@ export class FounderInformationComponent implements OnInit, OnChanges {
   }
 
   isPhoneNumberValid(): boolean {
-    const phoneNumber = this.personalInfo.phoneNumber?.trim() || '';
-    if (!phoneNumber) return false;
-    
-    // Remove any non-digit characters
-    const digitsOnly = phoneNumber.replace(/\D/g, '');
-    
-    // Validate based on country code
-    switch (this.personalInfo.countryCode) {
-      case '+20': // Egypt
-        return digitsOnly.length === 10 && digitsOnly.startsWith('1');
-      case '+1': // US/Canada
-        return digitsOnly.length === 10;
-      case '+44': // UK
-      case '+49': // Germany
-      case '+33': // France
-      case '+39': // Italy
-      case '+34': // Spain
-        return digitsOnly.length >= 9 && digitsOnly.length <= 11;
-      default:
-        return digitsOnly.length >= 5;
-    }
+      const phoneNumber = this.personalInfo.phoneNumber?.trim() || '';
+      if (!phoneNumber) return false;
+      
+      // Remove any non-digit characters
+      const digitsOnly = phoneNumber.replace(/\D/g, '');
+      
+      // Validate based on country code
+      switch (this.personalInfo.countryCode) {
+          case '+20': // Egypt
+              return digitsOnly.length === 10 && digitsOnly.startsWith('1');
+          case '+1': // US/Canada
+              return digitsOnly.length === 10;
+          case '+44': // UK
+          case '+49': // Germany
+          case '+33': // France
+          case '+39': // Italy
+          case '+34': // Spain
+              return digitsOnly.length >= 9 && digitsOnly.length <= 11;
+          default:
+              return digitsOnly.length >= 5;
+      }
   }
 
 
@@ -416,22 +416,22 @@ export class FounderInformationComponent implements OnInit, OnChanges {
     this.saveMessage = '';
 
     try {
-      // Create UpdateFounder instance with the form data
-      let date = new Date();
-      if (this.personalInfo.dateOfBirth) {
-        date = new Date(this.personalInfo.dateOfBirth);
-      }
+        let date = new Date();
+        if (this.personalInfo.dateOfBirth) {
+            date = new Date(this.personalInfo.dateOfBirth);
+        }
 
-      const updateData = new UpdateFounder(
-        this.personalInfo.firstName,
-        this.personalInfo.lastName,
-        this.personalInfo.countryCode + this.personalInfo.phoneNumber,
-        this.personalInfo.gender || null,
-        this.personalInfo.governmentId || null,
-        this.personalInfo.cityId || null,
-        this.personalInfo.address || null,
-        date.toISOString().split('T')[0]
-      );
+        const updateData = new UpdateFounder(
+            this.personalInfo.firstName,
+            this.personalInfo.lastName,
+            this.personalInfo.phoneNumber, 
+            this.personalInfo.gender || null,
+            this.personalInfo.governmentId || null,
+            this.personalInfo.cityId || null,
+            this.personalInfo.address || null,
+            date.toISOString().split('T')[0],
+            this.personalInfo.countryCode 
+        );
 
       this.profileService.updateFounder(this.personalInfo.email, updateData).subscribe({
         next: (response) => {
