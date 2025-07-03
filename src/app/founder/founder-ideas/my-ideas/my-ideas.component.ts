@@ -1,8 +1,9 @@
-import { Component, Input, OnInit, OnChanges, HostListener } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, HostListener, output, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EditIdeaComponent } from '../edit-idea/edit-idea.component';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { StandardAiResult } from '../../../_models/aiIdeaEvaluationResult';
 
 interface ContactRequest {
   id: string;
@@ -12,32 +13,44 @@ interface ContactRequest {
 }
 
 interface Idea {
-  id: string;
+  id: number;
+  founderId:number;
   title: string;
-  category: string;
-  status: 'approved' | 'draft' | 'submitted' | 'declined' | 'rejected-drafted';
-  stage: string;
   description: string;
+  category: string;
+  status: 'draft' | 'submitted' | 'approved' | 'declined' | 'rejected-drafted';
+  stage: string;
   submittedDate: string;
   government: string;
   city: string;
-  fundingGoal?: string; // Funding goal in EGP
-  declineReason?: string; // Optional decline reason
-  submissionType: 'form' | 'document'; // Track how the idea was submitted
-  formData?: any; // Store form-specific data
-  documentFiles?: string[]; // Store document file names/paths
-  contactRequests?: ContactRequest[]; // Investor contact requests
+  fundingGoal?: string;
+  declineReason?: string;
+  formData?: any;
+  AiRate?:number;
+  documentFiles?: string[];
+  contactRequests?: ContactRequest[];
   rejectionData?: {
     message: string;
-    standards: string[];
-    rejectedAt: string;
-  }; // AI rejection details for rejected-drafted status
+    standards: StandardAiResult[];
+  };
 }
 
 interface ReviewResult {
   isAccepted: boolean;
+  generalFeedback: string,
   message: string;
-  standards?: string[];
+  totalWeightScore: number;
+  allStandards?: StandardReview[];
+  rejectedStandards?: StandardReview[];
+}
+
+interface StandardReview {
+  standardCategoryId: number,
+  standard: string;
+  weight: number;
+  achievmentScore: number;
+  weightContribution: number;
+  feedback: string;
 }
 
 @Component({
@@ -65,6 +78,7 @@ interface ReviewResult {
 })
 export class MyIdeasComponent implements OnInit, OnChanges {
   @Input() ideas: Idea[] = [];
+  @Output() refresh= new EventEmitter<any>();
   
   // Filter properties
   selectedStatus: string = 'all';
@@ -191,6 +205,7 @@ export class MyIdeasComponent implements OnInit, OnChanges {
   }
 
   onEditIdea(idea: Idea): void {
+    console.log("66666666")
     this.editingIdea = idea;
     this.showEditView = true;
   }
@@ -273,6 +288,8 @@ export class MyIdeasComponent implements OnInit, OnChanges {
   onCloseEditView(): void {
     this.showEditView = false;
     this.editingIdea = null;
+    this.refresh.emit();
+
   }
 
   onEditSaveStarted(): void {
@@ -352,80 +369,80 @@ export class MyIdeasComponent implements OnInit, OnChanges {
     setTimeout(() => {
       clearInterval(messageInterval);
       this.isLoading = false;
-      this.simulateAIReview(action, idea);
+     // this.simulateAIReview(action, idea);
     }, reviewTime);
   }
 
-  private simulateAIReview(action: 'submit' | 'edit' | 'submit-draft', idea: Idea): void {
-    // 50% chance of acceptance, 50% chance of rejection for simulation
-    const isAccepted = Math.random() > 0.5;
+  // private simulateAIReview(action: 'submit' | 'edit' | 'submit-draft', idea: Idea): void {
+  //   // 50% chance of acceptance, 50% chance of rejection for simulation
+  //   const isAccepted = Math.random() > 0.5;
     
-    if (isAccepted) {
-      // Apply changes if accepted
-      if (action === 'submit' || action === 'submit-draft') {
-        const index = this.ideas.findIndex(i => i.id === idea.id);
-        if (index !== -1) {
-          this.ideas[index].status = 'submitted';
-          this.filterIdeas();
-        }
-        this.reviewResult = {
-          isAccepted: true,
-          message: 'Congratulations! Your business idea meets our standards and has been submitted for review by our investment team. You will receive updates on the evaluation progress.'
-        };
-      } else {
-        // Update idea changes
-        const index = this.ideas.findIndex(i => i.id === idea.id);
-        if (index !== -1) {
-          this.ideas[index] = idea;
-          this.filterIdeas();
-        }
-        this.reviewResult = {
-          isAccepted: true,
-          message: 'Great! Your idea changes have been saved successfully and meet our quality standards. The updated information is now available.'
-        };
-      }
-    } else {
-      // Random rejection reasons
-      const rejectionStandards = [
-        'Market research lacks sufficient depth and competitor analysis',
-        'Financial projections are unrealistic or missing key assumptions',
-        'Business model does not demonstrate clear revenue streams',
-        'Innovation factor is insufficient compared to existing solutions',
-        'Target market size is too narrow for sustainable growth',
-        'Technical feasibility concerns regarding implementation',
-        'Risk assessment and mitigation strategies are inadequate'
-      ];
+  //   if (isAccepted) {
+  //     // Apply changes if accepted
+  //     if (action === 'submit' || action === 'submit-draft') {
+  //       const index = this.ideas.findIndex(i => i.id === idea.id);
+  //       if (index !== -1) {
+  //         this.ideas[index].status = 'submitted';
+  //         this.filterIdeas();
+  //       }
+  //       this.reviewResult = {
+  //         isAccepted: true,
+  //         message: 'Congratulations! Your business idea meets our standards and has been submitted for review by our investment team. You will receive updates on the evaluation progress.'
+  //       };
+  //     } else {
+  //       // Update idea changes
+  //       const index = this.ideas.findIndex(i => i.id === idea.id);
+  //       if (index !== -1) {
+  //         this.ideas[index] = idea;
+  //         this.filterIdeas();
+  //       }
+  //       this.reviewResult = {
+  //         isAccepted: true,
+  //         message: 'Great! Your idea changes have been saved successfully and meet our quality standards. The updated information is now available.'
+  //       };
+  //     }
+  //   } else {
+  //     // Random rejection reasons
+  //     const rejectionStandards = [
+  //       'Market research lacks sufficient depth and competitor analysis',
+  //       'Financial projections are unrealistic or missing key assumptions',
+  //       'Business model does not demonstrate clear revenue streams',
+  //       'Innovation factor is insufficient compared to existing solutions',
+  //       'Target market size is too narrow for sustainable growth',
+  //       'Technical feasibility concerns regarding implementation',
+  //       'Risk assessment and mitigation strategies are inadequate'
+  //     ];
       
-      // Select 2-4 random standards that weren't met
-      const selectedStandards = rejectionStandards
-        .sort(() => 0.5 - Math.random())
-        .slice(0, Math.floor(Math.random() * 3) + 2);
+  //     // Select 2-4 random standards that weren't met
+  //     const selectedStandards = rejectionStandards
+  //       .sort(() => 0.5 - Math.random())
+  //       .slice(0, Math.floor(Math.random() * 3) + 2);
       
-      // For draft submissions that are rejected, automatically change status to rejected-drafted
-      if (action === 'submit-draft') {
-        const index = this.ideas.findIndex(i => i.id === idea.id);
-        if (index !== -1) {
-          this.ideas[index].status = 'rejected-drafted';
-          this.ideas[index].rejectionData = {
-            message: 'Our AI System has reviewed your business idea and found that it doesn\'t meet the required standards for submission. Please review the feedback below and consider improving your proposal.',
-            standards: selectedStandards,
-            rejectedAt: new Date().toISOString()
-          };
-          this.filterIdeas();
-        }
-      }
+  //     // For draft submissions that are rejected, automatically change status to rejected-drafted
+  //     if (action === 'submit-draft') {
+  //       const index = this.ideas.findIndex(i => i.id === idea.id);
+  //       if (index !== -1) {
+  //         this.ideas[index].status = 'rejected-drafted';
+  //         this.ideas[index].rejectionData = {
+  //           message: 'Our AI System has reviewed your business idea and found that it doesn\'t meet the required standards for submission. Please review the feedback below and consider improving your proposal.',
+  //           standards: selectedStandards,
+  //           rejectedAt: new Date().toISOString()
+  //         };
+  //         this.filterIdeas();
+  //       }
+  //     }
       
-      this.reviewResult = {
-        isAccepted: false,
-        message: (action === 'submit' || action === 'submit-draft')
-          ? 'Our AI System has reviewed your business idea and found that it doesn\'t meet the required standards for submission. Please review the feedback below and consider improving your proposal.'
-          : 'Our AI System has reviewed your changes and found that they don\'t meet the required standards. Please review the feedback below and make necessary improvements.',
-        standards: selectedStandards
-      };
-    }
+  //     this.reviewResult = {
+  //       isAccepted: false,
+  //       message: (action === 'submit' || action === 'submit-draft')
+  //         ? 'Our AI System has reviewed your business idea and found that it doesn\'t meet the required standards for submission. Please review the feedback below and consider improving your proposal.'
+  //         : 'Our AI System has reviewed your changes and found that they don\'t meet the required standards. Please review the feedback below and make necessary improvements.',
+  //       standards: selectedStandards
+  //     };
+  //   }
     
-    this.showResultModal = true;
-  }
+  //   this.showResultModal = true;
+  // }
 
   closeModal(): void {
     this.showResultModal = false;
@@ -433,34 +450,51 @@ export class MyIdeasComponent implements OnInit, OnChanges {
     this.currentAction = null;
   }
 
-  saveAsDraft(): void {
-    if (this.currentAction === 'submit' && this.reviewResult && !this.reviewResult.isAccepted) {
-      // Create a rejected-drafted idea with rejection data (only for new submissions, not draft submissions)
-      const rejectedIdeaIndex = this.ideas.findIndex(idea => idea.status === 'draft');
-      if (rejectedIdeaIndex !== -1) {
-        this.ideas[rejectedIdeaIndex].status = 'rejected-drafted';
-        this.ideas[rejectedIdeaIndex].rejectionData = {
-          message: this.reviewResult.message,
-          standards: this.reviewResult.standards || [],
-          rejectedAt: new Date().toISOString()
-        };
-        this.filterIdeas(); // Update filtered list to reflect status change
-      }
-    }
-    this.closeModal();
-  }
+  // saveAsDraft(): void {
+  //   if (this.currentAction === 'submit' && this.reviewResult && !this.reviewResult.isAccepted) {
+  //     // Create a rejected-drafted idea with rejection data (only for new submissions, not draft submissions)
+  //     const rejectedIdeaIndex = this.ideas.findIndex(idea => idea.status === 'draft');
+  //     if (rejectedIdeaIndex !== -1) {
+  //       this.ideas[rejectedIdeaIndex].status = 'rejected-drafted';
+  //       this.ideas[rejectedIdeaIndex].rejectionData = {
+  //         message: this.reviewResult.message,
+  //         standards: this.reviewResult.standards || [],
+  //         rejectedAt: new Date().toISOString()
+  //       };
+  //       this.filterIdeas(); // Update filtered list to reflect status change
+  //     }
+  //   }
+  //   this.closeModal();
+  // }
 
-  onShowRejectionDetails(idea: Idea): void {
-    if (idea.rejectionData) {
-      this.reviewResult = {
-        isAccepted: false,
-        message: idea.rejectionData.message,
-        standards: idea.rejectionData.standards
-      };
-      this.showResultModal = true;
-      this.currentAction = 'show-rejection';
-    }
+
+
+ onShowRejectionDetails(idea: Idea): void {
+  if (idea.rejectionData) {
+    var allStandards: StandardReview[] = idea.rejectionData.standards.map((item: StandardAiResult) => {
+      return {
+        standardCategoryId: item.standardCategoryId,
+        standard: item.name,
+        weight: item.weight,
+        achievmentScore: item.achievementScore,
+        weightContribution: item.weightedContribution,
+        feedback: item.feedback
+      }
+    });
+    this.reviewResult = {
+      isAccepted: false,
+      totalWeightScore: parseInt(idea.AiRate !== undefined ? idea.AiRate.toString() : '0') ?? 0,
+      generalFeedback: idea.rejectionData.message,
+      allStandards: allStandards,
+      rejectedStandards: allStandards.filter(s => s.weightContribution < (s.weight * .5)),
+      message: parseInt(idea.AiRate !== undefined ? idea.AiRate.toString() : '0') ?? 0 ? "Congratulations! Your business idea meets our standards" :
+        "Our AI System has reviewed your business idea and found that it doesn\'t meet the required standards for submission. Please review the feedback below and consider improving your proposal."
+    };
   }
+  this.showResultModal = true;
+  this.currentAction = 'show-rejection';
+  console.log(this.reviewResult);
+}
 
   continueEditing(): void {
     // For edit scenarios - reopen the edit view

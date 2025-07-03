@@ -1,4 +1,5 @@
 import { BusinessIdeaStatus, InvestingStages } from "../_shared/enums"; 
+import { AiIdeaEvaluationResult } from "./aiIdeaEvaluationResult";
 import { StandardAnswers } from "./standardanswers";
 import { Standard } from "./standards";
 
@@ -44,8 +45,10 @@ export class BusinessDto {
         public businessStandardAnswers: StandardAnswers[] = [],
         public city?: CityDto,
         public government?: GovernmentDto,
-        public images?:string[],
-        public imageFiles?:any
+        public images?:string,
+        public imageFiles?:any,
+        public aiBusinessEvaluations?:AiIdeaEvaluationResult,
+        public imagePaths?:string[],
     ) { }
 }
 

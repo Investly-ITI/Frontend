@@ -2,7 +2,7 @@ export class AiIdeaEvaluationResult{
     constructor(
      public businessId:number,
      public generalFeedback:string,   
-     public totalWeightedScore:number,
+     public totalWeightedScore:number|null,
      public standards:StandardAiResult[]|null
     ){}
 }

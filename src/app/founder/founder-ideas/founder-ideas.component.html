@@ -32,10 +32,12 @@
     <app-my-ideas 
       *ngIf="activeTab === 'myIdeas'"
       [ideas]="ideas"
+      (refresh)="getIdeas()"
     ></app-my-ideas>
     
     <app-add-idea 
       *ngIf="activeTab === 'addIdea'"
+      (saveStarted)="activteAllIdeas()"
     ></app-add-idea>
   </div>
 </div> 
