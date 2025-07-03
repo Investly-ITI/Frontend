@@ -17,6 +17,7 @@ import { ToastrService } from 'ngx-toastr';
 
 // Enums
 import { InvestingStages, DesiredInvestmentType } from '../../../_shared/enums';
+import { AiIdeaEvaluationResult, StandardAiResult } from '../../../_models/aiIdeaEvaluationResult';
 
 interface ContactRequest {
   id: string;
@@ -26,32 +27,43 @@ interface ContactRequest {
 }
 
 interface Idea {
-  id: string;
+  id: number;
+  founderId: number;
   title: string;
-  category: string;
-  status: 'approved' | 'draft' | 'submitted' | 'declined' | 'rejected-drafted';
-  stage: string;
   description: string;
+  category: string;
+  status: 'draft' | 'submitted' | 'approved' | 'declined' | 'rejected-drafted';
+  stage: string;
   submittedDate: string;
   government: string;
   city: string;
   fundingGoal?: string;
   declineReason?: string;
-  submissionType: 'form' | 'document';
   formData?: any;
+  AiRate?: number;
   documentFiles?: string[];
   contactRequests?: ContactRequest[];
   rejectionData?: {
     message: string;
-    standards: string[];
-    rejectedAt: string;
+    standards: StandardAiResult[];
   };
 }
 
 interface ReviewResult {
   isAccepted: boolean;
+  generalFeedback: string,
   message: string;
-  standards?: string[];
+  totalWeightScore: number|null;
+  allStandards?: StandardReview[];
+  rejectedStandards?: StandardReview[];
+}
+interface StandardReview {
+  standardCategoryId: number,
+  standard: string;
+  weight: number;
+  achievmentScore: number;
+  weightContribution: number;
+  feedback: string;
 }
 
 @Component({
@@ -86,42 +98,42 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
   // Step management
   currentStep = 1;
   totalSteps = 3;
-  
+
   // Form and data
   formData!: FormGroup;
   standards: any[] = [];
-  
+
   // Dropdown data
   governorates: Governorate[] = [];
   citiesByGovernorate: City[] = [];
   categories: Category[] = [];
   selectedGovernorate: boolean = false;
-  
+
   // Enums for templates
   investingStages = InvestingStages;
   desiredInvestmentTypes = DesiredInvestmentType;
-  
+
   // Form validation flags
   showFundingGoal: boolean = false;
-  
+
   // File upload properties
   selectedDocument: File | null = null;
   selectedImages: File[] = [];
   maxFileSize = 10 * 1024 * 1024; // 10MB
   maxImages = 5;
-  
+
   // Existing files from the idea being edited
   existingDocument: string = '';
   existingImages: string[] = [];
-  
+
   // Loading and result modal properties
   isLoading = false;
   loadingMessage = 'Updating your business idea...';
   showResultModal = false;
   reviewResult: ReviewResult | null = null;
-  
+
   private unsubscribe: Subscription[] = [];
-  
+
   // Loading messages to cycle through
   private loadingMessages = [
     'Updating your business idea...',
@@ -139,7 +151,7 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
     private addIdeaService: IdeaService,
     private standardService: StandardService,
     private toastrService: ToastrService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initializeForm();
@@ -154,6 +166,8 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
 
   initializeForm(): void {
     this.formData = this.fb.group({
+      Id: [0],
+      FounderId: [0],
       Description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
       Title: ['', Validators.required],
       CategoryId: [null, Validators.required],
@@ -161,14 +175,14 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
       DesiredInvestmentType: [null, Validators.required],
       GovernmentId: [null, Validators.required],
       CityId: [null, Validators.required],
-      Capital: [null, [Validators.min(5000)]], 
+      Capital: [null, [Validators.min(5000)]],
       Location: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(100)]],
     });
 
     this.formData.get('DesiredInvestmentType')?.valueChanges.subscribe(() => {
       this.updateFundingGoalVisibility();
     });
-    
+
     this.formData.get('CategoryId')?.valueChanges.subscribe(categoryId => {
       if (categoryId) {
         this.loadStandards(categoryId);
@@ -178,11 +192,13 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadExistingData(): void {
+  loadExistingData() {
     if (!this.idea) return;
 
     // Populate form with existing idea data
     this.formData.patchValue({
+      Id: this.idea.id,
+      FounderId: this.idea.founderId,
       Description: this.idea.description,
       Title: this.idea.title,
       Stage: this.getStageValue(this.idea.stage),
@@ -191,10 +207,11 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
       Location: this.idea.formData?.location || ''
     });
 
+    console.log(this.idea);
+
     // Load existing files
     this.existingDocument = (this.idea.documentFiles && this.idea.documentFiles.length > 0) ? this.idea.documentFiles[0] : '';
     this.existingImages = this.idea.formData?.images || [];
-
     // Update funding goal visibility based on investment type
     this.updateFundingGoalVisibility();
   }
@@ -258,7 +275,7 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
           this.selectedGovernorate = true;
           this.setInitialCity();
         }
-      }, 
+      },
       error: (err) => {
         console.log("Error loading cities:", err);
       }
@@ -294,14 +311,15 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
     this.standards.forEach(std => {
       // Use existing answers if available, otherwise default to empty
       std.Answer = this.getExistingStandardAnswer(std.id) || '';
-      std.touched = false; 
+      std.touched = false;
     });
   }
 
   getExistingStandardAnswer(standardId: number): string {
+
     // Get existing answer from idea's formData
     if (this.idea.formData && this.idea.formData.standards) {
-      const existingStandard = this.idea.formData.standards.find((s: any) => s.id === standardId);
+      const existingStandard = this.idea.formData.standards.find((s: any) => s.standardId === standardId);
       return existingStandard ? existingStandard.answer : '';
     }
     return '';
@@ -334,9 +352,9 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
 
   updateFundingGoalVisibility() {
     const investmentType = +this.formData.get('DesiredInvestmentType')?.value;
-    
-    if (investmentType === this.desiredInvestmentTypes.Both || 
-        investmentType === this.desiredInvestmentTypes.Funding) {
+
+    if (investmentType === this.desiredInvestmentTypes.Both ||
+      investmentType === this.desiredInvestmentTypes.Funding) {
       this.showFundingGoal = true;
       this.formData.get('Capital')?.setValidators([Validators.required, Validators.min(5000)]);
       this.formData.get('Capital')?.updateValueAndValidity();
@@ -382,7 +400,7 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
     });
 
     const fundingValid = !this.showFundingGoal || (this.formData.get('Capital')?.valid && this.formData.get('Capital')?.value);
-    
+
     return basicValid && fundingValid;
   }
 
@@ -406,7 +424,7 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
   onImagesSelected(event: any): void {
     const files = Array.from(event.target.files) as File[];
     const validFiles = files.filter(file => this.isValidImage(file));
-    
+
     const totalImages = this.selectedImages.length + this.existingImages.length + validFiles.length;
     if (totalImages <= this.maxImages) {
       this.selectedImages.push(...validFiles);
@@ -414,7 +432,7 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
       const available = this.maxImages - this.selectedImages.length - this.existingImages.length;
       this.toastrService.warning(`You can only upload up to ${this.maxImages} images total. You have ${available} slots remaining.`, 'Warning');
     }
-    
+
     event.target.value = '';
   }
 
@@ -458,40 +476,221 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
     }
     return true;
   }
-
-  onSubmit(): void {
-    if (this.isFormCompletelyValid()) {
-      this.submitForm();
+  getStageName(stageValue: number): string {
+    switch (stageValue) {
+      case this.investingStages.ideation: return 'Ideation';
+      case this.investingStages.startup: return 'Startup';
+      case this.investingStages.intermediate: return 'Intermediate';
+      case this.investingStages.advanced: return 'Advanced';
+      default: return 'Ideation';
     }
   }
 
+  getInvestmentTypeName(typeValue: number): string {
+    switch (typeValue) {
+      case this.desiredInvestmentTypes.IndustrialExperience: return 'Industrial Experience';
+      case this.desiredInvestmentTypes.Funding: return 'Funding';
+      case this.desiredInvestmentTypes.Both: return 'Both';
+      default: return 'Industrial Experience';
+    }
+  }
+
+  async onSubmit() {
+    if (this.isFormCompletelyValid()) {
+      await this.submitForm();
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  FormPayload(isDraft: boolean = false): FormData {
+    const rawData = this.formData.value;
+    const formPayload = new FormData();
+
+    // Add form data
+    for (const key in rawData) {
+      const value = rawData[key];
+      if (value !== null && value !== undefined && value !== '') {
+        formPayload.append(key, value);
+      }
+    }
+
+    formPayload.append('IsDrafted', isDraft.toString());
+
+    // Add standard answers
+    const standardAnswers = this.standards
+      .filter(std => std.Answer && std.Answer.trim().length > 0)
+      .map(std => new StandardAnswers(std.id, std.Answer.trim()));
+
+    standardAnswers.forEach((standard, index) => {
+      formPayload.append(`BusinessStandardAnswers[${index}].StandardId`, standard.StandardId.toString());
+      formPayload.append(`BusinessStandardAnswers[${index}].Answer`, standard.answer);
+    });
+
+    // Add document if selected
+    if (this.selectedDocument) {
+      formPayload.append('IdeaFile', this.selectedDocument);
+    }
+
+
+    // this.selectedImages.forEach((image, index) => {
+    //   formPayload.append(`Imagefiles`, image);
+    // });
+
+    //aiReviewForEachStandards
+    var aiIdeaEvaluationResult: AiIdeaEvaluationResult = {
+      businessId: 0,
+      generalFeedback: this.reviewResult?.generalFeedback ?? '',
+      totalWeightedScore: this.reviewResult?.totalWeightScore ?? 0,
+      standards: []
+    };
+    this.reviewResult?.allStandards?.forEach((s: StandardReview) => {
+      aiIdeaEvaluationResult.standards?.push(
+        new StandardAiResult(
+          s.standard,
+          s.weight,
+          s.achievmentScore,
+          s.weightContribution,
+          s.standardCategoryId,
+          s.feedback
+        )
+      );
+    });
+
+
+    // Add AiBusinessEvaluations fields directly to FormData
+    formPayload.append('AiBusinessEvaluations.BusinessId', aiIdeaEvaluationResult.businessId.toString());
+    formPayload.append('AiBusinessEvaluations.GeneralFeedback', aiIdeaEvaluationResult.generalFeedback);
+    formPayload.append('AiBusinessEvaluations.TotalWeightedScore', aiIdeaEvaluationResult.totalWeightedScore !== null && aiIdeaEvaluationResult.totalWeightedScore !== undefined ? aiIdeaEvaluationResult.totalWeightedScore.toString() : '');
+
+    // Add each standard in the list with proper bracket notation
+    aiIdeaEvaluationResult.standards?.forEach((standard, index) => {
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].Name`, standard.name);
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].Weight`, standard.weight.toString());
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].AchievementScore`, standard.achievementScore.toString());
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].WeightedContribution`, standard.weightedContribution.toString());
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].StandardCategoryId`, standard.standardCategoryId.toString());
+      formPayload.append(`AiBusinessEvaluations.Standards[${index}].Feedback`, standard.feedback);
+    });
+    return formPayload;
+  }
 
 
   isFormCompletelyValid(): boolean {
     return this.isStep1Valid() && this.isStep2Valid() && this.isStep3Valid();
   }
 
-  submitForm(): void {
+
+
+
+  async submitForm() {
     if (!this.isFormCompletelyValid()) {
       this.toastrService.error('Please complete all required fields.', 'Form Invalid');
       return;
     }
-
-    // Emit save started event for AI review simulation
-    this.saveStarted.emit();
-
     // Start AI review
-    this.startAIReview();
+    this.startAIReview(this.FormPayload(false));
   }
+
+  startAIReview(formPayload: any): void {
+    this.isLoading = true;
+    this.showResultModal = false;
+    var res = this.addIdeaService.Evaluate(formPayload).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          // this.ToastrService.success(response.message, 'Success');
+          this.isLoading = false;
+          this.AIReview(response.data);
+
+
+        } else {
+          this.toastrService.error(response.message, "Error");
+
+        }
+      }, error: (err) => {
+        const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
+        this.toastrService.error(errorMsg, 'Error');
+        this.isLoading = false;
+      }
+    })
+    this.unsubscribe.push(res);
+  }
+
+  private AIReview(aiResponse: AiIdeaEvaluationResult): void {
+    const result = this.ParseStandaredFromAiResponse(aiResponse);
+    this.reviewResult = result;
+    this.showResultModal = true;
+  }
+
+
+  private getAiTotalRate(response: AiIdeaEvaluationResult): number|null {
+    return response.totalWeightedScore;
+
+  }
+
+  private ParseStandaredFromAiResponse(response: AiIdeaEvaluationResult): ReviewResult {
+    var standards: StandardReview[] = [];
+    var result: ReviewResult | null = null;
+
+    var totalWeightScore = this.getAiTotalRate(response);
+    response.standards?.map(s => {
+      standards.push({
+        standard: s.name,
+        standardCategoryId: s.standardCategoryId,
+        weight: s.weight,
+        weightContribution: s.weightedContribution,
+        feedback: s.feedback,
+        achievmentScore: s.achievementScore
+      })
+    })
+
+    const safeTotalWeightScore = totalWeightScore ?? 0;
+    result = {
+      isAccepted: safeTotalWeightScore > 50,
+      generalFeedback: response.generalFeedback,
+      totalWeightScore: totalWeightScore??null,
+      allStandards: standards,
+      rejectedStandards: standards.filter(s => s.weightContribution < (s.weight * .5)),
+      message: safeTotalWeightScore > 50 ? "Congratulations! Your business idea meets our standards" :
+        "Our AI System has reviewed your business idea and found that it doesn\'t meet the required standards for submission. Please review the feedback below and consider improving your proposal."
+    };
+
+    return result;
+
+  }
+
+
+
+
 
   createUpdatedIdea(): Idea {
     const formValue = this.formData.value;
-    
+
     // Find category and governorate names
     const category = this.categories.find(c => c.id === formValue.CategoryId);
     const governorate = this.governorates.find(g => g.id === formValue.GovernmentId);
     const city = this.citiesByGovernorate.find(c => c.id === formValue.CityId);
-    
+
     const updatedIdea: Idea = {
       ...this.idea,
       title: formValue.Title,
@@ -502,7 +701,6 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
       city: city?.nameEn || this.idea.city,
       fundingGoal: formValue.Capital ? formValue.Capital.toString() : undefined,
       status: 'submitted', // When updating, the idea goes to submitted status for review
-      submissionType: 'form', // Unified approach - no more separate types
       documentFiles: this.existingDocument ? [this.existingDocument] : [],
       formData: {
         ...this.idea.formData,
@@ -523,74 +721,58 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
 
     return updatedIdea;
   }
-
-  getStageName(stageValue: number): string {
-    switch (stageValue) {
-      case this.investingStages.ideation: return 'Ideation';
-      case this.investingStages.startup: return 'Startup';
-      case this.investingStages.intermediate: return 'Intermediate';
-      case this.investingStages.advanced: return 'Advanced';
-      default: return 'Ideation';
-    }
-  }
-
-  getInvestmentTypeName(typeValue: number): string {
-    switch (typeValue) {
-      case this.desiredInvestmentTypes.IndustrialExperience: return 'Industrial Experience';
-      case this.desiredInvestmentTypes.Funding: return 'Funding';
-      case this.desiredInvestmentTypes.Both: return 'Both';
-      default: return 'Industrial Experience';
-    }
-  }
-
-  startAIReview(): void {
-    this.isLoading = true;
-    this.loadingMessage = this.loadingMessages[0];
-    
-    let messageIndex = 0;
-    const messageInterval = setInterval(() => {
-      messageIndex = (messageIndex + 1) % this.loadingMessages.length;
-      this.loadingMessage = this.loadingMessages[messageIndex];
-    }, 2000);
-
-    // Simulate AI review process
-    setTimeout(() => {
-      clearInterval(messageInterval);
-      this.simulateAIReview();
-    }, 8000);
-  }
-
-  private simulateAIReview(): void {
-    // Simulate AI review logic
-    const isAccepted = Math.random() > 0.3; // 70% chance of acceptance
-    
-    this.reviewResult = {
-      isAccepted: isAccepted,
-      message: isAccepted 
-        ? 'Your updated business idea meets all the required standards and has been successfully saved!'
-        : 'Your updated business idea has some areas that need improvement. Please review the feedback below.',
-      standards: isAccepted ? [] : [
-        'Market analysis could be more comprehensive',
-        'Financial projections need more detail',
-        'Competitive advantage could be better defined'
-      ]
-    };
-    
-    this.isLoading = false;
-    this.showResultModal = true;
-  }
-
   closeModal(): void {
     this.showResultModal = false;
-    
+
     if (this.reviewResult?.isAccepted) {
       const updatedIdea = this.createUpdatedIdea();
       this.onSave.emit(updatedIdea);
       this.onClose.emit();
     }
-    
+
     this.reviewResult = null;
   }
+
+
+
+  async saveAsDraft() {
+    const imageFiles = await this.convertExistingImagesToFiles(this.existingImages);
+    const allImages: File[] = [...imageFiles, ...this.selectedImages];
+    const file= await this.convertExistingDocumentToFile(this.existingDocument)
+
+    var formPayload = this.FormPayload(true);
+
+    // Add all images to FormData
+    allImages.forEach((image) => {
+      formPayload.append('ImageFiles', image);
+    });
+     if(file){
+      formPayload.append('IdeaFile',file);
+    }
+
+
+    this.sumbitForm(formPayload, true);
+    //this.closeModal();
+  }
+  async AddIdea() {
+    const imageFiles = await this.convertExistingImagesToFiles(this.existingImages);
+    const allImages: File[] = [...imageFiles, ...this.selectedImages];
+    const file= await this.convertExistingDocumentToFile(this.existingDocument)
+
+    var formPayload = this.FormPayload(false);
+
+    // Add all images to FormData
+    allImages.forEach((image) => {
+      formPayload.append('ImageFiles', image);
+    });
+    if(file){
+      formPayload.append('IdeaFile',file);
+    }
+
+    this.sumbitForm(formPayload, false);
+    //this.closeModal();
+  }
+
 
   onCancel(): void {
     this.onClose.emit();
@@ -601,6 +783,54 @@ export class EditIdeaComponent implements OnInit, OnDestroy {
   }
 
   getImagePreview(file: File): string {
+    console.log(file);
     return URL.createObjectURL(file);
+  }
+
+
+
+  sumbitForm(formData: FormData, isDraft: boolean) {
+    var sub = this.addIdeaService.UpdateIdea(formData).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          this.toastrService.success(
+            isDraft ? 'Idea saved to drafts' : response.message,
+            'Success'
+          );
+          this.showResultModal = false;
+          this.saveStarted.emit();
+        } else {
+          this.toastrService.error(response.message, "Error");
+        }
+      },
+      error: (err) => {
+        const errorMsg = err?.error?.message || err?.message || 'Unexpected error';
+        this.toastrService.error(errorMsg, 'Error');
+      }
+    });
+    this.unsubscribe.push(sub);
+
+  }
+
+async urlToAnyFile(url: string, filename: string, defaultMimeType: string = 'application/octet-stream'): Promise<File> {
+  console.log(url);
+  const response = await fetch(url);
+  const blob = await response.blob();
+  const mimeType = blob.type || defaultMimeType;
+  return new File([blob], filename, { type: mimeType });
+}
+
+  async convertExistingImagesToFiles(existingImages: string[]): Promise<File[]> {
+    return Promise.all(
+      existingImages.map(url => {
+        const filename = url.substring(url.lastIndexOf('/') + 1);
+        return this.urlToAnyFile(url, filename);
+      })
+    );
+  }
+  async convertExistingDocumentToFile(documentUrl: string): Promise<File | null> {
+    if (!documentUrl) return null;
+    const filename = documentUrl.substring(documentUrl.lastIndexOf('/') + 1);
+    return this.urlToAnyFile(documentUrl, filename, 'application/pdf');
   }
 } 

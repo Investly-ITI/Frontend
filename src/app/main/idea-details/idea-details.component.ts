@@ -7,7 +7,7 @@ import { InvestingStages } from '../../_shared/enums';
 import { ToastrService } from 'ngx-toastr';
 
 interface ExtendedBusinessDto extends BusinessDto {
-  images?: string[];
+  imagePaths?: string[];
   visits?: number;
   contactRequests?: number;
 }
@@ -130,7 +130,7 @@ export class IdeaDetailsComponent implements OnInit, OnDestroy {
     );
 
     // Add mock extended properties
-    mockBusinessData.images = [
+    mockBusinessData.imagePaths = [
       'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
       'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
       'https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
@@ -303,7 +303,7 @@ export class IdeaDetailsComponent implements OnInit, OnDestroy {
   }
 
   getImages(): string[] {
-    return this.businessData?.images || [];
+    return this.businessData?.imagePaths || [];
   }
 
   getBusinessStandardAnswers(): any[] {
