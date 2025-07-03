@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { EditIdeaComponent } from '../edit-idea/edit-idea.component';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { StandardAiResult } from '../../../_models/aiIdeaEvaluationResult';
+import { IdeaService } from '../../_services/idea.service';
+import { ToastrService } from 'ngx-toastr';
 
 interface ContactRequest {
   id: string;
@@ -117,6 +119,7 @@ export class MyIdeasComponent implements OnInit, OnChanges {
   showResultModal = false;
   reviewResult: ReviewResult | null = null;
   currentAction: 'submit' | 'edit' | 'submit-draft' | 'show-rejection' | null = null;
+  unsubscribe: any[] = []; // For unsubscribing from observables if needed
   
   // Loading messages to cycle through
   private loadingMessages = [
@@ -136,6 +139,9 @@ export class MyIdeasComponent implements OnInit, OnChanges {
     { value: 'declined', label: 'Declined', icon: 'bx-x-circle' },
     { value: 'rejected-drafted', label: 'Rejected - Drafted', icon: 'bx-error-circle' }
   ];
+
+
+ constructor(private ideaService:IdeaService, private toastr:ToastrService){}
 
   ngOnInit(): void {
     this.filterIdeas();
@@ -205,7 +211,6 @@ export class MyIdeasComponent implements OnInit, OnChanges {
   }
 
   onEditIdea(idea: Idea): void {
-    console.log("66666666")
     this.editingIdea = idea;
     this.showEditView = true;
   }
@@ -254,9 +259,20 @@ export class MyIdeasComponent implements OnInit, OnChanges {
       if (index !== -1) {
         this.ideas.splice(index, 1);
         this.filterIdeas(); // Refresh filtered list
-        console.log('Idea deleted:', this.ideaToDelete);
-        // Here you would typically call a service to delete from backend
+        var sub= this.ideaService.DeleteIdea(this.ideaToDelete.id).subscribe({
+           next:(response)=>{
+             if(response.isSuccess){
+              this.toastr.success(response.message,'success');
+             }else{
+              this.toastr.error(response.message,'error');
+             }
+           },error:(err)=>{
+               this.toastr.error(err.error.message,'error');
+           }
+        })
+        this.unsubscribe.push(sub);
       }
+
     }
     
     this.onCloseDeleteModal();
@@ -502,5 +518,8 @@ export class MyIdeasComponent implements OnInit, OnChanges {
       this.showEditView = true;
     }
     this.closeModal();
+  }
+  ngOnDestroy() {
+    this.unsubscribe.forEach((sb) => sb.unsubscribe());
   }
 } 
