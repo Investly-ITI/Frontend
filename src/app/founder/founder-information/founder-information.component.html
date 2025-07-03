@@ -159,40 +159,42 @@
             >
           </div>
 
-          <div class="form-row">
-            <div class="form-group editable">
-              <label for="government">Government</label>
-              <select 
-                id="government" 
-                class="form-control" 
-                [(ngModel)]="personalInfo.governmentId"
-                (change)="onGovernorateChange(personalInfo.governmentId)"
-                name="government"
-                [disabled]="isSaving"
-              >
-                <option value="" disabled selected>Select Government</option>
-                <option *ngFor="let gov of governorates" [value]="gov.id">
-                  {{ gov.nameEn }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group editable">
-              <label for="city">City</label>
-              <select 
-                id="city" 
-                class="form-control" 
-                [(ngModel)]="personalInfo.cityId"
-                (change)="onCityChange(personalInfo.cityId)"
-                name="city"
-                [disabled]="isSaving || !personalInfo.governmentId"
-              >
-                <option value="" disabled selected>Select City</option>
-                <option *ngFor="let city of citiesByGovernorate" [value]="city.id">
-                  {{ city.nameEn }}
-                </option>
-              </select>
-            </div>    
-          </div>
+<div class="form-row">
+  <div class="form-group editable">
+    <label for="government">Government</label>
+    <select 
+      id="government" 
+      class="form-control" 
+      [(ngModel)]="personalInfo.governmentId"
+      (ngModelChange)="onGovernorateChange($event)"
+      name="government"
+      [disabled]="isSaving"
+      [compareWith]="compareById"
+    >
+      <option [ngValue]="null" disabled>Select Government</option>
+      <option *ngFor="let gov of governorates" [ngValue]="gov.id">
+        {{ gov.nameEn }}
+      </option>
+    </select>
+  </div>
+  <div class="form-group editable">
+    <label for="city">City</label>
+    <select 
+      id="city" 
+      class="form-control" 
+      [(ngModel)]="personalInfo.cityId"
+      (ngModelChange)="onCityChange($event)"
+      name="city"
+      [disabled]="isSaving || !personalInfo.governmentId"
+      [compareWith]="compareById"
+    >
+      <option [ngValue]="null" disabled>Select City</option>
+      <option *ngFor="let city of citiesByGovernorate" [ngValue]="city.id">
+        {{ city.nameEn }}
+      </option>
+    </select>
+  </div>    
+</div>
 
           <div class="form-row">
             <div class="form-group">
