@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -23,7 +23,7 @@ interface ReviewResult {
   isAccepted: boolean;
   generalFeedback: string,
   message: string;
-  totalWeightScore: number;
+  totalWeightScore: number|null;
   allStandards?: StandardReview[];
   rejectedStandards?: StandardReview[];
 }
@@ -60,6 +60,7 @@ interface StandardReview {
   ]
 })
 export class AddIdeaComponent implements OnInit, OnDestroy {
+   @Output() saveStarted = new EventEmitter<void>();
   // Step management
   currentStep = 1;
   totalSteps = 3;
@@ -417,7 +418,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
     var aiIdeaEvaluationResult: AiIdeaEvaluationResult = {
       businessId: 0,
       generalFeedback: this.reviewResult?.generalFeedback??'',
-      totalWeightedScore: this.reviewResult?.totalWeightScore??0,
+      totalWeightedScore: this.reviewResult?.totalWeightScore??null,
       standards: []
     };
     this.reviewResult?.allStandards?.forEach((s: StandardReview) => {
@@ -437,7 +438,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
     // Add AiBusinessEvaluations fields directly to FormData
     formPayload.append('AiBusinessEvaluations.BusinessId', aiIdeaEvaluationResult.businessId.toString());
     formPayload.append('AiBusinessEvaluations.GeneralFeedback', aiIdeaEvaluationResult.generalFeedback);
-    formPayload.append('AiBusinessEvaluations.TotalWeightedScore', aiIdeaEvaluationResult.totalWeightedScore.toString());
+    formPayload.append('AiBusinessEvaluations.TotalWeightedScore', aiIdeaEvaluationResult.totalWeightedScore !== null && aiIdeaEvaluationResult.totalWeightedScore !== undefined ? aiIdeaEvaluationResult.totalWeightedScore.toString() : '');
 
     // Add each standard in the list with proper bracket notation
     aiIdeaEvaluationResult.standards?.forEach((standard, index) => {
@@ -482,7 +483,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
   }
 
 
-  private getAiTotalRate(response: AiIdeaEvaluationResult): number {
+  private getAiTotalRate(response: AiIdeaEvaluationResult): number|null {
     return response.totalWeightedScore;
 
   }
@@ -504,12 +505,12 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
     })
 
     result = {
-      isAccepted: totalWeightScore > 50,
+      isAccepted: (totalWeightScore ?? 0) > 50,
       generalFeedback: response.generalFeedback,
       totalWeightScore: totalWeightScore,
       allStandards: standards,
       rejectedStandards: standards.filter(s => s.weightContribution < (s.weight * .5)),
-      message: totalWeightScore > 50 ? "Congratulations! Your business idea meets our standards" :
+      message: (totalWeightScore ?? 0) > 50 ? "Congratulations! Your business idea meets our standards" :
         "Our AI System has reviewed your business idea and found that it doesn\'t meet the required standards for submission. Please review the feedback below and consider improving your proposal."
     };
 
@@ -530,6 +531,11 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
     this.sumbitForm(this.FormPayload(true), true);
     //this.closeModal();
   }
+  AddIdea():void{
+    this.sumbitForm(this.FormPayload(false),false);
+     //this.closeModal();
+  }
+
 
   getProgressPercentage(): number {
     return (this.currentStep / this.totalSteps) * 100;
@@ -553,6 +559,7 @@ export class AddIdeaComponent implements OnInit, OnDestroy {
             'Success'
           );
           this.showResultModal=false;
+          this.saveStarted.emit();
         } else {
           this.toastrService.error(response.message, "Error");
         }
