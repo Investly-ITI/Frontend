@@ -263,6 +263,7 @@ export class MyIdeasComponent implements OnInit, OnChanges {
            next:(response)=>{
              if(response.isSuccess){
               this.toastr.success(response.message,'success');
+              this.refresh.emit();
              }else{
               this.toastr.error(response.message,'error');
              }
