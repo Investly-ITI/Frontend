@@ -485,20 +485,45 @@ gap: 8px;
 }
 
 /* Dark Mode Adjustments */
-:host-context(.dark) .requirement-text {
-  color: var(--light-grey);
+/* Add these styles to your dark mode specific selectors */
+
+:host-context(.dark) .field-error {
+  color: #ff6b6b; /* A lighter red that's visible on dark backgrounds */
 }
 
-:host-context(.dark) .requirements-list li {
-  color: var(--light-grey);
-}
-
-:host-context(.dark) .requirements-list li.met {
-  color: var(--success);
+:host-context(.dark) .password-error {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ff6b6b;
 }
 
 :host-context(.dark) .requirements-list li:not(.met) {
-  color: var(--error-light);
+  color: #ff6b6b; /* Same as field error for consistency */
+}
+
+:host-context(.dark) .requirements-list li.met {
+  color: #6bff6b; /* A lighter green for dark mode */
+}
+
+:host-context(.dark) .requirements-list li.met i.bx-check {
+  color: #6bff6b;
+}
+
+:host-context(.dark) .requirements-list li:not(.met) i.bx-x {
+  color: #ff6b6b;
+}
+
+:host-context(.dark) .requirement-text {
+  color: #b0b0b0; /* A lighter grey for better visibility */
+}
+
+/* More specific selector for the requirements list in dark mode */
+:host-context(.dark) .password-requirements .requirements-list li {
+  color: #ff6b6b;
+}
+
+:host-context(.dark) .password-requirements .requirements-list li.met {
+  color: #6bff6b;
 }
 /*eye icon*/
 .password-input-container {

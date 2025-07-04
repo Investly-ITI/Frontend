@@ -1,0 +1,237 @@
+<!-- ========================================
+     MY IDEAS SECTION
+======================================== -->
+ <div class="tab-content">
+<div class="my-ideas-container">
+  <!-- Ideas List View -->
+  <div *ngIf="!showEditView" class="ideas-list-view">
+  <div class="ideas-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h3 class="ideas-title">My Ideas Contact Requests</h3>
+        <p class="ideas-description">Manage your submitted requests and track their status</p>
+      </div>
+      <div class="header-filter">
+        <div class="filter-wrapper">
+          <i class='bx bx-filter filter-icon'></i>
+          <div class="filter-select-container">
+            <select 
+              class="filter-select"
+              [(ngModel)]="filterByStatus" 
+              (ngModelChange)="onStatusFilterChange()"
+            >
+              <option 
+                *ngFor="let option of statusOptions" 
+                [value]="option.value"
+              >
+                {{ option.label }} ({{ getStatusCount(option.value) }})
+              </option>
+            </select>
+            <i class='bx bx-chevron-down filter-select-icon'></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ideas Grid -->
+  <div class="ideas-grid" *ngIf="FilteredRequests.length > 0; else noIdeas">
+    <div class="idea-card" *ngFor="let request of FilteredRequests"
+         [class.dropdown-open]="isDropdownOpen(request.id)">
+      <!-- Decline Alert Indicator for declined ideas -->
+      <div 
+        *ngIf="request.status === ContactRequestStatus.Declined" 
+        class="decline-alert-indicator"
+        (click)="onShowDeclineReason(request)"
+        title="View decline reason"
+      >
+        <i class='bx bx-error-circle'></i>
+      </div>
+
+      <!-- Rejection Alert Indicator for rejected-drafted ideas -->
+      <div 
+        *ngIf="request.status === ContactRequestStatus.Declined" 
+        class="rejection-alert-indicator"
+        (click)="onShowRejectionDetails(request)"
+        title="View AI rejection details"
+      >
+        <i class='bx bx-error-circle'></i>
+      </div>
+
+      <!-- Badges Container -->
+      <div class="badges-container">
+      <!-- Status Badge -->
+      <div class="status-badge" [ngClass]="getStatusClass(request.status)">
+        <i class='bx' [ngClass]="getStatusIcon(request.status)"></i>
+        <span>{{ContactRequestStatus[request.status] }}</span>
+        </div>
+      </div>
+
+      <!-- Idea Content -->
+      <div class="idea-content" >
+        <h4 class="idea-title">{{ request.businessTitle }}</h4>
+        <div class="idea-meta">
+          <div class="meta-item">
+            <i class='bx bx-category'></i>
+            <span>{{ request.business.categoryName }}</span>
+          </div>
+          <div class="meta-item">
+            <i class='bx bx-rocket'></i>
+            <span>{{InvestingStages[request.business?.stage||InvestingStages.ideation] }}</span>
+          </div>
+          <div class="meta-item">
+            <i class='bx bx-map'></i>
+            <span>{{ request.business.city?.nameEn }}, {{ request.business.government?.nameEn }}</span>
+          </div>
+          <div class="meta-item">
+            <i class='bx bx-calendar'></i>
+            <span>{{ request.createdAt | date:'MMM dd, yyyy' }}</span>
+          </div>
+          <div class="meta-item" *ngIf="request.business.capital">
+            <i class='bx bx-money'></i>
+            <span>{{ request.business.capital | number }} EGP</span>
+          </div>
+          <div class="meta-item" *ngIf="request.business?.desiredInvestmentType === DesiredInvestmentType.IndustrialExperience">
+            <i class='bx bx-briefcase'></i>
+            <span>Industrial&nbsp;Experience</span>
+          </div>
+           <div class="meta-item" *ngIf="request.status === ContactRequestStatus.Accepted ">
+            <i class='bx bx-user'></i>
+            <span>{{ request.founderName }} </span>
+          </div>
+             <div class="meta-item mb-2 " *ngIf="request.status === ContactRequestStatus.Accepted ">
+            <i class='bx bx-phone-call'></i>
+            <span>{{ request.founderPhoneNumber }} </span>
+          </div>
+           
+        </div>
+         <div class="meta-item" *ngIf="request.status === ContactRequestStatus.Accepted ">
+            <i class='bx bx-envelope'></i>
+            <span>{{ request.founderEmail }} </span>
+          </div>
+        
+        
+      </div>
+
+      <!-- Actions Dropdown -->
+      <div class="idea-actions">
+        <div class="actions-dropdown" [class.open]="isDropdownOpen(request.id)">
+          <button class="btn btn-primary btn-sm dropdown-toggle" 
+                  (click)="toggleDropdown(request.id)">
+            Actions
+          </button>
+          <div class="dropdown-menu" *ngIf="isDropdownOpen(request.id)">
+            <button class="dropdown-item primary" (click)="onViewDetails(request.id); closeDropdown()">
+              <i class='bx bx-show'></i>
+              View Details
+            </button>
+            
+            <button class="dropdown-item danger" *ngIf=" (request.status === ContactRequestStatus.Pending )" (click)="onDeleteIdea(request); closeDropdown()">
+              <i class='bx bx-trash'></i>
+              Delete Request
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Ideas State -->
+  <ng-template #noIdeas>
+    <div class="no-ideas">
+      <i class='bx bx-bulb'></i>
+      <h4 *ngIf="filterByStatus === 0; else filteredNoIdeas">No Requests Yet</h4>
+      <ng-template #filteredNoIdeas>
+        <h4> {{ getSelectedStatusLabel() }} </h4>
+      </ng-template>
+      <p *ngIf="filterByStatus === 0; else filteredMessage">You haven't submitted any request yet.</p>
+      <ng-template #filteredMessage>
+        <p>You don't have any requests with {{ getSelectedStatusLabel().toLowerCase() }} status.</p>
+      </ng-template>
+      <button class="btn btn-primary" *ngIf="filterByStatus === 0">
+        <i class='bx bx-plus'></i>
+        Add Your First Request
+      </button>
+    </div>
+  </ng-template>
+
+  <!-- Decline Reason Modal -->
+  <div class="modal-overlay" *ngIf="showDeclineModal" [class.closing]="isClosingModal" (click)="onCloseDeclineModal()">
+    <div class="modal-content" [class.closing]="isClosingModal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class='bx bx-error-circle'></i>
+          Decline Reason
+        </h3>
+        <button class="modal-close" (click)="onCloseDeclineModal()">
+          <i class='bx bx-x'></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="decline-reason-content">
+          <div class="decline-reason-icon">
+            <i class='bx bx-info-circle'></i>
+          </div>
+          <div class="decline-reason-text">
+            <p>{{ selectedDeclineReason }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteModal" [class.closing]="isClosingDeleteModal" (click)="onCloseDeleteModal()">
+    <div class="modal-content delete-modal" [class.closing]="isClosingDeleteModal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class='bx bx-trash'></i>
+          Confirm Deletion
+        </h3>
+        <button class="modal-close" (click)="onCloseDeleteModal()">
+          <i class='bx bx-x'></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="delete-confirmation-content">
+          <div class="delete-warning-icon">
+            <i class='bx bx-error-circle'></i>
+          </div>
+          <div class="delete-confirmation-text">
+            <p class="delete-message">Are you sure you want to delete this request?</p>
+            <p class="delete-warning">This action cannot be undone.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" (click)="onConfirmDelete()">
+          <i class='bx bx-trash'></i>
+          Delete Request
+        </button>
+      </div>
+    </div>
+  </div>
+
+  
+  
+ 
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading" [@fadeInOut]>
+    <div class="loading-content">
+      <div class="loading-animation">
+        <div class="loading-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+      <h4>Loading</h4>
+    
+    </div>
+  </div>
+
+ 
+</div> 
+</div>
+</div>
