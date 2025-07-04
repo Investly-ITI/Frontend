@@ -8,7 +8,7 @@
   <div class="profile-header">
     <div class="header-content">
       <div class="profile-avatar">
-<img [src]="imageUrl || (url + '/' + profileData.user.profilePicPath)" [alt]="profileData.user.firstName + ' ' + profileData.user.lastName">
+<img [src]="imageUrl || (url + '/' + profileData.user.profilePicPath) " [alt]="profileData.user.firstName + ' ' + profileData.user.lastName">
         <div class="avatar-overlay" (click)="triggerFileInput()">
           <i class='bx bx-camera'></i>
         </div>
@@ -71,12 +71,12 @@
           <li class="nav-item">
             <button 
               class="nav-button" 
-              [class.active]="activeSection === 'ideas'"
-              (click)="setActiveSection('ideas')"
+              [class.active]="activeSection === 'ContactRequests'"
+              (click)="setActiveSection('ContactRequests')"
             >
               <i class='bx bx-bulb'></i>
-              <span>Ideas</span>
-              <span class="badge">{{ ideasCount }}</span>
+              <span>Contact Requests</span>
+              <span class="badge">{{ ContactRequestCount.totalContactRequestCount }}</span>
             </button>
           </li>
           <li class="nav-item">
@@ -90,6 +90,17 @@
               <span class="badge" *ngIf="getUnreadNotificationsCount() > 0">{{ getUnreadNotificationsCount() }}</span>
             </button>
           </li>
+            <li class="nav-item">
+            <button 
+              class="nav-button" 
+              [class.active]="activeSection === 'feedback'"
+               [routerLink]="['/contact-us']"
+              (click)="setActiveSection('feedback')"
+            >
+              <i class='bx bx-comment-add'></i>
+              <span>Feedback</span>
+            </button>
+          </li>
         </ul>
       </nav>
     </div>
@@ -97,7 +108,7 @@
     <!-- ========================================
          MAIN CONTENT AREA
     ======================================== -->
-    <div class="profile-main">
+    <div class="profile-main"  >
       <!-- Information Section -->
       <app-investor-information 
         *ngIf="activeSection === 'information'"
@@ -111,14 +122,14 @@
         [securitySettings]="securitySettings"
         (securitySettingsChange)="onSecuritySettingsChange($event)"
       ></app-investor-security>
-<!-- 
+
    
-      <app-investor-ideas-request
+      <app-investor-idea-requests
         #investorIdeasRequest
-        [style.display]="activeSection === 'ideas' ? 'block' : 'none'"
-        (ideasCountChange)="onIdeasCountChange($event)"
-      ></app-investor-ideas-request>
-          -->
+        [style.display]="activeSection === 'ContactRequests' ? 'block' : 'none'"
+        (onRequestCountChange)="onIdeasCountChange($event)">
+      ></app-investor-idea-requests>
+          
 
     
       <app-investor-notifications 
@@ -127,4 +138,21 @@
   
     </div>
   </div>
+  
+
 </div> 
+
+    <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading" [@fadeInOut]>
+    <div class="loading-content">
+      <div class="loading-animation">
+        <div class="loading-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+      <h4>Loading</h4>
+    
+    </div>
+  </div>

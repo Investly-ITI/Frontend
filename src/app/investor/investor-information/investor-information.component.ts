@@ -9,6 +9,9 @@ import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 import { InvestorInvestingType,InvestingStages } from '../../_shared/enums';
 import { CountryCodeService } from '../../_services/country-code.service';
+
+
+
 @Component({
   selector: 'app-investor-information',
   imports: [CommonModule,FormsModule,ReactiveFormsModule],
@@ -49,7 +52,6 @@ private unsubscribe: Subscription[] = [];
   maxFunding = 1000000;    // 1M EGP  
   selectedFundingMin = 500;     // 5K EGP (initial minimum)
   selectedFundingMax = 100000;   // 100K EGP (initial maximum)
-  countryCodes: { code: string; country: string }[] = [];
 
    constructor(
     private fb: FormBuilder,
@@ -58,10 +60,11 @@ private unsubscribe: Subscription[] = [];
     private countryCodeService: CountryCodeService
   ) {}
    ngOnInit(): void {
-    this.countryCodes = this.countryCodeService.getCountryCodes();
     this.initializeForms();
     this.loadGovernments();
     this.setFundingValuesFromDatabase();
+   
+
    
   }
  
@@ -71,7 +74,9 @@ initializeForms(): void {
       investingType: [this.personalInfo?.investingType || '',Validators.required],
 fundingRange: [`${this.selectedFundingMin}-${this.selectedFundingMax}`],
 
-       interestedBusinessStages:[this.personalInfo?.interestedBusinessStages||'',Validators.required],
+     interestedBusinessStages: [this.personalInfo?.interestedBusinessStages  ? this.personalInfo.interestedBusinessStages.split(',').map(Number) 
+      : [], 
+  this.arrayRequiredValidator],
       user: this.fb.group({
         id: [this.personalInfo?.user?.id || 0],
         firstName: [this.personalInfo?.user?.firstName || '', Validators.required],
@@ -100,6 +105,8 @@ fundingRange: [`${this.selectedFundingMin}-${this.selectedFundingMax}`],
      if (this.personalInfo?.user.governmentId) {
       this.loadCities(this.personalInfo.user.governmentId,selectedCityId);
     }
+     const selectedStageIds = this.formData.get('interestedBusinessStages')?.value || [];
+this.selectedStages = this.availableStages.filter(stage => selectedStageIds.includes(stage.value));
   }
 
 
@@ -201,7 +208,11 @@ setFundingValuesFromDatabase(): void {
 
   for (const key in rawData) {
     if (key !== 'user') {
-      formPayload.append(`${key}`, rawData[key]);
+     if (key === 'interestedBusinessStages' && Array.isArray(rawData[key])) {
+  formPayload.append(key, rawData[key].join(','));
+} else {
+  formPayload.append(key, rawData[key]);
+}
     }
   }
 
@@ -217,7 +228,7 @@ setFundingValuesFromDatabase(): void {
     next: (res) => {
    if(res.isSuccess){
       this.isSaving = false;
-      this.saveMessage = 'ID documentation updated successfully!' 
+      this.saveMessage = 'Profile updated successfully!' 
     
           setTimeout(() => {
             this.saveMessage = '';
@@ -227,7 +238,7 @@ setFundingValuesFromDatabase(): void {
        else
        {
          this.isSaving = false;
-            this.saveMessage = 'ID documentation Failed!' 
+            this.saveMessage = 'Profile update Failed!' 
        }
     },
     error: () => {
@@ -386,6 +397,10 @@ submitDocumentation(): void {
     const percentage = ((value - this.minFunding) / (this.maxFunding - this.minFunding)) * 100;
     return Math.max(0, Math.min(100, percentage));
   }
+    private arrayRequiredValidator(control: any) {
+    const value = control.value;
+    return value && Array.isArray(value) && value.length > 0 ? null : { required: true };
+  }
 
  private IsAgeValid(control: any) {
     if (!control.value) return null;
@@ -402,6 +417,33 @@ submitDocumentation(): void {
 
     return age < 21 ? { ageRestriction: true } : null;
   }
+  toggleDropdown() {
+  this.dropdownOpen = !this.dropdownOpen;
+}
+
+closeDropdown() {
+  setTimeout(() => this.dropdownOpen = false, 200);
+}
+
+selectStage(stage: any) {
+  if (!this.selectedStages.find(s => s.value === stage.value)) {
+    this.selectedStages.push(stage);
+    this.updateFormControl();
+  }
+}
+
+removeStage(stage: any, event: Event) {
+  event.stopPropagation();
+  this.selectedStages = this.selectedStages.filter(s => s.value !== stage.value);
+  this.updateFormControl();
+}
+
+updateFormControl() {
+  this.formData.get('interestedBusinessStages')?.setValue(this.selectedStages.map(s => s.value));
+  this.formData.get('interestedBusinessStages')?.markAsTouched();
+}
+
+
 
   ngOnDestroy(): void {
     this.unsubscribe.forEach((sb) => sb.unsubscribe());

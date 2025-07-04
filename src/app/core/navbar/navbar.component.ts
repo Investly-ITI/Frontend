@@ -146,11 +146,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
   // Navigate to notifications section in founder profile
   navigateToNotifications(): void {
     // Navigate to notifications for all authenticated users
-    if (this.isAuthenticated && this.currentUser) {
-      this.router.navigate(['/profile'], { queryParams: { section: 'notifications' } });
-    }
+    
+    if (this.currentUser?.userType == UserType.Founder) {
+      this.router.navigate(['/founder/profile'], { queryParams: { section: 'notifications' } });
+        // For other user types, you can implement different navigation logic
+    } else if (this.currentUser?.userType == UserType.Investor) {
+    this.router.navigate(['/investor/profile'], { queryParams: { section: 'notifications' } });
     
     this.closeDropdowns();
     this.isMobileMenuOpen = false;
   }
+
+}
 }

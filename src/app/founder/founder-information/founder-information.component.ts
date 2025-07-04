@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProfileService } from '../_services/profile.service';
@@ -49,7 +49,9 @@ export class FounderInformationComponent implements OnInit, OnChanges {
     private profileService: ProfileService,
     private toastr: ToastrService,
     private governorateService: GovernrateService,
-    private countryCodeService: CountryCodeService
+    private countryCodeService: CountryCodeService,
+    private cdRef: ChangeDetectorRef
+
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -71,75 +73,67 @@ export class FounderInformationComponent implements OnInit, OnChanges {
     this.loadPreviousIdImages();
     this.loadProfileData();
   }
-  private loadProfileData(): void {
-    const sub = this.profileService.getProfileData().subscribe({
-      next: (response) => {
-        if (response.isSuccess && response.data) {
-          const founder = response.data;
-          const user = founder.user;
-          
-          // Parse phone number into country code and number
-          let countryCode = '+20'; // default to Egypt
-          let phoneNumber = user.phoneNumber || '';
-          
-          // Check if phone number starts with a country code
-          if (phoneNumber) {
-            // Common country codes we support
-            const countryCodes = ['+20', '+1', '+44', '+49', '+33', '+39', '+34', '+86', '+81', '+91'];
-            
-            // Find if phone number starts with any known country code
-            const matchedCode = countryCodes.find(code => phoneNumber.startsWith(code));
-            
-            if (matchedCode) {
-              countryCode = matchedCode;
-              phoneNumber = phoneNumber.substring(matchedCode.length);
-            }
-          }
+private async loadProfileData(): Promise<void> {
+  try {
+    // Load governorates first
+    await this.loadGovernorates();
 
-          // Update the personalInfo with the fetched data
-          this.personalInfo = {
-            ...this.personalInfo,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
-            countryCode: user.countryCode || '+20', // Default to Egypt if null
-            phoneNumber: user.phoneNumber || '',
-            nationalId: user.nationalId,
-            gender: user.gender,
-            government: user.government?.nameEn || '',
-            governmentId: user.governmentId,
-            city: user.city?.nameEn || '',
-            cityId: user.cityId,
-            address: user.address,
-            frontIdPicPath: user.frontIdPicPath,
-            backIdPicPath: user.backIdPicPath
-          };
+    const response = await this.profileService.getProfileData().toPromise();
+    
+    if (response?.isSuccess && response.data) {
+      const founder = response.data;
+      const user = founder.user;
 
-          // Load governorates and then set the city
-          this.loadGovernorates().then(() => {
-            if (user.governmentId) {
-              this.onGovernorateChange(user.governmentId);
+      // Update personalInfo with user data
+      this.personalInfo = {
+        ...this.personalInfo,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
+        countryCode: user.countryCode || '+20',
+        phoneNumber: user.phoneNumber || '',
+        nationalId: user.nationalId,
+        gender: user.gender,
+        government: user.government?.nameEn || '',
+        governmentId: user.governmentId,
+        city: user.city?.nameEn || '',
+        cityId: user.cityId,
+        address: user.address,
+        frontIdPicPath: user.frontIdPicPath,
+        backIdPicPath: user.backIdPicPath
+      };
+
+      // Force UI update for government dropdown
+      if (user.governmentId) {
+        setTimeout(() => {
+          this.personalInfo.governmentId = user.governmentId;
+          this.onGovernorateChange(user.governmentId).then(() => {
+            if (user.cityId) {
+              setTimeout(() => {
+                this.personalInfo.cityId = user.cityId;
+                this.cdRef.detectChanges(); // Add ChangeDetectorRef to constructor
+              }, 100);
             }
           });
-          
-          // Load images if we're on the documentation tab
-          if (this.activeTab === 'documentation') {
-            this.loadPreviousIdImages();
-          }
-          
-          // Notify parent component of changes
-          this.personalInfoChange.emit(this.personalInfo);
-        }
-      },
-      error: (err) => {
-        console.error('Error loading profile data:', err);
-        this.toastr.error('Failed to load profile data');
+        }, 0);
       }
-    });
-    this.unsubscribe.push(sub);
-  }
 
+      // Load images if on documentation tab
+      if (this.activeTab === 'documentation') {
+        this.loadPreviousIdImages();
+      }
+
+      this.personalInfoChange.emit(this.personalInfo);
+    }
+  } catch (err) {
+    console.error('Error loading profile data:', err);
+    this.toastr.error('Failed to load profile data');
+  }
+}
+  compareById(a: any, b: any): boolean {
+    return a === b;
+  }
   private loadPreviousIdImages(): void {
     // Check if we have previous image paths in personalInfo
     if (this.personalInfo?.frontIdPicPath) {
@@ -490,49 +484,41 @@ export class FounderInformationComponent implements OnInit, OnChanges {
   governments: any[] = []; 
   cities: any[] = [];     
 
-  onGovernorateChange(governorateId: number | null) {
-    if (!governorateId) {
-      this.citiesByGovernorate = [];
-      this.selectedGovernorate = false;
-      this.personalInfo.cityId = null;
-      this.personalInfo.city = '';
-      return;
-    }
-
-    const subCity = this.governorateService.getCitiesByGovernrateId(governorateId).subscribe({
-      next: (response) => {
-        if (response.isSuccess) {
-          this.citiesByGovernorate = response.data;
-          this.selectedGovernorate = true;
-          
-          // If we have a cityId from the profile data, select it
-          if (this.personalInfo.cityId) {
-            const selectedCity = this.citiesByGovernorate.find(c => c.id === this.personalInfo.cityId);
-            if (selectedCity) {
-              this.personalInfo.city = selectedCity.nameEn;
-            }
-          }
-          // Otherwise, if there's only one city, select it automatically
-          else if (this.citiesByGovernorate.length === 1) {
-            this.onCityChange(this.citiesByGovernorate[0].id);
-          }
-        }
-      }, 
-      error: (err) => {
-        console.log("Error loading cities", err);
-        this.toastr.error('Failed to load cities');
-      }
-    });
-    this.unsubscribe.push(subCity);
-
-    // Update the government name in personalInfo
-    const selectedGov = this.governorates.find(g => g.id === governorateId);
-    if (selectedGov) {
-      this.personalInfo.government = selectedGov.nameEn;
-      this.personalInfo.governmentId = selectedGov.id;
-    }
-    this.onFieldChange();
+async onGovernorateChange(governorateId: number | null): Promise<void> {
+  if (!governorateId) {
+    this.citiesByGovernorate = [];
+    this.selectedGovernorate = false;
+    this.personalInfo.cityId = null;
+    this.personalInfo.city = '';
+    return;
   }
+
+  try {
+    const response = await this.governorateService.getCitiesByGovernrateId(governorateId).toPromise();
+    
+    if (response?.isSuccess) {
+      this.citiesByGovernorate = response.data;
+      this.selectedGovernorate = true;
+      
+      // Update government info
+      const selectedGov = this.governorates.find(g => g.id === governorateId);
+      if (selectedGov) {
+        this.personalInfo.government = selectedGov.nameEn;
+        this.personalInfo.governmentId = selectedGov.id;
+      }
+      
+      this.onFieldChange();
+      
+      // If there's only one city, select it automatically
+      if (this.citiesByGovernorate.length === 1) {
+        this.onCityChange(this.citiesByGovernorate[0].id);
+      }
+    }
+  } catch (err) {
+    console.log("Error loading cities", err);
+    this.toastr.error('Failed to load cities');
+  }
+}
 
   onCityChange(cityId: number | null) {
     if (!cityId) {
