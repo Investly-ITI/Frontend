@@ -10,6 +10,7 @@ import { Governorate } from '../../../_models/governorate';
 import { GovernrateService } from '../../../_services/governorate.service';
 import { City } from '../../../_models/city';
 import { Subscription } from 'rxjs';
+import { CountryCodeService } from '../../../_services/country-code.service';
 
 @Component({
   selector: 'app-viewdetails',
@@ -40,12 +41,13 @@ frontIdImageUrl: string | null = null;
   
       Cities: City[] = [];
       governorates: Governorate[] = [];
-   
+      countryName: string = '';
   constructor(
-  private fb: FormBuilder,
-  private toastrService: ToastrService,
-  private governorateService: GovernrateService
-) { }
+    private fb: FormBuilder,
+    private toastrService: ToastrService,
+    private governorateService: GovernrateService,
+    private countryCodeService: CountryCodeService
+  ) { }
  
    ngOnChanges(): void {
   if (this.selectedEntity) {
@@ -92,8 +94,17 @@ initializeForm(): void {
       governmentId: [this.selectedEntity?.user?.governmentId || ''],
       cityId: [this.selectedEntity?.user?.cityId|| ''],
       address: [this.selectedEntity?.user?.address || ''],
+      countryCode: [this.selectedEntity?.user?.countryCode || ''],
     })
   });
+  // Set countryName for display using CountryCodeService
+    const code = this.selectedEntity?.user?.countryCode;
+    if (code) {
+      const found = this.countryCodeService.getCountryCodes().find(c => c.code === code);
+      this.countryName = found ? found.country : '';
+    } else {
+      this.countryName = '';
+    }
   if (this.modalMode === 'view') {
     this.formData.disable();
   }

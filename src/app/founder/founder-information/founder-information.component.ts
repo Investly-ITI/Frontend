@@ -9,6 +9,7 @@ import { Governorate } from '../../_models/governorate';
 import { City } from '../../_models/city';
 import { GovernrateService } from '../../_services/governorate.service';
 import { environment } from '../../../environments/environment';
+import { CountryCodeService } from '../../_services/country-code.service';
 
 interface PersonalInfo {
     firstName: string;
@@ -42,10 +43,13 @@ export class FounderInformationComponent implements OnInit, OnChanges {
   selectedGovernorate: boolean = false;
   documentationMessage = '';
 
+  countryCodes: { code: string; country: string }[] = [];
+
   constructor(
     private profileService: ProfileService,
     private toastr: ToastrService,
     private governorateService: GovernrateService,
+    private countryCodeService: CountryCodeService,
     private cdRef: ChangeDetectorRef
 
   ) {}
@@ -58,6 +62,7 @@ export class FounderInformationComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
+    this.countryCodes = this.countryCodeService.getCountryCodes();
     this.toastr.toastrConfig.positionClass = 'toast-top-right';
     this.toastr.toastrConfig.timeOut = 5000;
     this.toastr.toastrConfig.closeButton = true;
@@ -532,4 +537,4 @@ async onGovernorateChange(governorateId: number | null): Promise<void> {
 
 
 
-} 
+}
