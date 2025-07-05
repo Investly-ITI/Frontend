@@ -50,3 +50,11 @@ export enum NotificationsStatus {
      Funding=2,
      Both=3
  }
+
+ export enum TimeframeType {
+  LastMonth = 1,
+  Last3Months = 2,
+  Last6Months = 3,
+  LastYear = 4,
+  AllTime = 5
+}
