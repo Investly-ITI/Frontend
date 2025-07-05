@@ -1,5 +1,6 @@
 import { BusinessIdeaStatus, InvestingStages } from "../_shared/enums"; 
 import { AiIdeaEvaluationResult } from "./aiIdeaEvaluationResult";
+import { ContactRequestCountsDto, InvestorContactItem } from "./contact-request";
 import { StandardAnswers } from "./standardanswers";
 import { Standard } from "./standards";
 
@@ -49,6 +50,7 @@ export class BusinessDto {
         public imageFiles?:any,
         public aiBusinessEvaluations?:AiIdeaEvaluationResult,
         public imagePaths?:string[],
+        public investorContactRequests?:InvestorContactItem[],
     ) { }
 }
 

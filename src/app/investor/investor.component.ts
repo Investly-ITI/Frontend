@@ -1,6 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { InvestorIdeasRequestComponent } from './investor-ideas-request/investor-ideas-request.component';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProfileService } from '../investor/_services/profile.service';
 import { environment } from '../../environments/environment';
 import { InvestorInformationComponent } from "./investor-information/investor-information.component";
@@ -12,6 +11,9 @@ import { ToastrService } from 'ngx-toastr';
 import { getStatusLabel } from '../_shared/utils/enum.utils';
 import { Status } from '../_shared/enums';
 import { NotificationService } from '../_services/notification.service';
+import { InvestorIdeaRequestsComponent } from "./investor-idea-requests/investor-idea-requests.component";
+import { ContactRequestCountsDto } from '../_models/contact-request';
+
 
 interface SecuritySettings {
   twoFactorEnabled: boolean;
@@ -23,16 +25,16 @@ interface SecuritySettings {
 }
 @Component({
   selector: 'app-investor',
-  imports: [CommonModule,InvestorInformationComponent, InvestorSecurityComponent, InvestorIdeasRequestComponent, InvestorNotificationsComponent],
+  imports: [CommonModule, InvestorInformationComponent, InvestorSecurityComponent, InvestorNotificationsComponent, InvestorIdeaRequestsComponent,RouterLink],
   templateUrl: './investor.component.html',
-  styleUrl: './investor.component.css'
+  styleUrl: './investor.component.css',
 })
 export class InvestorComponent {
  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
-  @ViewChild('investorIdeasRequest') InvestorIdeasRequestComponent!: InvestorIdeasRequestComponent;
+  @ViewChild('investorIdeasRequest') InvestorIdeasRequestComponent!: InvestorIdeaRequestsComponent;
 
-  activeSection: 'information' | 'security' | 'ideas' | 'notifications' = 'information';
-  ideasCount: number = 0;
+  activeSection: 'information' | 'security' | 'ContactRequests' | 'notifications'|'feedback' = 'information';
+  ContactRequestCount: ContactRequestCountsDto = { totalContactRequestCount: 0 };
   url=environment.apiUrl;
   // Security alert indicator
   showSecurityAlert = true; // Set to true to show red exclamation mark next to Security
@@ -57,25 +59,17 @@ export class InvestorComponent {
   ) {}
     unreadCount: number = 0;
   private unreadCountSub?: Subscription;
+isLoading = false; 
 
   ngOnInit(): void {
-    // Handle query parameters to set active section and tab
-   this.getProfileData();
-  
+    this.getProfileData();
+    this.getRequestsCount();
+   
     this.activatedRoute.queryParams.subscribe(params => {
       if (params['section']) {
         this.activeSection = params['section'];
       }
       
-      // If we're on ideas section and there's a tab parameter, pass it to the ideas component
-      if (this.activeSection === 'ideas' && params['tab'] && this.InvestorIdeasRequestComponent) {
-        // Set the active tab in the ideas component
-        setTimeout(() => {
-          if (this.InvestorIdeasRequestComponent) {
-            this.InvestorIdeasRequestComponent.activeTab = params['tab'];
-          }
-        }, 0);
-      }
     });
      // Subscribe to shared unread count observable
     this.unreadCountSub = this.notificationService.getUnreadCount$().subscribe(count => {
@@ -86,7 +80,38 @@ export class InvestorComponent {
   }
 
 getProfileData():void{ 
+  this.isLoading = true;
+  this.subscriptions.push(
+    this.profileService.getProfileData().subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res.isSuccess && res.data) {
+
+          this.profileData = res.data;
+          console.log(this.profileData);
+          
+          this.securitySettings = {
+            twoFactorEnabled: false,
+            emailNotifications: false,
+            smsNotifications: false,
+            loginAlerts: false,
+            lastPasswordChange: "1-1-2000",
+            accountStatus: getStatusLabel(this.profileData.user.status)
+          }
+          this.showSecurityAlert = this.profileData.user.status != Status.Active;
+        } else {
+          console.error('Failed to fetch profile data', res.message);
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching profile data', err);
+      }
+    })
+  );
+
+  // Fetch contact requests count
 const sub = this.profileService.getProfileData().subscribe({
+ 
     next: (res) => {
       if (res.isSuccess && res.data) {
         this.profileData = res.data;
@@ -109,12 +134,29 @@ const sub = this.profileService.getProfileData().subscribe({
       console.error('Error fetching profile data', err);
     }
   });
+ 
 
 
  }
 
+ getRequestsCount()
+ {
+   const sub1=this.profileService.GetContactRequestsCount().subscribe({
+    next: (res) => {
+      if (res.isSuccess ) {
+        this.ContactRequestCount.totalContactRequestCount = +res.data.totalContactRequestCount;
+       
+      } else {
+        console.error('Failed to fetch profile data', res.message);
+      }
+    },
+    error: (err) => {
+      console.error('Error fetching profile data', err);
+    }
+  })
+ }
 
-  setActiveSection(section: 'information' | 'security' | 'ideas' | 'notifications'): void {
+  setActiveSection(section: 'information' | 'security' | 'ContactRequests' | 'notifications'|'feedback'): void {
     this.activeSection = section;
   }
 
@@ -204,7 +246,7 @@ const sub = this.profileService.getProfileData().subscribe({
   }
 
   onIdeasCountChange(count: number): void {
-    this.ideasCount = count;
+    this.ContactRequestCount.totalContactRequestCount = count;
   }
 
   onNotificationsChange(notifications: any[]): void {

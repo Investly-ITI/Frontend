@@ -68,7 +68,7 @@
               </div>
             </button>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" *ngIf="showIdeasTab">
             <button 
               class="nav-button" 
               [class.active]="activeSection === 'ideas'"
@@ -114,6 +114,7 @@
 
       <!-- Ideas Section -->
       <app-founder-ideas 
+      *ngIf="showIdeasTab"
         #founderIdeas
         [style.display]="activeSection === 'ideas' ? 'block' : 'none'"
         (ideasCountChange)="onIdeasCountChange($event)"

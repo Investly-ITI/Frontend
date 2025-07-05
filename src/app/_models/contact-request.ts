@@ -1,6 +1,8 @@
 // investor-contact.interfaces.ts
 
 import { ContactRequestStatus } from "../_shared/enums";
+import { BusinessDto } from "./businesses";
+import { Founder } from "./founder";
 
 export interface InvestorContactRequest {
   pageNumber?: number;
@@ -16,6 +18,8 @@ export interface InvestorContactRequest {
 export interface InvestorContactItem {
   id: number;
   founderName: string;
+  founderEmail: string;
+  founderPhoneNumber: string;
   founderId: number;
   investorName: string;
   investorId: number;
@@ -24,6 +28,7 @@ export interface InvestorContactItem {
   status: number;
   declineReason: string | null;
   createdAt: string | null;
+  business: BusinessDto;
 }
 
 export interface InvestorContactResponse {
@@ -40,5 +45,9 @@ export interface InvestorContactResponse {
 export interface UpdateContactRequestStatusDto {
   contactRequestId: number;
   newStatus: ContactRequestStatus;
-  declineReason?: string;  
+  declineReason?: string;
+}
+export interface ContactRequestCountsDto {
+  totalContactRequestCount: number;
+
 }
