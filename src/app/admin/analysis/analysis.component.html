@@ -1,0 +1,204 @@
+<div class="dashboard-container" [ngClass]="{'dark': isDarkMode}">
+
+  <div class="dashboard-header animate__animated animate__fadeIn mb-4 d-flex align-items-center justify-content-between">
+    <h1 class="mb-0"><i class="cil-chart"></i> Analysis Dashboard</h1>
+    </div>
+
+  <div class="row summary-cards animate__animated animate__fadeInUp">
+    <div class="col-md-3">
+      <div class="card card-1">
+        <div class="card-body">
+          <div class="card-icon"><i class="cil-lightbulb"></i></div>
+          <h5 class="card-title">Total Ideas</h5>
+          <h2 class="card-value">{{counts.totalActiveBusinessIdeas || 0}}</h2>
+          <p class="card-change"><i class="cil-arrow-top text-success"></i></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-2">
+        <div class="card-body">
+          <div class="card-icon"><i class="cil-user"></i></div>
+          <h5 class="card-title">Total Founders</h5>
+          <h2 class="card-value">{{counts.totalActiveFounders || 0}}</h2>
+          <p class="card-change"><i class="cil-arrow-top text-success"></i></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-3">
+        <div class="card-body">
+          <div class="card-icon"><i class="cil-people"></i></div>
+          <h5 class="card-title">Total Investors</h5>
+          <h2 class="card-value">{{counts.totalActiveInvestors || 0}}</h2>
+          <p class="card-change"><i class="cil-arrow-bottom text-danger"></i></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-4">
+        <div class="card-body">
+          <div class="card-icon"><i class="cil-handshake"></i></div>
+          <h5 class="card-title">Total Accepted Contact Requests</h5>
+          <h2 class="card-value">{{counts.totalAcceptedContactRequests || 0}}</h2>
+          <p class="card-change"><i class="cil-arrow-top text-success"></i></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row main-charts">
+    <div class="col-lg-8">
+      <div class="card chart-card animate__animated animate__fadeInLeft">
+        <div class="card-header">
+          <h5><i class="cil-chart-line"></i> Activity Overview</h5>
+          <div class="card-actions">
+            <button class="btn btn-sm"
+                    [ngClass]="{'btn-primary': selectedTimeframe === TimeframeType.LastMonth, 'btn-outline-secondary': selectedTimeframe !== TimeframeType.LastMonth}"
+                    (click)="fetchTimeAnalytics(TimeframeType.LastMonth)">Last Month</button>
+            <button class="btn btn-sm"
+                    [ngClass]="{'btn-primary': selectedTimeframe === TimeframeType.Last3Months, 'btn-outline-secondary': selectedTimeframe !== TimeframeType.Last3Months}"
+                    (click)="fetchTimeAnalytics(TimeframeType.Last3Months)">Last 3 Months</button>
+            <button class="btn btn-sm"
+                    [ngClass]="{'btn-primary': selectedTimeframe === TimeframeType.Last6Months, 'btn-outline-secondary': selectedTimeframe !== TimeframeType.Last6Months}"
+                    (click)="fetchTimeAnalytics(TimeframeType.Last6Months)">Last 6 Months</button>
+            <button class="btn btn-sm"
+                    [ngClass]="{'btn-primary': selectedTimeframe === TimeframeType.LastYear, 'btn-outline-secondary': selectedTimeframe !== TimeframeType.LastYear}"
+                    (click)="fetchTimeAnalytics(TimeframeType.LastYear)">Last Year</button>
+            <button class="btn btn-sm"
+                    [ngClass]="{'btn-primary': selectedTimeframe === TimeframeType.AllTime, 'btn-outline-secondary': selectedTimeframe !== TimeframeType.AllTime}"
+                    (click)="fetchTimeAnalytics(TimeframeType.AllTime)">All Time</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <canvas baseChart
+            [data]="timeAnalyticsChartData"
+            type="bar"
+            [options]="barChartOptions"
+          ></canvas>
+        </div>
+      </div>
+        <br/> <br/> 
+      <div class="card chart-card animate__animated animate__fadeInLeft mb-4">
+        <div class="card-header">
+          <h5><i class="cil-calendar"></i> Monthly Accepted Contact Requests</h5>
+        </div>
+        <div class="card-body">
+          <canvas baseChart
+            [data]="monthlyContactRequestsChartData"
+            type="line"
+            [options]="lineChartOptions"
+          ></canvas>
+        </div>
+      </div>
+<!-- 
+      <div class="card chart-card animate__animated animate__fadeInLeft">
+        <div class="card-header">
+          <h5><i class="cil-money"></i> Ideas by Investment Type</h5>
+        </div>
+        <div class="card-body">
+          <canvas baseChart
+            [data]="ideasByInvestmentTypeChartData"
+            type="polarArea"
+            [options]="polarAreaChartOptions"
+          ></canvas>
+        </div>
+      </div> -->
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card chart-card animate__animated animate__fadeInRight">
+        <div class="card-header">
+          <h5><i class="cil-tags"></i> Ideas by Category</h5>
+        </div>
+        <div class="card-body">
+          <canvas baseChart
+            [data]="ideasByCategoryChartData"
+            type="doughnut"
+            [options]="doughnutChartOptions"
+          ></canvas>
+        </div>
+      </div>
+
+      <div class="card chart-card animate__animated animate__fadeInRight">
+        <div class="card-header">
+          <h5><i class="cil-flag-alt"></i> Ideas by Stage</h5>
+        </div>
+        <div class="card-body">
+          <canvas baseChart
+            [data]="ideasByStageChartData"
+            type="pie"
+            [options]="pieChartOptions"
+          ></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row secondary-charts">
+    <div class="col-md-6">
+      <div class="card chart-card animate__animated animate__fadeInUp">
+        <div class="card-header">
+          <h5><i class="cil-star"></i> Most Active Investors</h5>
+        </div>
+        <div class="card-body">
+          <canvas baseChart
+            [data]="mostActiveInvestorsChartData"
+            type="bar"
+            [options]="horizontalBarChartOptions"
+          ></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card chart-card animate__animated animate__fadeInUp">
+        <div class="card-header">
+          <h5><i class="cil-thumb-up"></i> Most Supported Founders</h5>
+        </div>
+        <div class="card-body">
+          <canvas baseChart
+            [data]="mostSupportedFoundersChartData"
+            type="bar"
+            [options]="horizontalBarChartOptions"
+          ></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card chart-card animate__animated animate__fadeInUp">
+        <div class="card-header">
+          <h5><i class="cil-location-pin"></i> User Counts by Government</h5>
+        </div>
+        <div class="card-body">
+          <canvas baseChart
+            [data]="userCountsByGovernmentChartData"
+            type="bar"
+            [options]="barChartOptions"
+          ></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card chart-card animate__animated animate__fadeInUp">
+        <div class="card-header">
+          <h5><i class="cil-ai"></i> Avg AI Rate by Category</h5>
+        </div>
+        <div class="card-body">
+          <canvas baseChart
+            [data]="avgAiRateByCategoryChartData"
+            type="bar"
+            [options]="barChartOptions"
+          ></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- 
+  <ngx-spinner bdColor="rgba(0, 0, 0, 0)" size="large" color="var(--blue)" type="ball-circus" [fullScreen]="false">
+    <p [style.color]="isDarkMode ? 'var(--light2)' : 'var(--blue)'"> Loading... </p>
+  </ngx-spinner> -->
+
+</div>

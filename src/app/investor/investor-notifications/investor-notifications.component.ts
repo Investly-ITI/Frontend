@@ -22,6 +22,8 @@ export class InvestorNotificationsComponent {
   pageNumber: number = 1;
   pageSize: number = 10;
   totalCount: number = 0;
+    isSaving = false;
+  saveMessage = '';
 
     constructor(private notificationService: NotificationService) {}
   ngOnInit(): void {
@@ -70,11 +72,26 @@ export class InvestorNotificationsComponent {
 
   
   deleteNotification(notificationId: number): void {
+    this.isSaving = true;
     this.notificationService.softDeleteNotification(notificationId).subscribe({
       next: (res) => {
-        if (res.isSuccess) {
+             this.isSaving = false;
+        if (res.isSuccess) {  
+        
+             this.saveMessage = 'Notifications Deleted successfully';
+              setTimeout(() => {
+            this.saveMessage = '';
+            
+          }, 3000);
+        
           this.notifications = this.notifications.filter(n => n.id !== notificationId);
         } else {
+           this.saveMessage = 'Notifications Deleted failed';
+            setTimeout(() => {
+            this.saveMessage = '';
+            
+          }, 3000);
+
         }
       },
       error: () => {

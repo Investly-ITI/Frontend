@@ -10,6 +10,7 @@ import { Gender } from '../../_shared/general';
 import { JwtService } from '../../_services/jwt.service';
 import { InvestorInvestingType, InvestingStages } from '../../_shared/enums';
 import { ToastrService } from 'ngx-toastr';
+import { CountryCodeService } from '../../_services/country-code.service';
 
 @Component({
   selector: 'app-signup',
@@ -37,20 +38,8 @@ export class SignupComponent implements OnInit, OnDestroy {
   nationalCardBack: File | null = null;
 
   // Country codes for phone number (simplified)
-  countryCodes = [
-    { code: '+1', country: 'United States' },
-    { code: '+20', country: 'Egypt' },
-    { code: '+44', country: 'United Kingdom' },
-    { code: '+49', country: 'Germany' },
-    { code: '+33', country: 'France' },
-    { code: '+39', country: 'Italy' },
-    { code: '+34', country: 'Spain' },
-    { code: '+86', country: 'China' },
-    { code: '+81', country: 'Japan' },
-    { code: '+91', country: 'India' }
-  ];
-
-  selectedCountryCode = this.countryCodes.find(c => c.code === '+20');
+  countryCodes: { code: string, country: string }[] = [];
+  selectedCountryCode: { code: string, country: string } | undefined;
 
   // Investment options
   investmentTypes = [
@@ -103,9 +92,12 @@ export class SignupComponent implements OnInit, OnDestroy {
     , private Jwtservice: JwtService
     , private toastr:ToastrService
     , private router:Router
+    , private countryCodeService: CountryCodeService
   ) { }
 
   ngOnInit(): void {
+    this.countryCodes = this.countryCodeService.getCountryCodes();
+    this.selectedCountryCode = this.countryCodes.find(c => c.country === 'Egypt') || this.countryCodes[0];
     this.initializeForms();
     this.checkDarkMode();
     this.startCarousel();
@@ -162,12 +154,12 @@ export class SignupComponent implements OnInit, OnDestroy {
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       dateOfBirth: ['', [Validators.required, this.ageValidator]],
-      countryCode: [`${this.selectedCountryCode?.code} ${this.selectedCountryCode?.country}`, Validators.required],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{8,15}$/)]],
+      countryCode: [this.selectedCountryCode?.code, Validators.required],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{8,15}$/)]],
       address: ['', Validators.required],
       governmentId: ['', Validators.required],
       cityId: ['', Validators.required],
-      nationalId: ['', [Validators.required, Validators.pattern(/^\d{14}$/)]],
+      nationalId: ['', [Validators.required, Validators.pattern(/^[0-9]{14}$/)]],
       gender: ['', Validators.required],
       password: ['', [Validators.required,
         //Validators.minLength(8),
@@ -624,4 +616,4 @@ export class SignupComponent implements OnInit, OnDestroy {
   navigateToHome(): void {
     this.router.navigate(['/']);
   }
-} 
+}

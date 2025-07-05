@@ -36,7 +36,7 @@
   <!-- Ideas Grid -->
   <div class="ideas-grid" *ngIf="filteredIdeas.length > 0; else noIdeas">
     <div class="idea-card" *ngFor="let idea of filteredIdeas"
-         [class.dropdown-open]="isDropdownOpen(idea.id)">
+         [class.dropdown-open]="isDropdownOpen(idea.id.toString())">
       <!-- Decline Alert Indicator for declined ideas -->
       <div 
         *ngIf="idea.status === 'declined'" 
@@ -100,21 +100,21 @@
 
       <!-- Actions Dropdown -->
       <div class="idea-actions">
-        <div class="actions-dropdown" [class.open]="isDropdownOpen(idea.id)">
+        <div class="actions-dropdown" [class.open]="isDropdownOpen(idea.id.toString())">
           <button class="btn btn-primary btn-sm dropdown-toggle" 
-                  (click)="toggleDropdown(idea.id)">
+                  (click)="toggleDropdown(idea.id.toString())">
             Actions
           </button>
-          <div class="dropdown-menu" *ngIf="isDropdownOpen(idea.id)">
+          <div class="dropdown-menu" *ngIf="isDropdownOpen(idea.id.toString())">
             <button class="dropdown-item primary" (click)="onViewDetails(idea); closeDropdown()">
               <i class='bx bx-show'></i>
               View Details
             </button>
-            <button class="dropdown-item success" (click)="onSubmitIdea(idea); closeDropdown()"
+            <!-- <button class="dropdown-item success" (click)="onSubmitIdea(idea); closeDropdown()"
                     *ngIf="idea.status === 'draft'">
               <i class='bx bx-paper-plane'></i>
               Submit for Review
-            </button>
+            </button> -->
             <button class="dropdown-item info" (click)="onShowContactRequests(idea); closeDropdown()"
                     *ngIf="idea.status === 'approved' && getContactRequestsCount(idea) > 0">
               <i class='bx bx-envelope'></i>
@@ -351,13 +351,13 @@
       </div>
       
       <div class="modal-body">
-        <p class="modal-description">{{ reviewResult?.message }}</p>
+        <p class="modal-description">{{ reviewResult?.generalFeedback }}</p>
         
-        <div class="standards-list" *ngIf="!reviewResult?.isAccepted && reviewResult?.standards">
+        <div class="standards-list" *ngIf=" !reviewResult?.isAccepted&& (reviewResult?.rejectedStandards?.length ?? 0) > 0">
           <h4>Standards Not Met:</h4>
           <ul>
-            <li *ngFor="let standard of reviewResult?.standards; let i = index">
-              <strong>{{ i + 1 }}.</strong> {{ standard }}
+            <li *ngFor="let standard of reviewResult?.rejectedStandards; let i = index">
+              <strong>{{ i + 1 }}.</strong> {{ standard.standard }}
             </li>
           </ul>
         </div>
@@ -377,7 +377,7 @@
         <div class="button-group" *ngIf="!reviewResult?.isAccepted && currentAction === 'submit'">
           <button 
             class="btn btn-secondary" 
-            (click)="saveAsDraft()"
+           
           >
             <i class='bx bx-save'></i>
             Save as Draft

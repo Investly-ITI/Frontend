@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { getStatusLabel } from '../_shared/utils/enum.utils';
 import { Status } from '../_shared/enums';
+import { AuthService } from '../_services/auth.service';
 
 interface ProfileData {
   personalInfo: {
@@ -67,6 +68,8 @@ export class FounderComponent implements OnInit {
 
   activeSection: 'information' | 'security' | 'ideas' | 'notifications' = 'information';
   ideasCount: number = 0;
+  subscribe: Subscription[] = [];
+  showIdeasTab:boolean = false;
 
 
   // Security alert indicator
@@ -141,11 +144,17 @@ export class FounderComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private profileService: ProfileService,
     private notificationService: NotificationService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private authService: AuthService
   ) {}
   ngOnInit(): void {
     // Handle query parameters to set active section and tab
     this.getProfileData();
+    this.authService.CurrentUser$.subscribe(user => {
+         if(user?.status==Status.Active){
+          this.showIdeasTab = true;
+         }
+    });
     this.activatedRoute.queryParams.subscribe(params => {
       if (params['section']) {
         this.activeSection = params['section'];
@@ -211,6 +220,7 @@ export class FounderComponent implements OnInit {
         console.error('Error fetching profile data', err);
       }
     });
+    this.subscribe.push(sub); 
   }
 
   setActiveSection(section: 'information' | 'security' | 'ideas' | 'notifications'): void {
@@ -222,6 +232,7 @@ export class FounderComponent implements OnInit {
 
   ngOnDestroy(): void {
     this.unreadCountSub?.unsubscribe();
+    this.subscribe.forEach((sb) => sb.unsubscribe());
   }
 
   getUnreadNotificationsCount(): number {
@@ -321,4 +332,5 @@ export class FounderComponent implements OnInit {
   onNotificationsChange(notifications: any[]): void {
     this.profileData.notifications = notifications;
   }
+ 
 }

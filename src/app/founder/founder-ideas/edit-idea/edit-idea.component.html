@@ -251,11 +251,13 @@
           <p class="upload-description">Upload a supporting document (PDF, Word, or PowerPoint - Max 10MB)</p>
           
           <!-- Existing Document -->
-          <div class="uploaded-file" *ngIf="existingDocument && !selectedDocument">
+          <div class="uploaded-file" style="margin-bottom:3px ;" *ngIf="existingDocument && !selectedDocument">
             <div class="file-info">
               <i class='bx bx-file'></i>
-              <div class="file-details">
-                <span class="file-name">{{ existingDocument }}</span>
+              <div class="file-details " >
+                  <a [href]="existingDocument" target="_blank" rel="noopener" class="file-name" >
+                    {{ existingDocument | slice:(existingDocument.lastIndexOf('/')+1) }}
+                 </a>
                 <span class="file-status">Current Document</span>
               </div>
             </div>
@@ -320,10 +322,7 @@
             <div class="images-grid">
               <div *ngFor="let imageName of existingImages; let i = index" class="image-card">
                 <div class="image-preview">
-                  <div class="image-placeholder">
-                    <i class='bx bx-image'></i>
-                    <span>{{ imageName }}</span>
-                  </div>
+                    <img [src]="imageName" alt="Business Image" class="image-file" />
                 </div>
                 <div class="image-info">
                   <span class="image-name">{{ imageName }}</span>
@@ -463,23 +462,24 @@
         <div class="modal-icon">
           <i class='bx' [ngClass]="reviewResult?.isAccepted ? 'bx-check-circle' : 'bx-x-circle'"></i>
         </div>
-        <h3>{{ reviewResult?.isAccepted ? 'Idea Accepted!' : 'Idea Needs Improvement' }}</h3>
+         <h3>{{ reviewResult?.isAccepted ? 'Idea Accepted!' : 'Idea Needs Improvement' }}</h3>
+        <h4> Total Ai Score: {{ reviewResult?.totalWeightScore }} %</h4>
       </div>
       
       <div class="modal-body">
-        <p class="modal-description">{{ reviewResult?.message }}</p>
+        <p class="modal-description">{{ reviewResult?.generalFeedback }}</p>
         
-        <div class="standards-list" *ngIf="!reviewResult?.isAccepted && reviewResult?.standards">
+        <div class="standards-list" *ngIf=" !reviewResult?.isAccepted&& (reviewResult?.rejectedStandards?.length ?? 0) > 0">
           <h4>Standards Not Met:</h4>
           <ul>
-            <li *ngFor="let standard of reviewResult?.standards; let i = index">
-              <strong>{{ i + 1 }}.</strong> {{ standard }}
+            <li *ngFor="let standard of reviewResult?.rejectedStandards; let i = index">
+              <strong>{{ i + 1 }}.</strong> {{ standard.standard }}
             </li>
           </ul>
         </div>
       </div>
       
-      <div class="modal-actions">
+       <div class="modal-actions">
         <button 
           class="btn btn-secondary" 
           (click)="closeModal()"
@@ -487,8 +487,18 @@
           <i class='bx bx-check'></i>
           Close
         </button>
-        
+        <button class="btn btn-secondary" *ngIf="reviewResult?.isAccepted" (click)="saveAsDraft()">
+            <i class='bx bx-save'></i>
+            submit
+          </button>
+
         <div class="button-group" *ngIf="!reviewResult?.isAccepted">
+          <button 
+            class="btn btn-secondary" 
+            (click)="saveAsDraft()">
+            <i class='bx bx-save'></i>
+            Save as Draft
+          </button>
           <button 
             class="btn btn-outline" 
             (click)="closeModal()">

@@ -62,12 +62,11 @@
     </div>
 
     <div class="col-4">
-      <label for="nationalId">National ID</label>
+      <label for="countryCode">Country Code</label>
       <div class="input-container">
-        <input type="text" id="nationalId" class="form-input2" formControlName="nationalId" />
+        <input type="text" id="countryCode" class="form-input2" formControlName="countryCode" [value]="formData.get('user.countryCode')?.value + (countryName ? ' - ' + countryName : '')" readonly />
       </div>
     </div>
-
     <div class="col-4">
       <label for="phoneNumber">Phone Number</label>
       <div class="input-container">
@@ -114,6 +113,12 @@
           <option [value]="Gender.Male">Male</option>
           <option [value]="Gender.Female">Female</option>
         </select>
+      </div>
+    </div>
+       <div class="col-4">
+      <label for="nationalId">National ID</label>
+      <div class="input-container">
+        <input type="text" id="nationalId" class="form-input2" formControlName="nationalId" />
       </div>
     </div>
   </div>

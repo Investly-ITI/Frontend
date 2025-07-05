@@ -1,0 +1,395 @@
+/* ========================================
+   IMPORTS & FONTS
+======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+/* ========================================
+   BASE STYLES & RESET
+======================================== */
+:host {
+  --poppins: 'Poppins', sans-serif;
+  --lato: 'Lato', sans-serif;
+
+  --bg-light: #eee;
+  --card-bg: #FFFFFF;
+  --text-color: #2c3e50;
+  --secondary-text-color: #7f8c8d;
+  --border-color: #e0e0e0;
+  --shadow-color-light: rgba(0, 0, 0, 0.05);
+  --shadow-color-dark: rgba(0, 0, 0, 0.1);
+  --button-primary-bg: #3C91E6;
+  --button-primary-text: #FFFFFF;
+  --button-outline-border: #95a5a6;
+  --button-outline-text: #7f8c8d;
+  --chart-axis-color: #7f8c8d;
+  --chart-grid-color: rgba(0,0,0,0.05);
+
+  /* Specific colors for summary cards */
+  --card1-gradient-start: #30acaa;
+  --card1-gradient-end: #3fd1c9;
+  --card2-gradient-start: #3C91E6;
+  --card2-gradient-end: #6ec6ff;
+  --card3-gradient-start: #FFCE26;
+  --card3-gradient-end: #ffde59;
+  --card4-gradient-start: #FD7238;
+  --card4-gradient-end: #ff9a6c;
+  
+  /* Status colors */
+  --status-success: #2ed134;
+  --status-warning: #f0ad4e;
+  --status-info: #17a2b8;
+  --status-danger: #e6382f;
+  --status-neutral: #6c757d;
+}
+
+/* Dark Mode Styles */
+:host .dark {
+  --bg-light: #102837;
+  --card-bg: #18384e;
+  --text-color: #e2e8f0;
+  --secondary-text-color: #a0aec0;
+  --border-color: #4a5568;
+  --shadow-color-light: rgba(0, 0, 0, 0.2);
+  --shadow-color-dark: rgba(0, 0, 0, 0.3);
+  --button-primary-bg: #4299e1;
+  --button-primary-text: #FFFFFF;
+  --button-outline-border: #18384e;
+  --button-outline-text: #cbd5e0;
+  --chart-axis-color: #a0aec0;
+  --chart-grid-color: rgba(255,255,255,0.08);
+}
+
+/* Chart specific styles */
+:host ::ng-deep .chartjs-render-monitor {
+    color: var(--text-color);
+}
+
+:host ::ng-deep .chartjs-grid line {
+    stroke: var(--chart-grid-color);
+}
+
+:host ::ng-deep .chartjs-tick text {
+    fill: var(--chart-axis-color);
+    font-family: var(--poppins);
+}
+
+:host ::ng-deep .chartjs-legend-item text {
+    fill: var(--text-color) !important;
+    font-family: var(--poppins) !important;
+}
+
+:host ::ng-deep .chartjs-tooltip {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color) !important;
+    font-family: var(--poppins) !important;
+    box-shadow: 0 4px 20px var(--shadow-color-dark) !important;
+}
+
+:host ::ng-deep .chartjs-tooltip-key {
+    background-color: var(--text-color) !important;
+}
+
+/* Dashboard Layout */
+.dashboard-container {
+  padding: 30px;
+  background-color: var(--bg-light);
+  min-height: 100vh;
+  font-family: var(--poppins);
+  transition: background-color 0.3s ease;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding: 15px 0 25px;
+  border-bottom: 1px solid var(--border-color);
+  transition: border-color 0.3s ease;
+}
+
+.dashboard-header h1 {
+  color: var(--text-color);
+  font-weight: 700;
+  font-size: 32px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.3s ease;
+}
+
+.dashboard-header h1 i {
+  font-size: 38px;
+  color: var(--button-primary-bg);
+}
+
+/* Summary Cards */
+.summary-cards {
+  margin-bottom: 40px;
+}
+
+.summary-cards .col-md-3 {
+  padding: 0 15px;
+}
+
+.summary-cards .card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px var(--shadow-color-light);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  height: 100%;
+  overflow: hidden;
+}
+
+.summary-cards .card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 15px 35px var(--shadow-color-dark);
+}
+
+.card-1 { background: linear-gradient(135deg, var(--card1-gradient-start) 0%, var(--card1-gradient-end) 100%); }
+.card-2 { background: linear-gradient(135deg, var(--card2-gradient-start) 0%, var(--card2-gradient-end) 100%); }
+.card-3 { background: linear-gradient(135deg, var(--card3-gradient-start) 0%, var(--card3-gradient-end) 100%); }
+.card-4 { background: linear-gradient(135deg, var(--card4-gradient-start) 0%, var(--card4-gradient-end) 100%); }
+
+.summary-cards .card-body {
+  color: white;
+  padding: 30px;
+  position: relative;
+  z-index: 1;
+}
+
+.card-icon {
+  font-size: 40px;
+  margin-bottom: 20px;
+  opacity: 0.9;
+  filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3));
+}
+
+.card-title {
+  font-size: 16px;
+  opacity: 0.95;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.card-value {
+  font-size: 40px;
+  font-weight: 800;
+  margin-bottom: 15px;
+  letter-spacing: -1px;
+}
+
+.card-change {
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.card-change i {
+  font-size: 16px;
+}
+
+/* Chart Cards */
+.main-charts > div,
+.secondary-charts > div {
+    padding: 0 15px;
+}
+
+.chart-card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px var(--shadow-color-light);
+  margin-bottom: 30px;
+  background-color: var(--card-bg);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.chart-card:hover {
+  box-shadow: 0 15px 35px var(--shadow-color-dark);
+}
+
+.chart-card .card-header {
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 15px 15px 0 0 !important;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.chart-card .card-header h5 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: color 0.3s ease;
+}
+
+.chart-card .card-header h5 i {
+  font-size: 24px;
+  color: var(--button-primary-bg);
+}
+
+.chart-card .card-body {
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+/* Timeframe buttons */
+.card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.card-actions .btn {
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.3s ease;
+  min-width: 80px;
+}
+
+.card-actions .btn-primary {
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  border-color: var(--button-primary-bg);
+  box-shadow: 0 4px 10px rgba(60, 145, 230, 0.3);
+}
+
+.card-actions .btn-primary:hover {
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(60, 145, 230, 0.4);
+}
+
+.card-actions .btn-outline-secondary {
+  background-color: transparent;
+  color: var(--button-outline-text);
+  border-color: var(--button-outline-border);
+}
+
+.card-actions .btn-outline-secondary:hover {
+  background-color: var(--button-outline-border);
+  color: var(--button-primary-text);
+  transform: translateY(-2px);
+}
+
+/* NGX-Spinner Styling */
+ngx-spinner {
+    z-index: 9999;
+}
+
+ngx-spinner p {
+    font-family: var(--poppins);
+    font-weight: 600;
+    margin-top: 15px;
+    font-size: 1.1em;
+    color: var(--text-color);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 991.98px) {
+  .main-charts > div,
+  .secondary-charts > div {
+    flex: 0 0 100%;
+    max-width: 100%;
+    padding: 0 15px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .dashboard-container {
+    padding: 20px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 24px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .dashboard-header h1 i {
+    font-size: 32px;
+  }
+
+  .summary-cards .col-md-3 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    padding: 0;
+    margin-bottom: 20px;
+  }
+  .summary-cards .card {
+      margin-bottom: 15px;
+  }
+
+  .chart-card .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 15px 20px;
+  }
+  .chart-card .card-header h5 {
+      font-size: 18px;
+  }
+
+  .card-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .card-actions .btn {
+    flex-grow: 1;
+    min-width: unset;
+  }
+
+  .chart-card .card-body {
+    padding: 20px;
+    min-height: 250px;
+  }
+}
+
+@media (max-width: 575.98px) {
+    .dashboard-container {
+        padding: 15px;
+    }
+    .summary-cards .card-body {
+        padding: 20px;
+    }
+    .card-value {
+        font-size: 32px;
+    }
+    .card-icon {
+        font-size: 36px;
+    }
+    .chart-card .card-body {
+        padding: 15px;
+    }
+}

@@ -6,6 +6,7 @@ import { Response } from '../../_models/response';
 import { Investor } from '../../_models/investor';
 import { ChangePassword } from '../../_models/founder';
 import { DropdownDto } from '../../_models/user';
+import { ContactRequestCountsDto, InvestorContactItem, InvestorContactRequest, UpdateContactRequestStatusDto } from '../../_models/contact-request';
 
 @Injectable({
   providedIn: 'root'
@@ -37,10 +38,21 @@ return res;
           `${this.ApiUrl}/api/investor/profile/changepassword`, passwordData
         );
       }
-    
+
   getInvestorsForDropdown(): Observable<Response<DropdownDto[]>> {
     return this.http.get<Response<DropdownDto[]>>(`${this.ApiUrl}/api/investor/profile/dropdown`);
   }
-  
+   GetContactRequestsData():Observable<Response<InvestorContactItem[]>>{
+    var res=this.http.get<Response<InvestorContactItem[]>>(`${this.ApiUrl}/api/investor/InvestorRequests`);
+    return res;
+  }
+   ChangeContactRequestsStatus(status:UpdateContactRequestStatusDto|null):Observable<Response<InvestorContactItem>>{
+    var res=this.http.put<Response<InvestorContactItem>>(`${this.ApiUrl}/api/investor/InvestorRequests`,status);
+    return res;
+  }
+    GetContactRequestsCount():Observable<Response<ContactRequestCountsDto>>{
+    var res=this.http.get<Response<ContactRequestCountsDto>>(`${this.ApiUrl}/api/investor/InvestorRequests/contact-requests-count`);
+    return res;
+  }
 
 }

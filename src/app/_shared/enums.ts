@@ -21,7 +21,8 @@ export enum InvestorInvestingType {
  export enum ContactRequestStatus {
   Pending = 1,
   Accepted = 2,
-  Declined = 3
+  Declined = 3,
+  Deleted = 4,
 }
  export enum BusinessIdeaStatus {
     Active = 1,
@@ -50,3 +51,11 @@ export enum NotificationsStatus {
      Funding=2,
      Both=3
  }
+
+ export enum TimeframeType {
+  LastMonth = 1,
+  Last3Months = 2,
+  Last6Months = 3,
+  LastYear = 4,
+  AllTime = 5
+}
