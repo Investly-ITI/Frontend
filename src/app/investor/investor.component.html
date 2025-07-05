@@ -1,7 +1,7 @@
 <!-- ========================================
      PROFILE CONTAINER
 ======================================== -->
-<div class="profile-container">
+<div class="profile-container" >
   <!-- ========================================
        PROFILE HEADER
   ======================================== -->
@@ -68,7 +68,8 @@
               </div>
             </button>
           </li>
-          <li class="nav-item">
+
+          <li class="nav-item" *ngIf="profileData.user.status ==Status.Active">
             <button 
               class="nav-button" 
               [class.active]="activeSection === 'ContactRequests'"
@@ -90,7 +91,7 @@
               <span class="badge" *ngIf="getUnreadNotificationsCount() > 0">{{ getUnreadNotificationsCount() }}</span>
             </button>
           </li>
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="profileData.user.status ==Status.Active">
             <button 
               class="nav-button" 
               [class.active]="activeSection === 'feedback'"
@@ -108,7 +109,7 @@
     <!-- ========================================
          MAIN CONTENT AREA
     ======================================== -->
-    <div class="profile-main"  >
+    <div class="profile-main"  *ngIf="profileData?.user">
       <!-- Information Section -->
       <app-investor-information 
         *ngIf="activeSection === 'information'"

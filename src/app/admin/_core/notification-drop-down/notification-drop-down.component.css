@@ -124,3 +124,11 @@
   text-align: center;
   color: var(--dark-grey);
 }
+.small-link {
+  font-size: 13px;
+  padding: 2px 6px;
+}
+
+.ml-space {
+  margin-left: 12px; /* adjust spacing as needed */
+}

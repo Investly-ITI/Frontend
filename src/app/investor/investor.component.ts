@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
 import { getStatusLabel } from '../_shared/utils/enum.utils';
-import { Status } from '../_shared/enums';
+import { InvestorInvestingType, Status } from '../_shared/enums';
 import { NotificationService } from '../_services/notification.service';
 import { InvestorIdeaRequestsComponent } from "./investor-idea-requests/investor-idea-requests.component";
 import { ContactRequestCountsDto } from '../_models/contact-request';
@@ -39,7 +39,8 @@ export class InvestorComponent {
   // Security alert indicator
   showSecurityAlert = true; // Set to true to show red exclamation mark next to Security
     private subscriptions: Subscription[] = [];
- profileData: any; 
+profileData : any;
+
  imageUrl:string| null = null;
  securitySettings: SecuritySettings={
       twoFactorEnabled: true,
@@ -60,6 +61,7 @@ export class InvestorComponent {
     unreadCount: number = 0;
   private unreadCountSub?: Subscription;
 isLoading = false; 
+Status=Status;
 
   ngOnInit(): void {
     this.getProfileData();
@@ -109,33 +111,7 @@ getProfileData():void{
     })
   );
 
-  // Fetch contact requests count
-const sub = this.profileService.getProfileData().subscribe({
- 
-    next: (res) => {
-      if (res.isSuccess && res.data) {
-        this.profileData = res.data;
-        console.log(this.profileData);
-        
-                  this.securitySettings = {
-                    twoFactorEnabled: false,
-                    emailNotifications: false,
-                    smsNotifications: false,
-                    loginAlerts: false,
-                    lastPasswordChange: "1-1-2000",
-                    accountStatus: getStatusLabel(this.profileData.user.status)
-                  }
-                  this.showSecurityAlert=this.profileData.user.status!=Status.Active
-      } else {
-        console.error('Failed to fetch profile data', res.message);
-      }
-    },
-    error: (err) => {
-      console.error('Error fetching profile data', err);
-    }
-  });
- 
-
+  
 
  }
 

@@ -31,4 +31,8 @@ export class NotificationService {
     var res = this.httpclient.get<Response<any>>(`${this.baseUrl}/TotalNotificationsActiveDeleted`);
     return res;
   }
+  GetUnreadNotifications():Observable<Response<notification[]>> {
+    var res = this.httpclient.get<Response<notification[]>>(`${this.baseUrl}/UnreadNotifications`);
+    return res;
+  }
 }
