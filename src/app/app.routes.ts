@@ -20,6 +20,7 @@ import { ContactRequestComponent } from './admin/contact-request/contact-request
 import { NoAuthGuard } from './_guards/no-auth.guard';
 import { clientGuard } from './_guards/client.guard';
 import { FeedbacksComponent } from './admin/feedback/feedback.component';
+import { AnalysisComponent } from './admin/analysis/analysis.component';
 
 export const routes: Routes = [
    // Authentication routes (no layout - full screen)
@@ -52,13 +53,11 @@ export const routes: Routes = [
       {path:'business-ideas',component:BusinessIdeasComponent, title: 'Business Ideas Management'},
       {path:'',redirectTo:'investor',pathMatch:'full'},
       {path:'founder',component:FounderComponent, title: 'Founder Management'},
-       {path:'notification',component:NotificationsComponent, title: 'Notifcation Management'},
-       {path:'feedbacks',component:FeedbacksComponent, title: 'Feedbacks Management'},
-      
+      {path:'notification',component:NotificationsComponent, title: 'Notifcation Management'},
+      {path:'feedbacks',component:FeedbacksComponent, title: 'Feedbacks Management'},
       {path:'Contact-Request',component:ContactRequestComponent, title: 'Investor Contact Request'},
-     
-
-   ]},
+      {path:'analysis',component:AnalysisComponent, title: 'Dashboard Analysis'}
+]},
 
    {path:'',redirectTo:'/login',pathMatch:'full'},
    // { path: '**', redirectTo: '/admin' } // Wildcard route when no matching route is found
