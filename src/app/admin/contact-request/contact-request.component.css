@@ -1129,7 +1129,7 @@ input:checked + .slider:before {
   max-width: 100%;
   box-sizing: border-box;
   overflow-x: hidden;
-  min-height: 400px;
+  /* min-height: 400px; */
 }
 
 /* Modal Footer */
@@ -1816,4 +1816,82 @@ input:checked + .slider:before {
 
 .decline-reason-section textarea::placeholder {
   color: #9ca3af;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* Specific styling for accept modal only - compact design */
+.status-change-modal.accept-modal {
+    max-width: 400px !important;
+    width: 90% !important;
+    /* min-height: 400px !important;
+    max-height: 80vh !important; */
+    padding: 16px 20px !important;
+    height: auto !important;
+}
+
+.status-change-modal.accept-modal .modal-header {
+    padding: 0 0 12px 0 !important;
+    margin-bottom: 0 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+.status-change-modal.accept-modal .modal-header h3 {
+    font-size: 18px !important;
+    margin: 0 !important;
+    font-weight: 600 !important;
+}
+
+.status-change-modal.accept-modal .modal-body {
+    padding: 12px 0 0 0 !important;
+    margin: 0 !important;
+}
+
+.status-change-modal.accept-modal .status-change-confirmation {
+    text-align: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.status-change-modal.accept-modal .action-icon {
+    margin-bottom: 12px !important;
+}
+
+.status-change-modal.accept-modal .action-icon i {
+    font-size: 40px !important;
+}
+
+.status-change-modal.accept-modal .confirmation-text {
+    font-size: 14px !important;
+    margin: 0 0 16px 0 !important;
+    line-height: 1.3 !important;
+    color: #6b7280 !important;
+}
+
+.status-change-modal.accept-modal .modal-footer {
+    padding: 0 !important;
+    margin-top: 0 !important;
+    gap: 12px !important;
+    justify-content: center !important;
+    display: flex !important;
+}
+
+.status-change-modal.accept-modal .modal-footer button {
+    padding: 8px 20px !important;
+    font-size: 14px !important;
+    min-width: 90px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+}
+
+.accept-body-active {
+  min-height:  200px ;
 }

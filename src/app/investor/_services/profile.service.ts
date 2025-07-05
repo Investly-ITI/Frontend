@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { Response } from '../../_models/response';
 import { Investor } from '../../_models/investor';
 import { ChangePassword } from '../../_models/founder';
+import { DropdownDto } from '../../_models/user';
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +38,9 @@ return res;
         );
       }
     
- 
+  getInvestorsForDropdown(): Observable<Response<DropdownDto[]>> {
+    return this.http.get<Response<DropdownDto[]>>(`${this.ApiUrl}/api/investor/profile/dropdown`);
+  }
+  
 
 }

@@ -192,6 +192,30 @@
                 </ng-template>
               </div>
 
+              <!-- Business File Section -->
+              <div class="content-section" *ngIf="hasBusinessFile()">
+                <h4>Business Documents</h4>
+                <div class="file-container">
+                  <div class="file-item">
+                    <div class="file-info">
+                      <div class="file-icon generic-file">
+                        <i class='bx bx-file'></i>
+                      </div>
+                      <div class="file-details">
+                        <span class="file-name">{{ getFileName() }}</span>
+                        <span class="file-type">{{ getFileType() }}</span>
+                      </div>
+                    </div>
+                    <div class="file-actions">
+                      <button class="file-action-btn view-btn" (click)="viewBusinessFile()" title="View file">
+                        <i class='bx bx-show'></i>
+                        <span>View</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Founder Information -->
               <div class="content-section">
                 <h4>Founder Information</h4>
