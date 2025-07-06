@@ -9,7 +9,7 @@ import { Response } from '../../_models/response';
   providedIn: 'root'
 })
 export class CategoriesService {
-  private baseUrl = `${environment.apiUrl}/api/Category`
+  private baseUrl = `${environment.apiUrl}/api/admin/Category`
   
   constructor(private httpClient: HttpClient) { }
 
