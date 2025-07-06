@@ -1,25 +1,20 @@
 <!-- ========================================
      PROFILE CONTAINER
 ======================================== -->
-<div class="profile-container" >
+<div class="profile-container">
   <!-- ========================================
        PROFILE HEADER
   ======================================== -->
   <div class="profile-header">
     <div class="header-content">
       <div class="profile-avatar">
-<img [src]="imageUrl || (url + '/' + profileData.user.profilePicPath) " [alt]="profileData.user.firstName + ' ' + profileData.user.lastName">
+        <img [src]="imageUrl || (url + '/' + profileData.user.profilePicPath) "
+          [alt]="profileData.user.firstName + ' ' + profileData.user.lastName">
         <div class="avatar-overlay" (click)="triggerFileInput()">
           <i class='bx bx-camera'></i>
         </div>
         <!-- Hidden file input -->
-        <input 
-          #fileInput 
-          type="file" 
-          accept="image/*" 
-          (change)="onProfilePictureChange($event)"
-          style="display: none;"
-        >
+        <input #fileInput type="file" accept="image/*" (change)="onProfilePictureChange($event)" style="display: none;">
       </div>
       <div class="profile-info">
         <h1 class="profile-name">{{ profileData.user.firstName }} {{ profileData.user.lastName }}</h1>
@@ -43,61 +38,45 @@
       <nav class="sidebar-nav">
         <ul class="nav-list">
           <li class="nav-item">
-            <button 
-              class="nav-button" 
-              [class.active]="activeSection === 'information'"
-              (click)="setActiveSection('information')"
-            >
+            <button class="nav-button" [class.active]="activeSection === 'information'"
+              (click)="setActiveSection('information')">
               <i class='bx bx-user'></i>
               <span>Information</span>
             </button>
           </li>
           <li class="nav-item">
-            <button 
-              class="nav-button" 
-              [class.active]="activeSection === 'security'"
-              (click)="setActiveSection('security')"
-            >
+            <button class="nav-button" [class.active]="activeSection === 'security'"
+              (click)="setActiveSection('security')">
               <div class="nav-button-content">
-              <i class='bx bx-shield'></i>
-              <span>Security</span>
+                <i class='bx bx-shield'></i>
+                <span>Security</span>
               </div>
               <!-- Red exclamation mark notification indicator -->
-                <div class="security-alert-indicator" *ngIf="showSecurityAlert">
+              <div class="security-alert-indicator" *ngIf="showSecurityAlert">
                 <i class='bx bx-error'></i>
               </div>
             </button>
           </li>
 
           <li class="nav-item" *ngIf="profileData.user.status ==Status.Active">
-            <button 
-              class="nav-button" 
-              [class.active]="activeSection === 'ContactRequests'"
-              (click)="setActiveSection('ContactRequests')"
-            >
+            <button class="nav-button" [class.active]="activeSection === 'ContactRequests'"
+              (click)="setActiveSection('ContactRequests')">
               <i class='bx bx-bulb'></i>
               <span>Contact Requests</span>
               <span class="badge">{{ ContactRequestCount.totalContactRequestCount }}</span>
             </button>
           </li>
           <li class="nav-item">
-            <button 
-              class="nav-button" 
-              [class.active]="activeSection === 'notifications'"
-              (click)="setActiveSection('notifications')"
-            >
+            <button class="nav-button" [class.active]="activeSection === 'notifications'"
+              (click)="setActiveSection('notifications')">
               <i class='bx bx-bell'></i>
               <span>Notifications</span>
               <span class="badge" *ngIf="getUnreadNotificationsCount() > 0">{{ getUnreadNotificationsCount() }}</span>
             </button>
           </li>
-            <li class="nav-item" *ngIf="profileData.user.status ==Status.Active">
-            <button 
-              class="nav-button" 
-              [class.active]="activeSection === 'feedback'"
-               [routerLink]="['/contact-us']"
-              (click)="setActiveSection('feedback')"
-            >
+          <li class="nav-item" *ngIf="profileData.user.status ==Status.Active">
+            <button class="nav-button" [class.active]="activeSection === 'feedback'" [routerLink]="['/contact-us']"
+              (click)="setActiveSection('feedback')">
               <i class='bx bx-comment-add'></i>
               <span>Feedback</span>
             </button>
@@ -109,51 +88,42 @@
     <!-- ========================================
          MAIN CONTENT AREA
     ======================================== -->
-    <div class="profile-main"  *ngIf="profileData?.user">
+    <div class="profile-main" *ngIf="profileData?.user">
       <!-- Information Section -->
-      <app-investor-information 
-        *ngIf="activeSection === 'information'"
-        [personalInfo]="profileData"
-        (personalInfoChange)="onPersonalInfoChange($event)"
-      ></app-investor-information>
+      <app-investor-information *ngIf="activeSection === 'information'" [personalInfo]="profileData"
+        (personalInfoChange)="onPersonalInfoChange($event)"></app-investor-information>
 
-    
-      <app-investor-security
-        *ngIf="activeSection === 'security'"
-        [securitySettings]="securitySettings"
-        (securitySettingsChange)="onSecuritySettingsChange($event)"
-      ></app-investor-security>
 
-   
-      <app-investor-idea-requests
-        #investorIdeasRequest
+      <app-investor-security *ngIf="activeSection === 'security'" [securitySettings]="securitySettings"
+        (securitySettingsChange)="onSecuritySettingsChange($event)"></app-investor-security>
+
+
+      <app-investor-idea-requests #investorIdeasRequest
         [style.display]="activeSection === 'ContactRequests' ? 'block' : 'none'"
         (onRequestCountChange)="onIdeasCountChange($event)">
-      ></app-investor-idea-requests>
-          
+        ></app-investor-idea-requests>
 
-    
-      <app-investor-notifications 
-        *ngIf="activeSection === 'notifications'"
-      ></app-investor-notifications>
-  
+
+
+      <app-investor-notifications *ngIf="activeSection === 'notifications'"></app-investor-notifications>
+
     </div>
   </div>
-  
 
-</div> 
 
-    <!-- Loading Overlay -->
-  <div class="loading-overlay" *ngIf="isLoading" [@fadeInOut]>
-    <div class="loading-content">
-      <div class="loading-animation">
-        <div class="loading-dots">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="isLoading" [@fadeInOut]>
+  <div class="loading-content">
+    <div class="loading-animation">
+      <div class="loading-dots">
+        <span></span>
+        <span></span>
+        <span></span>
       </div>
-      <h4>Loading</h4>
-    
     </div>
+    <h4>Loading</h4>
+
   </div>
+</div>
