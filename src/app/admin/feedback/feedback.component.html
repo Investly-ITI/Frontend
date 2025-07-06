@@ -136,10 +136,10 @@
                                 </td>
                             </tr>
                             <tr *ngFor="let feedback of filteredFeedbacks; let i = index">
-                                <td><p>{{ feedback.subject || 'N/A' }}</p></td> 
-                                <td>{{ feedback.userTypeFromName || 'N/A' }}</td> <td>{{ feedback.userTypeToName || 'N/A' }}</td>     <td>{{ feedback.userFromName || 'N/A' }}</td>
-                                <td>{{ feedback.userToName || 'N/A' }}</td>
-                                <td>{{ feedback.createdAt ? (feedback.createdAt | date) : 'N/A' }}</td>
+                                <td><p>{{ feedback.subject || ' ' }}</p></td> 
+                                <td>{{ feedback.userTypeFromName || 'Anonymous' }}</td> <td>{{ feedback.userTypeToName || 'System' }}</td>     <td>{{ feedback.userFromName || 'Anonymous' }}</td>
+                                <td>{{ feedback.userToName || 'System' }}</td>
+                                <td>{{ feedback.createdAt ? (feedback.createdAt | date) : ' ' }}</td>
                                 <td>
                                     <span class="status process"
                                         [ngStyle]="{color: feedback.status === Status.Active ? '#2ed134' : '#e6382f'}"
@@ -214,7 +214,7 @@
     <div class="modal-overlay" [ngClass]="{ 'show': isDetailsModalOpen }" (click)="closeDetailsModal()">
         <div class="modal-container view-details-modal" (click)="$event.stopPropagation()" *ngIf="selectedFeedbackForDetails">
             <div class="modal-header">
-                <h3>Feedback Details: {{ selectedFeedbackForDetails.subject || 'N/A' }}</h3> <button type="button" class="close-btn" (click)="closeDetailsModal()">
+                <h3>Feedback Details: {{ selectedFeedbackForDetails.subject || ' ' }}</h3> <button type="button" class="close-btn" (click)="closeDetailsModal()">
                     <i class='bx bx-x'></i>
                 </button>
             </div>
@@ -226,32 +226,32 @@
                     </div>
                     <div class="detail-row">
                         <strong class="detail-label">Subject:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.subject || 'N/A' }}</span> </div>
+                        <span class="detail-value">{{ selectedFeedbackForDetails.subject || ' ' }}</span> </div>
                     <div class="detail-row">
                         <strong class="detail-label">Description:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.description || 'N/A' }}</span>
+                        <span class="detail-value">{{ selectedFeedbackForDetails.description || ' ' }}</span>
                     </div>
                     <div class="detail-row">
                         <strong class="detail-label">From Type:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.userTypeFromName || 'N/A' }}</span> </div>
+                        <span class="detail-value">{{ selectedFeedbackForDetails.userTypeFromName || 'Anonymous' }}</span> </div>
                     <div class="detail-row">
                         <strong class="detail-label">To Type:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.userTypeToName || 'N/A' }}</span> </div>
+                        <span class="detail-value">{{ selectedFeedbackForDetails.userTypeToName || 'System' }}</span> </div>
                     <div class="detail-row">
                         <strong class="detail-label">From User:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.userFromName || 'N/A' }}</span>
+                        <span class="detail-value">{{ selectedFeedbackForDetails.userFromName || 'Anonymous' }}</span>
                     </div>
                     <div class="detail-row">
                         <strong class="detail-label">To User:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.userToName || 'N/A' }}</span>
+                        <span class="detail-value">{{ selectedFeedbackForDetails.userToName || 'System' }}</span>
                     </div>
                     <div class="detail-row">
                         <strong class="detail-label">Status:</strong>
-                        <span class="detail-value status">{{ selectedFeedbackForDetails && selectedFeedbackForDetails.status !== undefined ? getStatusLabel(selectedFeedbackForDetails.status!) : 'N/A' }}</span>
+                        <span class="detail-value status">{{ selectedFeedbackForDetails && selectedFeedbackForDetails.status !== undefined ? getStatusLabel(selectedFeedbackForDetails.status!) : ' ' }}</span>
                     </div>
                     <div class="detail-row">
                         <strong class="detail-label">Created At:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.createdAt ? (selectedFeedbackForDetails.createdAt | date:'medium') : 'N/A' }}</span>
+                        <span class="detail-value">{{ selectedFeedbackForDetails.createdAt ? (selectedFeedbackForDetails.createdAt | date:'medium') : ' ' }}</span>
                     </div>
                 </div>
             </div>
