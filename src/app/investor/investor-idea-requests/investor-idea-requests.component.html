@@ -95,26 +95,27 @@
             <i class='bx bx-briefcase'></i>
             <span>Industrial&nbsp;Experience</span>
           </div>
-           <div class="meta-item" *ngIf="request.status === ContactRequestStatus.Accepted ">
-            <i class='bx bx-user'></i>
-            <span>{{ request.founderName }} </span>
-          </div>
-             <div class="meta-item mb-2 " *ngIf="request.status === ContactRequestStatus.Accepted ">
-            <i class='bx bx-phone-call'></i>
-            <span>{{ request.founderPhoneNumber }} </span>
-          </div>
-           
+
         </div>
-         <div class="meta-item" *ngIf="request.status === ContactRequestStatus.Accepted ">
-            <i class='bx bx-envelope'></i>
-            <span>{{ request.founderEmail }} </span>
-          </div>
-        
-        
+        <div *ngIf="request.status === ContactRequestStatus.Accepted" class="founder-info pt-2 border-top">
+    <h4 class="idea-title ">Founder Information</h4>
+    <div class="meta-item mt-3">
+      <i class='bx bx-user'></i>
+      <span>{{ request.founderName }}</span>
+    </div>
+    <div class="meta-item mt-3">
+      <i class='bx bx-phone-call'></i>
+      <span>{{ request.founderPhoneNumber }}</span>
+    </div>
+    <div class="meta-item mt-3">
+      <i class='bx bx-envelope'></i>
+      <span>{{ request.founderEmail }}</span>
+    </div>
+  </div>
       </div>
 
       <!-- Actions Dropdown -->
-      <div class="idea-actions">
+      <div class="idea-actions mt-5 ">
         <div class="actions-dropdown" [class.open]="isDropdownOpen(request.id)">
           <button class="btn btn-primary btn-sm dropdown-toggle" 
                   (click)="toggleDropdown(request.id)">

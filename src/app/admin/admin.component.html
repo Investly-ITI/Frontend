@@ -15,6 +15,14 @@
 
     <!-- Main Navigation Menu -->
     <ul class="side-menu top">
+
+             <!-- Analytics -->
+        <li routerLinkActive="active">
+            <a routerLink="/admin/analysis" style="cursor: pointer">
+                <i class='bx bxs-bar-chart-alt-2'></i>
+                <span class="text">Analysis</span>
+            </a>
+        </li>
         <!-- Investors -->
         <li routerLinkActive="active">
             <a routerLink="/admin/investor">
@@ -54,14 +62,6 @@
             <a routerLink="/admin/business-ideas" style="cursor: pointer">
                 <i class='bx bx-bulb'></i>
                 <span class="text">Business Ideas</span>
-            </a>
-        </li>
-        
-        <!-- Analytics -->
-        <li routerLinkActive="active">
-            <a routerLink="/admin/analysis" style="cursor: pointer">
-                <i class='bx bxs-bar-chart-alt-2'></i>
-                <span class="text">Analysis</span>
             </a>
         </li>
         
@@ -125,6 +125,7 @@
              [isNotificationsOpen]="isNotificationsOpen"
              [isNotificationsClosing]="isNotificationsClosing"
              [notifications]="notifications"
+             (seeMoreClicked)="closeNotifications()"
              ></app-notification-drop-down>
         </div>
 

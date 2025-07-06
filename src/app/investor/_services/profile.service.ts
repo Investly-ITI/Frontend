@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { Response } from '../../_models/response';
 import { Investor } from '../../_models/investor';
 import { ChangePassword } from '../../_models/founder';
+import { DropdownDto } from '../../_models/user';
 import { ContactRequestCountsDto, InvestorContactItem, InvestorContactRequest, UpdateContactRequestStatusDto } from '../../_models/contact-request';
 
 @Injectable({
@@ -38,7 +39,7 @@ return res;
         );
       }
 
-  GetContactRequestsData():Observable<Response<InvestorContactItem[]>>{
+   GetContactRequestsData():Observable<Response<InvestorContactItem[]>>{
     var res=this.http.get<Response<InvestorContactItem[]>>(`${this.ApiUrl}/api/investor/InvestorRequests`);
     return res;
   }

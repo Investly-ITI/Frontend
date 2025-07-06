@@ -26,6 +26,7 @@ import { environment } from '../../../environments/environment';
 import { ChangePassword, Founder, UpdateFounder, UpdateNationalIdRequest, UpdateNationalIdResponse, UpdateProfilePictureRequest } from '../../_models/founder';
 import { Observable } from 'rxjs';
 import { Response } from '../../_models/response';
+import { DropdownDto } from '../../_models/user';
 
 
 @Injectable({
@@ -82,6 +83,10 @@ export class ProfileService {
       formData
     );
   }
+
+
+
+
 
 
 }

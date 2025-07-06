@@ -351,9 +351,9 @@
       </div>
       
       <div class="modal-body">
-        <p class="modal-description">{{ reviewResult?.message }}</p>
+        <p class="modal-description">{{ reviewResult?.generalFeedback }}</p>
         
-        <div class="standards-list" *ngIf="!reviewResult?.isAccepted && reviewResult?.rejectedStandards">
+        <div class="standards-list" *ngIf=" !reviewResult?.isAccepted&& (reviewResult?.rejectedStandards?.length ?? 0) > 0">
           <h4>Standards Not Met:</h4>
           <ul>
             <li *ngFor="let standard of reviewResult?.rejectedStandards; let i = index">

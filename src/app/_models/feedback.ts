@@ -39,3 +39,19 @@ export class FeedbackCountsDto {
         public totalInactive: number = 0
     ) { }
 }
+
+export interface FeedbackCreateDto {
+  email?: string;
+  subject: string;
+  description: string;
+  feedbackType: FeedbackTargetType;
+  userIdTo?: number | null;
+  status?: number;
+  createdBy?: number;
+}
+
+export enum FeedbackTargetType {
+  System = 1,
+  Investor = 2,
+  Founder = 3
+}

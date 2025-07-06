@@ -1,19 +1,27 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { distinctUntilChanged, Subscription, take, takeUntil, tap } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
 // Models and Services
-import { ContactRequestStatus } from '../../_shared/enums';
-import { DropdownDto } from '../../_models/user';
-import { InvestorService } from '../../admin/_services/investor.service';
-import { FounderService } from '../../admin/_services/founder.service';
+import { DropdownDto, LoggedInUser } from '../../_models/user';
+import { UserFeedbackService } from '../../_services/user-feedback-service.service';
+import { AuthService } from '../../_services/auth.service';
+import { FeedbackCreateDto, FeedbackTargetType } from '../../_models/feedback';
+import { UserType } from '../../_shared/enums';
+import { Subject } from 'rxjs';
+
+interface Response<T> {
+  data: T;
+  isSuccess: boolean;
+  message: string;
+  statusCode: number;
+}
 
 interface ContactFormData {
-  name: string;
   email: string;
-  contactType: 'system_feedback' | 'investor_founder_feedback';
+  contactType: FeedbackTargetType;
   targetPersonId?: number;
   subject: string;
   message: string;
@@ -28,146 +36,257 @@ interface ContactFormData {
 })
 export class ContactUsComponent implements OnInit, OnDestroy {
   contactForm: FormGroup;
-  isLoading: boolean = false;
   isSubmitting: boolean = false;
-  
-  // Dropdown data for investor/founder selection
+  noContactsAvailable: boolean = false;
+  private destroy$ = new Subject<void>();
   availableContacts: DropdownDto[] = [];
   isLoadingContacts: boolean = false;
+  isAuthenticated: boolean = false;
   
   private subscriptions: Subscription = new Subscription();
+  feedbackTypes = [
+    { value: FeedbackTargetType.System, label: 'System Feedback' },
+    { value: FeedbackTargetType.Investor, label: 'Investor Feedback' },
+    { value: FeedbackTargetType.Founder, label: 'Founder Feedback' }
+  ];
 
   constructor(
     private fb: FormBuilder,
     private toastr: ToastrService,
-    private investorService: InvestorService,
-    private founderService: FounderService
+    private feedbackService: UserFeedbackService,
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {
     this.contactForm = this.createForm();
   }
 
-  ngOnInit(): void {
-    this.setupFormSubscriptions();
-  }
+  public FeedbackTargetType = FeedbackTargetType;
+  public showFeedbackTypeSelect = false;
+  public UserType = UserType;
+  public currentUser: LoggedInUser | null = null;
 
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
+  ngOnInit(): void {
+    this.setupAuthSubscriptions();
+    this.setupFormSubscriptions();
   }
 
   private createForm(): FormGroup {
     return this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      email: ['', [Validators.required, Validators.email]],
-      contactType: ['system_feedback', Validators.required],
-      targetPersonId: [null],
+      email: [{ value: '', disabled: !this.isAuthenticated }, [Validators.required, Validators.email]],
+      contactType: [{ value: FeedbackTargetType.System, disabled: !this.isAuthenticated }, Validators.required],
+      targetPersonId: [{ value: null, disabled: false }],
       subject: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(200)]],
       message: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]]
     });
   }
 
-  private setupFormSubscriptions(): void {
-    // Watch for contact type changes
-    const contactTypeSubscription = this.contactForm.get('contactType')?.valueChanges.subscribe(
-      (contactType: string) => {
-        if (contactType === 'investor_founder_feedback') {
-          this.contactForm.get('targetPersonId')?.setValidators([Validators.required]);
-          this.loadAvailableContacts();
-        } else {
-          this.contactForm.get('targetPersonId')?.clearValidators();
-          this.availableContacts = [];
-        }
-        this.contactForm.get('targetPersonId')?.updateValueAndValidity();
-        this.contactForm.get('targetPersonId')?.setValue(null);
-      }
+  private setupAuthSubscriptions(): void {
+    this.subscriptions.add(
+      this.authService.isAuthenticated$.subscribe(isAuthenticated => {
+        this.isAuthenticated = isAuthenticated;
+        this.updateFormForAuthState();
+        this.updateEmailFieldState();
+      })
     );
 
-    if (contactTypeSubscription) {
-      this.subscriptions.add(contactTypeSubscription);
+    this.subscriptions.add(
+      this.authService.CurrentUser$.subscribe(user => {
+        this.currentUser = user;
+        this.updateAvailableFeedbackTypes();
+        const currentType = this.contactForm.get('contactType')?.value;
+        if (currentType && currentType !== FeedbackTargetType.System) {
+          this.loadAvailableContacts(currentType);
+        }
+      })
+    );
+  }
+
+  private setupFormSubscriptions(): void {
+    const contactTypeControl = this.contactForm.get('contactType');
+    if (!contactTypeControl) return;
+
+    this.subscriptions.add(
+      contactTypeControl.valueChanges.pipe(
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      ).subscribe((type: FeedbackTargetType) => {
+        this.availableContacts = [];
+        this.contactForm.get('targetPersonId')?.reset(null, { emitEvent: false });
+
+        const targetPersonControl = this.contactForm.get('targetPersonId');
+        if (type !== FeedbackTargetType.System) {
+          targetPersonControl?.setValidators([Validators.required]);
+          this.loadAvailableContacts(type);
+        } else {
+          targetPersonControl?.clearValidators();
+        }
+        targetPersonControl?.updateValueAndValidity();
+        this.cdr.detectChanges();
+      })
+    );
+  }
+
+  private updateAvailableFeedbackTypes(): void {
+    if (!this.currentUser) {
+      this.feedbackTypes = [{ value: FeedbackTargetType.System, label: 'System Feedback' }];
+      return;
+    }
+
+    switch (this.currentUser.userType) {
+      case UserType.Investor:
+        this.feedbackTypes = [
+          { value: FeedbackTargetType.System, label: 'System Feedback' },
+          { value: FeedbackTargetType.Founder, label: 'Founder Feedback' }
+        ];
+        break;
+      case UserType.Founder:
+        this.feedbackTypes = [
+          { value: FeedbackTargetType.System, label: 'System Feedback' },
+          { value: FeedbackTargetType.Investor, label: 'Investor Feedback' }
+        ];
+        break;
+      default:
+        this.feedbackTypes = [
+          { value: FeedbackTargetType.System, label: 'System Feedback' },
+          { value: FeedbackTargetType.Investor, label: 'Investor Feedback' },
+          { value: FeedbackTargetType.Founder, label: 'Founder Feedback' }
+        ];
+    }
+
+    const currentType = this.contactForm.get('contactType')?.value;
+    if (!this.feedbackTypes.some(t => t.value === currentType)) {
+      this.contactForm.get('contactType')?.setValue(FeedbackTargetType.System);
     }
   }
 
-  private loadAvailableContacts(): void {
+  private loadAvailableContacts(feedbackType: FeedbackTargetType): void {
     this.isLoadingContacts = true;
-    
-    // In your implementation, you would need to load contacts that have accepted contact requests
-    // For now, we'll load both investors and founders
-    const investorSub = this.investorService.getInvestorsForDropdown().subscribe({
+    this.availableContacts = [];
+    this.noContactsAvailable = false;
+
+    this.authService.getRelatedUsersForFeedback().subscribe({
       next: (response) => {
-        const investors = response.data.map(investor => ({
-          ...investor,
-          name: `${investor.name} (Investor)`
-        }));
-        
-        // Load founders
-        const founderSub = this.founderService.getFoundersForDropdown().subscribe({
-          next: (founderResponse) => {
-            const founders = founderResponse.data.map(founder => ({
-              ...founder,
-              name: `${founder.name} (Founder)`
-            }));
-            
-            this.availableContacts = [...investors, ...founders];
-            this.isLoadingContacts = false;
-          },
-          error: (error) => {
-            console.error('Error loading founders:', error);
-            this.availableContacts = investors;
-            this.isLoadingContacts = false;
+        if (response.isSuccess && response.data) {
+          this.availableContacts = response.data;
+          this.noContactsAvailable = this.availableContacts.length === 0;
+          
+          if (this.noContactsAvailable) {
+            this.toastr.info('No contacts available for feedback at this time', 'Information');
           }
-        });
-        
-        this.subscriptions.add(founderSub);
+        } else {
+          this.availableContacts = [];
+          this.noContactsAvailable = true;
+          if (!response.isSuccess) {
+            this.toastr.error(response.message || 'Failed to load contacts', 'Error');
+          }
+        }
+        this.isLoadingContacts = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Error loading investors:', error);
         this.isLoadingContacts = false;
-        this.toastr.error('Failed to load contact options', 'Error');
+        this.availableContacts = [];
+        this.noContactsAvailable = true;
+        this.toastr.error('Failed to load contacts', 'Error');
       }
     });
-    
-    this.subscriptions.add(investorSub);
+  }
+
+  private updateFormForAuthState(): void {
+    const contactTypeControl = this.contactForm.get('contactType');
+    if (!contactTypeControl) return;
+
+    if (this.isAuthenticated) {
+      this.showFeedbackTypeSelect = true;
+      contactTypeControl.enable({ emitEvent: false });
+    } else {
+      this.showFeedbackTypeSelect = false;
+      contactTypeControl.setValue(FeedbackTargetType.System, { emitEvent: false });
+      contactTypeControl.disable({ emitEvent: false });
+    }
+  }
+
+  private updateEmailFieldState(): void {
+    const emailControl = this.contactForm.get('email');
+    if (!emailControl) return;
+
+    if (this.isAuthenticated) {
+      this.authService.CurrentUser$.pipe(
+        take(1),
+        takeUntil(this.destroy$)
+      ).subscribe(user => {
+        if (user?.email) {
+          emailControl.setValue(user.email, { emitEvent: false });
+          emailControl.disable({ emitEvent: false });
+        }
+      });
+    } else {
+      emailControl.enable({ emitEvent: false });
+      if (!emailControl.value) {
+        emailControl.setValue('', { emitEvent: false });
+      }
+    }
   }
 
   onSubmit(): void {
     if (this.contactForm.valid && !this.isSubmitting) {
       this.isSubmitting = true;
+      const formData = this.contactForm.getRawValue();
+      const feedbackDto = this.mapFormToFeedbackDto(formData);
       
-      const formData: ContactFormData = this.contactForm.value;
-      
-      // Simulate API call
-      setTimeout(() => {
-        console.log('Contact form submitted:', formData);
-        
-        this.toastr.success(
-          'Your message has been sent successfully. We\'ll get back to you within 24 hours!',
-          'Message Sent'
-        );
-        
-        this.contactForm.reset();
-        this.contactForm.get('contactType')?.setValue('system_feedback');
-        this.isSubmitting = false;
-      }, 2000);
+      this.feedbackService.createFeedback(feedbackDto).subscribe({
+        next: (response) => {
+          this.toastr.success('Your feedback has been submitted successfully!', 'Feedback Sent');
+          this.contactForm.reset({
+            contactType: FeedbackTargetType.System,
+            email: this.isAuthenticated ? this.contactForm.get('email')?.value : ''
+          });
+          if (this.isAuthenticated) {
+            this.contactForm.get('email')?.disable();
+          }
+        },
+        error: (error) => {
+          this.toastr.error(error.error?.message || 'Failed to submit feedback', 'Error');
+        },
+        complete: () => {
+          this.isSubmitting = false;
+        }
+      });
     } else {
       this.markFormGroupTouched();
     }
   }
 
+  private mapFormToFeedbackDto(formData: ContactFormData): FeedbackCreateDto {
+    return {
+      email: formData.email,
+      subject: formData.subject,
+      description: formData.message,
+      feedbackType: formData.contactType,
+      userIdTo: formData.contactType === FeedbackTargetType.System ? null : formData.targetPersonId,
+      status: 1
+    };
+  }
+
   private markFormGroupTouched(): void {
     Object.keys(this.contactForm.controls).forEach(key => {
-      const control = this.contactForm.get(key);
-      control?.markAsTouched();
+      this.contactForm.get(key)?.markAsTouched();
     });
   }
 
-  // Getter methods for template
-  get name() { return this.contactForm.get('name'); }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.subscriptions.unsubscribe();
+  }
+
+  // Template getters
   get email() { return this.contactForm.get('email'); }
   get contactType() { return this.contactForm.get('contactType'); }
   get targetPersonId() { return this.contactForm.get('targetPersonId'); }
   get subject() { return this.contactForm.get('subject'); }
   get message() { return this.contactForm.get('message'); }
 
-  // Helper methods for template
   hasError(controlName: string, errorType: string): boolean {
     const control = this.contactForm.get(controlName);
     return !!(control?.hasError(errorType) && control?.touched);
@@ -177,25 +296,22 @@ export class ContactUsComponent implements OnInit, OnDestroy {
     const control = this.contactForm.get(controlName);
     if (!control?.errors || !control?.touched) return '';
 
-    const errors = control.errors;
-    
-    if (errors['required']) return `${this.getFieldLabel(controlName)} is required`;
-    if (errors['email']) return 'Please enter a valid email address';
-    if (errors['minlength']) return `${this.getFieldLabel(controlName)} must be at least ${errors['minlength'].requiredLength} characters`;
-    if (errors['maxlength']) return `${this.getFieldLabel(controlName)} must not exceed ${errors['maxlength'].requiredLength} characters`;
+    if (control.errors['required']) return `${this.getFieldLabel(controlName)} is required`;
+    if (control.errors['email']) return 'Please enter a valid email address';
+    if (control.errors['minlength']) return `${this.getFieldLabel(controlName)} must be at least ${control.errors['minlength'].requiredLength} characters`;
+    if (control.errors['maxlength']) return `${this.getFieldLabel(controlName)} must not exceed ${control.errors['maxlength'].requiredLength} characters`;
     
     return 'Invalid input';
   }
 
   private getFieldLabel(controlName: string): string {
     const labels: { [key: string]: string } = {
-      name: 'Name',
       email: 'Email',
-      contactType: 'Contact Type',
+      contactType: 'Feedback Type',
       targetPersonId: 'Contact Person',
       subject: 'Subject',
       message: 'Message'
     };
     return labels[controlName] || controlName;
   }
-} 
+}
