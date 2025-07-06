@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { LoggedInUser, User, UserLogin } from '../_models/user';
+import { DropdownDto, LoggedInUser, User, UserLogin } from '../_models/user';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Response } from '../_models/response';
 import { jwtDecode } from 'jwt-decode';
@@ -100,5 +100,9 @@ export class AuthService {
     localStorage.removeItem(this.tokenKey);
   }
 
+  public getRelatedUsersForFeedback() : Observable<Response<DropdownDto[]>>
+  {
+    return this.httpClient.get<Response<DropdownDto[]>>(`${this.baseUrl}/appropriate-feedback-users`);
+  }
 
 }
