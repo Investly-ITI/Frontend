@@ -89,10 +89,10 @@ export class LoginStaffComponent implements OnInit {
       var sub = this.jwt.generateTokenStaff(this.loginData).subscribe({
         next: (response) => {
           if (response.isSuccess) {
-            this.toastr.success(response.message, "Success");
+            //this.toastr.success(response.message, "Success");
             this.auth.login(response.data);
             setTimeout(() => {
-              this.router.navigate(['admin/investor']);
+              this.router.navigate(['admin/analysis']);
             }, 1500);
 
           } else {
