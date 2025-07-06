@@ -20,6 +20,7 @@ import { ContactRequestComponent } from './admin/contact-request/contact-request
 import { NoAuthGuard } from './_guards/no-auth.guard';
 import { clientGuard } from './_guards/client.guard';
 import { FeedbacksComponent } from './admin/feedback/feedback.component';
+import { CategoriesComponent } from './admin/categories/categories.component';
 
 export const routes: Routes = [
    // Authentication routes (no layout - full screen)
@@ -50,6 +51,7 @@ export const routes: Routes = [
 
       {path:'investor',component:InvestorComponent, title: 'Investor Management'},
       {path:'business-ideas',component:BusinessIdeasComponent, title: 'Business Ideas Management'},
+      {path:'categories',component:CategoriesComponent, title: 'Categories Management'},
       {path:'',redirectTo:'investor',pathMatch:'full'},
       {path:'founder',component:FounderComponent, title: 'Founder Management'},
        {path:'notification',component:NotificationsComponent, title: 'Notifcation Management'},

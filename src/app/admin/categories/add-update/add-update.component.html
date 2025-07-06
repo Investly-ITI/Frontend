@@ -1,0 +1,181 @@
+<!-- ========================================
+     ADD/UPDATE CATEGORY MAIN CONTAINER
+======================================== -->
+<div class="add-update-container">
+  
+  <!-- Form Section -->
+  <form class="modal-form" [formGroup]="formData" (ngSubmit)="onSubmit()">
+    <div class="row">
+      <div class="col-12">
+        <label for="categoryName">Category Name</label>
+        <div class="input-container">
+          <input 
+            type="text" 
+            id="categoryName"
+            formControlName="name"
+            class="form-input2"
+            [class.error]="hasFieldError('name')"
+            placeholder="Enter category name"
+            maxlength="100"
+          >
+          <div *ngIf="hasFieldError('name')" class="text-danger">
+            {{ getFieldError('name') }}
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </form>
+
+  <!-- Standards Section -->
+  <div class="standards-section">
+    <div class="standards-header">
+      <h4 class="section-title">Category Standards</h4>
+      <div class="standards-info">
+        <span class="total-weight" [class.over-limit]="getTotalWeight() > 100">
+          Total Weight: {{ getTotalWeight() }}%
+        </span>
+        <button 
+          type="button" 
+          class="add-standard-btn" 
+          (click)="startAddingStandard()"
+          *ngIf="!isAddingStandard && (modalMode === 'add' || isEditMode)"
+          [disabled]="isAddStandardDisabled()"
+        >
+          <i class='bx bx-plus'></i>
+          Add Standard
+        </button>
+      </div>
+    </div>
+
+    <!-- Add/Edit Standard Form -->
+    <div class="standard-form" *ngIf="isAddingStandard && (modalMode === 'add' || isEditMode)">
+      <h4>{{ editingStandardIndex !== -1 ? 'Edit' : 'Add' }} Standard</h4>
+      
+      <div class="row">
+        <div class="col-6">
+          <label>Standard Name</label>
+          <div class="input-container">
+            <input 
+              type="text" 
+              [(ngModel)]="currentStandard.standardName"
+              class="form-input2"
+              [class.error]="getStandardFieldError('standardName')"
+              placeholder="Enter standard name"
+              maxlength="100"
+              (blur)="onStandardFieldTouch('standardName')"
+              (input)="onStandardFieldTouch('standardName')"
+            >
+            <div *ngIf="getStandardFieldError('standardName')" class="text-danger">
+              {{ getStandardFieldError('standardName') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <label>Weight (1-100)</label>
+          <div class="input-container">
+            <input 
+              type="number" 
+              [(ngModel)]="currentStandard.standardCategoryWeight"
+              class="form-input2"
+              [class.error]="getStandardFieldError('standardCategoryWeight')"
+              placeholder="Enter weight percentage"
+              min="1"
+              max="100"
+              (blur)="onStandardFieldTouch('standardCategoryWeight')"
+              (input)="onStandardFieldTouch('standardCategoryWeight')"
+            >
+            <div *ngIf="getStandardFieldError('standardCategoryWeight')" class="text-danger">
+              {{ getStandardFieldError('standardCategoryWeight') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <label>Question</label>
+          <div class="input-container">
+            <textarea 
+              [(ngModel)]="currentStandard.question"
+              class="form-input2 textarea"
+              [class.error]="getStandardFieldError('question')"
+              placeholder="Enter the evaluation question"
+              rows="2"
+              maxlength="500"
+              (blur)="onStandardFieldTouch('question')"
+              (input)="onStandardFieldTouch('question')"
+            ></textarea>
+            <div *ngIf="getStandardFieldError('question')" class="text-danger">
+              {{ getStandardFieldError('question') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="standard-actions">
+        <button type="button" class="cancel-standard-btn" (click)="cancelStandardEdit()">
+          <i class='bx bx-x'></i>
+          Cancel
+        </button>
+        <button 
+          type="button" 
+          class="action-btn" 
+          (click)="editingStandardIndex !== -1 ? updateStandard() : addStandard()"
+          [disabled]="!isValidStandard(currentStandard)"
+        >
+          <i class='bx bx-check'></i>
+          {{ editingStandardIndex !== -1 ? 'Update' : 'Add' }} Standard
+        </button>
+      </div>
+    </div>
+
+    <!-- Standards List -->
+    <div class="standards-list" *ngIf="standardsArray.length > 0 && !isAddingStandard">
+      <div class="standard-card" *ngFor="let standard of standardsArray.controls; let i = index" [formGroup]="$any(standard)">
+        <div class="standard-header">
+          <h5>{{ standard.get('standardName')?.value }}</h5>
+          <div class="standard-meta">
+            <span class="weight-badge">{{ standard.get('standardCategoryWeight')?.value }}%</span>
+            <div class="standard-actions" *ngIf="modalMode === 'add' || isEditMode">
+              <button type="button" class="edit-standard-btn" (click)="editStandard(i)" [disabled]="isAddingStandard">
+                <i class='bx bx-edit'></i>
+              </button>
+              <button type="button" class="remove-standard-btn" (click)="removeStandard(i)" [disabled]="isAddingStandard">
+                <i class='bx bx-trash'></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="standard-question">{{ standard.get('question')?.value }}</div>
+      </div>
+    </div>
+
+    <!-- No Standards Message -->
+    <div class="no-standards-message" *ngIf="standardsArray.length === 0 && !isAddingStandard">
+      <div class="no-standards-content">
+        <i class='bx bx-info-circle'></i>
+        <h4>No Standards Defined</h4>
+        <p>{{ (modalMode === 'add' || isEditMode) ? 'Click "Add Standard" to create evaluation criteria for this category.' : 'This category has no evaluation standards defined yet.' }}</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal Footer -->
+  <div class="modal-footer">
+    <!-- Add Mode: Show Add Button -->
+    <button *ngIf="modalMode === 'add'" type="button" class="action-btn add-btn" (click)="onSubmit()" [disabled]="!formData.valid || isAddingStandard || !hasFormChanges()">
+      <i class='bx bx-plus'></i>
+      Add {{ entityName }}
+    </button>
+
+    <!-- View Mode: Show Edit/Save Button -->
+    <button *ngIf="modalMode === 'view'" type="button" class="action-btn edit-btn" (click)="isEditMode ? onSubmit() : toggleEditMode()" [disabled]="isAddingStandard || (isEditMode && (!formData.valid || !hasFormChanges()))">
+      <i class='bx' [ngClass]="isEditMode ? 'bx-check' : 'bx-edit-alt'"></i>
+      {{ isEditMode ? 'Save' : 'Edit' }}
+    </button>
+  </div>
+</div>
