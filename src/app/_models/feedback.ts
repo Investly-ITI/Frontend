@@ -2,9 +2,8 @@
 export class FeedbackDto {
     constructor(
         public id: number,
+        public subject: string,
         public description?: string,
-        public userTypeFrom?: number,
-        public userTypeTo?: number,
         public userIdTo?: number,
         public status?: number,  
         public createdAt?: string,

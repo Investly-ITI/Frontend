@@ -28,10 +28,10 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   @Input() modalMode: 'add' | 'view' = 'view';
   @Input() Governorates!: Governorate[];
   @Output() saveEntity = new EventEmitter<any>();
-  
+
   //* Tab functionality
   activeTab: 'information' | 'documentation' = 'information';
-  
+
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>
 
@@ -76,7 +76,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
     , private toastrService: ToastrService
     , private governorateService: GovernrateService
     , private countryCodeService: CountryCodeService
-    // , private cdRef: ChangeDetectorRef
+    , private cdRef: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -86,7 +86,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-   
+
     if (changes['selectedEntity'] || changes['isEditMode']) {
       this.initializeForm();
     }
@@ -127,18 +127,31 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   // Custom validator for min/max funding
   minMaxFundingValidator(): ValidatorFn {
     return (group: AbstractControl): {[key: string]: any} | null => {
+      const investingType = group.get('investingType')?.value;
+
+      // Only apply validation if investingType is Money or Both
+      if (investingType !== String(this.investingTypes.Money) && investingType !== String(this.investingTypes.Both)) {
+        return null;
+      }
+
       const min = group.get('minFunding')?.value;
       const max = group.get('maxFunding')?.value;
-      if (min !== null && min !== undefined && min !== '' && Number(min) <= 500) {
-        return { minFundingTooLow: true };
+
+      // Check if min and max are required
+      if ((min === null || min === '') && (investingType === String(this.investingTypes.Money) || investingType === String(this.investingTypes.Both))) {
+        return { minRequired: true };
       }
-      if (
-        min !== null && min !== undefined && min !== '' &&
-        max !== null && max !== undefined && max !== '' &&
-        Number(max) <= Number(min)
-      ) {
-        return { maxFundingNotGreater: true };
+      if ((max === null || max === '') && (investingType === String(this.investingTypes.Money) || investingType === String(this.investingTypes.Both))) {
+        return { maxRequired: true };
       }
+
+      const minVal = Number(min);
+      const maxVal = Number(max);
+
+      if (minVal <= 1000) return { minTooLow: true };
+      if (maxVal >= 1000000) return { maxTooHigh: true };
+      if (maxVal <= minVal) return { maxNotGreaterThanMin: true };
+
       return null;
     };
   }
@@ -152,13 +165,29 @@ export class AddUpdateComponent implements OnInit, OnChanges {
     } else if (Array.isArray(interestedStages)) {
       stages = interestedStages.map((s: any) => String(s));
     }
+
+    const initialInvestingType = this.selectedEntity?.investingType !== undefined && this.selectedEntity?.investingType !== null
+    ? String(this.selectedEntity.investingType) // Ensure it's a string
+    : '';
+
+
     this.formData = this.fb.group({
       id: [this.selectedEntity?.id || null],
       userId: [this.selectedEntity?.userId || null],
-      investingType: [this.selectedEntity?.investingType || '', Validators.required],
+      investingType: [initialInvestingType, Validators.required],
       InterestedBusinessStages: [stages, Validators.required],
-      minFunding: [this.selectedEntity?.minFunding || null, [Validators.required, Validators.min(501)]],
-      maxFunding: [this.selectedEntity?.maxFunding || null, [Validators.required]],
+      minFunding: [
+        (initialInvestingType === String(this.investingTypes.Money) || initialInvestingType === String(this.investingTypes.Both))
+          ? (this.selectedEntity?.minFunding || null)
+          : null,
+        []
+      ],
+      maxFunding: [
+        (initialInvestingType === String(this.investingTypes.Money) || initialInvestingType === String(this.investingTypes.Both))
+          ? (this.selectedEntity?.maxFunding || null)
+          : null,
+        []
+      ],
       user: this.fb.group({
         id: [this.selectedEntity?.user?.id || 0],
         firstName: [this.selectedEntity?.user?.firstName || '', Validators.required],
@@ -175,14 +204,24 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         cityId: [this.selectedEntity?.user?.cityId || null,Validators.required],
         address: [this.selectedEntity?.user?.address || ""]
       })
-    }, { validators: this.minMaxFundingValidator() });
+    }, { validators: this.minMaxFundingValidator() }); // Apply the custom validator at the form group level
+
+    // Dynamically apply validators based on initial investing type
+    this.setFundingValidators(Number(initialInvestingType)); // Convert to number for enum comparison
+
+    // Subscribe to investingType changes to update validators and visibility
+    this.formData.get('investingType')?.valueChanges.subscribe(type => {
+      this.setFundingValidators(Number(type)); // Convert to number for enum comparison
+      this.onInvestingTypeChange(); // Call this to handle clearing/setting defaults and detect changes
+    });
+
     // Enable form in edit mode, disable only in view mode
     if (this.modalMode === 'view' && !this.isEditMode) {
       this.formData.disable();
     } else {
       this.formData.enable();
     }
-    // this.cdRef.detectChanges();
+    this.cdRef.detectChanges();
     const govId = this.formData.get('user.governmentId')?.value;
     if (govId) {
       this.loadCities(govId);
@@ -190,23 +229,69 @@ export class AddUpdateComponent implements OnInit, OnChanges {
     if(this.selectedEntity?.user?.profilePicPath!=null &&this.selectedEntity?.user?.profilePicPath!=''){
       this.profileImageUrl=this.ApiUrl+"/"+this.selectedEntity?.user?.profilePicPath;
     }
-   else
-  {
-    this.profileImageUrl='https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg';
-  }
-  if (this.selectedEntity?.user?.frontIdPicPath) {
-    this.frontIdImageUrl = this.ApiUrl + '/' + this.selectedEntity.user.frontIdPicPath;
-  } else {
-    this.frontIdImageUrl = null;
-  }
-  if (this.selectedEntity?.user?.backIdPicPath) {
-    this.backIdImageUrl = this.ApiUrl + '/' + this.selectedEntity.user.backIdPicPath;
-  } else {
-    this.backIdImageUrl = null;
-  }
+    else
+    {
+      this.profileImageUrl='https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg';
+    }
+    if (this.selectedEntity?.user?.frontIdPicPath) {
+      this.frontIdImageUrl = this.ApiUrl + '/' + this.selectedEntity.user.frontIdPicPath;
+    } else {
+      this.frontIdImageUrl = null;
+    }
+    if (this.selectedEntity?.user?.backIdPicPath) {
+      this.backIdImageUrl = this.ApiUrl + '/' + this.selectedEntity.user.backIdPicPath;
+    } else {
+      this.backIdImageUrl = null;
+    }
 
   }
 
+  setFundingValidators(investingType: InvestorInvestingType): void {
+    const minFundingControl = this.formData.get('minFunding');
+    const maxFundingControl = this.formData.get('maxFunding');
+
+    if (minFundingControl && maxFundingControl) {
+      if (investingType === this.investingTypes.Money || investingType === this.investingTypes.Both) {
+        minFundingControl.setValidators([Validators.required, Validators.min(1000)]);
+        maxFundingControl.setValidators([Validators.required, Validators.max(999999)]);
+      } else {
+        minFundingControl.clearValidators();
+        maxFundingControl.clearValidators();
+      }
+      minFundingControl.updateValueAndValidity({ emitEvent: false });
+      maxFundingControl.updateValueAndValidity({ emitEvent: false });
+      // Re-evaluate the custom group validator as well
+      this.formData.updateValueAndValidity({ emitEvent: false });
+    }
+  }
+
+InvestorInvestingType = InvestorInvestingType;
+shouldShowFundingFields(): boolean {
+  const investingType = +this.formData.get('investingType')?.value;
+  return investingType === InvestorInvestingType.Money || 
+           investingType === InvestorInvestingType.Both;
+}
+
+  onInvestingTypeChange() {
+  const investingType = Number(this.formData.get('investingType')?.value); 
+
+  if (investingType === this.investingTypes.Experience) {
+    this.formData.patchValue({
+      minFunding: null,
+      maxFunding: null
+    }, { emitEvent: false });
+  } else if ((investingType === this.investingTypes.Money ||
+              investingType === this.investingTypes.Both)) {
+    if (this.formData.get('minFunding')?.value === null || this.formData.get('minFunding')?.value === '') {
+      this.formData.get('minFunding')?.patchValue(this.selectedEntity?.minFunding || 1000, { emitEvent: false });
+    }
+    if (this.formData.get('maxFunding')?.value === null || this.formData.get('maxFunding')?.value === '') {
+      this.formData.get('maxFunding')?.patchValue(this.selectedEntity?.maxFunding || 10000, { emitEvent: false });
+    }
+  }
+
+  this.cdRef.detectChanges(); // Trigger view update
+}
 
 
   resetForm(): void {
@@ -229,7 +314,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         governmentId: [''],
         cityId: [''],
         address:[''],
-        
+
       })
     });
   }
@@ -248,6 +333,9 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   onSubmit(): void {
     if (!this.formData.valid) {
       this.formData.markAllAsTouched();
+      // Optionally, scroll to the first invalid field or show a general error message
+      this.toastrService.error('Please fill in all required fields correctly.', 'Validation Error');
+      return; // Stop submission if form is invalid
     } else {
       const rawData = this.formData.value;
       const formPayload = new FormData();
@@ -272,9 +360,15 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         }
       }
       //files
-      formPayload.append('user.PicFile',this.profilePicFile);
-     formPayload.append('user.FrontIdPicFile',this.FrontIdImageFile);
-      formPayload.append('user.BackIdPicFile',this.BackIdImageFile);
+      if (this.profilePicFile) {
+        formPayload.append('user.PicFile', this.profilePicFile);
+      }
+      if (this.FrontIdImageFile) {
+        formPayload.append('user.FrontIdPicFile', this.FrontIdImageFile);
+      }
+      if (this.BackIdImageFile) {
+        formPayload.append('user.BackIdPicFile', this.BackIdImageFile);
+      }
 
       //add
       if (this.selectedEntity?.id == null || this.selectedEntity?.id == 0) {
@@ -332,7 +426,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   onFrontIdFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      this.FrontIdImageFile = file; 
+      this.FrontIdImageFile = file;
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.frontIdImageUrl = e.target.result;
@@ -344,7 +438,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   onBackIdFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      this.BackIdImageFile = file; 
+      this.BackIdImageFile = file;
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.backIdImageUrl = e.target.result;
@@ -367,5 +461,3 @@ export class AddUpdateComponent implements OnInit, OnChanges {
     this.unsubscribe.forEach((sb) => sb.unsubscribe());
   }
 }
-
-
