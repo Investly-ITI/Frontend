@@ -18,8 +18,8 @@ export interface InvestorContactRequest {
 export interface InvestorContactItem {
   id: number;
   founderName: string;
-   founderEmail: string;
-    founderPhoneNumber: string;
+  founderEmail: string;
+  founderPhoneNumber: string;
   founderId: number;
   investorName: string;
   investorId: number;
@@ -28,7 +28,7 @@ export interface InvestorContactItem {
   status: number;
   declineReason: string | null;
   createdAt: string | null;
-  business:BusinessDto;
+  business: BusinessDto;
 }
 
 export interface InvestorContactResponse {
@@ -45,9 +45,9 @@ export interface InvestorContactResponse {
 export interface UpdateContactRequestStatusDto {
   contactRequestId: number;
   newStatus: ContactRequestStatus;
-  declineReason?: string;  
+  declineReason?: string;
 }
 export interface ContactRequestCountsDto {
   totalContactRequestCount: number;
- 
+
 }

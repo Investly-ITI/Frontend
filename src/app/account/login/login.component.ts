@@ -131,8 +131,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       var sub = this.jwt.generateToken(this.loginData).subscribe({
         next: (response) => {
           if (response.isSuccess) {
-            console.log(response);
-            this.toastr.success(response.message, "Success");
+            //console.log(response);
+            //this.toastr.success(response.message, "Success");
             this.auth.login(response.data);
             this.notificationService.fetchUnreadCount();
             this.notificationHubService.startConnection();

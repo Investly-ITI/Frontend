@@ -5,7 +5,7 @@ import { AddIdeaComponent } from './add-idea/add-idea.component';
 import { Subscription } from 'rxjs';
 import { IdeaService } from '../_services/idea.service';
 import { getStageLabel } from '../../_shared/utils/enum.utils';
-import { BusinessIdeaStatus, DesiredInvestmentType } from '../../_shared/enums';
+import { BusinessIdeaStatus, ContactRequestStatus, DesiredInvestmentType } from '../../_shared/enums';
 import { StandardAiResult } from '../../_models/aiIdeaEvaluationResult';
 import { BusinessDto } from '../../_models/businesses';
 import { environment } from '../../../environments/environment';
@@ -308,20 +308,25 @@ export class FounderIdeasComponent implements OnInit {
               rejectionData: {
                 message: item.aiBusinessEvaluations?.generalFeedback ?? "",
                 standards: item.aiBusinessEvaluations?.standards ?? []
-              }
+              },
+              contactRequests: item.investorContactRequests?.map((request) => ({
+                id: request.id.toString(),
+                investorName: request.investorName,
+                requestDate: request.createdAt?.toString() ?? '',
+                status: request.status === ContactRequestStatus.Pending ? 'pending' : request.status === ContactRequestStatus.Accepted? 'accepted' : 'declined'
+              })) ?? []
             };
           });
           this.ideas = ideasArr;
           this.emitIdeasCount();
-         // console.log(this.ideas);
+          console.log(this.ideas);
         }
       }, error: (err) => {
-        console.log("error");
+        console.log(err);
       }
 
     })
-
-
+    this.unsubscribe.push(sub);
 
   }
 
