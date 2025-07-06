@@ -45,6 +45,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   //* Profile image
   profileImageUrl: string = 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg';
   showImageOverlay: boolean = false;
+  formSubmitted: boolean = false;
   Gender = Gender;
 
   //* Documentation images
@@ -125,36 +126,61 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   }
 
   // Custom validator for min/max funding
-  minMaxFundingValidator(): ValidatorFn {
+minMaxFundingValidator(): ValidatorFn {
     return (group: AbstractControl): {[key: string]: any} | null => {
       const investingType = group.get('investingType')?.value;
+      const minControl = group.get('minFunding');
+      const maxControl = group.get('maxFunding');
 
       // Only apply validation if investingType is Money or Both
       if (investingType !== String(this.investingTypes.Money) && investingType !== String(this.investingTypes.Both)) {
+        // Clear any existing errors
+        minControl?.setErrors(null);
+        maxControl?.setErrors(null);
         return null;
       }
 
-      const min = group.get('minFunding')?.value;
-      const max = group.get('maxFunding')?.value;
+      const min = minControl?.value;
+      const max = maxControl?.value;
 
-      // Check if min and max are required
-      if ((min === null || min === '') && (investingType === String(this.investingTypes.Money) || investingType === String(this.investingTypes.Both))) {
-        return { minRequired: true };
+      const errors: any = {};
+
+      // Check if values are null or empty
+      if (min === null || min === '' || min === undefined) {
+        errors.minRequired = true;
       }
-      if ((max === null || max === '') && (investingType === String(this.investingTypes.Money) || investingType === String(this.investingTypes.Both))) {
-        return { maxRequired: true };
+      if (max === null || max === '' || max === undefined) {
+        errors.maxRequired = true;
       }
 
-      const minVal = Number(min);
-      const maxVal = Number(max);
+      // Only check numerical validations if values exist
+      if (min !== null && min !== '' && min !== undefined && 
+          max !== null && max !== '' && max !== undefined) {
+        const minVal = Number(min);
+        const maxVal = Number(max);
 
-      if (minVal <= 1000) return { minTooLow: true };
-      if (maxVal >= 1000000) return { maxTooHigh: true };
-      if (maxVal <= minVal) return { maxNotGreaterThanMin: true };
+        if (minVal <= 1000) errors.minTooLow = true;
+        if (maxVal >= 1000000) errors.maxTooHigh = true;
+        if (maxVal <= minVal) errors.maxNotGreaterThanMin = true;
+      }
 
+      // Set errors on individual controls
+      if (Object.keys(errors).length > 0) {
+        if (errors.minRequired || errors.minTooLow) {
+          minControl?.setErrors(errors);
+        }
+        if (errors.maxRequired || errors.maxTooHigh) {
+          maxControl?.setErrors(errors);
+        }
+        return errors; // Return errors at group level
+      }
+
+      // Clear errors if all validations pass
+      minControl?.setErrors(null);
+      maxControl?.setErrors(null);
       return null;
     };
-  }
+}
 
   initializeForm(): void {
     // Handle both InterestedBusinessStages and interestedBusinessStages
@@ -171,7 +197,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
     : '';
 
 
-    this.formData = this.fb.group({
+     this.formData = this.fb.group({
       id: [this.selectedEntity?.id || null],
       userId: [this.selectedEntity?.userId || null],
       investingType: [initialInvestingType, Validators.required],
@@ -193,12 +219,12 @@ export class AddUpdateComponent implements OnInit, OnChanges {
         firstName: [this.selectedEntity?.user?.firstName || '', Validators.required],
         lastName: [this.selectedEntity?.user?.lastName || '', Validators.required],
         email: [this.selectedEntity?.user?.email || '', [Validators.required, Validators.email]],
-        countryCode: [this.selectedEntity?.user?.countryCode || ''],
-        phoneNumber: [this.selectedEntity?.user?.phoneNumber || ''],
+        countryCode: [this.selectedEntity?.user?.countryCode || '',Validators.required],
+        phoneNumber: [this.selectedEntity?.user?.phoneNumber || '',Validators.required],
         userType: [this.selectedEntity?.user?.userType || 0],
         nationalId: [this.selectedEntity?.user?.nationalId || '', Validators.required],
         gender: [this.selectedEntity?.user?.gender || Gender.Male, Validators.required],
-        dateOfBirth: [this.selectedEntity?.user?.dateOfBirth || '',],
+        dateOfBirth: [this.selectedEntity?.user?.dateOfBirth || '',Validators.required],
         status: [this.selectedEntity?.user?.status || Status.Active],
         governmentId: [this.selectedEntity?.user?.governmentId || null, Validators.required],
         cityId: [this.selectedEntity?.user?.cityId || null,Validators.required],
@@ -246,7 +272,7 @@ export class AddUpdateComponent implements OnInit, OnChanges {
 
   }
 
-  setFundingValidators(investingType: InvestorInvestingType): void {
+ setFundingValidators(investingType: InvestorInvestingType): void {
     const minFundingControl = this.formData.get('minFunding');
     const maxFundingControl = this.formData.get('maxFunding');
 
@@ -257,13 +283,14 @@ export class AddUpdateComponent implements OnInit, OnChanges {
       } else {
         minFundingControl.clearValidators();
         maxFundingControl.clearValidators();
+        minFundingControl.setValue(null);
+        maxFundingControl.setValue(null);
       }
       minFundingControl.updateValueAndValidity({ emitEvent: false });
       maxFundingControl.updateValueAndValidity({ emitEvent: false });
-      // Re-evaluate the custom group validator as well
       this.formData.updateValueAndValidity({ emitEvent: false });
     }
-  }
+}
 
 InvestorInvestingType = InvestorInvestingType;
 shouldShowFundingFields(): boolean {
@@ -273,26 +300,17 @@ shouldShowFundingFields(): boolean {
 }
 
   onInvestingTypeChange() {
-  const investingType = Number(this.formData.get('investingType')?.value); 
+    const investingType = Number(this.formData.get('investingType')?.value); 
 
-  if (investingType === this.investingTypes.Experience) {
-    this.formData.patchValue({
-      minFunding: null,
-      maxFunding: null
-    }, { emitEvent: false });
-  } else if ((investingType === this.investingTypes.Money ||
-              investingType === this.investingTypes.Both)) {
-    if (this.formData.get('minFunding')?.value === null || this.formData.get('minFunding')?.value === '') {
-      this.formData.get('minFunding')?.patchValue(this.selectedEntity?.minFunding || 1000, { emitEvent: false });
+    if (investingType === this.investingTypes.Experience) {
+        this.formData.patchValue({
+            minFunding: null,
+            maxFunding: null
+        }, { emitEvent: false });
     }
-    if (this.formData.get('maxFunding')?.value === null || this.formData.get('maxFunding')?.value === '') {
-      this.formData.get('maxFunding')?.patchValue(this.selectedEntity?.maxFunding || 10000, { emitEvent: false });
-    }
-  }
 
-  this.cdRef.detectChanges(); // Trigger view update
+    this.cdRef.detectChanges();
 }
-
 
   resetForm(): void {
     this.formData = this.fb.group({
