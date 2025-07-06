@@ -84,9 +84,6 @@ export class ProfileService {
     );
   }
 
-  getFoundersForDropdown(): Observable<Response<DropdownDto[]>> {
-    return this.http.get<Response<DropdownDto[]>>(`${this.ApiUrl}/api/founder/Profile/dropdown`);
-  }
 
 
 

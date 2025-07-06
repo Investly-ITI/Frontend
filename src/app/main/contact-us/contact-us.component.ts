@@ -6,15 +6,11 @@ import { ToastrService } from 'ngx-toastr';
 
 // Models and Services
 import { DropdownDto, LoggedInUser } from '../../_models/user';
-import { InvestorService } from '../../admin/_services/investor.service';
-import { FounderService } from '../../admin/_services/founder.service';
 import { UserFeedbackService } from '../../_services/user-feedback-service.service';
 import { AuthService } from '../../_services/auth.service';
 import { FeedbackCreateDto, FeedbackTargetType } from '../../_models/feedback';
 import { UserType } from '../../_shared/enums';
 import { Subject } from 'rxjs';
-import { ProfileService as InvestorProfileService } from '../../investor/_services/profile.service';
-import { ProfileService as FounderProfileService } from '../../founder/_services/profile.service';
 
 interface Response<T> {
   data: T;
@@ -41,7 +37,7 @@ interface ContactFormData {
 export class ContactUsComponent implements OnInit, OnDestroy {
   contactForm: FormGroup;
   isSubmitting: boolean = false;
-  
+  noContactsAvailable: boolean = false;
   private destroy$ = new Subject<void>();
   availableContacts: DropdownDto[] = [];
   isLoadingContacts: boolean = false;
@@ -57,12 +53,8 @@ export class ContactUsComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private toastr: ToastrService,
-    // private investorService: InvestorService,
-    // private founderService: FounderService,
     private feedbackService: UserFeedbackService,
     private authService: AuthService,
-    private investorProfileService: InvestorProfileService,
-    private founderProfileService: FounderProfileService,
     private cdr: ChangeDetectorRef
   ) {
     this.contactForm = this.createForm();
@@ -170,30 +162,22 @@ export class ContactUsComponent implements OnInit, OnDestroy {
   private loadAvailableContacts(feedbackType: FeedbackTargetType): void {
     this.isLoadingContacts = true;
     this.availableContacts = [];
+    this.noContactsAvailable = false;
 
-    if (feedbackType === FeedbackTargetType.Investor) {
-      this.loadInvestors();
-    } else if (feedbackType === FeedbackTargetType.Founder) {
-      this.loadFounders();
-    } else {
-      this.isLoadingContacts = false;
-    }
-  }
-
-  private loadInvestors(): void {
-    this.investorProfileService.getInvestorsForDropdown().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
+    this.authService.getRelatedUsersForFeedback().subscribe({
       next: (response) => {
         if (response.isSuccess && response.data) {
-          this.availableContacts = response.data.map(investor => ({
-            id: investor.id,
-            name: `${investor.name} (Investor)`
-          }));
+          this.availableContacts = response.data;
+          this.noContactsAvailable = this.availableContacts.length === 0;
+          
+          if (this.noContactsAvailable) {
+            this.toastr.info('No contacts available for feedback at this time', 'Information');
+          }
         } else {
           this.availableContacts = [];
+          this.noContactsAvailable = true;
           if (!response.isSuccess) {
-            this.toastr.error(response.message || 'Failed to load investors', 'Error');
+            this.toastr.error(response.message || 'Failed to load contacts', 'Error');
           }
         }
         this.isLoadingContacts = false;
@@ -202,34 +186,8 @@ export class ContactUsComponent implements OnInit, OnDestroy {
       error: (error) => {
         this.isLoadingContacts = false;
         this.availableContacts = [];
-        this.toastr.error('Failed to load investors', 'Error');
-      }
-    });
-  }
-
-  private loadFounders(): void {
-    this.founderProfileService.getFoundersForDropdown().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (response) => {
-        if (response.isSuccess && response.data) {
-          this.availableContacts = response.data.map(founder => ({
-            id: founder.id,
-            name: `${founder.name} (Founder)`
-          }));
-        } else {
-          this.availableContacts = [];
-          if (!response.isSuccess) {
-            this.toastr.error(response.message || 'Failed to load founders', 'Error');
-          }
-        }
-        this.isLoadingContacts = false;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.isLoadingContacts = false;
-        this.availableContacts = [];
-        this.toastr.error('Failed to load founders', 'Error');
+        this.noContactsAvailable = true;
+        this.toastr.error('Failed to load contacts', 'Error');
       }
     });
   }

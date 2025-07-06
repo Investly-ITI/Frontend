@@ -39,9 +39,6 @@ return res;
         );
       }
 
-  getInvestorsForDropdown(): Observable<Response<DropdownDto[]>> {
-    return this.http.get<Response<DropdownDto[]>>(`${this.ApiUrl}/api/investor/profile/dropdown`);
-  }
    GetContactRequestsData():Observable<Response<InvestorContactItem[]>>{
     var res=this.http.get<Response<InvestorContactItem[]>>(`${this.ApiUrl}/api/investor/InvestorRequests`);
     return res;

@@ -124,7 +124,7 @@
                 id="targetPersonId" 
                 class="form-input" 
                 formControlName="targetPersonId"
-                [disabled]="isLoadingContacts"
+                [disabled]="isLoadingContacts || noContactsAvailable"
               >
                 <option [ngValue]="null" disabled>Select a contact</option>
                 <option *ngFor="let contact of availableContacts" [ngValue]="contact.id">
@@ -137,6 +137,10 @@
             </div>
             <div *ngIf="targetPersonId?.touched && targetPersonId?.errors" class="error-message">
               {{ getErrorMessage('targetPersonId') }}
+            </div>
+            <div *ngIf="noContactsAvailable && !isLoadingContacts" class="no-contacts-message">
+              <i class='bx bx-info-circle'></i>
+              <span>There are no {{contactType?.value === FeedbackTargetType.Investor ? 'investors' : 'founders'}} available for feedback at this time</span>
             </div>
           </div>
 

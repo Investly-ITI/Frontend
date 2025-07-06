@@ -2210,3 +2210,28 @@
   outline-offset: 2px;
 } 
 
+/* Alternative more prominent style */
+.no-contacts-message {
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 4px;
+  background-color: #e7f8ff; /* Very light blue */
+  border: 1px solid #bee5eb; /* Light blue border */
+  color: #0c5460; /* Darker blue text */
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.no-contacts-message i {
+  font-size: 1.1rem;
+  color: #17a2b8;
+}
+
+.authenticated-note {
+  margin-top: 8px;
+  color: #6c757d; /* Bootstrap's secondary color */
+  font-size: 0.875rem;
+  font-style: italic;
+}
