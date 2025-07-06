@@ -21,7 +21,7 @@
                         
                 
                     </div>
-                    <a [routerLink]="['/admin/notification']"  [queryParams]="{ UserTypeTo: UserType.Staff}" class="view-btn small-link ml-space">
+                    <a [routerLink]="['/admin/notification']"  [queryParams]="{ UserTypeTo: UserType.Staff}"  (click)="onSeeMoreClick()" class="view-btn small-link ml-space">
                           See more
                     </a>
 
