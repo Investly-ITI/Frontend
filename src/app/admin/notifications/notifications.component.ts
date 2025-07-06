@@ -13,9 +13,11 @@ import { ViewDetailsComponent } from './view-details/view-details.component';
 import { Subscription } from 'rxjs';
 import { notification, notificationSearch } from '../../_models/notification';
 import { NotificationService } from '../_services/notification.service';
+import { NotificationService as SharedNotificationService} from '../../_services/notification.service';
 import { DarkModeService } from '../_services/dark-mode.service';
 import { ToastrService } from 'ngx-toastr';
 import { NotificationsStatus, Status, UserType } from '../../_shared/enums';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-notifications',
@@ -78,8 +80,27 @@ isLoading2: boolean = true;
   displayDeletedCount: number = 0;
       
  constructor(private notficationService:NotificationService,  private darkModeService: DarkModeService,
-       private toastr: ToastrService) { }
+       private toastr: ToastrService,private router:ActivatedRoute,private SharedNotificationService:SharedNotificationService) { }
   ngOnInit(): void {
+      this.router.queryParams.subscribe(params => {
+    if (params['UserTypeTo']) {
+      this.searchData.UserTypeTo = this.userType.Staff; 
+      this.searchData.isRead=0;
+    
+ this.SharedNotificationService.markAllAsRead().subscribe({
+      next: () => {
+        this.SharedNotificationService.setUnreadCount(0);
+      
+      },
+      error: () => {
+        this.SharedNotificationService.setUnreadCount(0);
+       
+      }
+    });
+    }
+    this.loadData(); // now it will load filtered by staff
+    this.loadactiveDeletedCount();
+  });
     this.loadData();
   this.loadactiveDeletedCount();
     
