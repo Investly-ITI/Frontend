@@ -1,4 +1,5 @@
 import { InvestorInvestingType, Status, UserType,BusinessIdeaStatus ,InvestingStages } from "../enums";
+import {FeedbackTargetType } from "../../_models/feedback";
 
 export function getStatusLabel(value:number):string{
     // console.log(Status[value]);
@@ -20,6 +21,8 @@ export function getBusinessIdeaStatusLabel(value: number): string {
 export function getStageLabel(value: number): string {
     return InvestingStages[value] ?? 'Unknown';
 }
-
+export function getFeedbackTargetTypeLabel(value: number): string {
+  return FeedbackTargetType[value] ?? 'Unknown';
+}
 
 

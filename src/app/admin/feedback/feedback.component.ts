@@ -1,5 +1,3 @@
-// src/app/admin/feedbacks/feedback.component.ts - Important change in get filteredFeedbacks()
-
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,8 +12,9 @@ import { StatusLabelPipe } from '../../_shared/pipes/enum.pipe';
 import { Subscription } from 'rxjs';
 import { FeedbackService } from '../_services/feedback.service';
 import { FeedbackDto, FeedbackListDto, FeedbackSearchDto, FeedbackCountsDto } from '../../_models/feedback';
-import { getUserTypeLabel, getStatusLabel } from '../../_shared/utils/enum.utils';
+import { getUserTypeLabel, getStatusLabel, getFeedbackTargetTypeLabel } from '../../_shared/utils/enum.utils';
 import { UserType, Status } from '../../_shared/enums';
+import {FeedbackTargetType} from '../../_models/feedback'
 import { ToastrService } from 'ngx-toastr';
 import { DarkModeService } from '../_services/dark-mode.service';
 
@@ -53,7 +52,9 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
     feedbackCounts: FeedbackCountsDto = new FeedbackCountsDto();
     searchParams: FeedbackSearchDto = new FeedbackSearchDto();
     userTypes: UserType[] = Object.values(UserType).filter(value => typeof value === 'number') as UserType[];
-    statuses: Status[] = [Status.Active, Status.Inactive]; 
+    statuses: Status[] = [Status.Active, Status.Inactive];
+    feedbackTargetTypes: FeedbackTargetType[] = Object.values(FeedbackTargetType).filter(value => typeof value === 'number') as FeedbackTargetType[];
+
     isSoftDeleteModalOpen: boolean = false;
     selectedFeedbackIdForSoftDelete: number | null = null;
     selectedFeedbackDescription: string | null = null;
@@ -63,15 +64,17 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
 
     tempStatusFilter: number | null = null;
     tempUserTypeFromFilter: number | null = null;
-    tempUserTypeToFilter: number | null = null;
+    tempUserTypeToFilter: number | null = null; 
 
     entityNamePlural: string = 'Feedbacks';
     entityName: string = 'Feedback';
     public UserType = UserType;
     public Status = Status;
+    public FeedbackTargetType = FeedbackTargetType;
     public Math = Math;
     getUserTypeLabel = getUserTypeLabel;
     getStatusLabel = getStatusLabel;
+    getFeedbackTargetTypeLabel = getFeedbackTargetTypeLabel;
 
     isDetailsModalOpen: boolean = false;
     selectedFeedbackForDetails: FeedbackDto | null = null;
