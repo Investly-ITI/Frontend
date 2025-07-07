@@ -86,8 +86,9 @@ isLoading2: boolean = true;
     if (params['UserTypeTo']) {
       this.searchData.UserTypeTo = this.userType.Staff; 
       this.searchData.isRead=0;
-    
- this.SharedNotificationService.markAllAsRead().subscribe({
+    setTimeout(() => {
+    if (this.router.snapshot.queryParams['UserTypeTo']) {
+     this.SharedNotificationService.markAllAsRead().subscribe({
       next: () => {
         this.SharedNotificationService.setUnreadCount(0);
       
@@ -97,6 +98,9 @@ isLoading2: boolean = true;
        
       }
     });
+    }
+  }, 500);
+ 
     }
     this.loadData(); // now it will load filtered by staff
     this.loadactiveDeletedCount();
