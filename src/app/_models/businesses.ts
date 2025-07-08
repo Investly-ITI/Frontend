@@ -1,4 +1,4 @@
-import { BusinessIdeaStatus, InvestingStages } from "../_shared/enums"; 
+import { BusinessIdeaStatus, InvestingStages, ContactRequestStatus } from "../_shared/enums"; 
 import { AiIdeaEvaluationResult } from "./aiIdeaEvaluationResult";
 import { ContactRequestCountsDto, InvestorContactItem } from "./contact-request";
 import { StandardAnswers } from "./standardanswers";
@@ -46,7 +46,7 @@ export class BusinessDto {
         public businessStandardAnswers: StandardAnswers[] = [],
         public city?: CityDto,
         public government?: GovernmentDto,
-        public images?:string,
+        public images?: string | string[],
         public imageFiles?:any,
         public aiBusinessEvaluations?:AiIdeaEvaluationResult,
         public imagePaths?:string[],
@@ -70,5 +70,61 @@ export class BusinessSearchDto {
         public founderId?: number,
         public stage?: InvestingStages,
         public status?: BusinessIdeaStatus
+    ) { }
+}
+
+export class BusinessExploreDto {
+    constructor(
+        public id: number,
+        public title: string,
+        public description: string,
+        public stage: number,
+        public founderName: string,
+        public categoryName: string,
+        public governmentName: string,
+        public capital: number,
+        public airate: number,
+        public desiredInvestmentType: number,
+        public images: string[],
+        public contactRequestStatus: ContactRequestStatus | null,
+        public canRequestContact: boolean
+    ) { }
+}
+
+export class BusinessSearchRequest {
+    constructor(
+        public pageSize: number,
+        public pageNumber: number,
+        public useDefaultPreferences: boolean,
+        public searchInput?: string,
+        public categoryId?: number,
+        public stage?: InvestingStages,
+        public governmentId?: number,
+        public minCapital?: number | null,
+        public maxCapital?: number | null,
+        public minAiRate?: number,
+        public desiredInvestmentType?: number | null
+    ) { }
+}
+
+export class InvestorPreferences {
+    constructor(
+        public id: number,
+        public investorId: number,
+        public preferredCategories?: number[],
+        public preferredStages?: InvestingStages[],
+        public preferredGovernments?: number[],
+        public minCapital?: number,
+        public maxCapital?: number,
+        public minAiRate?: number
+    ) { }
+}
+
+export class InvestorPreferencesApiResponse {
+    constructor(
+        public interestedBusinessStages: string, // comma-separated string like "1,2,3"
+        public minFunding: number,
+        public maxFunding: number,
+        public investingType: number
     ) { }
 }

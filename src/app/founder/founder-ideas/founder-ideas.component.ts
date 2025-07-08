@@ -299,7 +299,13 @@ export class FounderIdeasComponent implements OnInit {
               declineReason: item.rejectedReason ?? '',
               formData:{
                 location:item.location,
-                images:item.images?.split(";").map((image)=>{return this.apiUrl+'/'+image}),
+                images: (() => {
+                  if (!item.images) return [];
+                  if (Array.isArray(item.images)) {
+                    return item.images.map((image: string) => this.apiUrl + '/' + image);
+                  }
+                  return item.images.split(";").map((image: string) => this.apiUrl + '/' + image);
+                })(),
                 standards:item.businessStandardAnswers,
                 investmentType:this.getInvestmentTypeName(item.desiredInvestmentType??0)                
               },
