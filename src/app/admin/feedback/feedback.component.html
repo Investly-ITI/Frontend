@@ -64,44 +64,44 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="advanced-search-dropdown">
-                                    <div class="advanced-search-menu" [ngClass]="{'show': isAdvancedSearchOpen}">
-                                        <div class="advanced-search-content">
-                                            <h4>Search Filters</h4>
-                                            <div class="filter-group">
-                                                <label for="userTypeFrom">User Type From:</label>
-                                                <select id="userTypeFrom" [(ngModel)]="tempUserTypeFromFilter" name="userTypeFromFilter">
-                                                    <option [ngValue]="null">All Users</option>
-                                                    <option *ngFor="let userType of userTypes" [ngValue]="userType">{{ getUserTypeLabel(userType) }}</option>
-                                                </select>
-                                            </div>
-                                            <div class="filter-group">
-                                                <label for="userTypeTo">User Type To:</label>
-                                                <select id="userTypeTo" [(ngModel)]="tempUserTypeToFilter" name="userTypeToFilter">
-                                                    <option [ngValue]="null">All Users</option>
-                                                    <option *ngFor="let userType of userTypes" [ngValue]="userType">{{ getUserTypeLabel(userType) }}</option>
-                                                </select>
-                                            </div>
-                                            <div class="filter-group">
-                                                <label for="status">Status:</label>
-                                                <select id="status" [(ngModel)]="tempStatusFilter" name="statusFilter">
-                                                    <option [ngValue]="null">All Status</option>
-                                                    <option *ngFor="let status of statuses" [ngValue]="status">{{ getStatusLabel(status) }}</option>
-                                                </select>
-                                            </div>
-                                            <div class="advanced-search-actions">
-                                                <button type="button" class="clear-btn" (click)="clearAdvancedSearch()">
-                                                    <i class='bx bx-x'></i>
-                                                    Clear
-                                                </button>
-                                                <button type="button" class="apply-btn" (click)="applyAdvancedSearch()">
-                                                    <i class='bx bx-search'></i>
-                                                    Apply
-                                                </button>
-                                            </div>
+                               <div class="advanced-search-dropdown">
+                                <div class="advanced-search-menu" [ngClass]="{'show': isAdvancedSearchOpen}">
+                                    <div class="advanced-search-content">
+                                        <h4>Search Filters</h4>
+                                        <div class="filter-group">
+                                            <label for="userTypeFrom">User Type From:</label>
+                                            <select id="userTypeFrom" [(ngModel)]="tempUserTypeFromFilter" name="userTypeFromFilter">
+                                                <option [ngValue]="null">All Users</option>
+                                                <option *ngFor="let userType of userTypes" [ngValue]="userType">{{ getUserTypeLabel(userType) }}</option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="userTypeTo">User Type To:</label>
+                                            <select id="userTypeTo" [(ngModel)]="tempUserTypeToFilter" name="userTypeToFilter">
+                                                <option [ngValue]="null">All Users</option>
+                                                <option *ngFor="let targetType of feedbackTargetTypes" [ngValue]="targetType">{{ getFeedbackTargetTypeLabel(targetType) }}</option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="status">Status:</label>
+                                            <select id="status" [(ngModel)]="tempStatusFilter" name="statusFilter">
+                                                <option [ngValue]="null">All Status</option>
+                                                <option *ngFor="let status of statuses" [ngValue]="status">{{ getStatusLabel(status) }}</option>
+                                            </select>
+                                        </div>
+                                        <div class="advanced-search-actions">
+                                            <button type="button" class="clear-btn" (click)="clearAdvancedSearch()">
+                                                <i class='bx bx-x'></i>
+                                                Clear
+                                            </button>
+                                            <button type="button" class="apply-btn" (click)="applyAdvancedSearch()">
+                                                <i class='bx bx-search'></i>
+                                                Apply
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
                             </form>
                         </div>
                     </div>
