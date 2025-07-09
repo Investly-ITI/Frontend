@@ -99,7 +99,7 @@ export class InvestorInformationComponent {
         dateOfBirth: [this.personalInfo?.user?.dateOfBirth || '', [Validators.required, this.IsAgeValid]],
         governmentId: [this.personalInfo?.user?.governmentId || null, Validators.required],
         cityId: [this.personalInfo?.user?.cityId || null, Validators.required],
-        address: [this.personalInfo?.user?.address || '', Validators.required],
+        address: [this.personalInfo?.user?.address || ''],
         countryCode: [this.personalInfo?.user?.countryCode || '+20', Validators.required]
 
       })
