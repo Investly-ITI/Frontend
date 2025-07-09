@@ -72,21 +72,11 @@
         <div class="quick-stats">
           <div class="stat-card">
             <div class="stat-icon">
-              <i class='bx bx-show'></i>
-            </div>
-            <div class="stat-content">
-              <span class="stat-number">{{ businessData?.visits || 0 | number }}</span>
-              <span class="stat-label">Views</span>
-            </div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon">
               <i class='bx bx-envelope'></i>
             </div>
             <div class="stat-content">
-              <span class="stat-number">{{ businessData?.contactRequests || 0 | number }}</span>
-              <span class="stat-label">Contacts</span>
+              <span class="stat-number">{{ formatNumber(businessData?.totalContactRequests || 0) }}</span>
+              <span class="stat-label">Contact Requests</span>
             </div>
           </div>
           
@@ -128,22 +118,54 @@
           <div class="funding-card">
             <div class="funding-header">
               <h3>Investment Opportunity</h3>
-              <div class="funding-type">
-                {{ businessData?.desiredInvestmentTypeName || 'Investment' }}
+              <div class="funding-type" *ngIf="!shouldShowExperienceSection()">
+                {{ getDesiredInvestmentTypeName() }}
               </div>
             </div>
-            <div class="funding-amount">
-              <span class="currency">EGP</span>
-              <span class="amount">{{ (businessData?.capital || 0) | number }}</span>
+            <!-- Show funding amount for Funding or Both types -->
+            <div class="funding-amount" *ngIf="shouldShowFundingAmount()">
+              <div class="amount-line">
+                <span class="amount">{{ formatNumber(businessData?.capital || 0) }}</span>
+                <span class="currency">EGP</span>
+              </div>
               <span class="label">funding needed</span>
             </div>
             
-            <!-- Contact Request Button -->
-            <button class="contact-btn" (click)="sendContactRequest()" [disabled]="isRequestPending">
-              <i class='bx bx-envelope' *ngIf="!isRequestPending"></i>
-              <i class='bx bx-loader-alt bx-spin' *ngIf="isRequestPending"></i>
-              <span>{{ isRequestPending ? 'Sending...' : 'Request Contact' }}</span>
-            </button>
+            <!-- Show experience section for Industrial Experience only -->
+            <div class="experience-needed" *ngIf="shouldShowExperienceSection()">
+              <div class="experience-content">
+                <div class="experience-icon">
+                  <i class='bx bx-briefcase'></i>
+                </div>
+                <div class="experience-text">
+                  <h4>Industrial Experience Needed</h4>
+                  <p>Looking for experienced professionals who can provide guidance, mentorship, and industry expertise to help grow this business.</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Contact Request Button/Status -->
+            <div class="contact-section">
+              <!-- Contact Request Status Badge -->
+              <div 
+                class="contact-status-badge status-badge" 
+                [ngClass]="getContactRequestStatusClass()" 
+                *ngIf="hasContactRequestStatus()">
+                <i class='bx bx-info-circle'></i>
+                <span>{{ getContactRequestStatusLabel() }}</span>
+              </div>
+              
+              <!-- Contact Request Button -->
+              <button 
+                class="contact-btn" 
+                (click)="sendContactRequest()" 
+                [disabled]="isSubmittingContactRequest || !canSendContactRequest()"
+                *ngIf="canSendContactRequest() || isSubmittingContactRequest">
+                <i class='bx bx-envelope' *ngIf="!isSubmittingContactRequest"></i>
+                <i class='bx bx-loader-alt bx-spin' *ngIf="isSubmittingContactRequest"></i>
+                <span>{{ isSubmittingContactRequest ? 'Sending...' : 'Request Contact' }}</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -169,7 +191,8 @@
           <button 
             class="tab-btn"
             [class.active]="activeTab === 'details'"
-            (click)="setActiveTab('details')">
+            (click)="setActiveTab('details')"
+            *ngIf="shouldShowDetailsTab()">
             <i class='bx bx-detail'></i>
             <span>Details</span>
           </button>
@@ -193,7 +216,7 @@
               </div>
 
               <!-- Business File Section -->
-              <div class="content-section" *ngIf="hasBusinessFile()">
+              <div class="content-section" *ngIf="shouldShowBusinessDocuments()">
                 <h4>Business Documents</h4>
                 <div class="file-container">
                   <div class="file-item">
@@ -255,7 +278,7 @@
           </div>
 
           <!-- Details Tab -->
-          <div class="tab-pane" [class.active]="activeTab === 'details'">
+          <div class="tab-pane" [class.active]="activeTab === 'details'" *ngIf="shouldShowDetailsTab()">
             <div class="details-content">
               
               <!-- Q&A Section -->
@@ -287,5 +310,50 @@
       </div>
     </div>
   </section>
+
+  <!-- Contact Request Confirmation Modal -->
+  <div *ngIf="showContactRequestModal" class="modal-overlay" (click)="closeContactRequestModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Confirm Contact Request</h3>
+        <button class="modal-close-btn" (click)="closeContactRequestModal()">
+          <i class='bx bx-x'></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="confirmation-content">
+          <div class="confirmation-icon">
+            <i class='bx bx-envelope'></i>
+          </div>
+          <h4>Request Contact Information</h4>
+          <p>Are you sure you want to request contact for:</p>
+          <div class="business-info">
+            <h5>{{ businessData?.title }}</h5>
+            <p>by {{ businessData?.founderName }}</p>
+          </div>
+          <p class="note">The Request Will Be Sent To The Admin For Review</p>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button 
+          class="btn btn-secondary" 
+          (click)="closeContactRequestModal()"
+          [disabled]="isSubmittingContactRequest">
+          Cancel
+        </button>
+        <button 
+          class="btn btn-primary" 
+          (click)="confirmContactRequest()"
+          [disabled]="isSubmittingContactRequest">
+          <span *ngIf="!isSubmittingContactRequest">Send Request</span>
+          <span *ngIf="isSubmittingContactRequest">
+            <i class='bx bx-loader-alt bx-spin'></i> Sending...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
 
 </div>
