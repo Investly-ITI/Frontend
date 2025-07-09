@@ -128,3 +128,43 @@ export class InvestorPreferencesApiResponse {
         public investingType: number
     ) { }
 }
+
+export interface BusinessStandardAnswer {
+    standardId: number;
+    answer: string;
+    standardQuestion: string;
+}
+
+export class IdeaDetailsDto {
+    constructor(
+        public id: number,
+        public title: string,
+        public description: string,
+        public stage: number,
+        public founderName: string,
+        public categoryName: string,
+        public governmentName: string,
+        public cityName: string,
+        public location: string,
+        public capital: number,
+        public airate: number,
+        public desiredInvestmentType: number,
+        public images: string[],
+        public filePath: string | null,
+        public businessStandardAnswers: BusinessStandardAnswer[],
+        public contactRequestStatus: ContactRequestStatus | null,
+        public canRequestContact: boolean,
+        public totalContactRequests: number,
+        public isInvestor: boolean
+    ) { }
+}
+
+export class IdeaDetailsApiResponse {
+    constructor(
+        public data: IdeaDetailsDto,
+        public isSuccess: boolean,
+        public message: string,
+        public statusCode: number,
+        public refreshTokenRequired: boolean
+    ) { }
+}
