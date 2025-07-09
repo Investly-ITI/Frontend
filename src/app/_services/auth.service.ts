@@ -105,4 +105,11 @@ export class AuthService {
     return this.httpClient.get<Response<DropdownDto[]>>(`${this.baseUrl}/appropriate-feedback-users`);
   }
 
+  public requestPasswordReset(email: string): Observable<Response<string>> {
+    return this.httpClient.post<Response<string>>(
+      `${this.baseUrl}/request-password-reset`,
+      { email }
+    );
+  }
+
 }

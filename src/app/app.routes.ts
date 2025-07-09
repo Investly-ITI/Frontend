@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AdminComponent } from './admin/admin.component';
 import { InvestorComponent } from './admin/investor/investor.component';
 import { LoginComponent } from './account/login/login.component';
+import { ResetPasswordRequestComponent } from './account/request-reset-password/request-reset-password.component';
 import { LoginStaffComponent } from './account/login-staff/login-staff.component';
 import { SignupComponent } from './account/signup/signup.component';
 import { LandingPageComponent } from './main/landing-page/landing-page.component';
@@ -25,7 +26,8 @@ import { AnalysisComponent } from './admin/analysis/analysis.component';
 export const routes: Routes = [
    // Authentication routes (no layout - full screen)
    { path: 'login', canActivate:[NoAuthGuard], component: LoginComponent, title: 'Login - Investly' },
-   { path: 'signup',canActivate:[NoAuthGuard], component: SignupComponent, title: 'Sign Up - Investly' },
+   { path: 'request-reset', canActivate: [NoAuthGuard],component: ResetPasswordRequestComponent, title: 'Reset Password - Investly' }, 
+  { path: 'signup',canActivate:[NoAuthGuard], component: SignupComponent, title: 'Sign Up - Investly' },
    { path: 'staff-login', component: LoginStaffComponent, title: 'Staff Login - Investly' },
    
    // Main public route with layout (navbar + footer)
