@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { DropdownDto, LoggedInUser, User, UserLogin } from '../_models/user';
+import { DropdownDto, LoggedInUser, ResetPasswordDto, User, UserLogin } from '../_models/user';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Response } from '../_models/response';
 import { jwtDecode } from 'jwt-decode';
@@ -111,5 +111,11 @@ export class AuthService {
       { email }
     );
   }
-
+  public resetPassword(model: ResetPasswordDto): Observable<Response<string>> {
+    return this.httpClient.post<Response<string>>(
+      `${this.baseUrl}/change-password`,
+      model
+    );
+  }
 }
+
