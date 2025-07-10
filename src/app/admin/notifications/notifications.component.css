@@ -527,9 +527,9 @@ input:checked + .slider:before {
   border: 1px solid var(--custom);
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-width: 280px;
-  width: 500px;
-  height: 300px;
+  min-width: 200px;
+  width: 300px;
+  max-height: 500px;
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
@@ -1615,4 +1615,429 @@ input:checked + .slider:before {
     text-align: center;
     color: #e6382f;
     padding: 10px 0px;
+}
+
+/* ========================================
+   ENHANCED PAGINATION STYLES
+======================================== */
+
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    margin-top: 20px;
+    border-top: 1px solid var(--grey);
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 20px;
+    background: var(--light);
+    border-top: 1px solid var(--custom);
+    border-radius: 0 0 8px 8px;
+}
+
+.page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--light);
+    border: 1px solid var(--custom);
+    border-radius: 6px;
+    color: var(--dark);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--poppins);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: #30acaa;
+    color: white;
+    border-color: #30acaa;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-btn i {
+    font-size: 16px;
+}
+
+.page-number-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: var(--light);
+    border: 1px solid var(--custom);
+    border-radius: 6px;
+    color: var(--dark);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--poppins);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.page-number-btn:hover:not(:disabled) {
+    background: #30acaa;
+    color: white;
+    border-color: #30acaa;
+}
+
+.page-number-btn.active {
+    background: #30acaa !important;
+    color: white !important;
+    border-color: #30acaa !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(48, 172, 170, 0.4) !important;
+    transform: scale(1.05) !important;
+}
+
+.page-number-btn.dots {
+    cursor: default;
+    border: none;
+    background: transparent;
+    color: var(--dark-grey);
+}
+
+.page-number-btn.dots:hover {
+    background: transparent;
+    color: var(--dark-grey);
+}
+
+.pagination-info {
+    text-align: center;
+    padding: 8px 20px 16px 20px;
+    background: var(--light);
+}
+
+.total-info {
+    color: var(--dark-grey);
+    font-family: var(--poppins);
+    font-size: 14px;
+    font-weight: 400;
+    margin: 0;
+}
+
+/* Dark mode pagination styles */
+:host .parent3.dark .pagination-btn {
+    background: var(--light);
+    color: var(--dark);
+    border-color: var(--custom);
+}
+
+:host .parent3.dark .pagination-container {
+    background: var(--light);
+}
+
+:host .parent3.dark .pagination-controls {
+    background: var(--light);
+    border-top-color: var(--custom);
+}
+
+:host .parent3.dark .total-info {
+    color: var(--dark-grey);
+}
+
+:host .parent3.dark .pagination-btn:hover:not(:disabled) {
+    background: #30acaa;
+    color: white;
+    border-color: #30acaa;
+}
+
+:host .parent3.dark .page-number-btn {
+    background: var(--light);
+    color: var(--dark);
+    border-color: var(--custom);
+}
+
+:host .parent3.dark .page-number-btn:hover:not(:disabled) {
+    background: #30acaa;
+    color: white;
+    border-color: #30acaa;
+}
+
+:host .parent3.dark .page-number-btn.active {
+    background: #30acaa;
+    color: white;
+    border-color: #30acaa;
+}
+
+:host .parent3.dark .page-number-btn.dots {
+    background: transparent;
+    color: var(--dark-grey);
+    border: none;
+}
+
+:host .parent3.dark .pagination-info {
+    background: var(--light);
+}
+
+/* Responsive pagination styles */
+@media screen and (max-width: 576px) {
+    .pagination-controls {
+        margin: 20px auto;
+        justify-content: center;
+        width: 100%;
+        max-width: 600px;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .page-numbers {
+        order: 2;
+        width: 100%;
+        justify-content: center;
+        margin: 8px 0;
+    }
+
+    .previous-btn {
+        order: 1;
+    }
+
+    .next-btn {
+        order: 3;
+    }
+
+    .pagination-btn {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    .page-number-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 13px;
+    }
+
+    .pagination-info {
+        margin: 0 auto;
+        max-width: 600px;
+    }
+
+    .total-info {
+        font-size: 12px;
+    }
+}
+
+@media screen and (max-width: 387px) {
+    .pagination-controls {
+        margin: 16px auto;
+        justify-content: center;
+        width: 100%;
+        max-width: 350px;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 8px;
+    }
+
+    .page-numbers {
+        order: 2;
+        width: 100%;
+        justify-content: center;
+        margin: 6px 0;
+        gap: 3px;
+    }
+
+    .previous-btn {
+        order: 1;
+        font-size: 12px;
+    }
+
+    .next-btn {
+        order: 3;
+        font-size: 12px;
+    }
+
+    .pagination-btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    .page-number-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+    .pagination-info {
+        margin: 0 auto;
+        max-width: 350px;
+        padding: 8px;
+    }
+
+    .total-info {
+        font-size: 11px;
+    }
+}
+
+/* ========================================
+   STATUS BADGES
+======================================== */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.status-badge.read {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-badge.unread {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* ========================================
+   ENHANCED VIEW DETAILS MODAL
+======================================== */
+.notification-details {
+    padding: 0;
+}
+
+.detail-section {
+    margin-bottom: 24px;
+    background: var(--light);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid var(--grey);
+    transition: all 0.3s ease;
+}
+
+.detail-section:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.detail-section h4 {
+    margin-bottom: 16px;
+    color: var(--dark);
+    font-size: 1.1em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 2px solid var(--grey);
+    padding-bottom: 8px;
+}
+
+.detail-section h4 i {
+    color: var(--blue);
+    font-size: 1.2em;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--grey);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.detail-row .label {
+    font-weight: 600;
+    color: var(--dark);
+    min-width: 120px;
+    margin-right: 16px;
+}
+
+.detail-row .value {
+    flex: 1;
+    color: var(--dark-grey);
+    font-weight: 400;
+}
+
+.message-content {
+    background: var(--custom);
+    border-radius: 6px;
+    padding: 16px;
+    border-left: 4px solid var(--blue);
+    margin-top: 12px;
+}
+
+.message-content p {
+    margin: 0;
+    color: var(--dark);
+    line-height: 1.5;
+    font-size: 0.95em;
+}
+
+/* Dark mode overrides */
+:host .parent3.dark .detail-section {
+    background: var(--custom);
+    border-color: var(--dark);
+}
+
+:host .parent3.dark .detail-section:hover {
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+
+:host .parent3.dark .detail-section h4 {
+    color: var(--dark);
+    border-color: var(--dark);
+}
+
+:host .parent3.dark .detail-row {
+    border-color: var(--dark);
+}
+
+:host .parent3.dark .detail-row .label {
+    color: var(--dark);
+}
+
+:host .parent3.dark .detail-row .value {
+    color: var(--dark-grey);
+}
+
+:host .parent3.dark .message-content {
+    background: var(--grey);
+    border-color: var(--blue);
+}
+
+:host .parent3.dark .message-content p {
+    color: var(--dark);
+}
+
+:host .parent3.dark .status-badge.read {
+    background-color: #1b5e20;
+    color: #a5d6a7;
+    border-color: #2e7d32;
+}
+
+:host .parent3.dark .status-badge.unread {
+    background-color: #b71c1c;
+    color: #ffcdd2;
+    border-color: #d32f2f;
 }

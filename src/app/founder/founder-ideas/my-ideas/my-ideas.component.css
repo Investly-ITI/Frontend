@@ -545,7 +545,35 @@
 
 .no-ideas p {
   font-family: var(--poppins);
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
+}
+
+.no-ideas .btn {
+  margin-top: 1rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(48, 172, 170, 0.2);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.no-ideas .btn i {
+  font-size: 1.1rem;
+  color: white !important;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+  margin-top: 15px;
+}
+
+.no-ideas .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(48, 172, 170, 0.3);
 }
 
 /* Responsive Design */

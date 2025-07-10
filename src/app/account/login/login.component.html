@@ -60,7 +60,7 @@
     </div>
 
     <!-- Login Form -->
-    <form class="login-form" [formGroup]="loginForm" >
+    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit($event)">
       <!-- Email Field -->
       <div class="form-group">
         <label for="email">Email Address</label>
@@ -121,8 +121,7 @@
 
       <!-- Submit Button -->
       <button 
-        type="button" 
-        (click)="onSubmit($event)"
+        type="submit" 
         class="login-btn"
         [disabled]="loginForm.invalid || isLoading"
       >

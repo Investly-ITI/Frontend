@@ -193,13 +193,7 @@
                                 </td>
                             </tr>
 
-                          
-                                <tr *ngIf="!isLoading2" class="no-results-row">
-                                <td colspan="7"
-                                    style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
-                                    Yet
-                                </td>
-                            </tr>
+
 
                             <tr *ngIf="isLoading" class="no-results-row">
                                 <td colspan="7"
@@ -214,16 +208,17 @@
                             <tr *ngFor="let item of loadedListData;let i=index">
                              
                                 <td>
-                                    <p>{{item.createdByNavigation?.firstName}} {{item.createdByNavigation?.lastName}}</p>
+                                    <p>{{item.createdByNavigation.firstName || 'Unknown'}} {{item.createdByNavigation.lastName || 'User'}}</p>
                                 </td>
                                 <td>
-                                    <p>{{item.userIdToNavigation?.firstName}} {{item.userIdToNavigation?.lastName}}</p>
+                                    <p>{{item.userIdToNavigation.firstName || 'Unknown'}} {{item.userIdToNavigation.lastName || 'User'}}</p>
                                 </td>
                                 <td>{{item.createdAt|date}}</td>
                               <td>
-                             <span [style.color]="item.isRead === 1 ? '#28a745' : '#dc3545'">
-                               {{ item.isRead === 1 ? 'Read' : 'Unread' }}
-                             </span>
+                                    <span class="status-badge"
+                                        [ngClass]="{'read': item.isRead === 1, 'unread': item.isRead === 0}">
+                                        {{ item.isRead === 1 ? 'Read' : 'Unread' }}
+                                    </span>
                                </td>
                                 <td>
                                     <span class="status process"
@@ -240,7 +235,7 @@
                                         <div class="action-menu">
                                          <button class="action-item view" type="button" (click)="openModal(item)">
                                                 <i class='bx bx-show'></i>
-                                                View Notification
+                                                View Details
                                             </button>
 
                                             <button class="action-item"
@@ -265,13 +260,32 @@
                         </tbody>
                     </table>
 
-                    <div class="pagination-controls">
-                        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">
-                            <i class='bx bx-chevron-left' style="font-size: 1.7em;"></i>
+                    <div class="pagination-controls" *ngIf="!showNoResults && totalPages > 0">
+                        <button class="pagination-btn previous-btn" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+                            <i class='bx bx-chevron-left'></i>
+                            Previous
                         </button>
-                        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">
-                            <i class='bx bx-chevron-right' style="font-size: 1.7em;"></i>
+                        
+                        <div class="page-numbers">
+                            <button 
+                                *ngFor="let page of getPageNumbers()" 
+                                class="page-number-btn"
+                                [class.active]="page === currentPage"
+                                [class.dots]="page === -1"
+                                (click)="goToPage(page)"
+                                [disabled]="page === -1">
+                                {{ page === -1 ? '...' : page }}
+                            </button>
+                        </div>
+                        
+                        <button class="pagination-btn next-btn" (click)="goToNextPage()" [disabled]="currentPage >= totalPages">
+                            Next
+                            <i class='bx bx-chevron-right'></i>
                         </button>
+                    </div>
+                    
+                    <div class="pagination-info" *ngIf="!showNoResults && totalPages > 0">
+                        <span class="total-info">Showing {{ currentPage }} of {{ totalPages }} pages ({{ totalCount }} total {{ entityNamePlural.toLowerCase() }})</span>
                     </div>
                 </div>
             </div>
@@ -302,7 +316,7 @@
    
     <div class="modal-header">
       <h3>
-        {{ modifyAction === 'activate' ? 'Activate' : 'Delete' }} {{ entityName }}
+        {{ getActionLabel(StatusChangedTo) }} {{ entityName }}
       </h3>
       <button type="button" class="close-btn" (click)="closeActivateDeleteModal()">
         <i class='bx bx-x'></i>
@@ -313,28 +327,14 @@
     <div class="modal-body">
       <div class="activate-deactivate-confirmation">
         <div class="action-icon">
-          <i
-            class="bx"
-            [ngClass]="{
-              'bx-check-circle': modifyAction === 'activate',
-              'bx-trash': modifyAction === 'delete'
-            }"
-            [style.color]="
-              modifyAction === 'activate' ? 'var(--green)' : 'var(--danger)'
-            "
-          ></i>
+          <i class="bx"
+             [ngClass]="getStatusIcon(StatusChangedTo)"
+             [style.color]="modifyAction === 'activate' ? 'var(--green)' : 'var(--danger)'">
+          </i>
         </div>
 
         <p class="confirmation-text">
-          Are you sure you want to {{ modifyAction }} this {{ entityToModify.toLowerCase() }}?
-
-          <span *ngIf="modifyAction === 'activate'" class="success-text">
-            This action will make the {{ entityName.toLowerCase() }} active.
-          </span>
-
-          <span *ngIf="modifyAction === 'delete'" class="danger-text">
-            This action will permanently remove the {{ entityName.toLowerCase() }} from the system.
-          </span>
+          Are you sure you want to {{ getActionLabel(StatusChangedTo).toLowerCase() }} this {{ entityName.toLowerCase() }}?
         </p>
       </div>
     </div>
@@ -343,23 +343,11 @@
     <div class="modal-footer activate-deactivate-modal-footer">
       <button type="button" class="cancel-btn" (click)="closeActivateDeleteModal()">Cancel</button>
 
-      <button
-        type="button"
-        class="confirm-btn"
-        [ngClass]="{
-          'activate': modifyAction === 'activate',
-          'delete': modifyAction === 'delete'
-        }"
-        (click)="confirmActivateDelete()"
-      >
-        <i
-          class="bx"
-          [ngClass]="{
-            'bx-check-circle': modifyAction === 'activate',
-            'bx-trash': modifyAction === 'delete'
-          }"
-        ></i>
-        {{ modifyAction === 'activate' ? 'Activate' : 'Delete' }}
+      <button type="button" class="confirm-btn"
+              [style.color]="modifyAction === 'activate' ? 'var(--green)' : 'var(--danger)'"
+              (click)="confirmActivateDelete()">
+        <i class="bx" [ngClass]="getStatusIcon(StatusChangedTo)"></i>
+        {{ getActionLabel(StatusChangedTo) }}
       </button>
     </div>
   </div>

@@ -80,7 +80,8 @@ interface StandardReview {
 })
 export class MyIdeasComponent implements OnInit, OnChanges {
   @Input() ideas: Idea[] = [];
-  @Output() refresh= new EventEmitter<any>();
+  @Output() refresh = new EventEmitter<any>();
+  @Output() addIdea = new EventEmitter<void>();
   
   // Filter properties
   selectedStatus: string = 'all';
@@ -520,6 +521,11 @@ export class MyIdeasComponent implements OnInit, OnChanges {
     }
     this.closeModal();
   }
+
+  onAddFirstIdea(): void {
+    this.addIdea.emit();
+  }
+
   ngOnDestroy() {
     this.unsubscribe.forEach((sb) => sb.unsubscribe());
   }

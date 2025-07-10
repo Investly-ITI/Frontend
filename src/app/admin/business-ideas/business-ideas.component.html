@@ -128,6 +128,14 @@
                                                         {{ getStageName(stage) }}</option>
                                                 </select>
                                             </div>
+                                            <div class="filter-group">
+                                                <label for="status">Status:</label>
+                                                <select id="status" [(ngModel)]="tempStatusFilter" name="tempStatusFilter">
+                                                    <option [ngValue]="null">All Status</option>
+                                                    <option *ngFor="let status of businessStatuses" [ngValue]="status">
+                                                        {{ getBusinessIdeaStatusName(status) }}</option>
+                                                </select>
+                                            </div>
                                             <div class="advanced-search-actions">
                                                 <button type="button" class="clear-btn" (click)="clearAdvancedSearch()">
                                                     <i class='bx bx-x'></i>
@@ -145,15 +153,10 @@
                         </div>
                     </div>
 
-                    <div *ngIf="isLoading && !businessIdeas.length" class="loading-indicator"
-                        style="text-align: center; padding: 20px;">Loading business ideas...</div>
                     <div *ngIf="error && !isLoading" class="error-message"
                         style="text-align: center; padding: 20px; color: var(--danger);">{{ error }}</div>
-                    <div *ngIf="!isLoading && !error && businessIdeas.length === 0" class="no-data-message"
-                        style="text-align: center; padding: 20px;">No business ideas found.</div>
 
-                    <table style="border-spacing: 15px; border-collapse: separate;"
-                        *ngIf="!isLoading || businessIdeas.length > 0">
+                    <table style="border-spacing: 15px; border-collapse: separate;">
                         <thead>
                             <tr>
                                 <th>Title</th>
@@ -161,11 +164,35 @@
                                 <th>Category</th>
                                 <th>
                                     Status
+                                    <!-- Status Filter Dots -->
+                                    <span id="dots-container">
+                                        <span class="dot green-dot" [class.selected]="currentFilter === 'active'"
+                                            (click)="setFilter('active', BusinessIdeaStatus.Active)" title="Show Active"></span>
+                                        <span class="dot red-dot" [class.selected]="currentFilter === 'rejected'"
+                                            (click)="setFilter('rejected', BusinessIdeaStatus.Rejected)" title="Show Rejected"></span>
+                                    </span>
                                 </th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
+                            <!-- No Results Found -->
+                            <tr *ngIf="showNoResults" class="no-results-row">
+                                <td colspan="5" style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
+                                    No business ideas found
+                                </td>
+                            </tr>
+
+                            <!-- Loading Spinner -->
+                            <tr *ngIf="isLoading" class="no-results-row">
+                                <td colspan="5" style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
+                                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;" id="spinner">
+                                        <mat-spinner style="color: white;" class="mat-spinner"></mat-spinner>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Data Rows -->
                             <tr *ngFor="let idea of filteredBusinessIdeas; let i = index">
                                 <td>
                                     <p>{{ idea.title || ' ' }}</p>
@@ -202,6 +229,8 @@
                                     </div>
                                 </td>
                             </tr>
+                            
+                            <!-- Filtered Results Message -->
                             <tr *ngIf="!isLoading && !error && filteredBusinessIdeas.length === 0 && businessList && businessList.totalCount > 0">
                                 <td colspan="5" style="text-align: center; padding: 20px;">No business ideas match your filters.
                                 </td>
@@ -209,15 +238,32 @@
                         </tbody>
                     </table>
 
-                    <div class="pagination-controls"
-                        *ngIf="businessList && businessList.totalCount > searchParams.pageSize">
-                        <button (click)="prevPage()" [disabled]="searchParams.pageNumber === 1">
-                            <i class='bx bx-chevron-left' style="font-size: 1.7em;"></i>
+                    <div class="pagination-controls" *ngIf="!showNoResults && totalPages > 0">
+                        <button class="pagination-btn previous-btn" (click)="prevPage()" [disabled]="searchParams.pageNumber === 1">
+                            <i class='bx bx-chevron-left'></i>
+                            Previous
                         </button>
-                        <button (click)="nextPage()"
-                            [disabled]="!businessList || searchParams.pageNumber * searchParams.pageSize >= businessList.totalCount">
-                            <i class='bx bx-chevron-right' style="font-size: 1.7em;"></i>
+                        
+                        <div class="page-numbers">
+                            <button 
+                                *ngFor="let page of getPageNumbers()" 
+                                class="page-number-btn"
+                                [class.active]="page === searchParams.pageNumber"
+                                [class.dots]="page === -1"
+                                (click)="goToPage(page)"
+                                [disabled]="page === -1">
+                                {{ page === -1 ? '...' : page }}
+                            </button>
+                        </div>
+                        
+                        <button class="pagination-btn next-btn" (click)="nextPage()" [disabled]="searchParams.pageNumber >= totalPages">
+                            Next
+                            <i class='bx bx-chevron-right'></i>
                         </button>
+                    </div>
+                    
+                    <div class="pagination-info" *ngIf="!showNoResults && totalPages > 0">
+                        <span class="total-info">Showing {{ searchParams.pageNumber }} of {{ totalPages }} pages ({{ totalCount }} total business ideas)</span>
                     </div>
                 </div>
             </div>
@@ -242,93 +288,134 @@
 
                 <div class="tab-content">
                     <div *ngIf="activeTab === 'details'" class="details-content">
-                        <div class="detail-row">
-                            <strong class="detail-label">Title:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.title || ' ' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong class="detail-label">Founder:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.founderName || ' ' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong class="detail-label">Category:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.categoryName || ' ' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong class="detail-label">Stage:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.stage ? getStageName(selectedIdeaForDetails.stage) : ' ' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong class="detail-label">Capital:</strong>
-                            <span class="detail-value">{{ (selectedIdeaForDetails.capital !== null && selectedIdeaForDetails.capital !== undefined) ? (selectedIdeaForDetails.capital | currency:'EGP ':'symbol':'1.2-2') : ' ' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong class="detail-label">Location:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.location || ' ' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong class="detail-label">Created At:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.createdAt ? (selectedIdeaForDetails.createdAt | date:'medium') : ' ' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong class="detail-label">Status:</strong>
-                            <span class="detail-value status" [ngClass]="{
-                                'status-inactive': selectedIdeaForDetails.status === BusinessIdeaStatus.Inactive
-                            }">
-                            </span>
-                        </div>
-                        <div class="detail-row">
-                            <strong class="detail-label">File Path:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.filePath ? selectedIdeaForDetails.filePath : ' ' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong class="detail-label">AI Rate:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.airate != null ? selectedIdeaForDetails.airate + '%' : ' ' }}</span>
-                        </div>
-                        <div class="detail-row" *ngIf="selectedIdeaForDetails.rejectedReason">
-                            <strong class="detail-label">Rejected Reason:</strong>
-                        </div>
-                        <div class="detail-row">
-                            <strong class="detail-label">Description:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.description || ' ' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong class="detail-label">City:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.city?.nameEn || selectedIdeaForDetails.city?.nameAr || ' ' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong class="detail-label">Government:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.government?.nameEn || selectedIdeaForDetails.government?.nameAr || ' ' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong class="detail-label">Investment Type:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.desiredInvestmentTypeName || ' ' }}</span>
+                        <div class="business-idea-details">
+                            <div class="detail-section">
+                                <h4>Basic Information</h4>
+                                <div class="detail-row">
+                                    <span class="label">Title:</span>
+                                    <span class="value">{{ selectedIdeaForDetails.title || '—' }}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Founder:</span>
+                                    <span class="value">{{ selectedIdeaForDetails.founderName || '—' }}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Category:</span>
+                                    <span class="value">{{ selectedIdeaForDetails.categoryName || '—' }}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Stage:</span>
+                                    <span class="value">{{ selectedIdeaForDetails.stage ? getStageName(selectedIdeaForDetails.stage) : '—' }}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Status:</span>
+                                    <span class="value">
+                                        <span class="status-badge" [ngClass]="{
+                                            'pending': selectedIdeaForDetails.status === BusinessIdeaStatus.Pending,
+                                            'active': selectedIdeaForDetails.status === BusinessIdeaStatus.Active,
+                                            'inactive': selectedIdeaForDetails.status === BusinessIdeaStatus.Inactive,
+                                            'rejected': selectedIdeaForDetails.status === BusinessIdeaStatus.Rejected
+                                        }">
+                                            {{ selectedIdeaForDetails.status != null ? getBusinessIdeaStatusName(selectedIdeaForDetails.status) : '—' }}
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="detail-section">
+                                <h4>Financial Details</h4>
+                                <div class="detail-row">
+                                    <span class="label">Capital Required:</span>
+                                    <span class="value">{{ (selectedIdeaForDetails.capital !== null && selectedIdeaForDetails.capital !== undefined) ? (selectedIdeaForDetails.capital | currency:'EGP ':'symbol':'1.2-2') : '—' }}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Investment Type:</span>
+                                    <span class="value">{{ selectedIdeaForDetails.desiredInvestmentTypeName || '—' }}</span>
+                                </div>
+                            </div>
+
+                            <div class="detail-section">
+                                <h4>Location Information</h4>
+                                <div class="detail-row">
+                                    <span class="label">City:</span>
+                                    <span class="value">{{ selectedIdeaForDetails.city?.nameEn || selectedIdeaForDetails.city?.nameAr || '—' }}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Governorate:</span>
+                                    <span class="value">{{ selectedIdeaForDetails.government?.nameEn || selectedIdeaForDetails.government?.nameAr || '—' }}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Location:</span>
+                                    <span class="value">{{ selectedIdeaForDetails.location || '—' }}</span>
+                                </div>
+                            </div>
+
+                            <div class="detail-section">
+                                <h4>Additional Information</h4>
+                                <div class="detail-row">
+                                    <span class="label">AI Rating:</span>
+                                    <span class="value">{{ selectedIdeaForDetails.airate != null ? selectedIdeaForDetails.airate + '%' : '—' }}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Created At:</span>
+                                    <span class="value">{{ selectedIdeaForDetails.createdAt ? (selectedIdeaForDetails.createdAt | date:'medium') : '—' }}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">File Path:</span>
+                                    <span class="value">{{ selectedIdeaForDetails.filePath ? selectedIdeaForDetails.filePath : '—' }}</span>
+                                </div>
+                                <div class="detail-row" *ngIf="selectedIdeaForDetails.rejectedReason">
+                                    <span class="label">Rejected Reason:</span>
+                                    <span class="value rejected-reason">{{ selectedIdeaForDetails.rejectedReason }}</span>
+                                </div>
+                            </div>
+
+                            <div class="detail-section">
+                                <h4>Description</h4>
+                                <div class="description-content">
+                                    <p>{{ selectedIdeaForDetails.description || 'No description available.' }}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div *ngIf="activeTab === 'pdf'" class="documentation-content">
-                        <h4>Associated File</h4>
-                        <div *ngIf="selectedIdeaForDetails.filePath; else noFile">
-                            <a class="download-link" [href]="getFileDownloadUrl(selectedIdeaForDetails.filePath)" target="_blank">
-                                <i class="bx bx-download"></i> Download/View File
-                            </a>
+                        <div class="file-section">
+                            <h4><i class="bx bx-file"></i> Associated File</h4>
+                            <div *ngIf="selectedIdeaForDetails.filePath; else noFile" class="file-download-container">
+                                <a class="download-link" [href]="getFileDownloadUrl(selectedIdeaForDetails.filePath)" target="_blank">
+                                    <i class="bx bx-download"></i> Download/View File
+                                </a>
+                            </div>
+                            <ng-template #noFile>
+                                <div class="no-file-message">
+                                    <i class="bx bx-file-blank"></i>
+                                    <span>No file available for this business idea.</span>
+                                </div>
+                            </ng-template>
                         </div>
-                        <ng-template #noFile>
-                            <span>No file available.</span>
-                        </ng-template>
                     </div>
 
                     <div *ngIf="activeTab === 'standardAnswers'" class="documentation-content">
-                        <h4>Standard Answers</h4>
-                        <div *ngIf="selectedIdeaForDetails.businessStandardAnswers && selectedIdeaForDetails.businessStandardAnswers.length > 0; else noAnswers">
-                            <div *ngFor="let answer of selectedIdeaForDetails.businessStandardAnswers" class="standard-answer-item">
-                                <span class="question-label"><strong>Q:</strong> {{ answer.standardQuestion }}</span><br>
-                                <span class="answer-value"><strong>A:</strong> {{ answer.answer }}</span>
+                        <div class="answers-section">
+                            <h4><i class="bx bx-question-mark"></i> Standard Answers</h4>
+                            <div *ngIf="selectedIdeaForDetails.businessStandardAnswers && selectedIdeaForDetails.businessStandardAnswers.length > 0; else noAnswers" class="answers-container">
+                                <div *ngFor="let answer of selectedIdeaForDetails.businessStandardAnswers" class="standard-answer-item">
+                                    <div class="question-section">
+                                        <span class="question-label"><strong>Q:</strong> {{ answer.standardQuestion }}</span>
+                                    </div>
+                                    <div class="answer-section">
+                                        <span class="answer-value"><strong>A:</strong> {{ answer.answer }}</span>
+                                    </div>
+                                </div>
                             </div>
+                            <ng-template #noAnswers>
+                                <div class="no-answers-message">
+                                    <i class="bx bx-info-circle"></i>
+                                    <span>No standard answers available for this business idea.</span>
+                                </div>
+                            </ng-template>
                         </div>
-                        <ng-template #noAnswers>
-                            <span>No standard answers available.</span>
-                        </ng-template>
                     </div>
                 </div>
             </div>
@@ -340,37 +427,52 @@
 
 
     <div class="modal-overlay" [ngClass]="{ 'show': isStatusUpdateModalOpen }" (click)="closeStatusUpdateModal()">
-        <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-container status-update-modal" (click)="$event.stopPropagation()">
             <div class="modal-header">
-                <h3>Update Business Idea Status</h3>
+                <h3><i class="bx bx-edit"></i> Update Business Idea Status</h3>
                 <button type="button" class="close-btn" (click)="closeStatusUpdateModal()">
                     <i class='bx bx-x'></i>
                 </button>
             </div>
             <div class="modal-body">
-                <p>Current Status:
-                    <strong>{{ currentStatusName }}</strong>
-                </p>
-                <select [(ngModel)]="newStatus" name="newStatusSelect" class="form-control"
-                    style="width: 100%; padding: 10px; margin-top:10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
-                    <option [ngValue]="null" disabled>Select New Status</option>
-                    <option *ngFor="let status of businessStatuses" [ngValue]="status">
-                        {{ getBusinessIdeaStatusName(status) }}
-                    </option>
-                </select>
+                <div class="status-update-content">
+                    <div class="current-status-section">
+                        <div class="status-info">
+                            <span class="status-label">Current Status:</span>
+                            <span class="current-status-badge" [ngClass]="{
+                                'active': getCurrentBusinessStatus() === BusinessIdeaStatus.Active,
+                                'inactive': getCurrentBusinessStatus() === BusinessIdeaStatus.Inactive,
+                                'pending': getCurrentBusinessStatus() === BusinessIdeaStatus.Pending,
+                                'rejected': getCurrentBusinessStatus() === BusinessIdeaStatus.Rejected
+                            }">{{ currentStatusName }}</span>
+                        </div>
+                    </div>
 
-                <div class="form-group" *ngIf="newStatus === BusinessIdeaStatus.Rejected">
-                    <label for="rejectedReason">Reason for Rejection:</label>
-                    <textarea id="rejectedReason" [(ngModel)]="rejectedReasonInput" name="rejectedReason" rows="4"
-                        class="form-control" required
-                        placeholder="Please provide a detailed reason for rejecting this idea."
-                        style="width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc;"></textarea>
+                    <div class="new-status-section">
+                        <label for="newStatusSelect" class="form-label">Select New Status:</label>
+                        <select [(ngModel)]="newStatus" name="newStatusSelect" id="newStatusSelect" class="status-select">
+                            <option [ngValue]="null" disabled>Choose a new status</option>
+                            <option *ngFor="let status of businessStatuses" [ngValue]="status">
+                                {{ getBusinessIdeaStatusName(status) }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="rejection-reason-section" *ngIf="newStatus === BusinessIdeaStatus.Rejected">
+                        <label for="rejectedReason" class="form-label">Reason for Rejection:</label>
+                        <textarea id="rejectedReason" [(ngModel)]="rejectedReasonInput" name="rejectedReason" rows="4"
+                            class="rejection-textarea" required
+                            placeholder="Please provide a detailed reason for rejecting this business idea..."></textarea>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="cancel-btn" (click)="closeStatusUpdateModal()">Cancel</button>
-                <button type="button" class="confirm-btn" style="background-color: #2ed134; color: #fff;"
-                    (click)="submitStatusUpdate()">Update</button>
+                <button type="button" class="cancel-btn" (click)="closeStatusUpdateModal()">
+                    <i class="bx bx-x"></i> Cancel
+                </button>
+                <button type="button" class="confirm-btn update-btn" (click)="submitStatusUpdate()">
+                    <i class="bx bx-check"></i> Update Status
+                </button>
             </div>
         </div>
     </div>

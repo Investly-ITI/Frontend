@@ -1,6 +1,7 @@
 import { Component, OnInit ,HostListener, OnDestroy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BusinessService } from '../_services/businesses.service';
 import { BusinessDto, BusinessListDto, BusinessSearchDto } from '../../_models/businesses';
 import { Response } from '../../_models/response';
@@ -17,7 +18,7 @@ import { Category } from '../../_models/category';
 @Component({
   selector: 'app-business-ideas',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatProgressSpinnerModule],
   templateUrl: './business-ideas.component.html',
   styleUrls: ['./business-ideas.component.css']
 })
@@ -31,6 +32,20 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   error: string | null = null;
   rejectedReasonInput: string = '';
+
+  // Helper properties for pagination
+  get showNoResults(): boolean {
+    return this.businessIdeas.length === 0 && !this.isLoading;
+  }
+
+  get totalPages(): number {
+    if (!this.businessList || this.businessList.totalCount === 0) return 0;
+    return Math.ceil(this.businessList.totalCount / this.searchParams.pageSize);
+  }
+
+  get totalCount(): number {
+    return this.businessList?.totalCount || 0;
+  }
 
   searchParams: BusinessSearchDto = new BusinessSearchDto();
 
@@ -65,6 +80,12 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
 
   public Math = Math;
 
+  getCurrentBusinessStatus(): BusinessIdeaStatus | undefined {
+    if (this.selectedBusinessId === null) return undefined;
+    const business = this.businessIdeas.find(b => b.id === this.selectedBusinessId);
+    return business?.status;
+  }
+
   isDarkMode: boolean = false;
   private darkModeSubscription: Subscription = new Subscription();
 
@@ -74,6 +95,8 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
   tempCategoryFilter: number | null = null;
   searchInput: string = '';
   tempStageFilter: number | null = null;
+  tempStatusFilter: number | null = null;
+  currentFilter: string = '';
 
   constructor(
     private businessService: BusinessService,
@@ -99,6 +122,8 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
   loadBusinessIdeas(): void {
     this.isLoading = true;
     this.error = null;
+    this.businessIdeas = []; // Clear data immediately when loading starts
+    this.businessList = null; // Clear list data as well
     this.businessService.getAllBusinesses(this.searchParams)
       .pipe(
         catchError(err => {
@@ -161,19 +186,73 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
 
 
   nextPage(): void {
-    if (this.businessList && this.searchParams.pageNumber * this.searchParams.pageSize < this.businessList.totalCount) {
+    if (this.businessList && this.searchParams.pageNumber * this.searchParams.pageSize < this.businessList.totalCount && !this.showNoResults && this.totalPages > 0) {
       this.searchParams.pageNumber++;
       this.loadBusinessIdeas();
-
     }
   }
 
   prevPage(): void {
-    if (this.searchParams.pageNumber > 1) {
+    if (this.searchParams.pageNumber > 1 && !this.showNoResults) {
       this.searchParams.pageNumber--;
       this.loadBusinessIdeas();
-
     }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages && page !== this.searchParams.pageNumber && page !== -1) {
+      this.searchParams.pageNumber = page;
+      this.loadBusinessIdeas();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const totalPages = this.totalPages;
+    const current = this.searchParams.pageNumber;
+
+    if (totalPages <= 7) {
+      // Show all pages if total is 7 or less
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      if (current > 4) {
+        // Add dots if current page is far from start
+        pages.push(-1); // -1 represents dots
+      }
+
+      // Show pages around current page
+      let start = Math.max(2, current - 1);
+      let end = Math.min(totalPages - 1, current + 1);
+
+      // Adjust range to always show 3 numbers around current
+      if (current <= 3) {
+        end = Math.min(totalPages - 1, 4);
+      }
+      if (current >= totalPages - 2) {
+        start = Math.max(2, totalPages - 3);
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (current < totalPages - 3) {
+        // Add dots if current page is far from end
+        pages.push(-1); // -1 represents dots
+      }
+
+      // Always show last page
+      if (totalPages > 1) {
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
   }
  @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
@@ -296,12 +375,15 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
     this.isAdvancedSearchOpen = !this.isAdvancedSearchOpen;
     this.tempCategoryFilter = this.searchParams.categoryId ?? null;
     this.tempStageFilter = this.searchParams.stage ?? null;
+    this.tempStatusFilter = this.searchParams.status ?? null;
     this.dropdownStates = this.dropdownStates.map(() => false);
   }
 
   clearAdvancedSearch(): void {
     this.tempCategoryFilter = null;
     this.tempStageFilter = null;
+    this.tempStatusFilter = null;
+    this.currentFilter = ''; // Clear the status filter dots visual state
     this.searchParams.categoryId = undefined;
     this.searchParams.status = undefined;
     this.searchParams.stage = undefined;
@@ -310,9 +392,17 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
     this.dropdownStates = this.dropdownStates.map(() => false);
   }
 
+  setFilter(filter: string, status: number): void {
+    this.currentFilter = this.currentFilter === filter ? '' : filter;
+    this.searchParams.status = this.currentFilter ? status : undefined;
+    this.searchParams.pageNumber = 1;
+    this.loadBusinessIdeas();
+  }
+
   applyAdvancedSearch(): void {
     this.searchParams.categoryId = this.tempCategoryFilter === null ? undefined : this.tempCategoryFilter;
     this.searchParams.stage = this.tempStageFilter === null ? undefined : this.tempStageFilter;
+    this.searchParams.status = this.tempStatusFilter === null ? undefined : this.tempStatusFilter;
     this.onSearch();
     this.isAdvancedSearchOpen = false;
     this.dropdownStates = this.dropdownStates.map(() => false);

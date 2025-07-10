@@ -149,7 +149,7 @@
       <ng-template #filteredMessage>
         <p>You don't have any ideas with {{ getSelectedStatusLabel().toLowerCase() }} status.</p>
       </ng-template>
-      <button class="btn btn-primary" *ngIf="selectedStatus === 'all'">
+      <button class="btn btn-primary" *ngIf="selectedStatus === 'all'" (click)="onAddFirstIdea()">
         <i class='bx bx-plus'></i>
         Add Your First Idea
       </button>

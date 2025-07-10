@@ -299,6 +299,13 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   }
 
   onSubmit(): void {
+    // Check if total weight is exactly 100%
+    const totalWeight = this.getTotalWeight();
+    if (totalWeight < 100) {
+      this.toastrService.error(`Total weight is ${totalWeight}%. Please ensure all standards add up to exactly 100%.`, 'Validation Error');
+      return;
+    }
+
     if (this.formData.valid) {
       const formValue = this.formData.value;
       
@@ -469,6 +476,12 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   // Helper method to check if adding a standard is disabled
   isAddStandardDisabled(): boolean {
     return this.getTotalWeight() >= 100;
+  }
+
+  // Helper method to check if save button should be disabled due to weight validation
+  isSaveDisabled(): boolean {
+    const totalWeight = this.getTotalWeight();
+    return totalWeight < 100;
   }
 
   // Capture original form data for change detection
