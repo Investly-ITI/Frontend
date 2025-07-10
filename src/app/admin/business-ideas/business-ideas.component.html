@@ -128,6 +128,15 @@
                                                         {{ getStageName(stage) }}</option>
                                                 </select>
                                             </div>
+                                             <div class="filter-group">
+                                                <label for="status">Status:</label>
+                                                    <select id="status" [(ngModel)]="tempStatusFilter" name="tempStatusFilter">
+                                                        <option [ngValue]="null">All</option>
+                                                        <option *ngFor="let status of businessStatusesFilter" [ngValue]="status">
+                                                            {{ getBusinessIdeaStatusName(status) }}
+                                                        </option>
+                                                    </select>
+                                            </div>
                                             <div class="advanced-search-actions">
                                                 <button type="button" class="clear-btn" (click)="clearAdvancedSearch()">
                                                     <i class='bx bx-x'></i>
@@ -275,6 +284,7 @@
                             <span class="detail-value status" [ngClass]="{
                                 'status-inactive': selectedIdeaForDetails.status === BusinessIdeaStatus.Inactive
                             }">
+                             {{ selectedIdeaForDetails.status !== null && selectedIdeaForDetails.status !== undefined ? getBusinessIdeaStatusName(selectedIdeaForDetails.status) : 'N/A' }}
                             </span>
                         </div>
                         <div class="detail-row">

@@ -37,11 +37,15 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
   stages: InvestingStages[] = Object.values(InvestingStages).filter(value => typeof value === 'number') as InvestingStages[];
   businessStatuses: BusinessIdeaStatus[] = Object.values(BusinessIdeaStatus)
   .filter(value => typeof value === 'number' && value !== BusinessIdeaStatus.Deleted) as BusinessIdeaStatus[];
+    businessStatusesFilter: BusinessIdeaStatus[] = Object.values(BusinessIdeaStatus)
+  .filter(value => typeof value === 'number' && value !== BusinessIdeaStatus.Deleted) as BusinessIdeaStatus[];
+
 
   isStatusUpdateModalOpen: boolean = false;
   selectedBusinessId: number | null = null;
   newStatus: BusinessIdeaStatus | null = null;
   currentStatusName: string | null = null;
+  tempStatusFilter: BusinessIdeaStatus | null = null;
 
   isSoftDeleteModalOpen: boolean = false;
   selectedIdeaIdForSoftDelete: number | null = null;
@@ -151,6 +155,7 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
     this.searchParams.pageSize = 5;
     this.tempCategoryFilter = null;
     this.tempStageFilter = null;
+    this.tempStatusFilter = null;
     this.loadBusinessIdeas();
   }
 
@@ -302,6 +307,7 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
   clearAdvancedSearch(): void {
     this.tempCategoryFilter = null;
     this.tempStageFilter = null;
+    this.tempStatusFilter = null;
     this.searchParams.categoryId = undefined;
     this.searchParams.status = undefined;
     this.searchParams.stage = undefined;
@@ -313,6 +319,7 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
   applyAdvancedSearch(): void {
     this.searchParams.categoryId = this.tempCategoryFilter === null ? undefined : this.tempCategoryFilter;
     this.searchParams.stage = this.tempStageFilter === null ? undefined : this.tempStageFilter;
+    this.searchParams.status = this.tempStatusFilter === null ? undefined : this.tempStatusFilter;
     this.onSearch();
     this.isAdvancedSearchOpen = false;
     this.dropdownStates = this.dropdownStates.map(() => false);
@@ -362,6 +369,9 @@ get filteredBusinessIdeas(): BusinessDto[] {
   }
   if (this.searchParams.stage != null && this.searchParams.stage !== undefined) {
     filtered = filtered.filter(idea => idea.stage === this.searchParams.stage);
+  }
+   if (this.searchParams.status != null && this.searchParams.status !== undefined) {
+    filtered = filtered.filter(idea => idea.status === this.searchParams.status);
   }
   return filtered;
 }
