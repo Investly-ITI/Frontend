@@ -11,6 +11,7 @@
   display: block;
   width: 100%;
   min-height: 100vh;
+  zoom: 0.9; /* zoom out by 10% */
 }
 
 :host * {
