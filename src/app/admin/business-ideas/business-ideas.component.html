@@ -168,14 +168,14 @@
                         <tbody>
                             <tr *ngFor="let idea of filteredBusinessIdeas; let i = index">
                                 <td>
-                                    <p>{{ idea.title || 'N/A' }}</p>
+                                    <p>{{ idea.title || ' ' }}</p>
                                 </td>
-                                <td>{{ idea.founderName || 'N/A' }}</td>
-                                <td>{{ idea.categoryName || 'N/A' }}</td>
+                                <td>{{ idea.founderName || ' ' }}</td>
+                                <td>{{ idea.categoryName || ' ' }}</td>
                                 <td>
                                     <span class="status"
                                         [ngStyle]="{ 'color': idea.status === BusinessIdeaStatus.Active ? '#2ed134' : idea.status === BusinessIdeaStatus.Pending ? '#ffab00' : idea.status === BusinessIdeaStatus.Rejected ? '#e6382f' : idea.status === BusinessIdeaStatus.Inactive ? '#adb5bd' : '#000' }">
-                                        {{ idea.status ? getBusinessIdeaStatusName(idea.status) : 'N/A' }}
+                                        {{ idea.status ? getBusinessIdeaStatusName(idea.status) : ' ' }}
                                     </span>
                                 </td>
                                 <td>
@@ -244,31 +244,31 @@
                     <div *ngIf="activeTab === 'details'" class="details-content">
                         <div class="detail-row">
                             <strong class="detail-label">Title:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.title || 'N/A' }}</span>
+                            <span class="detail-value">{{ selectedIdeaForDetails.title || ' ' }}</span>
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">Founder:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.founderName || 'N/A' }}</span>
+                            <span class="detail-value">{{ selectedIdeaForDetails.founderName || ' ' }}</span>
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">Category:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.categoryName || 'N/A' }}</span>
+                            <span class="detail-value">{{ selectedIdeaForDetails.categoryName || ' ' }}</span>
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">Stage:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.stage ? getStageName(selectedIdeaForDetails.stage) : 'N/A' }}</span>
+                            <span class="detail-value">{{ selectedIdeaForDetails.stage ? getStageName(selectedIdeaForDetails.stage) : ' ' }}</span>
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">Capital:</strong>
-                            <span class="detail-value">{{ (selectedIdeaForDetails.capital !== null && selectedIdeaForDetails.capital !== undefined) ? (selectedIdeaForDetails.capital | currency:'EGP ':'symbol':'1.2-2') : 'N/A' }}</span>
+                            <span class="detail-value">{{ (selectedIdeaForDetails.capital !== null && selectedIdeaForDetails.capital !== undefined) ? (selectedIdeaForDetails.capital | currency:'EGP ':'symbol':'1.2-2') : ' ' }}</span>
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">Location:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.location || 'N/A' }}</span>
+                            <span class="detail-value">{{ selectedIdeaForDetails.location || ' ' }}</span>
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">Created At:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.createdAt ? (selectedIdeaForDetails.createdAt | date:'medium') : 'N/A' }}</span>
+                            <span class="detail-value">{{ selectedIdeaForDetails.createdAt ? (selectedIdeaForDetails.createdAt | date:'medium') : ' ' }}</span>
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">Status:</strong>
@@ -279,30 +279,30 @@
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">File Path:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.filePath ? selectedIdeaForDetails.filePath : 'N/A' }}</span>
+                            <span class="detail-value">{{ selectedIdeaForDetails.filePath ? selectedIdeaForDetails.filePath : ' ' }}</span>
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">AI Rate:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.airate != null ? selectedIdeaForDetails.airate + '%' : 'N/A' }}</span>
+                            <span class="detail-value">{{ selectedIdeaForDetails.airate != null ? selectedIdeaForDetails.airate + '%' : ' ' }}</span>
                         </div>
                         <div class="detail-row" *ngIf="selectedIdeaForDetails.rejectedReason">
                             <strong class="detail-label">Rejected Reason:</strong>
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">Description:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.description || 'N/A' }}</span>
+                            <span class="detail-value">{{ selectedIdeaForDetails.description || ' ' }}</span>
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">City:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.city?.nameEn || selectedIdeaForDetails.city?.nameAr || 'N/A' }}</span>
+                            <span class="detail-value">{{ selectedIdeaForDetails.city?.nameEn || selectedIdeaForDetails.city?.nameAr || ' ' }}</span>
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">Government:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.government?.nameEn || selectedIdeaForDetails.government?.nameAr || 'N/A' }}</span>
+                            <span class="detail-value">{{ selectedIdeaForDetails.government?.nameEn || selectedIdeaForDetails.government?.nameAr || ' ' }}</span>
                         </div>
                         <div class="detail-row">
                             <strong class="detail-label">Investment Type:</strong>
-                            <span class="detail-value">{{ selectedIdeaForDetails.desiredInvestmentTypeName || 'N/A' }}</span>
+                            <span class="detail-value">{{ selectedIdeaForDetails.desiredInvestmentTypeName || ' ' }}</span>
                         </div>
                     </div>
 

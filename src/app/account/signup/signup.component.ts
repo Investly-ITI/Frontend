@@ -321,8 +321,11 @@ export class SignupComponent implements OnInit, OnDestroy {
          
         },
         error: (err) => {
-           this.isLoading = false;
-          this.toastr.error("something went wrong","Error");
+             this.isLoading = false;
+               const errorMsg = err.error?.message
+            ? err.error.message
+            : "Something went wrong. Please try again.";
+          this.toastr.error(errorMsg,"Error");
         }
       })
 

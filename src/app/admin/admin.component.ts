@@ -7,6 +7,9 @@ import { DarkModeService } from './_services/dark-mode.service';
 import { LoggedInUser } from '../_models/user';
 import { AuthService } from '../_services/auth.service';
 import { Subscription } from 'rxjs';
+import { NotificationService  } from '../_services/notification.service';
+import { NotificationService as AdminNotificationService } from './_services/notification.service';
+import { notification } from '../_models/notification';
 
 
 @Component({
@@ -19,15 +22,18 @@ export class AdminComponent implements OnInit {
 
   //* Notifications Properties
   notificationsCount: number = 0;
-  notifications: Notification[] = []; //! you need to define notification interface / model and import it then start populating this array with data from your service in loadNotifications method
+  notifications: notification[] = []; //! you need to define notification interface / model and import it then start populating this array with data from your service in loadNotifications method
   isNotificationsOpen: boolean = false;
   isNotificationsClosing: boolean = false;
   loggedInUser:LoggedInUser|null=null;
   private  unsubscribe: Subscription[] = []; 
+  private unreadCountSub?: Subscription;
 
   constructor(
     private darkModeService: DarkModeService,
-    private auth:AuthService
+    private auth:AuthService,
+    private notificationService:NotificationService,
+    private AdminNotificationService:AdminNotificationService
   ){}
 
 
@@ -35,7 +41,12 @@ export class AdminComponent implements OnInit {
   ngOnInit() {
     
     // this.loadNotifications(); //+ Uncomment this line when you implement the loadNotifications method
-
+     // Subscribe to shared unread count observable
+    this.unreadCountSub = this.notificationService.getUnreadCount$().subscribe(count => {
+      this.notificationsCount = count;
+    });
+    // Initial fetch
+    this.notificationService.refreshUnreadCount();
     const allSideMenu = document.querySelectorAll(
       '#sidebar .side-menu.top li a'
     );
@@ -84,7 +95,8 @@ export class AdminComponent implements OnInit {
       this.closeNotifications();
     } else {
       this.isNotificationsOpen = true;
-      // this.loadNotifications(); //+ Uncomment this line when you implement the loadNotifications method
+      this.loadNotifications();
+//+ Uncomment this line when you implement the loadNotifications method
     }
   }
 
@@ -97,7 +109,16 @@ export class AdminComponent implements OnInit {
   }
 
   loadNotifications() {
-    //+ Implement your logic to load notifications here (Service Call)
+    
+    this.AdminNotificationService.GetUnreadNotifications().subscribe({
+      next: (response) => {   
+        this.notifications = response.data;
+       
+      },
+      error: (error) => {
+        console.error('Error loading notifications:', error);
+      }
+    });
   }
 
   logout(){

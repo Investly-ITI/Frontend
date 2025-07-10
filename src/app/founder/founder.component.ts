@@ -13,6 +13,7 @@ import { ToastrService } from 'ngx-toastr';
 import { getStatusLabel } from '../_shared/utils/enum.utils';
 import { Status } from '../_shared/enums';
 import { AuthService } from '../_services/auth.service';
+import { RouterLink } from '@angular/router';
 
 interface ProfileData {
   personalInfo: {
@@ -57,7 +58,7 @@ interface ProfileData {
     FounderInformationComponent,
     FounderSecurityComponent,
     FounderIdeasComponent,
-    FounderNotificationsComponent
+    FounderNotificationsComponent,RouterLink
   ],
   templateUrl: './founder.component.html',
   styleUrl: './founder.component.css'
@@ -66,7 +67,7 @@ export class FounderComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('founderIdeas') founderIdeasComponent!: FounderIdeasComponent;
 
-  activeSection: 'information' | 'security' | 'ideas' | 'notifications' = 'information';
+  activeSection: 'information' | 'security' | 'ideas' | 'notifications'|'feedback' = 'information';
   ideasCount: number = 0;
   subscribe: Subscription[] = [];
   showIdeasTab:boolean = false;
@@ -223,7 +224,7 @@ export class FounderComponent implements OnInit {
     this.subscribe.push(sub); 
   }
 
-  setActiveSection(section: 'information' | 'security' | 'ideas' | 'notifications'): void {
+  setActiveSection(section: 'information' | 'security' | 'ideas' | 'notifications'|'feedback'): void {
     this.activeSection = section;
     if (section === 'notifications') {
       this.notificationService.setUnreadCount(0);

@@ -19,7 +19,7 @@
               <i class='bx bx-search'></i>
               <input 
                 type="text" 
-                placeholder="Search ideas, founders, or categories..."
+                placeholder="Search ideas or founders..."
                 formControlName="searchInput"
                 class="search-input">
             </div>
@@ -75,6 +75,15 @@
 
       <!-- Advanced Filters (Accordion) -->
       <div class="filters-accordion" [class.expanded]="isFiltersExpanded">
+        
+        <!-- Preferences Applied Indicator -->
+        <div *ngIf="preferencesApplied && investorPreferences && !userMadeChanges" class="preferences-indicator">
+          <div class="preferences-badge">
+            <i class='bx bx-user-check'></i>
+            <span>Your investment preferences have been applied to the filters</span>
+          </div>
+        </div>
+        
         <form [formGroup]="searchForm" class="filters-form">
         <div class="filters-grid">
           
@@ -92,9 +101,13 @@
           <!-- Stage Filter -->
           <div class="filter-group">
             <label for="stage">Business Stage</label>
-            <select id="stage" formControlName="stage" class="filter-select">
+            <select 
+              id="stage" 
+              formControlName="stage"
+              class="filter-select">
               <option value="">All Stages</option>
-              <option *ngFor="let stage of stageOptions" [value]="stage.value">
+              <option *ngFor="let stage of stageOptions" [value]="stage.value" 
+                      [hidden]="stage.value === 'custom'">
                 {{ stage.label }}
               </option>
             </select>
@@ -102,9 +115,9 @@
 
           <!-- Location Filter -->
           <div class="filter-group">
-            <label for="location">Location</label>
+            <label for="location">Governorate</label>
             <select id="location" formControlName="governorateId" class="filter-select">
-              <option value="">All Locations</option>
+              <option value="">All Governorates</option>
               <option *ngFor="let gov of governorates" [value]="gov.id">
                 {{ gov.nameEn }}
               </option>
@@ -117,13 +130,13 @@
             <div class="range-inputs">
               <input 
                 type="number" 
-                placeholder="Min ($)"
+                placeholder="Min (EGP)"
                 formControlName="minFunding"
                 class="range-input">
               <span class="range-separator">-</span>
               <input 
                 type="number" 
-                placeholder="Max ($)"
+                placeholder="Max (EGP)"
                 formControlName="maxFunding"
                 class="range-input">
             </div>
@@ -133,10 +146,11 @@
           <div class="filter-group">
             <label for="aiRate">Min AI Rating</label>
             <select id="aiRate" formControlName="minAiRate" class="filter-select">
-              <option value="">Any Rating</option>
-              <option value="70">70+ Excellent</option>
-              <option value="80">80+ Outstanding</option>
-              <option value="90">90+ Exceptional</option>
+              <option value="50">50%+ Good</option>
+              <option value="60">60%+ Very Good</option>
+              <option value="70">70%+ Excellent</option>
+              <option value="80">80%+ Outstanding</option>
+              <option value="90">90%+ Exceptional</option>
             </select>
           </div>
 
@@ -200,12 +214,22 @@
           </div>
 
           <!-- Card Image -->
-          <div class="card-image">
+          <div class="card-image" 
+               (mouseenter)="startImageCycling(business)"
+               (mouseleave)="stopImageCycling(business)">
             <img 
               [src]="getBusinessImage(business)" 
               [alt]="business.title" 
               class="business-image"
               loading="lazy">
+            
+            <!-- Image indicator dots for multiple images -->
+            <div *ngIf="getBusinessImages(business).length > 1" class="image-indicators">
+              <span *ngFor="let img of getBusinessImages(business); let i = index" 
+                    class="indicator-dot"
+                    [class.active]="i === (currentImageIndexes[business.id] || 0)">
+              </span>
+            </div>
           </div>
 
           <!-- Card Content -->
@@ -221,7 +245,7 @@
               </div>
               <div class="detail-item">
                 <i class='bx bx-map'></i>
-                <span>{{ business.location }}</span>
+                <span>{{ business.governmentName }}</span>
               </div>
               <div class="detail-item">
                 <i class='bx bx-user'></i>
@@ -229,11 +253,33 @@
               </div>
             </div>
 
-            <!-- Funding Information -->
-            <div *ngIf="shouldShowFunding()" class="funding-info">
-              <div class="funding-amount">
+            <!-- Investment Type Information -->
+            <div class="investment-info">
+              <!-- Show funding amount for Funding or Both types -->
+              <div *ngIf="shouldShowFundingForBusiness(business)" class="funding-amount">
                 <span class="amount">{{ business.capital || 0 }} EGP</span>
                 <span class="label">Funding Needed</span>
+              </div>
+              
+              <!-- Show investment type -->
+              <div class="investment-type">
+                <span class="type-badge" [attr.data-type]="business.desiredInvestmentType || 1">
+                  <!-- For Both type, show combined icons -->
+                  <ng-container *ngIf="(business.desiredInvestmentType || 1) === DesiredInvestmentType.Both">
+                    <i class='bx bx-dollar-circle'></i>
+                    <i class='bx bx-briefcase'></i>
+                    Funding & Experience
+                  </ng-container>
+                  
+                  <!-- For single investment types -->
+                  <ng-container *ngIf="(business.desiredInvestmentType || 1) !== DesiredInvestmentType.Both">
+                    <i class='bx' [ngClass]="{
+                      'bx-dollar-circle': (business.desiredInvestmentType || 1) === DesiredInvestmentType.Funding,
+                      'bx-briefcase': (business.desiredInvestmentType || 1) === DesiredInvestmentType.IndustrialExperience
+                    }"></i>
+                    {{ getInvestmentTypeLabel(business.desiredInvestmentType || 1) }}
+                  </ng-container>
+                </span>
               </div>
             </div>
           </div>
@@ -244,10 +290,39 @@
               <i class='bx bx-info-circle'></i>
               <span>View Details</span>
             </button>
-            <button class="btn btn-secondary btn-small">
-              <i class='bx bx-envelope'></i>
-              <span>Contact</span>
-            </button>
+            
+            <!-- Contact button logic based on user type and request status -->
+            <div *ngIf="isUserInvestor(); else nonInvestorActions">
+              <!-- Show contact request button if user can request contact -->
+              <button 
+                *ngIf="canShowContactButton(business)" 
+                class="btn btn-secondary btn-small" 
+                (click)="onContactRequest(business)">
+                <i class='bx bx-envelope'></i>
+                <span>Contact Request</span>
+              </button>
+              
+              <!-- Show status badge if there's an existing contact request -->
+              <span 
+                *ngIf="business.contactRequestStatus !== null" 
+                class="status-badge"
+                [ngClass]="getContactRequestStatusClass(business.contactRequestStatus!)">
+                <i class='bx bx-info-circle'></i>
+                <span>{{ getContactRequestStatusLabel(business.contactRequestStatus!) }}</span>
+              </span>
+            </div>
+            
+            <!-- Non-investor users see a disabled contact request button -->
+            <ng-template #nonInvestorActions>
+              <button 
+                *ngIf="business.canRequestContact" 
+                class="btn btn-secondary btn-small" 
+                disabled 
+                title="Login as investor to contact founders">
+                <i class='bx bx-envelope'></i>
+                <span>Contact Request</span>
+              </button>
+            </ng-template>
           </div>
 
         </div>
@@ -298,12 +373,22 @@
                   </div>
                 </div>
 
-                <div class="card-image">
+                <div class="card-image"
+                     (mouseenter)="startImageCycling(business)"
+                     (mouseleave)="stopImageCycling(business)">
                   <img 
                     [src]="getBusinessImage(business)" 
                     [alt]="business.title" 
                     class="business-image"
                     loading="lazy">
+                  
+                  <!-- Image indicator dots for multiple images -->
+                  <div *ngIf="getBusinessImages(business).length > 1" class="image-indicators">
+                    <span *ngFor="let img of getBusinessImages(business); let i = index" 
+                          class="indicator-dot"
+                          [class.active]="i === (currentImageIndexes[business.id] || 0)">
+                    </span>
+                  </div>
                 </div>
 
                 <div class="card-content">
@@ -317,7 +402,7 @@
                     </div>
                     <div class="detail-item">
                       <i class='bx bx-map'></i>
-                      <span>{{ business.location }}</span>
+                      <span>{{ business.governmentName }}</span>
                     </div>
                     <div class="detail-item">
                       <i class='bx bx-user'></i>
@@ -325,10 +410,33 @@
                     </div>
                   </div>
 
-                  <div *ngIf="shouldShowFunding()" class="funding-info">
-                    <div class="funding-amount">
+                  <!-- Investment Type Information -->
+                  <div class="investment-info">
+                    <!-- Show funding amount for Funding or Both types -->
+                    <div *ngIf="shouldShowFundingForBusiness(business)" class="funding-amount">
                       <span class="amount">{{ business.capital || 0 }} EGP</span>
                       <span class="label">Funding Needed</span>
+                    </div>
+                    
+                    <!-- Show investment type -->
+                    <div class="investment-type">
+                      <span class="type-badge" [attr.data-type]="business.desiredInvestmentType || 1">
+                        <!-- For Both type, show combined icons -->
+                        <ng-container *ngIf="(business.desiredInvestmentType || 1) === DesiredInvestmentType.Both">
+                          <i class='bx bx-dollar-circle'></i>
+                          <i class='bx bx-briefcase'></i>
+                          Funding & Experience
+                        </ng-container>
+                        
+                        <!-- For single investment types -->
+                        <ng-container *ngIf="(business.desiredInvestmentType || 1) !== DesiredInvestmentType.Both">
+                          <i class='bx' [ngClass]="{
+                            'bx-dollar-circle': (business.desiredInvestmentType || 1) === DesiredInvestmentType.Funding,
+                            'bx-briefcase': (business.desiredInvestmentType || 1) === DesiredInvestmentType.IndustrialExperience
+                          }"></i>
+                          {{ getInvestmentTypeLabel(business.desiredInvestmentType || 1) }}
+                        </ng-container>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -338,10 +446,39 @@
                     <i class='bx bx-info-circle'></i>
                     <span>View Details</span>
                   </button>
-                  <button class="btn btn-secondary btn-small">
-                    <i class='bx bx-envelope'></i>
-                    <span>Contact</span>
-                  </button>
+                  
+                  <!-- Contact request button logic based on user type and request status -->
+                  <div *ngIf="isUserInvestor(); else nonInvestorActionsCarousel">
+                    <!-- Show contact request button if user can request contact -->
+                    <button 
+                      *ngIf="canShowContactButton(business)" 
+                      class="btn btn-secondary btn-small" 
+                      (click)="onContactRequest(business)">
+                      <i class='bx bx-envelope'></i>
+                      <span>Contact Request</span>
+                    </button>
+                    
+                    <!-- Show status badge if there's an existing contact request -->
+                    <span 
+                      *ngIf="business.contactRequestStatus !== null" 
+                      class="status-badge"
+                      [ngClass]="getContactRequestStatusClass(business.contactRequestStatus!)">
+                      <i class='bx bx-info-circle'></i>
+                      <span>{{ getContactRequestStatusLabel(business.contactRequestStatus!) }}</span>
+                    </span>
+                  </div>
+                  
+                  <!-- Non-investor users see a disabled contact request button -->
+                  <ng-template #nonInvestorActionsCarousel>
+                    <button 
+                      *ngIf="business.canRequestContact" 
+                      class="btn btn-secondary btn-small" 
+                      disabled 
+                      title="Login as investor to contact founders">
+                      <i class='bx bx-envelope'></i>
+                      <span>Contact Request</span>
+                    </button>
+                  </ng-template>
                 </div>
               </div>
             </div>
@@ -405,5 +542,50 @@
       </nav>
     </div>
   </section>
+
+  <!-- Contact Request Confirmation Modal -->
+  <div *ngIf="showContactRequestModal" class="modal-overlay" (click)="closeContactRequestModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Confirm Contact Request</h3>
+        <button class="modal-close-btn" (click)="closeContactRequestModal()">
+          <i class='bx bx-x'></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="confirmation-content">
+          <div class="confirmation-icon">
+            <i class='bx bx-envelope'></i>
+          </div>
+          <h4>Request Contact Information</h4>
+          <p>Are you sure you want to request contact for:</p>
+          <div class="business-info">
+            <h5>{{ selectedBusiness?.title }}</h5>
+            <p>by {{ selectedBusiness?.founderName }}</p>
+          </div>
+          <p class="note">The Request Will Be Sent To The Admin For Review</p>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button 
+          class="btn btn-secondary" 
+          (click)="closeContactRequestModal()"
+          [disabled]="isSubmittingContactRequest">
+          Cancel
+        </button>
+        <button 
+          class="btn btn-primary" 
+          (click)="confirmContactRequest()"
+          [disabled]="isSubmittingContactRequest">
+          <span *ngIf="!isSubmittingContactRequest">Send Request</span>
+          <span *ngIf="isSubmittingContactRequest">
+            <i class='bx bx-loader-alt bx-spin'></i> Sending...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
 
 </div> 

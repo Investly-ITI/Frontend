@@ -12,25 +12,19 @@
                         <!-- Notification Content -->
                         <div class="notification-content">
                             <div class="notification-message">
-                                <!-- //+ Message Content Here -->
+                               {{notification.body}}
                             </div>
                             <div class="notification-time">
-                                <!-- //+ Message Date Here -->
+                                {{notification.createdAt | date:'short'}}
                             </div>
                         </div>
                         
-                        <!-- Notification Actions -->
-                        <div class="notification-actions">
-                            <button class="view-btn" >
-                                <!-- //+ click function for mark As Seen Here -->
-                                <i style="color: var(--dark);" class='bx bx-show'></i>
-                            </button>
-                            <button class="delete-btn" >
-                                <!-- //+ click function for delete Here -->
-                                <i class='bx bx-x'></i>
-                            </button>
-                        </div>
+                
                     </div>
+                    <a [routerLink]="['/admin/notification']"  [queryParams]="{ UserTypeTo: UserType.Staff}" (click)="onSeeMoreClick()" class="view-btn small-link ml-space">
+                          See more
+                    </a>
+
                 </div>
                 
                 <!-- No Notifications Template -->

@@ -1,13 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormControl } from '@angular/forms';
-import { BusinessDto, BusinessSearchDto } from '../../_models/businesses';
+import { ToastrService } from 'ngx-toastr';
+import { BusinessDto, BusinessExploreDto, BusinessSearchRequest, BusinessListDto, InvestorPreferences, InvestorPreferencesApiResponse } from '../../_models/businesses';
 import { Category } from '../../_models/category';
 import { Governorate } from '../../_models/governorate';
-import { InvestingStages, DesiredInvestmentType, BusinessIdeaStatus } from '../../_shared/enums';
+import { InvestingStages, DesiredInvestmentType, BusinessIdeaStatus, ContactRequestStatus, UserType } from '../../_shared/enums';
 import { CategoryService } from '../../_services/category.service';
 import { GovernrateService } from '../../_services/governorate.service';
+import { ExploreService } from './explore.service';
+import { AuthService } from '../../_services/auth.service';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-explore',
@@ -16,7 +20,7 @@ import { GovernrateService } from '../../_services/governorate.service';
   templateUrl: './explore.component.html',
   styleUrl: './explore.component.css'
 })
-export class ExploreComponent implements OnInit {
+export class ExploreComponent implements OnInit, OnDestroy {
 
   // View states
   isGridView = true;
@@ -32,25 +36,79 @@ export class ExploreComponent implements OnInit {
   carouselItemsPerView = 3;
 
   // Data
-  businesses: BusinessDto[] = [];
-  filteredBusinesses: BusinessDto[] = [];
+  businesses: BusinessExploreDto[] = [];
+  filteredBusinesses: BusinessExploreDto[] = [];
   categories: Category[] = [];
   governorates: Governorate[] = [];
+  investorPreferences: InvestorPreferencesApiResponse | null = null;
+
+  // Track if this is the initial load to avoid infinite loops
+  private isInitialLoad = true;
+  preferencesApplied = false;
+  userMadeChanges = false; // Track if user explicitly changed filters
+  private isClearing = false; // Track when we're in the middle of clearing filters
+
+  // Image cycling for hover effect
+  currentImageIndexes: { [businessId: number]: number } = {};
+  imageIntervals: { [businessId: number]: any } = {};
+  imageTimeouts: { [businessId: number]: any } = {};
 
   // Enums for template
   InvestingStages = InvestingStages;
   DesiredInvestmentType = DesiredInvestmentType;
+  ContactRequestStatus = ContactRequestStatus;
+
+  // Modal state
+  showContactRequestModal = false;
+  selectedBusiness: BusinessExploreDto | null = null;
+  isSubmittingContactRequest = false;
   
   // Expose Math for template
   Math = Math;
 
-  // Filter options
-  stageOptions = [
-    { value: InvestingStages.ideation, label: 'Ideation' },
-    { value: InvestingStages.startup, label: 'Startup' },
-    { value: InvestingStages.intermediate, label: 'Intermediate' },
-    { value: InvestingStages.advanced, label: 'Advanced' }
-  ];
+  // Convert getter to simple property - getters in templates cause binding issues
+  stageOptions: { value: string, label: string }[] = [];
+
+  // Remove the getter and replace with method to initialize options
+  private initializeStageOptions(): void {
+    const baseOptions: { value: string, label: string }[] = [
+      { value: '1', label: 'Ideation' },      // InvestingStages.ideation = 1
+      { value: '2', label: 'Startup' },       // InvestingStages.startup = 2  
+      { value: '3', label: 'Intermediate' },  // InvestingStages.intermediate = 3
+      { value: '4', label: 'Advanced' }       // InvestingStages.advanced = 4
+    ];
+    
+    // Add "Custom Preference" option only for investors
+    if (this.isUserInvestor()) {
+      baseOptions.push({ value: 'custom', label: 'Custom Preference' });
+    }
+    
+    this.stageOptions = baseOptions;
+  }
+
+  // Get options for dropdown - excludes 'custom' so it's not selectable
+  getSelectableStageOptions(): { value: string, label: string }[] {
+    return [
+      { value: '', label: 'All Stages' },
+      { value: '1', label: 'Ideation' },
+      { value: '2', label: 'Startup' },
+      { value: '3', label: 'Intermediate' },
+      { value: '4', label: 'Advanced' }
+    ];
+  }
+
+  // Get display text for selected value - includes custom preference display
+  getStageDisplayText(): string {
+    const selectedValue = this.searchForm.get('stage')?.value;
+    if (selectedValue === 'custom') {
+      return 'Custom Preference';
+    }
+    if (!selectedValue || selectedValue === '') {
+      return 'All Stages';
+    }
+    const option = this.stageOptions.find(opt => opt.value === selectedValue);
+    return option ? option.label : 'All Stages';
+  }
 
   investmentTypeOptions = [
     { value: DesiredInvestmentType.IndustrialExperience, label: 'Industrial Experience' },
@@ -67,30 +125,47 @@ export class ExploreComponent implements OnInit {
     private fb: FormBuilder,
     private categoryService: CategoryService,
     private governorateService: GovernrateService,
-    private router: Router
+    private exploreService: ExploreService,
+    private authService: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private toastr: ToastrService
   ) { }
 
   ngOnInit() {
+    this.initializeStageOptions(); // Initialize stage options first
     this.initializeForm();
     this.loadInitialData();
-    this.generateSampleData(); // For demo purposes
+    this.loadBusinesses(); // Load real data instead of generating sample data
   }
 
   initializeForm() {
     this.searchForm = this.fb.group({
       searchInput: [''],
-      categoryId: [null],
-      stage: [null],
-      governorateId: [null],
+      categoryId: [''],
+      stage: [''], // Initialize with empty string to match "All Stages" option
+      governorateId: [''],
       minFunding: [null],
       maxFunding: [null],
-      minAiRate: [null],
-      investmentType: [null]
+      minAiRate: [50], // Default to 50+ Good rating
+      investmentType: ['']
     });
 
-    // Subscribe to form changes for real-time filtering
-    this.searchForm.valueChanges.subscribe(() => {
-      this.applyFilters();
+    // Subscribe to form changes for real-time filtering with debounce
+    this.searchForm.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr))
+    ).subscribe((formValues) => {
+      // Skip if we're in the middle of clearing filters
+      if (this.isClearing) {
+        return;
+      }
+      
+      // Mark that user has made changes only after initial setup is complete
+      if (this.preferencesApplied && !this.isInitialLoad && !this.userMadeChanges) {
+        this.userMadeChanges = true;
+      }
+      this.loadBusinesses();
     });
 
     // Clear funding fields when Industrial Experience is selected
@@ -114,93 +189,176 @@ export class ExploreComponent implements OnInit {
       this.governorates = governoratesResponse?.data || [];
     } catch (error) {
       console.error('Error loading initial data:', error);
+      this.toastr.warning(
+        'Some filter options may not be available. Please refresh the page if needed.',
+        'Loading Issue'
+      );
     }
   }
 
-  // Generate sample data for demo
-  generateSampleData() {
-    // Extended BusinessDto to include imageUrl as a dynamic property
-this.businesses = [
-  Object.assign(new BusinessDto(1, 1, 'Ahmed Hassan', 1, 'Technology', 'AI-Powered Health Monitoring App', 85, InvestingStages.startup, 'Cairo', 150000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-15', undefined, undefined, undefined, undefined, 1, 1, 'Revolutionary healthcare app that uses AI to monitor vital signs and predict health issues before they become serious.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop' }),
+  async loadBusinesses() {
+    try {
+      this.isLoading = true;
+      const formValues = this.searchForm.value;
+      
+      const searchRequest: BusinessSearchRequest = {
+        pageSize: this.itemsPerPage,
+        pageNumber: this.currentPage,
+        searchInput: formValues.searchInput || undefined,
+        categoryId: formValues.categoryId || undefined,
+        stage: (formValues.stage && formValues.stage !== '' && formValues.stage !== 'custom') ? parseInt(formValues.stage) : undefined,
+        governmentId: formValues.governorateId || undefined,
+        minCapital: (formValues.minFunding !== null && formValues.minFunding !== '' && formValues.minFunding !== 0) ? formValues.minFunding : null,
+        maxCapital: (formValues.maxFunding !== null && formValues.maxFunding !== '') ? formValues.maxFunding : undefined,
+        minAiRate: (formValues.minAiRate !== null && formValues.minAiRate !== '') ? formValues.minAiRate : undefined,
+        desiredInvestmentType: (formValues.investmentType !== null && formValues.investmentType !== '') ? formValues.investmentType : null,
+        useDefaultPreferences: this.isInitialLoad && !this.userMadeChanges && !this.preferencesApplied
+      };
 
-  Object.assign(new BusinessDto(2, 2, 'Fatima Al-Rashid', 2, 'Agriculture', 'Sustainable Urban Farming', 92, InvestingStages.intermediate, 'Alexandria', 300000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-20', undefined, undefined, undefined, undefined, 2, 2, 'Vertical farming solution for urban areas using hydroponics and renewable energy sources.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop' }),
+      const response = await this.exploreService.getBusinesses(searchRequest).toPromise();
+      
+      if (response && response.isSuccess && response.data) {
+        this.businesses = response.data.businesses || [];
+        this.filteredBusinesses = [...this.businesses]; // For compatibility with existing template
+        this.totalItems = response.data.totalCount || 0;
+        this.investorPreferences = response.data.investorPreferences || null;
+        
+        // Apply investor preferences to form on initial load only
+        if (this.isInitialLoad && this.investorPreferences && !this.preferencesApplied) {
+          this.applyInvestorPreferencesToForm(this.investorPreferences);
+          this.preferencesApplied = true;
+          this.isInitialLoad = false;
+          // Reload businesses with applied preferences
+          setTimeout(() => this.loadBusinesses(), 100);
+          return;
+        }
+        
+        // Apply defaults for non-investors or when no preferences exist
+        if (this.isInitialLoad && !this.investorPreferences && !this.preferencesApplied) {
+          this.applyDefaultsForNonInvestors();
+          this.preferencesApplied = true;
+          this.isInitialLoad = false;
+        }
+        
+        // Update pagination info if provided
+        if (response.data.currentPage) {
+          this.currentPage = response.data.currentPage;
+        }
+        
+        // Mark initial load as complete
+        this.isInitialLoad = false;
+      } else {
+        console.error('Failed to load businesses:', response?.message);
+        this.businesses = [];
+        this.filteredBusinesses = [];
+        this.totalItems = 0;
+        
+        // Show error toast for API failure
+        this.toastr.error(
+          response?.message || 'Unable to load business ideas. Please try again.',
+          'Loading Failed'
+        );
+      }
+    } catch (error) {
+      console.error('Error loading businesses:', error);
+      this.businesses = [];
+      this.filteredBusinesses = [];
+      this.totalItems = 0;
+      
+      // Show error toast for network/unexpected errors
+      this.toastr.error(
+        'Network error occurred while loading business ideas. Please check your connection and try again.',
+        'Connection Error'
+      );
+    } finally {
+      this.isLoading = false;
+    }
+  }
 
-  Object.assign(new BusinessDto(3, 3, 'Mohamed Ali', 1, 'Technology', 'Blockchain Supply Chain Platform', 78, InvestingStages.advanced, 'Giza', 500000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-10', undefined, undefined, undefined, undefined, 3, 3, 'Complete transparency in supply chain management using blockchain technology and IoT sensors.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=300&fit=crop' }),
+  /**
+   * Apply investor preferences to the filter form
+   */
+  private applyInvestorPreferencesToForm(preferences: InvestorPreferencesApiResponse) {
+    
+    const updateObject: any = {};
+    
+    // Set default values for all filters when preferences are applied
+    updateObject.categoryId = ''; // All categories
+    updateObject.governorateId = ''; // All governorates  
+    updateObject.minAiRate = 50; // Minimum good rating (50+)
+    updateObject.searchInput = ''; // Clear any search text
+    
+    // Apply investment type
+    if (preferences.investingType !== undefined && preferences.investingType !== null) {
+      updateObject.investmentType = preferences.investingType;
+    }
+    
+    // Apply funding range
+    if (preferences.minFunding !== undefined && preferences.minFunding !== null) {
+      updateObject.minFunding = preferences.minFunding;
+    }
+    
+    if (preferences.maxFunding !== undefined && preferences.maxFunding !== null) {
+      updateObject.maxFunding = preferences.maxFunding;
+    }
+    
+    // Apply business stages - only if there's a single preferred stage
+    if (preferences.interestedBusinessStages) {
+      const stages = preferences.interestedBusinessStages.toString().split(',').map((s: string) => s.trim());
+      
+      // Only apply stage filter if there's exactly one preferred stage
+      if (stages.length === 1 && stages[0]) {
+        const stageValue = parseInt(stages[0]);
+        if (!isNaN(stageValue) && stageValue >= 1 && stageValue <= 4) {
+          updateObject.stage = stageValue.toString(); // Convert to string: "1", "2", "3", or "4"
+        }
+      } else if (stages.length > 1) {
+        updateObject.stage = 'custom'; // Set stage to 'custom' for multiple stages
+      }
+    } else {
+      // If no stages preference, set to empty string for "All Stages"
+      updateObject.stage = '';
+    }
+    
+    // Apply the updates to the form without emitting events to avoid infinite loop
+    if (Object.keys(updateObject).length > 0) {
+      this.searchForm.patchValue(updateObject, { emitEvent: false });
+      
+      // Force change detection to ensure dropdown updates
+      this.cdr.detectChanges();
+      
+      // Show the filters section so user can see the applied preferences
+      this.isFiltersExpanded = true;
+    }
+  }
 
-  Object.assign(new BusinessDto(4, 4, 'Sara Mohamed', 3, 'Education', 'Virtual Reality Education Platform', 88, InvestingStages.startup, 'Luxor', 200000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-25', undefined, undefined, undefined, undefined, 4, 4, 'Immersive VR learning experiences for students of all ages with interactive 3D environments.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?w=400&h=300&fit=crop' }),
-
-  Object.assign(new BusinessDto(5, 5, 'Omar Farouk', 2, 'Clean Energy', 'Solar-Powered Water Purification', 95, InvestingStages.ideation, 'Aswan', 100000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-02-01', undefined, undefined, undefined, undefined, 5, 5, 'Portable solar-powered water purification systems for rural and emergency use.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=400&h=300&fit=crop' }),
-
-  Object.assign(new BusinessDto(6, 6, 'Layla Ibrahim', 4, 'Smart Home', 'Smart Home Automation Hub', 82, InvestingStages.intermediate, 'Cairo', 250000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-30', undefined, undefined, undefined, undefined, 1, 1, 'All-in-one smart home solution with AI-powered automation and energy optimization.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop' }),
-
-  Object.assign(new BusinessDto(7, 7, 'Youssef Ahmed', 1, 'Healthcare', 'Telemedicine Platform for Rural Areas', 90, InvestingStages.advanced, 'Minya', 400000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-18', undefined, undefined, undefined, undefined, 6, 6, 'Connecting rural patients with healthcare professionals through advanced telemedicine technology.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=300&fit=crop' }),
-
-  Object.assign(new BusinessDto(8, 8, 'Nour El-Din', 3, 'Environmental', 'Eco-Friendly Packaging Solutions', 87, InvestingStages.startup, 'Port Said', 180000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-02-05', undefined, undefined, undefined, undefined, 7, 7, 'Biodegradable packaging materials made from agricultural waste and natural fibers.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=400&h=300&fit=crop' }),
-
-  Object.assign(new BusinessDto(9, 9, 'Hania Mahmoud', 2, 'Fintech', 'AI-Driven Financial Advisory', 91, InvestingStages.intermediate, 'Suez', 350000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-22', undefined, undefined, undefined, undefined, 8, 8, 'Personal finance management with AI-powered investment recommendations and risk assessment.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop' }),
-
-  Object.assign(new BusinessDto(10, 10, 'Amr Mostafa', 4, 'E-commerce', 'Digital Marketplace for Artisans', 84, InvestingStages.ideation, 'Ismailia', 120000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-02-08', undefined, undefined, undefined, undefined, 9, 9, 'Online platform connecting traditional artisans with global customers and providing business tools.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop' }),
-
-  Object.assign(new BusinessDto(11, 11, 'Rana Salah', 1, 'Logistics', 'Autonomous Delivery Drones', 89, InvestingStages.advanced, 'Sharm El Sheikh', 600000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-01-12', undefined, undefined, undefined, undefined, 10, 10, 'Last-mile delivery solution using AI-powered drones for efficient and cost-effective shipping.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1508614999368-9260051292e5?w=400&h=300&fit=crop' }),
-
-  Object.assign(new BusinessDto(12, 12, 'Karim El-Sayed', 3, 'Healthcare', 'Mental Health Support App', 86, InvestingStages.startup, 'Hurghada', 140000, false, undefined, BusinessIdeaStatus.Active, undefined, '2024-02-03', undefined, undefined, undefined, undefined, 11, 11, 'AI-powered mental health support with personalized therapy sessions and crisis intervention.', undefined, undefined, [], undefined, undefined), { imageUrl: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=300&fit=crop' })
-];
-
-    this.filteredBusinesses = [...this.businesses];
-    this.totalItems = this.businesses.length;
-    this.isLoading = false;
+  private applyDefaultsForNonInvestors() {
+    
+    const updateObject: any = {
+      categoryId: '', // All categories
+      governorateId: '', // All governorates
+      stage: '', // All stages
+      investmentType: '', // All types  
+      minFunding: null,
+      maxFunding: null,
+      minAiRate: 50, // Still set minimum AI rating for quality
+      searchInput: ''
+    };
+    
+    this.searchForm.patchValue(updateObject, { emitEvent: false });
+    
+    // Force change detection to ensure dropdown updates
+    this.cdr.detectChanges();
   }
 
   applyFilters() {
-    const formValues = this.searchForm.value;
-    
-    this.filteredBusinesses = this.businesses.filter(business => {
-      // Search input filter
-      if (formValues.searchInput) {
-        const searchLower = formValues.searchInput.toLowerCase();
-        const matchesSearch = 
-          business.title?.toLowerCase().includes(searchLower) ||
-          business.description?.toLowerCase().includes(searchLower) ||
-          business.founderName?.toLowerCase().includes(searchLower) ||
-          business.categoryName?.toLowerCase().includes(searchLower);
-        if (!matchesSearch) return false;
-      }
-
-      // Category filter
-      if (formValues.categoryId && business.categoryId !== formValues.categoryId) {
-        return false;
-      }
-
-      // Stage filter
-      if (formValues.stage && business.stage !== formValues.stage) {
-        return false;
-      }
-
-      // Governorate filter
-      if (formValues.governorateId && business.governmentId !== formValues.governorateId) {
-        return false;
-      }
-
-      // Funding range filter
-      if (formValues.minFunding && business.capital && business.capital < formValues.minFunding) {
-        return false;
-      }
-      if (formValues.maxFunding && business.capital && business.capital > formValues.maxFunding) {
-        return false;
-      }
-
-      // AI rate filter
-      if (formValues.minAiRate && business.airate && business.airate < formValues.minAiRate) {
-        return false;
-      }
-
-      return true;
-    });
-
-    this.totalItems = this.filteredBusinesses.length;
-    this.currentPage = 1; // Reset to first page
-    this.currentCarouselIndex = 0; // Reset carousel position
+    // Reset to first page when filters change
+    this.currentPage = 1;
+    this.currentCarouselIndex = 0;
+    this.loadBusinesses();
   }
+
+
 
   toggleView(viewType: 'grid' | 'carousel') {
     this.isGridView = viewType === 'grid';
@@ -208,14 +366,42 @@ this.businesses = [
   }
 
   clearFilters() {
-    this.searchForm.reset();
-    this.filteredBusinesses = [...this.businesses];
-    this.totalItems = this.businesses.length;
+    
+    // this.searchForm.reset();
     this.currentCarouselIndex = 0; // Reset carousel position
+    this.currentPage = 1;
+    
+    // Mark as user action (no longer initial load, preferences removed)
+    this.preferencesApplied = false;
+    this.isInitialLoad = false; 
+    this.userMadeChanges = true; // Clearing filters is an explicit user action
+    this.isClearing = true; // Set flag to indicate clearing
+    
+    // Set clean default values (ignore investor preferences)
+    const defaultValues = {
+      searchInput: '',
+      categoryId: '', // All categories
+      stage: '', // All stages
+      governorateId: '', // All governorates  
+      minFunding: null, // No min funding
+      maxFunding: null, // No max funding
+      minAiRate: 50, // 50%+ AI rating
+      investmentType: '' // All investment types
+    };
+    
+    // true to ensure form updates properly
+    this.searchForm.patchValue(defaultValues, { emitEvent: true });
+    
+    // Reset flag after a short delay to allow the form change to process
+    setTimeout(() => {
+      this.isClearing = false;
+    }, 100);
   }
 
-  getStageLabel(stage: InvestingStages): string {
-    const stageOption = this.stageOptions.find(option => option.value === stage);
+  getStageLabel(stage: InvestingStages | string | number): string {
+    // Convert to string for consistent comparison
+    const stageStr = stage?.toString();
+    const stageOption = this.stageOptions.find(option => option.value === stageStr);
     return stageOption ? stageOption.label : 'Unknown';
   }
 
@@ -224,12 +410,25 @@ this.businesses = [
     return typeOption ? typeOption.label : 'Unknown';
   }
 
+  //Convert comma-separated stage numbers to readable labels
+  
+  getStagesLabel(stages: string): string {
+    if (!stages) return '';
+    
+    const stageNumbers = stages.split(',').map(s => s.trim()).filter(s => s);
+    if (stageNumbers.length === 0) return '';
+    
+    const stageLabels = stageNumbers.map(stageNum => {
+      const stageValue = parseInt(stageNum);
+      return this.getStageLabel(stageValue);
+    }).filter(label => label !== 'Unknown');
+    
+    return stageLabels.join(', ');
+  }
 
 
-  getPaginatedBusinesses(): BusinessDto[] {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    return this.filteredBusinesses.slice(startIndex, endIndex);
+  getPaginatedBusinesses(): BusinessExploreDto[] {
+    return this.filteredBusinesses;
   }
 
   get totalPages(): number {
@@ -239,6 +438,7 @@ this.businesses = [
   changePage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
+      this.loadBusinesses();
     }
   }
 
@@ -282,7 +482,7 @@ this.businesses = [
     }
   }
 
-  getCarouselBusinesses(): BusinessDto[] {
+  getCarouselBusinesses(): BusinessExploreDto[] {
     // Return all filtered businesses for the transform approach
     return this.filteredBusinesses;
   }
@@ -303,8 +503,77 @@ this.businesses = [
     return this.currentCarouselIndex < Math.max(0, this.filteredBusinesses.length - this.carouselItemsPerView);
   }
 
-  getBusinessImage(business: BusinessDto): string {
-    return (business as any).imageUrl || 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop';
+  getBusinessImage(business: BusinessExploreDto): string {
+    const currentIndex = this.currentImageIndexes[business.id] || 0;
+    
+    // Use the images array from API response
+    if (business.images && business.images.length > 0) {
+      const images = Array.isArray(business.images) ? business.images : [business.images];
+      return images[currentIndex] || images[0];
+    }
+    // Fallback to default image
+    return 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop';
+  }
+
+  getBusinessImages(business: BusinessExploreDto): string[] {
+    // Use the images array from API response
+    if (business.images && business.images.length > 0) {
+      return Array.isArray(business.images) ? business.images : [business.images];
+    }
+    // Fallback to default image
+    return ['https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop'];
+  }
+
+  startImageCycling(business: BusinessExploreDto): void {
+    const images = this.getBusinessImages(business);
+    if (images.length <= 1) return;
+
+    // Initialize current index if not exists
+    if (!(business.id in this.currentImageIndexes)) {
+      this.currentImageIndexes[business.id] = 0;
+    }
+
+    // Clear any existing interval and timeout
+    if (this.imageIntervals[business.id]) {
+      clearInterval(this.imageIntervals[business.id]);
+      delete this.imageIntervals[business.id];
+    }
+    if (this.imageTimeouts[business.id]) {
+      clearTimeout(this.imageTimeouts[business.id]);
+      delete this.imageTimeouts[business.id];
+    }
+
+    // Start cycling after 0.5 second delay, then every 2 seconds
+    this.imageTimeouts[business.id] = setTimeout(() => {
+      // Check if we should still start cycling (user might have unhovered)
+      if (this.imageTimeouts[business.id]) {
+        this.transitionToNextImage(business, images);
+        this.imageIntervals[business.id] = setInterval(() => {
+          this.transitionToNextImage(business, images);
+        }, 2000);
+      }
+    }, 500);
+  }
+
+  private transitionToNextImage(business: BusinessExploreDto, images: string[]): void {
+    // Switch to next image instantly
+    this.currentImageIndexes[business.id] = 
+      (this.currentImageIndexes[business.id] + 1) % images.length;
+  }
+
+  stopImageCycling(business: BusinessExploreDto): void {
+    // Clear interval and timeout immediately
+    if (this.imageIntervals[business.id]) {
+      clearInterval(this.imageIntervals[business.id]);
+      delete this.imageIntervals[business.id];
+    }
+    if (this.imageTimeouts[business.id]) {
+      clearTimeout(this.imageTimeouts[business.id]);
+      delete this.imageTimeouts[business.id];
+    }
+    
+    // Reset to first image instantly
+    this.currentImageIndexes[business.id] = 0;
   }
 
   shouldShowFunding(): boolean {
@@ -313,17 +582,140 @@ this.businesses = [
     return investmentType != DesiredInvestmentType.IndustrialExperience && investmentType != '1';
   }
 
+  shouldShowFundingForBusiness(business: BusinessExploreDto): boolean {
+    // Show funding if desiredInvestmentType is Funding (2) or Both (3)
+    return business.desiredInvestmentType === DesiredInvestmentType.Funding || 
+           business.desiredInvestmentType === DesiredInvestmentType.Both;
+  }
+
+  // Contact request logic
+  canShowContactButton(business: BusinessExploreDto): boolean {
+    return business.contactRequestStatus === null && business.canRequestContact === true;
+  }
+
+  getContactRequestStatusLabel(status: ContactRequestStatus): string {
+    switch (status) {
+      case ContactRequestStatus.Pending:
+        return 'Contact Request Pending';
+      case ContactRequestStatus.Accepted:
+        return 'Contact Request Accepted';
+      case ContactRequestStatus.Declined:
+        return 'Contact Request Declined';
+      case ContactRequestStatus.Deleted:
+        return 'Contact Request Cancelled';
+      default:
+        return 'Unknown Status';
+    }
+  }
+
+  getContactRequestStatusClass(status: ContactRequestStatus): string {
+    switch (status) {
+      case ContactRequestStatus.Pending:
+        return 'bg-yellow-100 text-yellow-800';
+      case ContactRequestStatus.Accepted:
+        return 'bg-green-100 text-green-800';
+      case ContactRequestStatus.Declined:
+        return 'bg-red-100 text-red-800';
+      case ContactRequestStatus.Deleted:
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  isUserInvestor(): boolean {
+    const userData = this.authService.getUserData();
+    return userData?.userType === UserType.Investor;
+  }
+
+  onContactRequest(business: BusinessExploreDto): void {
+    this.selectedBusiness = business;
+    this.showContactRequestModal = true;
+  }
+
+  confirmContactRequest(): void {
+    if (!this.selectedBusiness) return;
+
+    this.isSubmittingContactRequest = true;
+    
+    this.exploreService.createContactRequest(this.selectedBusiness.id).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          // Update the business object to reflect the new status
+          this.selectedBusiness!.contactRequestStatus = ContactRequestStatus.Pending;
+          this.selectedBusiness!.canRequestContact = false;
+          
+          // Show success toast
+          this.toastr.success(
+            'Your contact request has been submitted',
+            'Contact Request Sent!'
+          );
+          
+          this.closeContactRequestModal();
+        } else {
+          // Show error toast
+          this.toastr.error(response.message || 'Failed to send contact request.', 'Request Failed');
+        }
+      },
+      error: (error) => {
+        console.error('Error sending contact request:', error);
+        
+        // Handle different error types
+        let errorMessage = 'An unexpected error occurred. Please try again.';
+        
+        if (error.status === 401) {
+          errorMessage = 'You need to be logged in to send contact requests.';
+        } else if (error.status === 403) {
+          errorMessage = 'You do not have permission to send contact requests.';
+        } else if (error.status === 429) {
+          errorMessage = 'Too many requests. Please wait a moment and try again.';
+        } else if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+        
+        this.toastr.error(errorMessage, 'Request Failed');
+        this.closeContactRequestModal();
+      },
+      complete: () => {
+        this.isSubmittingContactRequest = false;
+      }
+    });
+  }
+
+  closeContactRequestModal(): void {
+    this.showContactRequestModal = false;
+    this.selectedBusiness = null;
+    this.isSubmittingContactRequest = false;
+  }
+
   // Navigation Methods
-  navigateToIdeaDetails(business: BusinessDto): void {
+  navigateToIdeaDetails(business: BusinessExploreDto): void {
     this.router.navigate(['/idea', business.id]);
   }
 
-  onCardClick(business: BusinessDto, event: Event): void {
+  onCardClick(business: BusinessExploreDto, event: Event): void {
     // Prevent navigation if clicking on buttons inside the card
     const target = event.target as HTMLElement;
     if (target.tagName === 'BUTTON' || target.closest('button')) {
       return;
     }
     this.navigateToIdeaDetails(business);
+  }
+
+  ngOnDestroy(): void {
+    // Clear all image intervals and timeouts to prevent memory leaks
+    Object.values(this.imageIntervals).forEach(interval => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    });
+    Object.values(this.imageTimeouts).forEach(timeout => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    });
+    this.currentImageIndexes = {};
+    this.imageIntervals = {};
+    this.imageTimeouts = {};
   }
 } 
