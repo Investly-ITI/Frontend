@@ -167,9 +167,9 @@
                                     <!-- Status Filter Dots -->
                                     <span id="dots-container">
                                         <span class="dot green-dot" [class.selected]="currentFilter === 'active'"
-                                            (click)="setFilter('active', BusinessIdeaStatus.Active)" title="Show Active"></span>
-                                        <span class="dot red-dot" [class.selected]="currentFilter === 'rejected'"
-                                            (click)="setFilter('rejected', BusinessIdeaStatus.Rejected)" title="Show Rejected"></span>
+                                            (click)="setQuickFilter('active', BusinessIdeaStatus.Active)" title="Show Active"></span>
+                                        <span class="dot red-dot" [class.selected]="currentFilter === 'inactive'"
+                                            (click)="setQuickFilter('inactive', BusinessIdeaStatus.Inactive)" title="Show Inactive"></span>
                                     </span>
                                 </th>
                                 <th>Actions</th>
@@ -178,15 +178,15 @@
                         <tbody>
                             <!-- No Results Found -->
                             <tr *ngIf="showNoResults" class="no-results-row">
-                                <td colspan="5" style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
+                                <td colspan="5" class="no-results-cell">
                                     No business ideas found
                                 </td>
                             </tr>
 
                             <!-- Loading Spinner -->
                             <tr *ngIf="isLoading" class="no-results-row">
-                                <td colspan="5" style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
-                                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;" id="spinner">
+                                <td colspan="5" class="no-results-cell">
+                                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                                         <mat-spinner style="color: white;" class="mat-spinner"></mat-spinner>
                                     </div>
                                 </td>
@@ -200,8 +200,8 @@
                                 <td>{{ idea.founderName || ' ' }}</td>
                                 <td>{{ idea.categoryName || ' ' }}</td>
                                 <td>
-                                    <span class="status"
-                                        [ngStyle]="{ 'color': idea.status === BusinessIdeaStatus.Active ? '#2ed134' : idea.status === BusinessIdeaStatus.Pending ? '#ffab00' : idea.status === BusinessIdeaStatus.Rejected ? '#e6382f' : idea.status === BusinessIdeaStatus.Inactive ? '#adb5bd' : '#000' }">
+                                    <span class="status" style="padding: 10px 0;"
+                                        [ngStyle]="{ 'color': idea.status === BusinessIdeaStatus.Active ? '#2ed134' : idea.status === BusinessIdeaStatus.Pending ? '#ffab00' : idea.status === BusinessIdeaStatus.Rejected ? '#e6382f' : idea.status === BusinessIdeaStatus.Inactive ? 'red' : '#000' }">
                                         {{ idea.status ? getBusinessIdeaStatusName(idea.status) : ' ' }}
                                     </span>
                                 </td>
@@ -231,14 +231,15 @@
                             </tr>
                             
                             <!-- Filtered Results Message -->
-                            <tr *ngIf="!isLoading && !error && filteredBusinessIdeas.length === 0 && businessList && businessList.totalCount > 0">
-                                <td colspan="5" style="text-align: center; padding: 20px;">No business ideas match your filters.
+                            <tr *ngIf="!isLoading && !error && filteredBusinessIdeas.length === 0 && businessList && businessList.totalCount > 0" class="no-results-row">
+                                <td colspan="5" class="no-results-cell">
+                                    No business ideas match your filters.
                                 </td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <div class="pagination-controls" *ngIf="!showNoResults && totalPages > 0">
+                    <div class="pagination-controls" *ngIf="!showNoResults && totalPages > 0 && filteredBusinessIdeas.length > 0">
                         <button class="pagination-btn previous-btn" (click)="prevPage()" [disabled]="searchParams.pageNumber === 1">
                             <i class='bx bx-chevron-left'></i>
                             Previous
@@ -262,7 +263,7 @@
                         </button>
                     </div>
                     
-                    <div class="pagination-info" *ngIf="!showNoResults && totalPages > 0">
+                    <div class="pagination-info" *ngIf="!showNoResults && totalPages > 0 && filteredBusinessIdeas.length > 0">
                         <span class="total-info">Showing {{ searchParams.pageNumber }} of {{ totalPages }} pages ({{ totalCount }} total business ideas)</span>
                     </div>
                 </div>
