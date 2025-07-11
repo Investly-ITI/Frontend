@@ -33,6 +33,7 @@
       *ngIf="activeTab === 'myIdeas'"
       [ideas]="ideas"
       (refresh)="getIdeas()"
+      (addIdea)="switchTab('addIdea')"
     ></app-my-ideas>
     
     <app-add-idea 

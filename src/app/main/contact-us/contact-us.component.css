@@ -9,6 +9,7 @@
 :host {
   display: block;
   width: 100%;
+  zoom: 0.9; /* zoom out by 10% */
 }
 
 :host * {

@@ -148,16 +148,17 @@ export class InvestorComponent implements OnInit, OnDestroy {
     this.searchData.pageNumber=this.currentPage;
     console.log(this.searchData);
     this.isLoading = true;
+    this.loadedListData = []; // Clear data immediately when loading starts
     this.InvestorService.getpagintedData(this.searchData).subscribe({
       next: (response) => {
         this.isLoading = false;
         if (response.isSuccess) {
           this.loadedListData = response.data.list;
-          this.pageSize=response.data.pageSize;
-          this.totalCount=response.data.totalCount;
-          this.currentPage=response.data.currentPage;
-          this.totalPages=Math.ceil(this.totalCount / this.pageSize);
-          this.showNoResults = response.data.list.length === 0 ? true : false;
+          this.pageSize = response.data.pageSize;
+          this.totalCount = response.data.totalCount || 0;
+          this.currentPage = response.data.currentPage;
+          this.totalPages = response.data.list.length === 0 ? 0 : Math.ceil(this.totalCount / this.pageSize);
+          this.showNoResults = response.data.list.length === 0;
           this.dropdownStates=new Array(this.loadedListData.length).fill(false);
           this.isAdvancedSearchOpen = false;
         }
@@ -233,16 +234,73 @@ loadGovernments(){
     
 }
 goToNextPage() {
-  if (this.currentPage < this.totalPages) {
+  if (this.currentPage < this.totalPages && !this.showNoResults && this.totalPages > 0) {
     this.currentPage++;
     this.loadData();
   }
 }
+
 goToPreviousPage() {
-  if (this.currentPage > 1) {
+  if (this.currentPage > 1 && !this.showNoResults) {
     this.currentPage--;
     this.loadData();
   }
+}
+
+goToPage(page: number) {
+  if (page >= 1 && page <= this.totalPages && page !== this.currentPage && page !== -1) {
+    this.currentPage = page;
+    this.loadData();
+  }
+}
+
+getPageNumbers(): number[] {
+  const pages: number[] = [];
+  const totalPages = this.totalPages;
+  const current = this.currentPage;
+
+  if (totalPages <= 7) {
+    // Show all pages if total is 7 or less
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+  } else {
+    // Always show first page
+    pages.push(1);
+
+    if (current > 4) {
+      // Add dots if current page is far from start
+      pages.push(-1); // -1 represents dots
+    }
+
+    // Show pages around current page
+    let start = Math.max(2, current - 1);
+    let end = Math.min(totalPages - 1, current + 1);
+
+    // Adjust range to always show 3 numbers around current
+    if (current <= 3) {
+      end = Math.min(totalPages - 1, 4);
+    }
+    if (current >= totalPages - 2) {
+      start = Math.max(2, totalPages - 3);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (current < totalPages - 3) {
+      // Add dots if current page is far from end
+      pages.push(-1); // -1 represents dots
+    }
+
+    // Always show last page
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+  }
+
+  return pages;
 }
 
 loadActiveInactiveCount(){
@@ -307,6 +365,7 @@ loadActiveInactiveCount(){
   this.searchData.gender=null;
   this.searchData.governmentId=0;
   this.searchData.status=0;
+  this.currentFilter = ''; // Clear the status filter dots visual state
   this.loadData();
   }
 

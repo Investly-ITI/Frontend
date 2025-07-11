@@ -32,7 +32,6 @@ import { FounderService } from '../_services/founder.service';
     NgxSkeletonLoaderModule,
     MatSelectModule,
     MatCheckboxModule,
-    StatusLabelPipe,
   ],
   templateUrl: './contact-request.component.html',
   styleUrls: ['./contact-request.component.css']
@@ -94,6 +93,11 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
   pendingCount: number = 0;
   acceptedCount: number = 0;
   declinedCount: number = 0;
+
+  //* Animation states for statistics
+  displayPendingCount: number = 0;
+  displayAcceptedCount: number = 0;
+  displayDeclinedCount: number = 0;
   //* Data
   loadedListData: InvestorContactItem[] = [];
   ContactRequestStatus = ContactRequestStatus; // Make enum available in template
@@ -124,15 +128,16 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
   loadData(): void {
     this.searchData.pageNumber = this.currentPage;
     this.isLoading = true;
+    this.loadedListData = []; // Clear data immediately when loading starts
     
     this.contactRequestService.getInvestorContacts(this.searchData).subscribe({
       next: (response) => {
         if (response.isSuccess && response.data) {
           this.loadedListData = response.data.items;
           this.pageSize = response.data.pageSize;
-          this.totalCount = response.data.totalFilteredItems;
+          this.totalCount = response.data.totalFilteredItems || 0;
           this.currentPage = response.data.currentPage;
-          this.totalPages = response.data.totalPages;
+          this.totalPages = response.data.items.length === 0 ? 0 : response.data.totalPages;
           this.showNoResults = response.data.items.length === 0;
           this.dropdownStates = new Array(this.loadedListData.length).fill(false);
           this.isAdvancedSearchOpen = false;
@@ -182,6 +187,7 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
     this.contactRequestService.getPendingContactsCount().subscribe({
       next: (response) => {
           this.pendingCount = response;
+          this.displayPendingCount = response; // For animation
       },
       error: (err) => console.error('Failed to load pending count', err)
     });
@@ -189,6 +195,7 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
     this.contactRequestService.getAcceptedContactsCount().subscribe({
       next: (response) => {
           this.acceptedCount = response;
+          this.displayAcceptedCount = response; // For animation
       },
       error: (err) => console.error('Failed to load accepted count', err)
     });
@@ -196,6 +203,7 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
     this.contactRequestService.getDeclinedContactsCount().subscribe({
       next: (response) => {
           this.declinedCount = response;
+          this.displayDeclinedCount = response; // For animation
       },
       error: (err) => console.error('Failed to load declined count', err)
     });
@@ -203,17 +211,73 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
 
   //* Pagination
   goToNextPage(): void {
-    if (this.currentPage < this.totalPages) {
+    if (this.currentPage < this.totalPages && !this.showNoResults && this.totalPages > 0) {
       this.currentPage++;
       this.loadData();
     }
   }
 
   goToPreviousPage(): void {
-    if (this.currentPage > 1) {
+    if (this.currentPage > 1 && !this.showNoResults) {
       this.currentPage--;
       this.loadData();
     }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage && page !== -1) {
+      this.currentPage = page;
+      this.loadData();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const totalPages = this.totalPages;
+    const current = this.currentPage;
+
+    if (totalPages <= 7) {
+      // Show all pages if total is 7 or less
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      if (current > 4) {
+        // Add dots if current page is far from start
+        pages.push(-1); // -1 represents dots
+      }
+
+      // Show pages around current page
+      let start = Math.max(2, current - 1);
+      let end = Math.min(totalPages - 1, current + 1);
+
+      // Adjust range to always show 3 numbers around current
+      if (current <= 3) {
+        end = Math.min(totalPages - 1, 4);
+      }
+      if (current >= totalPages - 2) {
+        start = Math.max(2, totalPages - 3);
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (current < totalPages - 3) {
+        // Add dots if current page is far from end
+        pages.push(-1); // -1 represents dots
+      }
+
+      // Always show last page
+      if (totalPages > 1) {
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
   }
 
   //* Status change methods
@@ -350,6 +414,10 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
       this.searchData.pageNumber = 1;
       this.loadData();
     }
+  }
+
+  getDigitsArray(number: number): string[] {
+    return number.toString().split('');
   }
 
   ngOnDestroy(): void {
