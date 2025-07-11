@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
+import { AuthService } from '../../_services/auth.service';
 
 interface TeamMember {
   name: string;
@@ -71,31 +72,31 @@ export class AboutUsComponent implements OnInit, OnDestroy {
     {
       name: 'Sarah Salem',
       position: 'CEO & Co-Founder',
-      image: 'Businessmen.jpg',
+      image: 'Sarah.png',
       bio: 'Visionary leader with 10+ years in fintech and investment. Passionate about connecting Egyptian entrepreneurs with global opportunities.'
     },
     {
       name: 'Abdulrahman Ahmed',
       position: 'CTO & Co-Founder',
-      image: 'Me.jpg',
+      image: 'Me2.jpg',
       bio: 'Tech expert specializing in financial platforms. Committed to building secure, scalable solutions for the investment community.'
     },
     {
       name: 'Abanoub Magdy',
       position: 'Head of Investments',
-      image: 'Handshake2.jpg',
+      image: 'Abanoub.jpg',
       bio: 'Investment strategist with deep knowledge of Egyptian market dynamics. Helps match the right investors with promising startups.'
     },
     {
       name: 'Aseel El-Sawy',
       position: 'Head of Community',
-      image: 'Cowork.jpg',
+      image: 'Aseel.png',
       bio: 'Community builder focused on creating meaningful connections. Ensures every user has a positive experience on our platform.'
     },
     {
       name: 'Abdulrahman Abu-Elgheit',
       position: 'Head of Community',
-      image: 'Cowork.jpg',
+      image: 'AbuElgheit.jpg',
       bio: 'Community builder focused on creating meaningful connections. Ensures every user has a positive experience on our platform.'
     }
   ];
@@ -119,7 +120,7 @@ export class AboutUsComponent implements OnInit, OnDestroy {
     }
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.setupStatisticsAnimation();
@@ -139,15 +140,22 @@ export class AboutUsComponent implements OnInit, OnDestroy {
   }
 
   navigateToContact(): void {
+    console.log('Navigating to contact');
     this.router.navigate(['/contact-us']);
   }
 
   navigateToExplore(): void {
+    console.log('Navigating to explore');
     this.router.navigate(['/explore']);
   }
 
   navigateToSignup(): void {
+    console.log('Navigating to signup');
     this.router.navigate(['/signup']);
+  }
+
+  isUserLoggedIn(): boolean {
+    return this.authService.getToken() !== null;
   }
 
   // Helper method to get current highlighted statistic
