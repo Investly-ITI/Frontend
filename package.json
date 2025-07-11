@@ -4,9 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "vercel-build": "ng build --configuration=production"
   },
   "private": true,
   "dependencies": {
@@ -23,8 +24,8 @@
     "@coreui/chartjs": "^4.0.0",
     "@coreui/coreui": "^5.4.1",
     "@microsoft/signalr": "^8.0.7",
+    "@ng-select/ng-select": "^14.0.0",
     "animate.css": "^4.1.1",
-    "@ng-select/ng-select": "^15.0.0",
     "boxicons": "^2.1.4",
     "chart.js": "^4.5.0",
     "jwt-decode": "^4.0.0",
