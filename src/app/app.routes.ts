@@ -23,11 +23,18 @@ import { clientGuard } from './_guards/client.guard';
 import { FeedbacksComponent } from './admin/feedback/feedback.component';
 import { CategoriesComponent } from './admin/categories/categories.component';
 import { AnalysisComponent } from './admin/analysis/analysis.component';
+import { ResetPasswordComponent } from './account/reset-password/reset-password.component';
 
 export const routes: Routes = [
    // Authentication routes (no layout - full screen)
    { path: 'login', canActivate:[NoAuthGuard], component: LoginComponent, title: 'Login - Investly' },
    { path: 'request-reset', canActivate: [NoAuthGuard],component: ResetPasswordRequestComponent, title: 'Reset Password - Investly' }, 
+   { 
+  path: 'reset-password', 
+  canActivate: [NoAuthGuard], 
+  component: ResetPasswordComponent, 
+  title: 'Reset Password - Investly' 
+},
   { path: 'signup',canActivate:[NoAuthGuard], component: SignupComponent, title: 'Sign Up - Investly' },
    { path: 'staff-login', component: LoginStaffComponent, title: 'Staff Login - Investly' },
    

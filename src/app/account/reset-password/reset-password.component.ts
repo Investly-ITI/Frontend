@@ -1,15 +1,16 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-// import { PasswordService } from '../../_services/password.service';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../_services/auth.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-reset-password',
   templateUrl: './reset-password.component.html',
-  styleUrls: ['./reset-password.component.css']
+  styleUrls: ['./reset-password.component.css'],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, RouterLink]
 })
 export class ResetPasswordComponent implements OnInit, OnDestroy {
   resetForm: FormGroup;
@@ -18,11 +19,15 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
   isDarkMode = false;
   email: string = '';
   token: string = '';
+  showNewPassword = false;
+  showConfirmPassword = false;
   private unsubscribe: Subscription[] = [];
 
   // Carousel properties
   private carouselInterval: any;
   private currentSlideIndex = 3;
+
+  specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
 
   constructor(
     private fb: FormBuilder,
@@ -36,7 +41,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
         Validators.required,
         Validators.minLength(8),
         Validators.maxLength(100),
-        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?\""{}|<>]).*$/)
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>?]).*$/)
       ]],
       confirmNewPassword: ['', [Validators.required]]
     }, { validator: this.passwordMatchValidator });
@@ -62,9 +67,47 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     this.unsubscribe.forEach(sub => sub.unsubscribe());
   }
 
+  hasUppercase(): boolean {
+    const password = this.resetForm.get('newPassword')?.value;
+    return password && /[A-Z]/.test(password);
+  }
+
+  hasLowercase(): boolean {
+    const password = this.resetForm.get('newPassword')?.value;
+    return password && /[a-z]/.test(password);
+  }
+
+  hasNumber(): boolean {
+    const password = this.resetForm.get('newPassword')?.value;
+    return password && /\d/.test(password);
+  }
+
+  hasSpecialChar(): boolean {
+    const password = this.resetForm.get('newPassword')?.value;
+    return password && /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>?]/.test(password);
+  }
+
+  hasMinLength(): boolean {
+    const password = this.resetForm.get('newPassword')?.value;
+    return password && password.length >= 8;
+  }
+
   passwordMatchValidator(form: FormGroup) {
     return form.get('newPassword')?.value === form.get('confirmNewPassword')?.value
       ? null : { mismatch: true };
+  }
+
+  toggleNewPasswordVisibility(): void {
+    this.showNewPassword = !this.showNewPassword;
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  updatePasswordStrength(): void {
+    // This method is called on input event to update strength meter
+    // The getters passwordStrength and passwordStrengthColor will handle the updates
   }
 
   onSubmit(): void {
@@ -93,10 +136,12 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.isLoading = false;
-          this.toastr.error(
-            err.error?.message || 'Failed to reset password', 
-            'Error'
-          );
+          const errorMsg = err.error?.message || 'Failed to reset password. Please try again.';
+          this.toastr.error(errorMsg, 'Error');
+          
+          if (errorMsg.toLowerCase().includes('invalid')) {
+            setTimeout(() => this.router.navigate(['/request-reset']), 2000);
+          }
         }
       });
     this.unsubscribe.push(sub);
@@ -137,5 +182,34 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     slides[this.currentSlideIndex].classList.remove('active');
     this.currentSlideIndex = (this.currentSlideIndex + 1) % slides.length;
     slides[this.currentSlideIndex].classList.add('active');
+  }
+
+  get passwordStrength(): number {
+    const password = this.resetForm.get('newPassword')?.value;
+    if (!password) return 0;
+    
+    let strength = 0;
+    
+    // Length contributes up to 40% of strength
+    const lengthStrength = Math.min(password.length / 20, 0.4);
+    strength += lengthStrength;
+    
+    // Character variety contributes the remaining 60%
+    const varietyStrength = 
+      (this.hasUppercase() ? 0.15 : 0) +
+      (this.hasLowercase() ? 0.15 : 0) +
+      (this.hasNumber() ? 0.15 : 0) +
+      (this.hasSpecialChar() ? 0.15 : 0);
+    
+    strength += varietyStrength;
+    
+    return Math.min(Math.round(strength * 100), 100);
+  }
+
+  get passwordStrengthColor(): string {
+    const strength = this.passwordStrength;
+    if (strength < 40) return 'var(--error)';
+    if (strength < 80) return 'var(--warning)';
+    return 'var(--success)';
   }
 }
