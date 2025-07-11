@@ -26,7 +26,15 @@
                 <li>
                     <i class='bx bx-time-five' style="font-size: 2.5em; color: #f39c12;"></i>
                     <span class="text">
-                        <h3>{{ pendingCount }}</h3>
+                        <h3 class="animated-number">
+                            <span class="digit-container"
+                                *ngFor="let digit of getDigitsArray(displayPendingCount); let i = index">
+                                <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                                    [ngClass]="{'animate': animationComplete}">
+                                    {{ digit }}
+                                </span>
+                            </span>
+                        </h3>
                         <p>Pending Requests</p>
                     </span>
                 </li>
@@ -35,7 +43,15 @@
                 <li>
                     <i class='bx bxs-check-circle' style="font-size: 2.5em; color: #2ed134;"></i>
                     <span class="text">
-                        <h3>{{ acceptedCount }}</h3>
+                        <h3 class="animated-number">
+                            <span class="digit-container"
+                                *ngFor="let digit of getDigitsArray(displayAcceptedCount); let i = index">
+                                <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                                    [ngClass]="{'animate': animationComplete}">
+                                    {{ digit }}
+                                </span>
+                            </span>
+                        </h3>
                         <p>Accepted Requests</p>
                     </span>
                 </li>
@@ -44,7 +60,15 @@
                 <li>
                     <i class='bx bxs-x-circle' style="font-size: 2.5em; color: #e6382f;"></i>
                     <span class="text">
-                        <h3>{{ declinedCount }}</h3>
+                        <h3 class="animated-number">
+                            <span class="digit-container"
+                                *ngFor="let digit of getDigitsArray(displayDeclinedCount); let i = index">
+                                <span class="digit" [style.animation-delay]="(i * 0.1) + 's'"
+                                    [ngClass]="{'animate': animationComplete}">
+                                    {{ digit }}
+                                </span>
+                            </span>
+                        </h3>
                         <p>Declined Requests</p>
                     </span>
                 </li>
@@ -182,8 +206,6 @@
                                     Status
                                     <!-- Status Filter Dots -->
                                     <span id="dots-container">
-                                        <span class="dot orange-dot" [class.selected]="currentFilter === 'pending'"
-                                            (click)="setFilter('pending', ContactRequestStatus.Pending)" title="Show Pending"></span>
                                         <span class="dot green-dot" [class.selected]="currentFilter === 'accepted'"
                                             (click)="setFilter('accepted', ContactRequestStatus.Accepted)" 
                                             title="Show Accepted"></span>
@@ -282,16 +304,32 @@
                     <!-- ========================================
                          PAGINATION CONTROLS
                     ======================================== -->
-                    <div class="pagination-controls">
-                        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">
-                            <i class='bx bx-chevron-left' style="font-size: 1.7em;"></i>
+                    <div class="pagination-controls" *ngIf="!showNoResults && totalPages > 0">
+                        <button class="pagination-btn previous-btn" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+                            <i class='bx bx-chevron-left'></i>
+                            Previous
                         </button>
-                        <!-- <span class="page-info">
-                            Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} total)
-                        </span> -->
-                        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">
-                            <i class='bx bx-chevron-right' style="font-size: 1.7em;"></i>
+                        
+                        <div class="page-numbers">
+                            <button 
+                                *ngFor="let page of getPageNumbers()" 
+                                class="page-number-btn"
+                                [class.active]="page === currentPage"
+                                [class.dots]="page === -1"
+                                (click)="goToPage(page)"
+                                [disabled]="page === -1">
+                                {{ page === -1 ? '...' : page }}
+                            </button>
+                        </div>
+                        
+                        <button class="pagination-btn next-btn" (click)="goToNextPage()" [disabled]="currentPage >= totalPages">
+                            Next
+                            <i class='bx bx-chevron-right'></i>
                         </button>
+                    </div>
+                    
+                    <div class="pagination-info" *ngIf="!showNoResults && totalPages > 0">
+                        <span class="total-info">Showing {{ currentPage }} of {{ totalPages }} pages ({{ totalCount }} total {{ entityNamePlural.toLowerCase() }})</span>
                     </div>
                 </div>
             </div>
@@ -302,7 +340,7 @@
          VIEW CONTACT REQUEST MODAL
     ======================================== -->
     <div class="modal-overlay" [ngClass]="{'show': isModalOpen}" (click)="closeModal()">
-        <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-container view-details-modal" (click)="$event.stopPropagation()">
             <!-- Modal Header -->
             <div class="modal-header">
                 <h3>{{ entityName }} Details</h3>
@@ -371,17 +409,14 @@
          STATUS CHANGE CONFIRMATION MODAL
     ======================================== -->
 <div class="modal-overlay" [ngClass]="{ 'show': isStatusChangeModalOpen }" (click)="closeStatusChangeModal()">
-    <div class="modal-container status-change-modal" 
-         [class.accept-modal]="statusChangeAction === 'accept'"
-         (click)="$event.stopPropagation()" 
-         *ngIf="selectedRequest">
+    <div class="modal-container activate-deactivate-modal" (click)="$event.stopPropagation()" *ngIf="selectedRequest">
         
         <!-- Modal Header -->
         <div class="modal-header">
             <h3>
-                {{ statusChangeAction === 'accept' ? 'Accept Contact Request' : 
-                   statusChangeAction === 'decline' ? 'Decline Contact Request' : 
-                   'Set Contact Request to Pending' }}
+                {{ statusChangeAction === 'accept' ? 'Accept' : 
+                   statusChangeAction === 'decline' ? 'Decline' : 
+                   'Update' }} Contact Request
             </h3>
             <button type="button" class="close-btn" (click)="closeStatusChangeModal()">
                 <i class='bx bx-x'></i>
@@ -389,8 +424,8 @@
         </div>
 
         <!-- Modal Body -->
-        <div class="modal-body" [class.accept-body-active]="statusChangeAction === 'accept'">
-            <div class="status-change-confirmation" >
+        <div class="modal-body">
+            <div class="activate-deactivate-confirmation">
                 <!-- Icon (Checkmark for Accept, X for Decline) -->
                 <div class="action-icon">
                     <i class="bx"
@@ -404,9 +439,7 @@
 
                 <!-- Confirmation Message -->
                 <p class="confirmation-text">
-                    Are you sure you want to {{ statusChangeAction }} this contact request from 
-                    <strong>{{ selectedRequest.investorName }}</strong> to 
-                    <strong>{{ selectedRequest.founderName }}</strong>?
+                    Are you sure you want to {{ statusChangeAction }} this contact request?
                 </p>
 
                 <!-- Decline Reason (Only shown for Decline) -->
@@ -416,20 +449,20 @@
                               [(ngModel)]="declineReason" 
                               name="declineReason"
                               placeholder="Please provide a reason for declining this request..."
-                              rows="4"
+                              rows="3"
                               required></textarea>
                 </div>
             </div>
         </div>
 
         <!-- Modal Footer (Buttons) -->
-        <div class="modal-footer status-change-modal-footer">
+        <div class="modal-footer activate-deactivate-modal-footer">
             <button type="button" class="cancel-btn" (click)="closeStatusChangeModal()">Cancel</button>
             <button type="button" 
                     class="confirm-btn"
                     [ngClass]="{
-                        'accept-btn': statusChangeAction === 'accept',
-                        'decline-btn': statusChangeAction === 'decline'
+                        'activate': statusChangeAction === 'accept',
+                        'deactivate': statusChangeAction === 'decline'
                     }"
                     [disabled]="statusChangeAction === 'decline' && !declineReason.trim()"
                     (click)="confirmStatusChange()">

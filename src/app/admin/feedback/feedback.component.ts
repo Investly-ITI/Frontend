@@ -30,8 +30,7 @@ import { DarkModeService } from '../_services/dark-mode.service';
         MatProgressSpinnerModule,
         NgxSkeletonLoaderModule,
         MatSelectModule,
-        MatCheckboxModule,
-        StatusLabelPipe
+        MatCheckboxModule
     ],
     templateUrl: './feedback.component.html',
     styleUrls: ['./feedback.component.css']
@@ -45,22 +44,28 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
     dropdownStates: boolean[] = [];
     animationComplete: boolean = false;
     isAdvancedSearchOpen: boolean = false;
+    currentFilter: string = '';
     error: string | null = null;
 
     feedbackList: FeedbackListDto | null = null;
     feedbacks: FeedbackDto[] = [];
     feedbackCounts: FeedbackCountsDto = new FeedbackCountsDto();
     searchParams: FeedbackSearchDto = new FeedbackSearchDto();
+
+    // Helper properties for pagination
+    get totalPages(): number {
+        if (!this.feedbackList || this.feedbackList.totalCount === 0) return 0;
+        return Math.ceil(this.feedbackList.totalCount / this.searchParams.pageSize);
+    }
+
+    get totalCount(): number {
+        return this.feedbackList?.totalCount || 0;
+    }
     userTypes: UserType[] = Object.values(UserType).filter(value => typeof value === 'number') as UserType[];
     statuses: Status[] = [Status.Active, Status.Inactive];
     feedbackTargetTypes: FeedbackTargetType[] = Object.values(FeedbackTargetType).filter(value => typeof value === 'number') as FeedbackTargetType[];
 
-    isSoftDeleteModalOpen: boolean = false;
-    selectedFeedbackIdForSoftDelete: number | null = null;
-    selectedFeedbackDescription: string | null = null;
 
-    isHardDeleteModalOpen: boolean = false;
-    selectedFeedbackForHardDelete: FeedbackDto | null = null;
 
     tempStatusFilter: number | null = null;
     tempUserTypeFromFilter: number | null = null;
@@ -78,6 +83,12 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
 
     isDetailsModalOpen: boolean = false;
     selectedFeedbackForDetails: FeedbackDto | null = null;
+
+    isActivateDeactivateModalOpen: boolean = false;
+    entityToModify: any = null;
+    modifyAction!: string;
+    entityIdToChangeStatus: number = 0;
+    StatusChangedTo: number = 0;
 
     sortDirection: 'asc' | 'desc' = 'desc';
     sortField: string = 'createdAt';
@@ -105,6 +116,8 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
     loadFeedbacks(): void {
         this.isLoading = true;
         this.error = null;
+        this.feedbacks = []; // Clear data immediately when loading starts
+        this.feedbackList = null; // Clear list data as well
         this.feedbackService.getAllFeedbacks(this.searchParams)
             .subscribe({
                 next: (response) => {
@@ -115,13 +128,13 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
                         this.showNoResults = this.feedbacks.length === 0;
                     } else if (response) {
                         this.error = response.message || 'Failed to load feedbacks.';
-                        this.toastr.error(this.error);
+                        this.toastr.error(this.error, "Error");
                     }
                     this.isLoading = false;
                 },
                 error: (err) => {
                     this.error = 'Failed to load feedbacks. Please try again.';
-                    this.toastr.error(this.error);
+                    this.toastr.error(this.error, "Error");
                     this.isLoading = false;
                 }
             });
@@ -153,17 +166,73 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
     }
 
     nextPage(): void {
-        if (this.feedbackList && this.searchParams.pageNumber * this.searchParams.pageSize < this.feedbackList.totalCount) {
+        if (this.feedbackList && this.searchParams.pageNumber * this.searchParams.pageSize < this.feedbackList.totalCount && !this.showNoResults && this.totalPages > 0) {
             this.searchParams.pageNumber++;
             this.loadFeedbacks();
         }
     }
 
     prevPage(): void {
-        if (this.searchParams.pageNumber > 1) {
+        if (this.searchParams.pageNumber > 1 && !this.showNoResults) {
             this.searchParams.pageNumber--;
             this.loadFeedbacks();
         }
+    }
+
+    goToPage(page: number): void {
+        if (page >= 1 && page <= this.totalPages && page !== this.searchParams.pageNumber && page !== -1) {
+            this.searchParams.pageNumber = page;
+            this.loadFeedbacks();
+        }
+    }
+
+    getPageNumbers(): number[] {
+        const pages: number[] = [];
+        const totalPages = this.totalPages;
+        const current = this.searchParams.pageNumber;
+
+        if (totalPages <= 7) {
+            // Show all pages if total is 7 or less
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Always show first page
+            pages.push(1);
+
+            if (current > 4) {
+                // Add dots if current page is far from start
+                pages.push(-1); // -1 represents dots
+            }
+
+            // Show pages around current page
+            let start = Math.max(2, current - 1);
+            let end = Math.min(totalPages - 1, current + 1);
+
+            // Adjust range to always show 3 numbers around current
+            if (current <= 3) {
+                end = Math.min(totalPages - 1, 4);
+            }
+            if (current >= totalPages - 2) {
+                start = Math.max(2, totalPages - 3);
+            }
+
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
+
+            if (current < totalPages - 3) {
+                // Add dots if current page is far from end
+                pages.push(-1); // -1 represents dots
+            }
+
+            // Always show last page
+            if (totalPages > 1) {
+                pages.push(totalPages);
+            }
+        }
+
+        return pages;
     }
 
     loadFeedbackStatisticsCounts(): void {
@@ -172,58 +241,16 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
                 if (response.isSuccess && response.data) {
                     this.feedbackCounts = response.data;
                 } else {
-                    this.toastr.error(response?.message || 'Failed to load feedback statistics.');
+                    this.toastr.error(response?.message || 'Failed to load feedback statistics.', "Error");
                 }
             },
             error: (err) => {
-                this.toastr.error('Error loading feedback statistics.');
+                this.toastr.error('Error loading feedback statistics.', "Error");
             }
         });
     }
 
-    openSoftDeleteModal(feedbackId: number, description: string): void {
-        this.selectedFeedbackIdForSoftDelete = feedbackId;
-        this.selectedFeedbackDescription = description;
-        this.isSoftDeleteModalOpen = true;
-        this.dropdownStates.fill(false);
-    }
 
-    closeSoftDeleteModal(): void {
-        this.isSoftDeleteModalOpen = false;
-        this.selectedFeedbackIdForSoftDelete = null;
-        this.selectedFeedbackDescription = null;
-    }
-
-    openHardDeleteModal(feedback: FeedbackDto): void {
-        this.selectedFeedbackForHardDelete = feedback;
-        this.isHardDeleteModalOpen = true;
-        this.dropdownStates.fill(false);
-    }
-
-    closeHardDeleteModal(): void {
-        this.isHardDeleteModalOpen = false;
-        this.selectedFeedbackForHardDelete = null;
-    }
-
-    performHardDelete(): void {
-        if (this.selectedFeedbackForHardDelete) {
-            this.feedbackService.updateFeedbackStatus(this.selectedFeedbackForHardDelete.id, Status.Deleted).subscribe({
-                next: (res) => {
-                    if (res.isSuccess) {
-                        this.toastr.success('Feedback deleted.');
-                        this.loadFeedbacks();
-                        this.loadFeedbackStatisticsCounts();
-                        this.closeHardDeleteModal();
-                    } else {
-                        this.toastr.error(res.message || 'Failed to delete feedback.');
-                    }
-                },
-                error: () => {
-                    this.toastr.error('An error occurred while deleting feedback.');
-                }
-            });
-        }
-    }
 
     toggleActiveInactive(feedback: FeedbackDto): void {
         let actionType: number;
@@ -235,15 +262,15 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
         this.feedbackService.updateFeedbackStatus(feedback.id, actionType).subscribe({
             next: (res) => {
                 if (res.isSuccess) {
-                    this.toastr.success(`Feedback marked as ${this.getStatusLabel(actionType)}.`);
+                    this.toastr.success(`Feedback marked as ${this.getStatusLabel(actionType)}.`, 'Success');
                     this.loadFeedbacks();
                     this.loadFeedbackStatisticsCounts();
                 } else {
-                    this.toastr.error(res.message || `Failed to mark feedback as ${this.getStatusLabel(actionType)}.`);
+                    this.toastr.error(res.message || `Failed to mark feedback as ${this.getStatusLabel(actionType)}.`, 'Error');
                 }
             },
             error: () => {
-                this.toastr.error('An error occurred while updating feedback status.');
+                this.toastr.error('An error occurred while updating feedback status.', 'Error');
             }
         });
     }
@@ -278,8 +305,16 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
         this.tempStatusFilter = null;
         this.tempUserTypeFromFilter = null;
         this.tempUserTypeToFilter = null;
+        this.currentFilter = ''; // Clear the status filter dots visual state
         this.clearSearch();
         this.isAdvancedSearchOpen = false;
+    }
+
+    setFilter(filter: string, status: number): void {
+        this.currentFilter = this.currentFilter === filter ? '' : filter;
+        this.searchParams.statusFilter = this.currentFilter ? status : undefined;
+        this.searchParams.pageNumber = 1;
+        this.loadFeedbacks();
     }
 
     applyAdvancedSearch(): void {
@@ -315,6 +350,96 @@ export class FeedbacksComponent implements OnInit, OnDestroy {
     closeDetailsModal(): void {
         this.isDetailsModalOpen = false;
         this.selectedFeedbackForDetails = null;
+    }
+
+    openActivateDeactivateModal(id: number, entity: any, action: string, status: number): void {
+        this.entityToModify = entity;
+        this.modifyAction = action;
+        this.entityIdToChangeStatus = id;
+        this.StatusChangedTo = status;
+        this.dropdownStates = this.dropdownStates.map(() => false);
+        this.isActivateDeactivateModalOpen = true;
+    }
+
+    closeActivateDeactivateModal(): void {
+        this.isActivateDeactivateModalOpen = false;
+        setTimeout(() => {
+            this.entityToModify = null;
+            this.modifyAction = 'deactivate';
+        }, 300);
+    }
+
+    confirmActivateDeactivate(): void {
+        if (this.entityToModify) {
+            if (this.StatusChangedTo === Status.Deleted) {
+                // Handle delete action
+                this.feedbackService.updateFeedbackStatus(this.entityIdToChangeStatus, Status.Deleted).subscribe({
+                    next: (res) => {
+                        if (res.isSuccess) {
+                            this.toastr.success('Feedback deleted successfully.', 'Success');
+                            this.loadFeedbacks();
+                            this.loadFeedbackStatisticsCounts();
+                        } else {
+                            this.toastr.error(res.message || 'Failed to delete feedback.', 'Error');
+                        }
+                    },
+                    error: () => {
+                        this.toastr.error('An error occurred while deleting feedback.', 'Error');
+                    }
+                });
+            } else {
+                // Handle activate/deactivate action
+                const feedbackToToggle = this.feedbacks.find(f => f.id === this.entityIdToChangeStatus);
+                if (feedbackToToggle) {
+                    this.toggleActiveInactive(feedbackToToggle);
+                }
+            }
+            this.closeActivateDeactivateModal();
+        }
+    }
+
+    getUserStatusColor(status: number): string {
+        switch (status) {
+            case Status.Active: return '#2ed134';   // Green
+            case Status.Inactive: return '#f0ad4e'; // Yellow/Orange
+            case Status.Deleted: return '#6c757d';  // Gray
+            case Status.Pending: return '#17a2b8';  // Blue
+            case Status.Rejected: return '#e6382f'; // Red
+            default: return '#000000';                   
+        }
+    }
+
+    getActionLabel(status: number): string {
+        switch (status) {
+            case Status.Active: return 'Deactivate';
+            case Status.Inactive: return 'Activate';
+            case Status.Pending: return 'Approve';
+            case Status.Rejected: return 'reject';
+            case Status.Deleted: return 'delete';
+            default: return 'Update';
+        }
+    }
+
+    getToggledStatus(status: number): number {
+        switch (status) {
+            case Status.Active: return Status.Inactive;
+            case Status.Inactive: return Status.Active;
+            case Status.Pending: return Status.Active; 
+            case Status.Rejected: return Status.Rejected; 
+            case Status.Deleted: return Status.Deleted; 
+            default: return Status.Pending;
+        }
+    }
+
+    getStatusIcon(status: number): string {
+        switch (status) {
+            case Status.Active: return 'bx-x-circle';
+            case Status.Inactive: return 'bx-check-circle';
+            case Status.Pending: return 'bx-check-circle';
+            case Status.Rejected: return 'bx-x-circle';
+            case Status.Deleted: return 'bx-x';
+            default: return 'bx-cog';
+        }
     }
 
     sortByCreatedAt(): void {

@@ -30,7 +30,6 @@ import { ActivatedRoute } from '@angular/router';
     NgxSkeletonLoaderModule,
     MatSelectModule,
     MatCheckboxModule,
-    StatusLabelPipe,
     ViewDetailsComponent],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.css'
@@ -103,16 +102,18 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.searchData.PageNumber = this.currentPage;
     console.log('Loading data with searchData:', this.searchData);
     this.isLoading = true;
+    this.loadedListData = []; // Clear data immediately when loading starts
     this.notficationService.getNotifications(this.searchData).subscribe({
       next: (response) => {
         console.log('Response:', response);
         this.loadedListData = response.data.notifications;
         console.log('loadedListData:', this.loadedListData);
-        this.totalCount = response.data.totalCount;
+        this.totalCount = response.data.totalCount || 0;
         this.isLoading = false;
+        this.isLoading2 = false;
         this.currentPage = response.data.currentPage;
-        this.totalPages = Math.ceil(this.totalCount / this.pageSize);
-        this.showNoResults = response.data.totalCount === 0 ? true : false;
+        this.totalPages = response.data.notifications.length === 0 ? 0 : Math.ceil(this.totalCount / this.pageSize);
+        this.showNoResults = response.data.notifications.length === 0;
         console.log('result:', this.showNoResults);
         this.dropdownStates = new Array(this.loadedListData.length).fill(false);
         this.isAdvancedSearchOpen = false;
@@ -144,16 +145,73 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   }
   goToNextPage() {
-    if (this.currentPage < this.totalPages) {
+    if (this.currentPage < this.totalPages && !this.showNoResults && this.totalPages > 0) {
       this.currentPage++;
       this.loadData();
     }
   }
+
   goToPreviousPage() {
-    if (this.currentPage > 1) {
+    if (this.currentPage > 1 && !this.showNoResults) {
       this.currentPage--;
       this.loadData();
     }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage && page !== -1) {
+      this.currentPage = page;
+      this.loadData();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const totalPages = this.totalPages;
+    const current = this.currentPage;
+
+    if (totalPages <= 7) {
+      // Show all pages if total is 7 or less
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      if (current > 4) {
+        // Add dots if current page is far from start
+        pages.push(-1); // -1 represents dots
+      }
+
+      // Show pages around current page
+      let start = Math.max(2, current - 1);
+      let end = Math.min(totalPages - 1, current + 1);
+
+      // Adjust range to always show 3 numbers around current
+      if (current <= 3) {
+        end = Math.min(totalPages - 1, 4);
+      }
+      if (current >= totalPages - 2) {
+        start = Math.max(2, totalPages - 3);
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (current < totalPages - 3) {
+        // Add dots if current page is far from end
+        pages.push(-1); // -1 represents dots
+      }
+
+      // Always show last page
+      if (totalPages > 1) {
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
   }
   toggleDropdown(index: number, event?: Event) {
     if (event) {
@@ -197,6 +255,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.searchData.UserTypeTo = 0;
     this.searchData.Status = 0;
     this.searchData.isRead = null;
+    this.currentFilter = ''; // Clear the status filter dots visual state
     this.loadData();
   }
   openActivateDeleteModal(id: number, entity: any, action: 'activate' | 'delete', status: number): void {
@@ -286,6 +345,28 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
         }
       });
+    }
+  }
+
+  getActionLabel(status: number): string {
+    switch (status) {
+      case NotificationsStatus.Active:
+        return 'Activate';
+      case NotificationsStatus.Deleted:
+        return 'Delete';
+      default:
+        return 'Update';
+    }
+  }
+
+  getStatusIcon(status: number): string {
+    switch (status) {
+      case NotificationsStatus.Active:
+        return 'bx-check-circle';
+      case NotificationsStatus.Deleted:
+        return 'bx-trash';
+      default:
+        return 'bx-help-circle';
     }
   }
 
