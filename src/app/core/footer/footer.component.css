@@ -520,6 +520,8 @@
   
   .brand-text {
     font-size: 1.8rem;
+    margin-left: -0.4rem;
+    margin-bottom: 0.15rem;
   }
   
   .footer-brand img {

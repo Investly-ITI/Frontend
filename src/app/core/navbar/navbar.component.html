@@ -9,6 +9,7 @@
     <div class="navbar-brand" (click)="navigateTo('/')">
       <div class="brand-container">
         <img src="Logo-Investly-Cut.png" alt="Investly">
+        <span class="brand-text">nvestly</span>
       </div>
     </div>
 
@@ -19,7 +20,7 @@
       <ul class="navbar-nav">
         <!-- Explore -->
         <li class="nav-item">
-          <a class="nav-link" (click)="navigateTo('/explore')">
+          <a class="nav-link" [class.active]="isRouteActive('/explore')" (click)="navigateTo('/explore')">
             <i class='bx bx-search-alt'></i>
             <span>Explore</span>
           </a>
@@ -47,7 +48,7 @@
 
         <!-- Contact Us -->
         <li class="nav-item">
-          <a class="nav-link" (click)="navigateTo('/contact-us')">
+          <a class="nav-link" [class.active]="isRouteActive('/contact-us')" (click)="navigateTo('/contact-us')">
             <i class='bx bx-envelope'></i>
             <span>Contact Us</span>
           </a>
@@ -55,7 +56,7 @@
 
         <!-- About Us -->
         <li class="nav-item">
-          <a class="nav-link" (click)="navigateTo('/about-us')">
+          <a class="nav-link" [class.active]="isRouteActive('/about-us')" (click)="navigateTo('/about-us')">
             <i class='bx bx-info-circle'></i>
             <span>About Us</span>
           </a>
