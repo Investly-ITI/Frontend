@@ -21,7 +21,7 @@ interface Idea {
   title: string;
   description: string;
   category: string;
-  status: 'draft' | 'submitted' | 'approved' | 'declined' | 'rejected-drafted';
+  status: 'draft' | 'submitted' | 'approved' | 'declined' | 'rejected-drafted'|'inactive';
   stage: string;
   submittedDate: string;
   government: string;
@@ -139,7 +139,8 @@ export class MyIdeasComponent implements OnInit, OnChanges {
     { value: 'submitted', label: 'Under Review', icon: 'bx-time' },
     { value: 'draft', label: 'Draft', icon: 'bx-edit' },
     { value: 'declined', label: 'Declined', icon: 'bx-x-circle' },
-    { value: 'rejected-drafted', label: 'Rejected - Drafted', icon: 'bx-error-circle' }
+    { value: 'rejected-drafted', label: 'Rejected - Drafted', icon: 'bx-error-circle' },
+    {value: 'inactive', label: 'Inactive', icon: 'bx-x-circle' }
   ];
 
 
@@ -172,6 +173,7 @@ export class MyIdeasComponent implements OnInit, OnChanges {
       case 'submitted': return 'status-submitted';
       case 'declined': return 'status-declined';
       case 'rejected-drafted': return 'status-rejected-drafted';
+      case 'inactive': return 'status-declined';
       default: return 'status-draft';
     }
   }
@@ -337,7 +339,8 @@ export class MyIdeasComponent implements OnInit, OnChanges {
   }
 
   getContactRequestsCount(idea: Idea): number {
-    return idea.contactRequests?.length || 0;
+    console.log(idea.contactRequests?.length);
+    return (idea.contactRequests?.length || 0);
   }
 
   getPendingContactRequestsCount(idea: Idea): number {

@@ -268,7 +268,10 @@ export class FounderIdeasComponent implements OnInit {
           //this.loading = false;
           const ideasArr: Idea[] = response.data.map((item: BusinessDto) => {
             let status = '';
-            if (item.isDrafted && item.airate == null) {
+            if(item.status==BusinessIdeaStatus.Inactive){
+              status = 'inactive';
+            }
+            else if (item.isDrafted && item.airate == null) {
               status = 'draft';
             } else if (item.isDrafted && item.airate!=null && item.airate > 50) {
               status = 'draft';
