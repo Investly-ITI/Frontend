@@ -219,12 +219,15 @@
   gap: 16px;
   width: 100%;
   max-width: 100%;
-  max-height: 70vh;
-  overflow-y: auto;
+  /* Remove fixed max-height to let parent modal handle scrolling */
+  /* max-height: 70vh; */
+  /* overflow-y: auto; */
   overflow-x: hidden;
   box-sizing: border-box;
   background-color: var(--light);
   color: var(--dark);
+  /* Ensure proper minimum height for content */
+  min-height: 300px;
 }
 
 /* ========================================
@@ -332,23 +335,23 @@
 .input-container {
   position: relative;
   width: 100%;
-  box-sizing: border-box;
+  /* Remove any height constraints that might cause scrolling */
+  overflow: visible;
 }
 
 .form-input2 {
   width: 100%;
-  max-width: 100%;
   padding: 10px 14px;
-  border: 2px solid var(--custom);
-  border-radius: 8px;
   background-color: var(--light);
-  color: var(--light2);
+  border: 1px solid var(--custom);
+  border-radius: 8px;
   font-family: var(--poppins);
   font-size: 14px;
+  color: var(--dark);
   transition: all 0.3s ease;
-  outline: none;
-  box-sizing: border-box;
-  overflow: hidden;
+  /* Prevent unwanted scrollbars */
+  overflow: visible;
+  resize: none; /* For textareas */
 }
 
 .form-input2:focus {
@@ -548,7 +551,10 @@ select.form-input2:disabled {
   margin-bottom: 16px;
   width: 100%;
   box-sizing: border-box;
-  overflow: hidden;
+  /* Fix: Remove overflow hidden that cuts off buttons */
+  overflow: visible;
+  /* Ensure minimum height for content */
+  min-height: fit-content;
 }
 
 .standard-form h4 {
@@ -565,10 +571,17 @@ select.form-input2:disabled {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 16px;
+  /* Increase margin for better spacing */
+  margin-bottom: 8px;
   flex-wrap: wrap;
   width: 100%;
   box-sizing: border-box;
+  /* Ensure buttons are always visible */
+  position: relative;
+  z-index: 10;
+  /* Add padding to prevent clipping */
+  padding-bottom: 4px;
 }
 
 .cancel-standard-btn {
@@ -817,10 +830,15 @@ select.form-input2:disabled {
   align-items: center;
   gap: 6px;
   transition: all 0.3s ease;
-  min-width: 100px;
+  min-width: 120px;
   justify-content: center;
   background-color: var(--dark);
   color: var(--light);
+  /* Ensure button is always visible */
+  position: relative;
+  z-index: 10;
+  /* Prevent button from being cut off */
+  margin-bottom: 0;
 }
 
 .action-btn:hover:not(:disabled) {
@@ -874,12 +892,37 @@ select.form-input2:disabled {
   }
   
   .add-update-container {
-    max-height: 60vh;
+    /* Remove fixed height constraints */
+    /* max-height: 60vh; */
     overflow-x: hidden;
+    /* Allow natural height flow */
+    min-height: auto;
   }
   
   .standards-list {
-    max-height: 250px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  /* Standard form responsive improvements */
+  .standard-form {
+    /* Add extra padding to ensure buttons are visible */
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .standard-actions {
+    margin-top: 20px;
+    margin-bottom: 12px;
+    /* Stack buttons on very small screens if needed */
+    flex-wrap: wrap;
+  }
+  
+  .standard-actions .action-btn,
+  .standard-actions .cancel-standard-btn {
+    min-width: 100px;
+    flex: 1;
+    margin-bottom: 4px;
   }
 }
 
@@ -887,6 +930,8 @@ select.form-input2:disabled {
   .form-input2 {
     font-size: 16px; /* Prevent zoom on iOS */
     padding: 8px 12px;
+    /* Ensure no unwanted scroll behavior */
+    overflow: visible;
   }
   
   .row {
@@ -896,6 +941,8 @@ select.form-input2:disabled {
   
   .standard-form {
     padding: 12px;
+    /* Increase bottom padding for button visibility */
+    padding-bottom: 24px;
   }
   
   .standard-card {
@@ -912,7 +959,25 @@ select.form-input2:disabled {
   
   .add-update-container {
     gap: 12px;
-    max-height: 55vh;
+    /* Remove fixed height constraints */
+    /* max-height: 55vh; */
+    min-height: auto;
+  }
+  
+  /* Standard form mobile improvements */
+  .standard-actions {
+    margin-top: 16px;
+    gap: 12px;
+    flex-direction: column;
+  }
+  
+  .standard-actions .action-btn,
+  .standard-actions .cancel-standard-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 16px;
+    font-size: 14px;
+    min-width: auto;
   }
 }
 

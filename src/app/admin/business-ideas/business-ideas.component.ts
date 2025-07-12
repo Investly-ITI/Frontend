@@ -404,6 +404,15 @@ export class BusinessIdeasComponent implements OnInit, OnDestroy {
     this.loadBusinessIdeas();
   }
 
+  setQuickFilter(filter: string, status: number): void {
+    // Toggle the filter - if already active, clear it
+    this.currentFilter = this.currentFilter === filter ? '' : filter;
+    
+    // Use the same mechanism as dropdown filter
+    this.tempStatusFilter = this.currentFilter ? status : null;
+    this.applyAdvancedSearch();
+  }
+
   applyAdvancedSearch(): void {
     this.searchParams.categoryId = this.tempCategoryFilter === null ? undefined : this.tempCategoryFilter;
     this.searchParams.stage = this.tempStageFilter === null ? undefined : this.tempStageFilter;
