@@ -17,7 +17,11 @@
         </p>
         
         <div class="hero-actions">
-          <button class="btn btn-primary" (click)="navigateToSignup()">
+          <button 
+            *ngIf="!isUserLoggedIn()"
+            class="btn btn-primary" 
+            (click)="navigateToSignup()"
+          >
             <i class='bx bx-user-plus'></i>
             <span>Join Our Community</span>
           </button>
@@ -180,7 +184,11 @@
         </p>
         
         <div class="cta-actions">
-          <button class="btn btn-primary cta-btn" (click)="navigateToSignup()">
+          <button 
+            *ngIf="!isUserLoggedIn()"
+            class="btn btn-primary cta-btn" 
+            (click)="navigateToSignup()"
+          >
             <i class='bx bx-rocket'></i>
             <span>Start Your Journey</span>
           </button>

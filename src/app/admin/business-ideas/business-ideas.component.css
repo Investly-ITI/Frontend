@@ -694,6 +694,7 @@ input:checked + .slider:before {
     flex-grow: 1;
     flex-basis: 500px;
     font-family: var(--poppins);
+    min-height: 500px;
 }
 
 /* Table Structure */
@@ -729,6 +730,15 @@ input:checked + .slider:before {
     align-items: center;
     grid-gap: 12px;
     padding-left: 6px;
+}
+
+/* Override first-child flex for loading and no-results cells */
+:host #content main .table-data .order table tr td:first-child.no-results-cell {
+    display: table-cell !important;
+    text-align: center !important;
+    align-items: unset !important;
+    grid-gap: unset !important;
+    padding-left: 0 !important;
 }
 
 :host #content main .table-data .order table td img {
@@ -937,24 +947,32 @@ input:checked + .slider:before {
 /* ========================================
    LOADING & EMPTY STATES
 ======================================== */
-.no-results-row td {
-    color: var(--dark);
-    font-size: 1.1em;
-    font-weight: 500;
-    font-family: var(--poppins);
-    width: 100%;
-    display: table-cell;
-    text-align: center;
-    padding: 20px;
-}
-
 .no-results-row {
     width: 100%;
     display: table-row;
 }
 
+:host #content main .table-data .order table .no-results-row .no-results-cell {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 40px !important;
+    font-size: 1.1em;
+    font-weight: 500;
+    font-family: var(--poppins);
+    color: var(--dark);
+    display: table-cell !important;
+    grid-gap: unset !important;
+    padding-left: 40px !important;
+}
+
+
+
 .mat-spinner::ng-deep circle {
     stroke: var(--dark);
+}
+
+:host .parent3.dark .mat-spinner::ng-deep circle {
+    stroke: var(--light);
 }
 
 /* ========================================

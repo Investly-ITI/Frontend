@@ -108,9 +108,13 @@
         <form action="#">
         </form>
         
-        <!-- Dark Mode Toggle -->
-        <input type="checkbox" id="switch-mode" hidden >
-        <label for="switch-mode" class="switch-mode"></label>
+        <!-- Theme Toggle (Enhanced Design) -->
+        <div class="theme-toggle">
+            <input type="checkbox" id="theme-switch" [checked]="isDarkMode" (change)="toggleTheme()">
+            <label for="theme-switch" class="switch-label">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
 
         <!-- ========================================
              NOTIFICATIONS DROPDOWN
@@ -126,6 +130,7 @@
              [isNotificationsClosing]="isNotificationsClosing"
              [notifications]="notifications"
              (seeMoreClicked)="closeNotifications()"
+             (clickOutside)="closeNotifications()"
              ></app-notification-drop-down>
         </div>
 

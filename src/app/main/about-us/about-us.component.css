@@ -557,7 +557,7 @@
 }
 
 .team-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   text-align: center;
 }
@@ -587,16 +587,18 @@
 
 .team-grid {
   display: flex;
-  flex-wrap: wrap;
-  gap: 3rem;
+  flex-wrap: nowrap;
+  gap: 1rem;
   margin-top: 2rem;
-  justify-content: center;
+  justify-content: space-between;
   align-items: stretch;
+  width: 100%;
 }
 
 .team-card {
-  flex: 0 0 300px;
-  max-width: 350px;
+  flex: 1;
+  max-width: none;
+  min-width: 0;
 }
 
 .team-card {
@@ -840,6 +842,9 @@
 
 .cta-btn {
   min-width: 200px;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
 }
 
 .cta-decoration {
@@ -996,6 +1001,54 @@
   .statistics-grid {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
+  
+  .team-container {
+    max-width: 1000px;
+  }
+  
+  .team-grid {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.2rem;
+  }
+  
+  .team-card {
+    flex: 0 0 calc(33.333% - 0.8rem);
+    max-width: 300px;
+    min-width: 260px;
+  }
+}
+
+@media screen and (max-width: 1151px) {
+  .team-container {
+    max-width: 1100px;
+  }
+  
+  .team-grid {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+  
+  .team-card {
+    flex: 0 0 calc(33.333% - 1rem);
+    max-width: 320px;
+    min-width: 280px;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .team-grid {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+  
+  .team-card {
+    flex: 0 0 calc(33.333% - 1rem);
+    max-width: 280px;
+    min-width: 240px;
+  }
 }
 
 @media screen and (max-width: 768px) {
@@ -1043,10 +1096,25 @@
     padding: 4rem 1rem;
   }
   
-  .values-grid,
-  .team-grid {
+  .values-grid {
     grid-template-columns: 1fr;
     gap: 2rem;
+  }
+  
+  .team-container {
+    max-width: 100%;
+  }
+  
+  .team-grid {
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+  }
+  
+  .team-card {
+    flex: 0 0 calc(50% - 0.75rem);
+    max-width: 300px;
+    min-width: 250px;
   }
   
   .cta-actions {
@@ -1106,6 +1174,17 @@
   
   .value-card {
     padding: 2rem;
+  }
+  
+  .team-grid {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .team-card {
+    flex: none;
+    max-width: 100%;
+    min-width: auto;
   }
   
   .floating-icon {
