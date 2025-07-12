@@ -70,8 +70,8 @@ export class ContactRequestComponent implements OnInit, OnDestroy {
     investorIdFilter: undefined,
     founderIdFilter: undefined,
     statusFilter: undefined,
-    columnOrderBy: '',
-    orderByDirection: undefined
+    columnOrderBy: 'createdAt',
+    orderByDirection: 'DESC'
   };
 
   pageSize: number = 5;
