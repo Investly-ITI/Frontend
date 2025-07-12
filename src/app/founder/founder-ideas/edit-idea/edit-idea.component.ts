@@ -32,7 +32,7 @@ interface Idea {
   title: string;
   description: string;
   category: string;
-  status: 'draft' | 'submitted' | 'approved' | 'declined' | 'rejected-drafted';
+  status: 'draft' | 'submitted' | 'approved' | 'declined' | 'rejected-drafted'|'inactive';
   stage: string;
   submittedDate: string;
   government: string;

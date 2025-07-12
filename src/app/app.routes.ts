@@ -1,10 +1,35 @@
 import { Routes } from '@angular/router';
+import { AdminComponent } from './admin/admin.component';
+import { InvestorComponent } from './admin/investor/investor.component';
+import { LoginComponent } from './account/login/login.component';
+import { ResetPasswordRequestComponent } from './account/request-reset-password/request-reset-password.component';
+import { LoginStaffComponent } from './account/login-staff/login-staff.component';
+import { SignupComponent } from './account/signup/signup.component';
+import { LandingPageComponent } from './main/landing-page/landing-page.component';
+import { ExploreComponent } from './main/explore/explore.component';
+import { IdeaDetailsComponent } from './main/idea-details/idea-details.component';
+import { ContactUsComponent } from './main/contact-us/contact-us.component';
+import { AboutUsComponent } from './main/about-us/about-us.component';
 import { MainLayoutComponent } from './_shared/components/main-layout.component';
 import { adminGuard } from './_guards/admin.guard';
 import { NoAuthGuard } from './_guards/no-auth.guard';
 import { clientGuard } from './_guards/client.guard';
+import { FeedbacksComponent } from './admin/feedback/feedback.component';
+import { CategoriesComponent } from './admin/categories/categories.component';
+import { AnalysisComponent } from './admin/analysis/analysis.component';
+import { ResetPasswordComponent } from './account/reset-password/reset-password.component';
 
 export const routes: Routes = [
+   // Authentication routes (no layout - full screen)
+   { path: 'request-reset', canActivate: [NoAuthGuard],component: ResetPasswordRequestComponent, title: 'Reset Password - Investly' }, 
+   { 
+  path: 'reset-password', 
+  canActivate: [NoAuthGuard], 
+  component: ResetPasswordComponent, 
+  title: 'Reset Password - Investly' 
+},
+
+
    // Authentication routes (lazy loaded)
    { 
      path: 'login', 

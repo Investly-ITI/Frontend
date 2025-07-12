@@ -56,3 +56,10 @@ export interface DropdownDto {
   id: number;
   name: string;
 }
+
+export interface ResetPasswordDto {
+  email: string;
+  token: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
