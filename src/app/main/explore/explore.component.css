@@ -10,6 +10,7 @@
 :host {
   display: block;
   width: 100%;
+  zoom: 0.9; /* zoom out by 10% */
 }
 
 :host * {
@@ -1148,7 +1149,7 @@
   color: var(--dark);
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: var(--poppins);
   font-weight: 500;
   min-width: 44px;
@@ -1156,15 +1157,18 @@
 }
 
 .page-btn:hover:not(:disabled) {
-  border-color: var(--light);
-  color: var(--light);
+  border-color: #30acaa;
+  color: #30acaa;
   transform: translateY(-1px);
 }
 
 .page-btn.active {
-  background: var(--light);
-  border-color: var(--light);
-  color: white;
+  background: #30acaa !important;
+  border-color: #30acaa !important;
+  color: white !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(48, 172, 170, 0.4) !important;
+  transform: scale(1.05) !important;
 }
 
 .page-btn:disabled {
@@ -1185,8 +1189,12 @@
 }
 
 :host-context(.dark) .page-btn.active {
-  background: var(--light);
-  color: white;
+  background: #30acaa !important;
+  border-color: #30acaa !important;
+  color: white !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(48, 172, 170, 0.4) !important;
+  transform: scale(1.05) !important;
 }
 
 /* ========================================

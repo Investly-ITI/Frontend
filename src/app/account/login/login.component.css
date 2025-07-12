@@ -216,7 +216,7 @@
   font-family: var(--oswald);
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-  margin-top: 15px;
+  margin-top: 0.65rem;
   animation: textGlow 3s ease-in-out infinite alternate;
 }
 
@@ -1185,7 +1185,6 @@
 
   .brand-text {
     font-size: 2rem;
-    margin-top: 0;
   }
 
   .login-card {
@@ -1297,6 +1296,7 @@
 
   .brand-text {
     font-size: 1.75rem;
+    margin-bottom: 0.3rem;
   }
 
   .login-brand img {

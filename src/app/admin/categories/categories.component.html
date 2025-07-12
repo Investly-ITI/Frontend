@@ -153,7 +153,17 @@
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Status</th>
+                                <th style="text-align: center; padding-right: 50px;">Total Standards</th>
+                                <th>
+                                    Status
+                                    <!-- Status Filter Dots -->
+                                    <span id="dots-container">
+                                        <span class="dot green-dot" [class.selected]="currentFilter === 'active'"
+                                            (click)="setFilter('active', Status.Active)" title="Show Active"></span>
+                                        <span class="dot red-dot" [class.selected]="currentFilter === 'inactive'"
+                                            (click)="setFilter('inactive', Status.Inactive)" title="Show Inactive"></span>
+                                    </span>
+                                </th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -162,7 +172,7 @@
                         <tbody>
                             <!-- No Results Found -->
                             <tr *ngIf="showNoResults" class="no-results-row">
-                                <td colspan="3"
+                                <td colspan="4"
                                     style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
                                     No {{ entityNamePlural }} Found
                                 </td>
@@ -170,7 +180,7 @@
 
                             <!-- Loading Spinner -->
                             <tr *ngIf="isLoading" class="no-results-row">
-                                <td colspan="3"
+                                <td colspan="4"
                                     style="text-align: center; padding: 20px; width: 100%; display: table-cell;">
                                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;"
                                         id="spinner">
@@ -184,6 +194,13 @@
                                 <!-- Category Name -->
                                 <td>
                                     <p>{{ category.name }}</p>
+                                </td>
+
+                                <!-- Total Standards -->
+                                <td style="text-align: center; vertical-align: middle; padding-right: 50px;">
+                                    <span style="font-weight: 500; color: var(--dark); font-family: var(--poppins); font-size: 14px;">
+                                        {{ category.standardCategoryDto.length || 0 }}
+                                    </span>
                                 </td>
 
                                 <!-- Status -->
@@ -230,13 +247,32 @@
                     <!-- ========================================
                          PAGINATION CONTROLS
                     ======================================== -->
-                    <div class="pagination-controls">
-                        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">
-                            <i class='bx bx-chevron-left' style="font-size: 1.7em;"></i>
+                    <div class="pagination-controls" *ngIf="!showNoResults && totalPages > 0">
+                        <button class="pagination-btn previous-btn" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+                            <i class='bx bx-chevron-left'></i>
+                            Previous
                         </button>
-                        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">
-                            <i class='bx bx-chevron-right' style="font-size: 1.7em;"></i>
+                        
+                        <div class="page-numbers">
+                            <button 
+                                *ngFor="let page of getPageNumbers()" 
+                                class="page-number-btn"
+                                [class.active]="page === currentPage"
+                                [class.dots]="page === -1"
+                                (click)="goToPage(page)"
+                                [disabled]="page === -1">
+                                {{ page === -1 ? '...' : page }}
+                            </button>
+                        </div>
+                        
+                        <button class="pagination-btn next-btn" (click)="goToNextPage()" [disabled]="currentPage >= totalPages">
+                            Next
+                            <i class='bx bx-chevron-right'></i>
                         </button>
+                    </div>
+                    
+                    <div class="pagination-info" *ngIf="!showNoResults && totalPages > 0">
+                        <span class="total-info">Showing {{ currentPage }} of {{ totalPages }} pages ({{ totalCount }} total {{ entityNamePlural.toLowerCase() }})</span>
                     </div>
                 </div>
             </div>

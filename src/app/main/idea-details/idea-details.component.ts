@@ -6,6 +6,7 @@ import { IdeaDetailsDto, BusinessStandardAnswer } from '../../_models/businesses
 import { InvestingStages, ContactRequestStatus } from '../../_shared/enums';
 import { ToastrService } from 'ngx-toastr';
 import { IdeaDetailsService } from './idea-details.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-idea-details',
@@ -278,7 +279,40 @@ export class IdeaDetailsComponent implements OnInit, OnDestroy {
   }
 
   getImages(): string[] {
-    return this.businessData?.images || [];
+    if (this.businessData?.images && this.businessData.images.length > 0) {
+      return this.businessData.images.map(imagePath => this.getFullImageUrl(imagePath));
+    }
+    return [];
+  }
+
+  // Utility method to construct full image URLs
+  private getFullImageUrl(imagePath: string): string {
+    if (!imagePath) {
+      return '';
+    }
+    
+    // If already a full URL, return as is
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    
+    // Construct full URL using environment apiUrl
+    return `${environment.apiUrl}/${imagePath}`;
+  }
+
+  // Utility method to construct full file URLs
+  private getFullFileUrl(filePath: string): string {
+    if (!filePath) {
+      return '';
+    }
+    
+    // If already a full URL, return as is
+    if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+      return filePath;
+    }
+    
+    // Construct full URL using environment apiUrl
+    return `${environment.apiUrl}/${filePath}`;
   }
 
   getBusinessStandardAnswers(): BusinessStandardAnswer[] {
@@ -428,7 +462,8 @@ export class IdeaDetailsComponent implements OnInit, OnDestroy {
     }
 
     if (this.businessData?.filePath) {
-      window.open(this.businessData.filePath, '_blank');
+      const fullFileUrl = this.getFullFileUrl(this.businessData.filePath);
+      window.open(fullFileUrl, '_blank');
     }
   }
 

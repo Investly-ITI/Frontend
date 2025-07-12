@@ -33,7 +33,10 @@
     <div class="standards-header">
       <h4 class="section-title">Category Standards</h4>
       <div class="standards-info">
-        <span class="total-weight" [class.over-limit]="getTotalWeight() > 100">
+        <span class="total-weight" 
+              [class.over-limit]="getTotalWeight() > 100"
+              [class.under-limit]="getTotalWeight() < 100"
+              [class.complete]="getTotalWeight() === 100">
           Total Weight: {{ getTotalWeight() }}%
         </span>
         <button 
@@ -136,7 +139,16 @@
     <div class="standards-list" *ngIf="standardsArray.length > 0 && !isAddingStandard">
       <div class="standard-card" *ngFor="let standard of standardsArray.controls; let i = index" [formGroup]="$any(standard)">
         <div class="standard-header">
-          <h5>{{ standard.get('standardName')?.value }}</h5>
+          <div class="standard-content">
+            <div class="standard-name-row">
+              <span class="standard-label">Standard Name:</span>
+              <span class="standard-value">{{ standard.get('standardName')?.value }}</span>
+            </div>
+            <div class="standard-question-row">
+              <span class="standard-label">Standard Question:</span>
+              <span class="standard-value">{{ standard.get('question')?.value }}</span>
+            </div>
+          </div>
           <div class="standard-meta">
             <span class="weight-badge">{{ standard.get('standardCategoryWeight')?.value }}%</span>
             <div class="standard-actions" *ngIf="modalMode === 'add' || isEditMode">
@@ -149,7 +161,6 @@
             </div>
           </div>
         </div>
-        <div class="standard-question">{{ standard.get('question')?.value }}</div>
       </div>
     </div>
 
@@ -167,13 +178,13 @@
   <!-- Modal Footer -->
   <div class="modal-footer">
     <!-- Add Mode: Show Add Button -->
-    <button *ngIf="modalMode === 'add'" type="button" class="action-btn add-btn" (click)="onSubmit()" [disabled]="!formData.valid || isAddingStandard || !hasFormChanges()">
+    <button *ngIf="modalMode === 'add'" type="button" class="action-btn add-btn" (click)="onSubmit()" [disabled]="!formData.valid || isAddingStandard || !hasFormChanges() || isSaveDisabled()">
       <i class='bx bx-plus'></i>
       Add {{ entityName }}
     </button>
 
     <!-- View Mode: Show Edit/Save Button -->
-    <button *ngIf="modalMode === 'view'" type="button" class="action-btn edit-btn" (click)="isEditMode ? onSubmit() : toggleEditMode()" [disabled]="isAddingStandard || (isEditMode && (!formData.valid || !hasFormChanges()))">
+    <button *ngIf="modalMode === 'view'" type="button" class="action-btn edit-btn" (click)="isEditMode ? onSubmit() : toggleEditMode()" [disabled]="isAddingStandard || (isEditMode && (!formData.valid || !hasFormChanges() || isSaveDisabled()))">
       <i class='bx' [ngClass]="isEditMode ? 'bx-check' : 'bx-edit-alt'"></i>
       {{ isEditMode ? 'Save' : 'Edit' }}
     </button>

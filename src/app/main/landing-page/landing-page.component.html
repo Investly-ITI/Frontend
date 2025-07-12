@@ -48,7 +48,11 @@
           
           <!-- CTA Buttons -->
           <div class="hero-actions">
-            <button class="btn btn-primary hero-cta" (click)="navigateToSignup()">
+            <button 
+              *ngIf="!isUserLoggedIn()"
+              class="btn btn-primary hero-cta" 
+              (click)="navigateToSignup()"
+            >
               <i class='bx bx-user-plus'></i>
               <span>Join Investly</span>
             </button>

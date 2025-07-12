@@ -118,7 +118,16 @@
                                     Created At
                                     <i class="bx bx-sort"></i>
                                 </th>
-                                <th>Status</th>
+                                <th>
+                                    Status
+                                    <!-- Status Filter Dots -->
+                                    <span id="dots-container">
+                                        <span class="dot green-dot" [class.selected]="currentFilter === 'active'"
+                                            (click)="setFilter('active', Status.Active)" title="Show Active"></span>
+                                        <span class="dot red-dot" [class.selected]="currentFilter === 'inactive'"
+                                            (click)="setFilter('inactive', Status.Inactive)" title="Show Inactive"></span>
+                                    </span>
+                                </th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -154,14 +163,19 @@
                                         </button>
                                         <div class="action-menu">
                                             <button class="action-item view" type="button" (click)="openDetailsModal(feedback)">
-                                                <i class='bx bx-show'></i> Details
+                                                <i class='bx bx-show'></i> View Details
                                             </button>
-                                            <button class="action-item" type="button" (click)="toggleActiveInactive(feedback)">
-                                                <i class='bx' [ngClass]="feedback.status === Status.Active ? 'bx-minus-circle' : 'bx-check-circle'"></i>
-                                                {{ feedback.status === Status.Active ? 'Deactivate' : 'Activate' }}
+                                            <button class="action-item" 
+                                                [ngStyle]="{'color': getUserStatusColor(getToggledStatus(feedback.status ?? Status.Inactive))}" 
+                                                type="button" 
+                                                (click)="openActivateDeactivateModal(feedback.id, feedback.subject || 'Feedback', getActionLabel(feedback.status ?? Status.Inactive), feedback.status ?? Status.Inactive)">
+                                                <i [class]="'bx ' + getStatusIcon(feedback.status ?? Status.Inactive)"></i>
+                                                {{ getActionLabel(feedback.status ?? Status.Inactive) }}
                                             </button>
-                                            <button class="action-item delete" type="button" (click)="openHardDeleteModal(feedback)">
-                                                <i class='bx bx-trash'></i> Delete
+                                            <button class="action-item" type="button"
+                                                (click)="openActivateDeactivateModal(feedback.id, feedback.subject || 'Feedback', 'delete', Status.Deleted)">
+                                                <i class='bx bx-trash'></i>
+                                                delete
                                             </button>
                                         </div>
                                     </div>
@@ -170,88 +184,102 @@
                         </tbody>
                     </table>
 
-                    <div class="pagination-controls">
-                        <button (click)="prevPage()" [disabled]="searchParams.pageNumber === 1">
-                            <i class='bx bx-chevron-left' style="font-size: 1.7em;"></i>
+                    <div class="pagination-controls" *ngIf="!showNoResults && totalPages > 0">
+                        <button class="pagination-btn previous-btn" (click)="prevPage()" [disabled]="searchParams.pageNumber === 1">
+                            <i class='bx bx-chevron-left'></i>
+                            Previous
                         </button>
-                        <button (click)="nextPage()" [disabled]="!feedbackList || searchParams.pageNumber * searchParams.pageSize >= feedbackList.totalCount">
-                            <i class='bx bx-chevron-right' style="font-size: 1.7em;"></i>
+                        
+                        <div class="page-numbers">
+                            <button 
+                                *ngFor="let page of getPageNumbers()" 
+                                class="page-number-btn"
+                                [class.active]="page === searchParams.pageNumber"
+                                [class.dots]="page === -1"
+                                (click)="goToPage(page)"
+                                [disabled]="page === -1">
+                                {{ page === -1 ? '...' : page }}
+                            </button>
+                        </div>
+                        
+                        <button class="pagination-btn next-btn" (click)="nextPage()" [disabled]="searchParams.pageNumber >= totalPages">
+                            Next
+                            <i class='bx bx-chevron-right'></i>
                         </button>
+                    </div>
+                    
+                    <div class="pagination-info" *ngIf="!showNoResults && totalPages > 0">
+                        <span class="total-info">Showing {{ searchParams.pageNumber }} of {{ totalPages }} pages ({{ totalCount }} total {{ entityNamePlural.toLowerCase() }})</span>
                     </div>
                 </div>
             </div>
         </main>
     </section>
 
-    <div class="modal-overlay" [ngClass]="{ 'show': isSoftDeleteModalOpen }" (click)="closeSoftDeleteModal()">
-        <div class="modal-container activate-deactivate-modal" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-                <h3>Delete Feedback</h3>
-                <button type="button" class="close-btn" (click)="closeSoftDeleteModal()">
-                    <i class='bx bx-x'></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="activate-deactivate-confirmation">
-                    <div class="action-icon">
-                        <i class="bx bx-trash" style="color: var(--danger);"></i>
-                    </div>
-                    <p class="confirmation-text danger-text">
-                        Are you sure you want to delete <span class="highlight-text">{{ selectedFeedbackDescription }}</span>?
-                        This action will mark the feedback as deleted and it will no longer be visible.
-                    </p>
-                </div>
-            </div>
-            <div class="modal-footer activate-deactivate-modal-footer">
-                <button type="button" class="cancel-btn" (click)="closeSoftDeleteModal()">Cancel</button>
-                <button type="button" class="confirm-btn delete" (click)="performHardDelete()">
-                    <i class='bx bx-trash'></i> Delete
-                </button>
-            </div>
-        </div>
-    </div>
+
 
     <div class="modal-overlay" [ngClass]="{ 'show': isDetailsModalOpen }" (click)="closeDetailsModal()">
         <div class="modal-container view-details-modal" (click)="$event.stopPropagation()" *ngIf="selectedFeedbackForDetails">
             <div class="modal-header">
-                <h3>Feedback Details: {{ selectedFeedbackForDetails.subject || ' ' }}</h3> <button type="button" class="close-btn" (click)="closeDetailsModal()">
+                <h3><i class='bx bx-message-detail'></i> Feedback Details: {{ selectedFeedbackForDetails.subject || '—' }}</h3>
+                <button type="button" class="close-btn" (click)="closeDetailsModal()">
                     <i class='bx bx-x'></i>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="details-content">
-                    <div class="detail-row">
-                        <strong class="detail-label">ID:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.id }}</span>
+                <div class="feedback-details">
+                    <div class="detail-section">
+                        <h4>Basic Information</h4>
+                        <div class="detail-row">
+                            <span class="label">ID:</span>
+                            <span class="value">{{ selectedFeedbackForDetails.id || '—' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Subject:</span>
+                            <span class="value">{{ selectedFeedbackForDetails.subject || '—' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Status:</span>
+                            <span class="value">
+                                <span class="status-badge" [ngClass]="{
+                                    'active': selectedFeedbackForDetails.status === Status.Active,
+                                    'inactive': selectedFeedbackForDetails.status === Status.Inactive
+                                }">
+                                    {{ selectedFeedbackForDetails && selectedFeedbackForDetails.status !== undefined ? getStatusLabel(selectedFeedbackForDetails.status!) : '—' }}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Created At:</span>
+                            <span class="value">{{ selectedFeedbackForDetails.createdAt ? (selectedFeedbackForDetails.createdAt | date:'medium') : '—' }}</span>
+                        </div>
                     </div>
-                    <div class="detail-row">
-                        <strong class="detail-label">Subject:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.subject || ' ' }}</span> </div>
-                    <div class="detail-row">
-                        <strong class="detail-label">Description:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.description || ' ' }}</span>
+
+                    <div class="detail-section">
+                        <h4>User Information</h4>
+                        <div class="detail-row">
+                            <span class="label">From Type:</span>
+                            <span class="value">{{ selectedFeedbackForDetails.userTypeFromName || 'Anonymous' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">From User:</span>
+                            <span class="value">{{ selectedFeedbackForDetails.userFromName || 'Anonymous' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">To Type:</span>
+                            <span class="value">{{ selectedFeedbackForDetails.userTypeToName || 'System' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">To User:</span>
+                            <span class="value">{{ selectedFeedbackForDetails.userToName || 'System' }}</span>
+                        </div>
                     </div>
-                    <div class="detail-row">
-                        <strong class="detail-label">From Type:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.userTypeFromName || 'Anonymous' }}</span> </div>
-                    <div class="detail-row">
-                        <strong class="detail-label">To Type:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.userTypeToName || 'System' }}</span> </div>
-                    <div class="detail-row">
-                        <strong class="detail-label">From User:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.userFromName || 'Anonymous' }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <strong class="detail-label">To User:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.userToName || 'System' }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <strong class="detail-label">Status:</strong>
-                        <span class="detail-value status">{{ selectedFeedbackForDetails && selectedFeedbackForDetails.status !== undefined ? getStatusLabel(selectedFeedbackForDetails.status!) : ' ' }}</span>
-                    </div>
-                    <div class="detail-row">
-                        <strong class="detail-label">Created At:</strong>
-                        <span class="detail-value">{{ selectedFeedbackForDetails.createdAt ? (selectedFeedbackForDetails.createdAt | date:'medium') : ' ' }}</span>
+
+                    <div class="detail-section">
+                        <h4>Feedback Content</h4>
+                        <div class="description-content">
+                            <p>{{ selectedFeedbackForDetails.description || 'No description provided.' }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -261,36 +289,51 @@
         </div>
     </div>
 
-    <div class="modal-overlay" [ngClass]="{ 'show': isHardDeleteModalOpen }" (click)="closeHardDeleteModal()">
-        <div class="modal-container activate-deactivate-modal" (click)="$event.stopPropagation()">
+    <!-- ========================================
+         ACTIVATE/DEACTIVATE CONFIRMATION MODAL
+    ======================================== -->
+    <div class="modal-overlay" [ngClass]="{ 'show': isActivateDeactivateModalOpen }" (click)="closeActivateDeactivateModal()">
+        <div class="modal-container activate-deactivate-modal" (click)="$event.stopPropagation()" *ngIf="entityToModify">
+            <!-- Modal Header -->
             <div class="modal-header">
-                <h3>Delete Feedback</h3>
-                <button type="button" class="close-btn" (click)="closeHardDeleteModal()">
+                <h3>
+                    {{ getActionLabel(StatusChangedTo) }} Feedback
+                </h3>
+                <button type="button" class="close-btn" (click)="closeActivateDeactivateModal()">
                     <i class='bx bx-x'></i>
                 </button>
             </div>
+
+            <!-- Modal Body -->
             <div class="modal-body">
                 <div class="activate-deactivate-confirmation">
                     <div class="action-icon">
-                        <i class="bx bx-trash" style="color: var(--danger);"></i>
+                        <i class="bx"
+                           [ngClass]="getStatusIcon(StatusChangedTo)"
+                           [style.color]="getUserStatusColor(getToggledStatus(StatusChangedTo))">
+                        </i>
                     </div>
-                    <p class="confirmation-text danger-text">
-                        Are you sure you want to <b>permanently delete</b>
-                        <span class="highlight-text">{{ selectedFeedbackForHardDelete?.description }}</span>?
-                        This action <b>cannot be undone</b> and the feedback will be removed from the system.
+
+                    <p class="confirmation-text">
+                        Are you sure you want to {{ getActionLabel(StatusChangedTo).toLowerCase() }} this feedback?
                     </p>
                 </div>
             </div>
+
+            <!-- Modal Footer -->
             <div class="modal-footer activate-deactivate-modal-footer">
-                <button type="button" class="cancel-btn" (click)="closeHardDeleteModal()">Cancel</button>
-                <button type="button" class="confirm-btn delete" style="background-color: red; color: #fff;" (click)="performHardDelete()">
-                    <i class='bx bx-trash'></i> Delete
+                <button type="button" class="cancel-btn" (click)="closeActivateDeactivateModal()">Cancel</button>
+
+                <button type="button" class="confirm-btn"
+                        [ngStyle]="{'color': getUserStatusColor(getToggledStatus( StatusChangedTo))}"
+                        (click)="confirmActivateDeactivate()">
+                    <i class="bx" [ngClass]="getStatusIcon(StatusChangedTo)"></i>
+                    {{ getActionLabel(StatusChangedTo) }}
                 </button>
             </div>
         </div>
     </div>
 
-    <div *ngIf="isLoading && !feedbacks.length" class="loading-indicator" style="text-align: center; padding: 20px;">
-        <ngx-skeleton-loader count="5" appearance="line" [theme]="{ 'height': '30px', 'margin-bottom': '10px', 'background-color': isDarkMode ? '#333' : '#e0e0e0' }"></ngx-skeleton-loader>
-    </div>
+
+
 </div>
