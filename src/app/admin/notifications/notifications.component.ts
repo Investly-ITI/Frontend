@@ -19,6 +19,7 @@ import { ToastrService } from 'ngx-toastr';
 import { NotificationsStatus, Status, UserType } from '../../_shared/enums';
 import { ActivatedRoute } from '@angular/router';
 
+
 @Component({
   selector: 'app-notifications',
   imports: [CommonModule,
