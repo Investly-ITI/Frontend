@@ -619,4 +619,15 @@ export class SignupComponent implements OnInit, OnDestroy {
   navigateToHome(): void {
     this.router.navigate(['/']);
   }
+
+  // Truncate file names to prevent layout issues
+  getTruncatedFileName(fileName: string): string {
+    if (fileName.length <= 20) {
+      return fileName;
+    }
+    const extension = fileName.split('.').pop();
+    const nameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
+    const truncatedName = nameWithoutExtension.substring(0, 15);
+    return `${truncatedName}...${extension ? '.' + extension : ''}`;
+  }
 }

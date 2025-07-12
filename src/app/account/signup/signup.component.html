@@ -414,7 +414,7 @@
                 <label for="profilePicture" class="upload-label">
                   <i class='bx bx-cloud-upload'></i>
                   <span *ngIf="!profilePicture">Click to upload profile picture</span>
-                  <span *ngIf="profilePicture" class="file-name">{{ profilePicture.name }}</span>
+                  <span *ngIf="profilePicture" class="file-name">{{ getTruncatedFileName(profilePicture.name) }}</span>
                   <small>JPG, PNG, GIF up to 5MB</small>
                 </label>
               </div>
@@ -439,7 +439,7 @@
                   <label for="cardFront" class="upload-label">
                     <i class='bx bx-cloud-upload'></i>
                     <span *ngIf="!nationalCardFront">Upload front side</span>
-                    <span *ngIf="nationalCardFront" class="file-name">{{ nationalCardFront.name }}</span>
+                    <span *ngIf="nationalCardFront" class="file-name">{{ getTruncatedFileName(nationalCardFront.name) }}</span>
                     <small>JPG, PNG, GIF up to 5MB</small>
                   </label>
                 </div>
@@ -459,7 +459,7 @@
                   <label for="cardBack" class="upload-label">
                     <i class='bx bx-cloud-upload'></i>
                     <span *ngIf="!nationalCardBack">Upload back side</span>
-                    <span *ngIf="nationalCardBack" class="file-name">{{ nationalCardBack.name }}</span>
+                    <span *ngIf="nationalCardBack" class="file-name">{{ getTruncatedFileName(nationalCardBack.name) }}</span>
                     <small>JPG, PNG, GIF up to 5MB</small>
                   </label>
                 </div>

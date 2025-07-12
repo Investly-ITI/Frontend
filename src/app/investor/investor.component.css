@@ -463,6 +463,13 @@
   .profile-main {
     padding: 1.5rem;
   }
+
+  .security-alert-indicator {
+    top: -0.002rem;
+    bottom: auto;
+    right: 0.2rem;
+    margin: 0;
+  }
 }
 /* ========================================
    AI REVIEW LOADING OVERLAY
