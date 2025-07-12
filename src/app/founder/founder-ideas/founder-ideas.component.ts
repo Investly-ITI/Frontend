@@ -9,6 +9,7 @@ import { BusinessIdeaStatus, ContactRequestStatus, DesiredInvestmentType } from 
 import { StandardAiResult } from '../../_models/aiIdeaEvaluationResult';
 import { BusinessDto } from '../../_models/businesses';
 import { environment } from '../../../environments/environment';
+import { ActivatedRoute } from '@angular/router';
 
 interface ContactRequest {
   id: string;
@@ -61,7 +62,7 @@ export class FounderIdeasComponent implements OnInit {
   apiUrl=environment.apiUrl;
   //loading = true;
 
-  constructor(private ideaService: IdeaService) { }
+  constructor(private ideaService: IdeaService, private route:ActivatedRoute) { }
 
   // Sample data for testing
   // sampleIdeas: Idea[] = [
@@ -336,6 +337,13 @@ export class FounderIdeasComponent implements OnInit {
 
     })
     this.unsubscribe.push(sub);
+
+   this.route.queryParams.subscribe(params => {
+    const tab = params['tab'];
+    if (tab === 'myIdeas' || tab === 'addIdea') {
+      this.activeTab = tab;
+    }
+  });
 
   }
 

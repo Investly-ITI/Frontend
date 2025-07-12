@@ -313,7 +313,10 @@ export class MyIdeasComponent implements OnInit, OnChanges {
   }
 
   onEditSaveStarted(): void {
-    // Close edit view before starting AI review
+    // Close edit view before starting AI review\
+    this.router.navigate(['/profile'], {
+  queryParams: { section: 'ideas', tab: 'myIdeas' }
+});
     this.onCloseEditView();
   }
 
