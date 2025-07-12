@@ -577,7 +577,17 @@
 }
 
 /* Responsive Design */
+@media screen and (max-width: 1024px) {
+  .ideas-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
 @media screen and (max-width: 768px) {
+  .my-ideas-container {
+    padding: 0.75rem;
+  }
+  
   .header-content {
     flex-direction: column;
     gap: 1rem;
@@ -593,6 +603,7 @@
 
   .ideas-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .idea-meta {
@@ -608,16 +619,6 @@
   .dropdown-toggle {
     width: 100%;
     justify-content: center;
-  }
-  
-  .dropdown-menu {
-    top: auto;
-    bottom: 100%;
-    left: 0;
-    margin-left: 0;
-    margin-bottom: 0.5rem;
-    min-width: auto;
-    width: 100%;
   }
 
   .filter-section {
@@ -639,6 +640,99 @@
 
   .filter-btn i {
     font-size: 1.1rem;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .my-ideas-container {
+    padding: 0.5rem;
+  }
+  
+  .ideas-grid {
+    gap: 0.75rem;
+  }
+  
+  .idea-card {
+    padding: 1rem;
+    padding-bottom: 3.5rem;
+  }
+  
+  .idea-title {
+    font-size: 1.1rem;
+  }
+  
+  .idea-meta {
+    gap: 0.5rem;
+  }
+  
+  .meta-item {
+    font-size: 0.85rem;
+  }
+  
+  .idea-description {
+    font-size: 0.9rem;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  
+  .idea-actions {
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .my-ideas-container {
+    padding: 0.25rem;
+  }
+  
+  .ideas-header {
+    margin-bottom: 1rem;
+  }
+  
+  .ideas-title {
+    font-size: 1.25rem;
+  }
+  
+  .idea-card {
+    padding: 0.75rem;
+    padding-bottom: 3rem;
+    border-radius: 12px;
+  }
+  
+  .idea-title {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .badges-container {
+    margin-bottom: 0.75rem;
+  }
+  
+  .status-badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+  }
+  
+  .idea-description {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  
+  .idea-actions {
+    bottom: 0.75rem;
+    left: 0.75rem;
+    right: 0.75rem;
+  }
+  
+  .btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .dropdown-menu {
+    min-width: 100%;
   }
 }
 
@@ -1938,3 +2032,105 @@
     font-size: 0.9rem;
   }
 } 
+
+/* --- Mobile fix: force card/content to wrap and shrink on small screens --- */
+@media screen and (max-width: 480px) {
+  .ideas-grid {
+    grid-template-columns: 1fr;
+  }
+  .idea-card {
+    min-width: 0 !important;
+    width: 100% !imzportant;
+    padding: 1rem !important;
+    padding-top: 1rem !important;
+    padding-left: 1.5rem !important;
+    padding-bottom: 2.5rem !important;
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
+  }
+  .idea-title, .meta-item, .idea-description {
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+  .idea-title {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .idea-meta {
+    gap: 0.3rem !important;
+  }
+  .meta-item {
+    font-size: 0.8rem !important;
+    flex-wrap: wrap !important;
+  }
+  .idea-description {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.75rem !important;
+    -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
+  }
+  .idea-actions {
+    bottom: 0.5rem !important;
+    left: 1.2rem !important;
+    right: 0.5rem !important;
+  }
+  .btn-sm {
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+@media screen and (max-width: 769px) {
+  .idea-meta {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+@media screen and (max-width: 426px) {
+  .idea-meta {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+@media screen and (max-width: 376px) {
+  .idea-meta {
+    grid-template-columns: 1fr !important;
+  }
+}
+@media screen and (max-width: 374px) {
+  .idea-meta {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .header-filter,
+  .filter-select-container {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .filter-select {
+    width: 100% !important;
+    font-size: 0.95rem !important;
+    padding: 0.6rem 2.2rem 0.6rem 1rem !important;
+  }
+  .filter-select-icon {
+    right: 0.8rem !important;
+    font-size: 1.1rem !important;
+  }
+  .filter-wrapper {
+    width: 100% !important;
+  }
+  .ideas-header {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+}
+@media screen and (max-width: 480px) {
+  .filter-select {
+    font-size: 0.9rem !important;
+    padding: 0.5rem 2rem 0.5rem 0.8rem !important;
+  }
+  .filter-select-icon {
+    right: 0.5rem !important;
+    font-size: 1rem !important;
+  }
+}

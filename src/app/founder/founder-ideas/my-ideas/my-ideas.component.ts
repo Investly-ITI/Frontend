@@ -6,6 +6,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { StandardAiResult } from '../../../_models/aiIdeaEvaluationResult';
 import { IdeaService } from '../../_services/idea.service';
 import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 
 interface ContactRequest {
   id: string;
@@ -142,7 +143,7 @@ export class MyIdeasComponent implements OnInit, OnChanges {
   ];
 
 
- constructor(private ideaService:IdeaService, private toastr:ToastrService){}
+ constructor(private ideaService:IdeaService, private toastr:ToastrService, private router: Router){}
 
   ngOnInit(): void {
     this.filterIdeas();
@@ -207,8 +208,7 @@ export class MyIdeasComponent implements OnInit, OnChanges {
   }
 
   onViewDetails(idea: Idea): void {
-    console.log('View details for idea:', idea);
-    // Navigate to idea details
+    this.router.navigate(['/idea', idea.id]);
   }
 
   onEditIdea(idea: Idea): void {

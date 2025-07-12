@@ -106,7 +106,7 @@
             Actions
           </button>
           <div class="dropdown-menu" *ngIf="isDropdownOpen(idea.id.toString())">
-            <button class="dropdown-item primary" (click)="onViewDetails(idea); closeDropdown()">
+            <button class="dropdown-item primary" (click)="onViewDetails(idea); closeDropdown()" *ngIf="idea.status === 'approved'">
               <i class='bx bx-show'></i>
               View Details
             </button>

@@ -9,7 +9,12 @@
   display: block;
   width: 100%;
   min-height: 100vh;
-  zoom: 0.9; /* zoom out by 10% */
+}
+
+@media screen and (min-width: 1025px) {
+  :host {
+    zoom: 0.8; 
+  }
 }
 
 :host * {

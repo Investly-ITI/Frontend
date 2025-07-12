@@ -625,12 +625,12 @@
   
   .dropdown-menu {
     top: auto;
-    bottom: 100%;
+    /* bottom: 100%; */
     left: 0;
-    margin-left: 0;
-    margin-bottom: 0.5rem;
-    min-width: auto;
-    width: 100%;
+    /* margin-left: 0; */
+    /* margin-bottom: 0.5rem; */
+    min-width: 100%;
+    /* width: 100%; */
   }
 
   .filter-section {
@@ -1951,3 +1951,37 @@
     font-size: 0.9rem;
   }
 } 
+
+@media screen and (max-width: 768px) {
+  .header-filter,
+  .filter-select-container {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .filter-select {
+    width: 100% !important;
+    font-size: 0.95rem !important;
+    padding: 0.6rem 2.2rem 0.6rem 1rem !important;
+  }
+  .filter-select-icon {
+    right: 0.8rem !important;
+    font-size: 1.1rem !important;
+  }
+  .filter-wrapper {
+    width: 100% !important;
+  }
+  .ideas-header {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+}
+@media screen and (max-width: 480px) {
+  .filter-select {
+    font-size: 0.9rem !important;
+    padding: 0.5rem 2rem 0.5rem 0.8rem !important;
+  }
+  .filter-select-icon {
+    right: 0.5rem !important;
+    font-size: 1rem !important;
+  }
+}
