@@ -86,22 +86,38 @@ export class LoginStaffComponent implements OnInit {
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.loginData = { ...this.loginForm.value }
+      
       var sub = this.jwt.generateTokenStaff(this.loginData).subscribe({
         next: (response) => {
           if (response.isSuccess) {
             //this.toastr.success(response.message, "Success");
             this.auth.login(response.data);
+            // Keep loading state active during navigation
             setTimeout(() => {
               this.router.navigate(['admin/analysis']);
+              // Reset loading state after navigation
+              this.isLoading = false;
             }, 1500);
-
           } else {
+            // Reset loading immediately on failed login for retry
+            this.isLoading = false;
             this.toastr.error(response.message, "Error");
+            // Reset form state on failed login
+            this.loginForm.get('password')?.setValue('');
+            this.loginForm.get('password')?.markAsUntouched();
           }
-        },error:(err)=>{
-          this.toastr.error("something went wrong","Error");
+        },
+        error: (err) => {
+          // Reset loading immediately on error for retry
+          this.isLoading = false;
+          console.error('Login error:', err);
+          this.toastr.error("Something went wrong. Please try again.", "Error");
+          // Reset form state on error
+          this.loginForm.get('password')?.setValue('');
+          this.loginForm.get('password')?.markAsUntouched();
         }
-      })
+      });
+      
       this.unsubscribe.push(sub);
     } else {
       // Mark all fields as touched to show validation errors

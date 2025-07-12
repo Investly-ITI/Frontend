@@ -127,6 +127,7 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   transition: all 0.3s ease;
   margin-top: 2px;
+  display: none; 
 }
 
 :host-context(.dark) .brand-text {
@@ -215,6 +216,19 @@
 :host-context(.dark) .nav-link:hover {
   color: var(--light);
   background: rgba(48, 172, 170, 0.15);
+}
+
+/* Active state for navigation links */
+.nav-link.active {
+  color: var(--light);
+  background: rgba(48, 172, 170, 0.15);
+  border-left: 3px solid var(--light);
+}
+
+:host-context(.dark) .nav-link.active {
+  color: var(--light);
+  background: rgba(48, 172, 170, 0.2);
+  border-left: 3px solid var(--light);
 }
 
 /* ========================================
@@ -987,6 +1001,8 @@
   
   .brand-text {
     font-size: 1.8rem;
+    margin-bottom: 0.1rem;
+    display: inline; /* Show on tablet and smaller */
   }
   
   .mobile-menu-toggle {
@@ -1128,6 +1144,9 @@
     padding: 0 0.75rem;
     height: 65px;
   }
+  .logout-text {
+    display: none;
+  }
   
   .navbar-brand img {
     height: 30px;
@@ -1135,6 +1154,7 @@
   
   .brand-text {
     font-size: 1.6rem;
+    margin-bottom: 0.1rem;
   }
   
   .navbar-menu {
@@ -1148,6 +1168,22 @@
   
   .btn {
     width: 100%;
+  }
+}
+
+@media screen and (max-width: 321px) {
+  .brand-text{
+    margin-left: -0.45rem;
+    margin-bottom: 0.2rem;
+  }
+}
+
+/* ========================================
+   MOBILE RESPONSIVE - 375px and below
+======================================== */
+@media screen and (max-width: 376px) {
+  .logout-text {
+    display: none;
   }
 }
 

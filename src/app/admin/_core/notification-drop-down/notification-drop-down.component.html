@@ -7,30 +7,38 @@
                 
                 <!-- Notifications List -->
                 <div class="notification-body" *ngIf="notifications.length > 0; else noNotifications">
-                    <div *ngFor="let notification of notifications" 
-                         class="notification-item">
-                        <!-- Notification Content -->
-                        <div class="notification-content">
-                            <div class="notification-message">
-                               {{notification.body}}
-                            </div>
-                            <div class="notification-time">
-                                {{notification.createdAt | date:'short'}}
+                    <div class="notifications-list">
+                        <div *ngFor="let notification of notifications" 
+                             class="notification-item">
+                            <!-- Notification Content -->
+                            <div class="notification-content">
+                                <div class="notification-message">
+                                   {{notification.body}}
+                                </div>
+                                <div class="notification-time">
+                                    {{notification.createdAt | date:'short'}}
+                                </div>
                             </div>
                         </div>
-                        
-                
                     </div>
-                    <a [routerLink]="['/admin/notification']"  [queryParams]="{ UserTypeTo: UserType.Staff}" (click)="onSeeMoreClick()" class="view-btn small-link ml-space">
-                          See more
-                    </a>
-
+                    
+                    <!-- See More Footer -->
+                    <div class="notification-footer">
+                        <a [routerLink]="['/admin/notification']" 
+                           [queryParams]="{ UserTypeTo: UserType.Staff}" 
+                           (click)="onSeeMoreClick()" 
+                           class="see-more-btn">
+                            <i class='bx bx-chevron-right'></i>
+                            <span>View All Notifications</span>
+                        </a>
+                    </div>
                 </div>
                 
                 <!-- No Notifications Template -->
                 <ng-template #noNotifications>
                     <div class="no-notifications">
-                        No new notifications
+                        <i class='bx bx-bell-off'></i>
+                        <p>No new notifications</p>
                     </div>
                 </ng-template>
             </div>

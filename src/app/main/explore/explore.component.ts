@@ -12,6 +12,7 @@ import { GovernrateService } from '../../_services/governorate.service';
 import { ExploreService } from './explore.service';
 import { AuthService } from '../../_services/auth.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-explore',
@@ -509,7 +510,8 @@ export class ExploreComponent implements OnInit, OnDestroy {
     // Use the images array from API response
     if (business.images && business.images.length > 0) {
       const images = Array.isArray(business.images) ? business.images : [business.images];
-      return images[currentIndex] || images[0];
+      const imagePath = images[currentIndex] || images[0];
+      return this.getFullImageUrl(imagePath);
     }
     // Fallback to default image
     return 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop';
@@ -518,10 +520,26 @@ export class ExploreComponent implements OnInit, OnDestroy {
   getBusinessImages(business: BusinessExploreDto): string[] {
     // Use the images array from API response
     if (business.images && business.images.length > 0) {
-      return Array.isArray(business.images) ? business.images : [business.images];
+      const images = Array.isArray(business.images) ? business.images : [business.images];
+      return images.map(imagePath => this.getFullImageUrl(imagePath));
     }
     // Fallback to default image
     return ['https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop'];
+  }
+
+  // Utility method to construct full image URLs
+  private getFullImageUrl(imagePath: string): string {
+    if (!imagePath) {
+      return 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop';
+    }
+    
+    // If already a full URL, return as is
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    
+    // Construct full URL using environment apiUrl
+    return `${environment.apiUrl}/${imagePath}`;
   }
 
   startImageCycling(business: BusinessExploreDto): void {

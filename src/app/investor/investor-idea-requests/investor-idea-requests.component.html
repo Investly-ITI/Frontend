@@ -77,7 +77,7 @@
           </div>
           <div class="meta-item">
             <i class='bx bx-rocket'></i>
-            <span>{{InvestingStages[request.business?.stage||InvestingStages.ideation] }}</span>
+            <span>{{InvestingStages[request.business.stage||InvestingStages.ideation] }}</span>
           </div>
           <div class="meta-item">
             <i class='bx bx-map'></i>
@@ -149,9 +149,9 @@
       <ng-template #filteredMessage>
         <p>You don't have any requests with {{ getSelectedStatusLabel().toLowerCase() }} status.</p>
       </ng-template>
-      <button class="btn btn-primary" *ngIf="filterByStatus === 0">
-        <i class='bx bx-plus'></i>
-        Add Your First Request
+      <button class="btn btn-primary" *ngIf="filterByStatus === 0" (click)="onExploreIdeas()">
+        <i class='bx bx-search-alt'></i>
+        Explore Ideas
       </button>
     </div>
   </ng-template>

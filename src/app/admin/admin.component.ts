@@ -29,6 +29,9 @@ export class AdminComponent implements OnInit {
   private  unsubscribe: Subscription[] = []; 
   private unreadCountSub?: Subscription;
 
+  //* Theme Toggle Properties
+  isDarkMode = false;
+
   constructor(
     private darkModeService: DarkModeService,
     private auth:AuthService,
@@ -39,6 +42,9 @@ export class AdminComponent implements OnInit {
 
   //* Dark mode - sidebar - menu bar - notifications Toggles in onInit hook:
   ngOnInit() {
+    
+    // Initialize theme system
+    this.checkDarkMode();
     
     // this.loadNotifications(); //+ Uncomment this line when you implement the loadNotifications method
      // Subscribe to shared unread count observable
@@ -71,16 +77,14 @@ export class AdminComponent implements OnInit {
       });
     }
 
-    const switchMode = document.getElementById('switch-mode') as HTMLInputElement;
-
-    if (switchMode) {
-      // Set initial state based on service
-      switchMode.checked = this.darkModeService.isDarkMode();
-      
-      switchMode.addEventListener('change', () => {
-        this.darkModeService.toggleDarkMode();
-      });
-    }
+    // Remove old switch-mode logic - now using new theme toggle
+    // const switchMode = document.getElementById('switch-mode') as HTMLInputElement;
+    // if (switchMode) {
+    //   switchMode.checked = this.darkModeService.isDarkMode();
+    //   switchMode.addEventListener('change', () => {
+    //     this.darkModeService.toggleDarkMode();
+    //   });
+    // }
 
      var sub=this.auth.CurrentUser$.subscribe(user=>{
            this.loggedInUser=user;
@@ -125,6 +129,47 @@ export class AdminComponent implements OnInit {
     this.auth.logout();
     location.reload();
     
+  }
+
+  //* Theme Toggle Methods
+  toggleTheme(): void {
+    this.isDarkMode = !this.isDarkMode;
+    this.darkModeService.toggleDarkMode();
+    this.applyTheme();
+    // Store theme preference in localStorage
+    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+  }
+
+  private checkDarkMode(): void {
+    // Check if dark mode is stored in localStorage or from service
+    const storedTheme = localStorage.getItem('theme');
+    this.isDarkMode = this.darkModeService.isDarkMode() || storedTheme === 'dark';
+    this.applyTheme();
+  }
+
+  private applyTheme(): void {
+    const body = document.body;
+    const parent3 = document.querySelector('.parent3');
+
+    // Add transition for smooth animation
+    if (parent3) {
+      (parent3 as HTMLElement).style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+    }
+
+    if (this.isDarkMode) {
+      body.classList.add('dark');
+      parent3?.classList.add('dark');
+    } else {
+      body.classList.remove('dark');
+      parent3?.classList.remove('dark');
+    }
+
+    // Remove transition after animation completes
+    setTimeout(() => {
+      if (parent3) {
+        (parent3 as HTMLElement).style.transition = '';
+      }
+    }, 600);
   }
 
   ngOnDestroy() {

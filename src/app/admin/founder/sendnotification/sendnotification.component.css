@@ -76,6 +76,34 @@
   color: var(--dark-grey);
 }
 
+/* Textarea Specific Styling */
+.textarea-body {
+  min-height: 80px;
+  max-height: 150px;
+  resize: vertical;
+  font-family: var(--poppins);
+  line-height: 1.4;
+  overflow-y: auto;
+}
+
+.textarea-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.textarea-body::-webkit-scrollbar-track {
+  background: var(--custom);
+  border-radius: 3px;
+}
+
+.textarea-body::-webkit-scrollbar-thumb {
+  background: var(--dark-grey);
+  border-radius: 3px;
+}
+
+.textarea-body::-webkit-scrollbar-thumb:hover {
+  background: var(--dark);
+}
+
 /* Modal Footer */
 .modal-footer {
   display: flex;

@@ -282,5 +282,10 @@ InvestingStages=InvestingStages;
     }
   }
 
+  // Navigation method for explore ideas button
+  onExploreIdeas(): void {
+    this.router.navigate(['/explore']);
+  }
+
   
 }

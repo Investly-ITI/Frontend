@@ -268,13 +268,32 @@
                         </tbody>
                     </table>
 
-                    <div class="pagination-controls">
-                        <button (click)="goToPreviousPage()" [disabled]="currentPage === 1">
-                            <i class='bx bx-chevron-left' style="font-size: 1.7em;"></i>
+                    <div class="pagination-controls" *ngIf="!showNoResults && totalPages > 0">
+                        <button class="pagination-btn previous-btn" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+                            <i class='bx bx-chevron-left'></i>
+                            Previous
                         </button>
-                        <button (click)="goToNextPage()" [disabled]="currentPage === totalPages">
-                            <i class='bx bx-chevron-right' style="font-size: 1.7em;"></i>
+                        
+                        <div class="page-numbers">
+                            <button 
+                                *ngFor="let page of getPageNumbers()" 
+                                class="page-number-btn"
+                                [class.active]="page === currentPage"
+                                [class.dots]="page === -1"
+                                (click)="goToPage(page)"
+                                [disabled]="page === -1">
+                                {{ page === -1 ? '...' : page }}
+                            </button>
+                        </div>
+                        
+                        <button class="pagination-btn next-btn" (click)="goToNextPage()" [disabled]="currentPage >= totalPages">
+                            Next
+                            <i class='bx bx-chevron-right'></i>
                         </button>
+                    </div>
+                    
+                    <div class="pagination-info" *ngIf="!showNoResults && totalPages > 0">
+                        <span class="total-info">Showing {{ currentPage }} of {{ totalPages }} pages ({{ totalCount }} total {{ entityNamePlural.toLowerCase() }})</span>
                     </div>
                 </div>
             </div>
@@ -302,7 +321,7 @@
         </div>
     </div>
     <div class="modal-overlay" [ngClass]="{'show': isNotitficationModalOpen}" (click)="closeNotitifcationModal()">
-        <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-container send-notification-modal" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <h3>{{ modalMode === 'add' ? 'send ' + entityName : entityName  }}</h3>
                 <button type="button" class="close-btn" (click)="closeNotitifcationModal()">

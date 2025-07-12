@@ -1,10 +1,11 @@
 import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../_services/auth.service';
 import { LoggedInUser } from '../../_models/user';
 import { UserType,Status } from '../../_shared/enums';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { NotificationService } from '../../_services/notification.service';
 
@@ -22,6 +23,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   UserType = UserType; 
   Status=Status;
   notifcationCount=0;
+  currentRoute = '';
 
   showProfileAlert = true; // Set to true to show red exclamation mark
 
@@ -34,6 +36,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Initialize current route
+    this.currentRoute = this.router.url;
+
     const authSub = this.authService.isAuthenticated$.subscribe(
       isAuth => this.isAuthenticated = isAuth
     );
@@ -42,14 +47,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
       user => this.currentUser = user
    
     );
+
+    // Track route changes for active state
+    const routerSub = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.currentRoute = event.url;
+    });
+
      console.log(this.currentUser);
      this.showProfileAlert=this.currentUser?.status!=Status.Active?true:false;
      const subNoti= this.notificationService.getUnreadCount$().subscribe((count)=>{
       this.notifcationCount=count;
      })
     console.log(this.notifcationCount) ;
-    this.subscriptions.push(subNoti);
-    this.subscriptions.push(authSub, userSub);
+    this.subscriptions.push(subNoti, authSub, userSub, routerSub);
   }
 
 
@@ -93,6 +105,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   closeDropdowns() {
     this.isIdeasDropdownOpen = false;
+  }
+
+  isRouteActive(route: string): boolean {
+    return this.currentRoute === route || this.currentRoute.startsWith(route + '/');
   }
 
   navigateTo(route: string) {

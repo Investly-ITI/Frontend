@@ -1,32 +1,45 @@
-<form class="modal-form" [formGroup]="formData">
-  <div class="form-group">
-    <label for="from">From</label>
-    <div class="input-container">
-      <input type="text" id="from" class="form-input2" formControlName="from" readonly />
+<!-- Modal Body -->
+<div class="modal-body" *ngIf="selectedEntity">
+    <div class="notification-details">
+        <div class="detail-section">
+            <h4><i class="bx bx-info-circle"></i> Notification Information</h4>
+            <div class="detail-row">
+                <span class="label">From:</span>
+                <span class="value">{{ selectedEntity.createdByNavigation.firstName || 'Unknown' }} {{ selectedEntity.createdByNavigation.lastName || 'User' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">To:</span>
+                <span class="value">{{ selectedEntity.userIdToNavigation.firstName || 'Unknown' }} {{ selectedEntity.userIdToNavigation.lastName || 'User' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Title:</span>
+                <span class="value">{{ selectedEntity.title || '—' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Status:</span>
+                <span class="status-badge" [ngClass]="{'read': selectedEntity.isRead === 1, 'unread': selectedEntity.isRead === 0}">
+                    {{ selectedEntity.isRead === 1 ? 'Read' : 'Unread' }}
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Created At:</span>
+                <span class="value">{{ selectedEntity.createdAt | date:'medium' }}</span>
+            </div>
+        </div>
+        
+        <div class="detail-section">
+            <h4><i class="bx bx-message-detail"></i> Message Content</h4>
+            <div class="message-content">
+                <p>{{ selectedEntity.body || 'No message content available' }}</p>
+            </div>
+        </div>
     </div>
-  </div>
-  <div class="form-group">
-    <label for="to">To</label>
-    <div class="input-container">
-      <input type="text" id="to" class="form-input2" formControlName="to" readonly />
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="title">Title</label>
-    <div class="input-container">
-      <input type="text" id="title" class="form-input2" formControlName="title" readonly />
-    </div>
-  </div>
-  <div class="form-group">
-    <label for="body">Body</label>
-    <div class="input-container">
-      <input type="text" id="body" class="form-input2" formControlName="body" readonly />
-    </div>
-  </div>
-</form>
+</div>
+
+<!-- Modal Footer -->
 <div class="modal-footer">
-  <button type="button" class="action-btn close-btn" (click)="closeModal.emit()">
-    <i class='bx bx-x'></i>
-    Close
-  </button>
+    <button type="button" class="close-btn" (click)="closeModal.emit()">
+        <i class='bx bx-x'></i>
+        Close
+    </button>
 </div>

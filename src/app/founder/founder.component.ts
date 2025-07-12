@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FounderInformationComponent } from './founder-information/founder-information.component';
 import { FounderSecurityComponent } from './founder-security/founder-security.component';
 import { FounderIdeasComponent } from './founder-ideas/founder-ideas.component';
@@ -13,7 +13,6 @@ import { ToastrService } from 'ngx-toastr';
 import { getStatusLabel } from '../_shared/utils/enum.utils';
 import { Status } from '../_shared/enums';
 import { AuthService } from '../_services/auth.service';
-import { RouterLink } from '@angular/router';
 
 interface ProfileData {
   personalInfo: {
