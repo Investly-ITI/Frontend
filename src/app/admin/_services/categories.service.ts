@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CategorySearch, Category, AddCategoryWithStandards, AddCategoryStandard, UpdateCategoryWithStandards } from '../../_models/category';
 import { Response } from '../../_models/response';
+import { AIGeneratedStandard } from '../../_models/aiGeneratedStandards';
 
 @Injectable({
   providedIn: 'root'
@@ -33,4 +34,8 @@ export class CategoriesService {
   getTotalActiveInactive(): Observable<Response<any>> {
     return this.httpClient.get<Response<any>>(`${this.baseUrl}/total-active-inactive`);
   }
+  getStandardsFromAI(categoryName: string): Observable<Response<AIGeneratedStandard[]>> {
+    return this.httpClient.get<Response<AIGeneratedStandard[]>>(`${this.baseUrl}/GenerateStandards?category=${categoryName}`);
+  }
 }
+

@@ -1253,4 +1253,13 @@ select.form-input2:disabled {
 :host-context(.parent3.dark) .standard-value {
   color: var(--dark) !important;
 }
-  
+  /* Optional: AI Suggestions Panel Enhancements */
+.ai-suggestions-panel .standard-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ai-suggestions-panel .standard-card:hover {
+  border-color: var(--light2);
+  box-shadow: 0 0 10px rgba(48, 172, 170, 0.2);
+}

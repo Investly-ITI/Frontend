@@ -6,8 +6,8 @@
   <!-- Form Section -->
   <form class="modal-form" [formGroup]="formData" (ngSubmit)="onSubmit()">
     <div class="row">
-      <div class="col-12">
-        <label for="categoryName">Category Name</label>
+      <div class="col-12 ">
+        <label for="categoryName mb">Category Name</label>
         <div class="input-container">
           <input 
             type="text" 
@@ -26,6 +26,21 @@
 
 
     </div>
+
+<div class="standards-info mb-3" *ngIf="!isAddingStandard && (modalMode === 'add')">
+  <span></span> <!-- To keep left side consistent -->
+  <button 
+    type="button" 
+    class="add-standard-btn" 
+    (click)="GenerateStandardsWithAi()"
+    [disabled]="isAddStandardDisabled() || isGeneratingStandards"
+  >
+    <i class='bx bx-plus'></i>
+    Generate Standards
+  </button>
+</div>
+
+
   </form>
 
   <!-- Standards Section -->
@@ -51,6 +66,34 @@
         </button>
       </div>
     </div>
+
+    <!-- AI Suggestions Panel -->
+<div *ngIf="aiGeneratedStandards.length > 0" class="standards-list mt-3">
+  <h5 class="section-title mb-2">Suggestions from AI</h5>
+  <div 
+    class="standard-card ai-suggestion-card" 
+    *ngFor="let suggestion of aiGeneratedStandards" 
+    (click)="applyAiSuggestion(suggestion)">
+    
+    <div class="standard-header">
+      <div class="standard-content">
+        <div class="standard-name-row">
+          <span class="standard-label">Standard Name:</span>
+          <span class="standard-value">{{ suggestion.standard }}</span>
+        </div>
+        <div class="standard-question-row">
+          <span class="standard-label">Standard Question:</span>
+          <span class="standard-value">{{ suggestion.question }}</span>
+        </div>
+      </div>
+      <div class="standard-meta">
+        <span class="weight-badge">{{ suggestion.weight }}%</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 
     <!-- Add/Edit Standard Form -->
     <div class="standard-form" *ngIf="isAddingStandard && (modalMode === 'add' || isEditMode)">
@@ -190,3 +233,4 @@
     </button>
   </div>
 </div>
+
