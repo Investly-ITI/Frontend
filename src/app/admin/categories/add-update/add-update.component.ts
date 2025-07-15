@@ -5,6 +5,7 @@ import { Category, StandardCategoryDto, AddCategoryWithStandards, AddCategorySta
 import { Status } from '../../../_shared/enums';
 import { CategoriesService } from '../../_services/categories.service';
 import { ToastrService } from 'ngx-toastr';
+import { AIGeneratedStandard } from '../../../_models/aiGeneratedStandards';
 
 @Component({
   selector: 'app-add-update',
@@ -55,6 +56,12 @@ export class AddUpdateComponent implements OnInit, OnChanges {
   //* Track original form data for change detection
   originalFormData: any = null;
 
+//ai standards
+  aiGeneratedStandards:AIGeneratedStandard[] = [];
+
+isGeneratingStandards: boolean = false;
+appliedAISuggestions: AIGeneratedStandard[] = [];
+selectedAISuggestion: AIGeneratedStandard | null = null;
 
 
   constructor(
@@ -143,6 +150,12 @@ export class AddUpdateComponent implements OnInit, OnChanges {
 
     if (this.isValidStandard(this.currentStandard)) {
       this.standardsArray.push(this.createStandardFormGroup(this.currentStandard));
+      // Remove from AI only after it's added
+      if (this.selectedAISuggestion) {
+    this.aiGeneratedStandards = this.aiGeneratedStandards.filter(s => s !== this.selectedAISuggestion);
+    this.appliedAISuggestions.push(this.selectedAISuggestion);
+    this.selectedAISuggestion = null;
+  }
       this.resetCurrentStandard();
       this.isAddingStandard = false;
       this.standardFieldsTouched = {};
@@ -199,8 +212,20 @@ export class AddUpdateComponent implements OnInit, OnChanges {
 
   removeStandard(index: number): void {
     const standardControl = this.standardsArray.at(index);
-    const standardId = standardControl.get('standardId')?.value;
     
+      const standardValue = standardControl.value;
+     // Return to AI if it was from AI originally
+  const reapplied = this.appliedAISuggestions.find(s =>
+    s.standard === standardValue.standardName &&
+    s.question === standardValue.question &&
+    s.weight === standardValue.standardCategoryWeight
+  );
+
+  if (reapplied) {
+    this.aiGeneratedStandards.push(reapplied);
+    this.appliedAISuggestions = this.appliedAISuggestions.filter(s => s !== reapplied);
+  }
+  const standardId = standardControl.get('standardId')?.value;
     // If it's an existing standard (has standardId), mark for deletion
     if (standardId && standardId > 0) {
       this.deletedStandardIds.push(standardId);
@@ -572,6 +597,48 @@ export class AddUpdateComponent implements OnInit, OnChanges {
 
     return false;
   }
+//generate standards with AI
+GenerateStandardsWithAi(): void {
+  this.isGeneratingStandards = true;
+  const categoryName = this.formData.get('name')?.value?.trim();
+  if (!categoryName) {
+    this.toastrService.error('Category name is required', 'Error');
+    this.isGeneratingStandards = false;
+    return;
+  }
+
+  this.categoriesService.getStandardsFromAI(categoryName).subscribe({
+    next: (res) => {
+      if (res.isSuccess) {
+        this.aiGeneratedStandards = res.data;
+        this.toastrService.success('AI suggestions loaded', 'Success');
+      } else {
+          this.aiGeneratedStandards=[]
+        this.toastrService.error(res.message, 'Error');
+      }
+        this.isGeneratingStandards = false;
+    },
+    error: (err) => {
+      console.error('Error fetching AI suggestions:', err);
+      this.toastrService.error('Failed to load AI suggestions', 'Error');
+    }
+  });
+}
+applyAiSuggestion(suggestion: any): void {
+  this.isAddingStandard = true; // Open the form
+  this.editingStandardIndex = -1; 
+  this.currentStandard.standardName = suggestion.standard;
+  this.currentStandard.question = suggestion.question;
+  this.currentStandard.standardCategoryWeight = suggestion.weight;
+ 
+ this.selectedAISuggestion = suggestion;
+  // Mark all fields touched to trigger validation
+  this.standardFieldsTouched = {
+    standardName: true,
+    question: true,
+    standardCategoryWeight: true
+  };
+}
 
 
 }
